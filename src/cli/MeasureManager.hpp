@@ -118,6 +118,7 @@ class MeasureManagerServer
   };
 
   // Request handlers
+  ResponseType status(const web::json::value& body);
   ResponseType internal_state(const web::json::value& body);
   ResponseType reset(const web::json::value& body);
   ResponseType set(const web::json::value& body);
