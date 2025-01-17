@@ -59,11 +59,8 @@ namespace energyplus {
     }
 
     // Zone Name: Required Object
-    boost::optional<std::string> thermalZoneName;
     if (boost::optional<ThermalZone> zone = modelObject.thermalZone()) {
-      if ((s = zone->name())) {
-        thermalZoneName = s;
-
+      if ((boost::optional<std::string> thermalZoneName = zone->name())) {
         idfObject.setString(ZoneHVAC_ExhaustControlFields::ZoneName, thermalZoneName.get());
       }
     }
