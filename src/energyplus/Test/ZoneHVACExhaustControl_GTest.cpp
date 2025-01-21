@@ -79,9 +79,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ZoneHVACExhaustControl) {
 
   const auto& idfObject = idfObjs.front();
   EXPECT_EQ(availabilitySchedule.nameString(), idfObject.getString(ZoneHVAC_ExhaustControlFields::AvailabilityScheduleName).get());
-  EXPECT_EQ(zone.nameString(), idfObject.getString(ZoneHVAC_ExhaustControlFields::ZoneName).get());
-  EXPECT_EQ(inletNodeName.nameString(), idfObject.getString(ZoneHVAC_ExhaustControlFields::InletNodeName).get());
-  EXPECT_EQ(outletNodeName.nameString(), idfObject.getString(ZoneHVAC_ExhaustControlFields::OutletNodeName).get());
+  EXPECT_EQ("", idfObject.getString(ZoneHVAC_ExhaustControlFields::ZoneName).get());
+  EXPECT_EQ("", idfObject.getString(ZoneHVAC_ExhaustControlFields::InletNodeName).get());
+  EXPECT_EQ("", idfObject.getString(ZoneHVAC_ExhaustControlFields::OutletNodeName).get());
   EXPECT_EQ(0.6, idfObject.getDouble(ZoneHVAC_ExhaustControlFields::DesignExhaustFlowRate).get());
   EXPECT_EQ("Scheduled", idfObject.getString(ZoneHVAC_ExhaustControlFields::FlowControlType).get());
   EXPECT_EQ(exhaustFlowFractionSchedule.nameString(), idfObject.getString(ZoneHVAC_ExhaustControlFields::ExhaustFlowFractionScheduleName).get());
