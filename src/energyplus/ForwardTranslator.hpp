@@ -482,6 +482,7 @@ namespace model {
   class ZoneHVACEnergyRecoveryVentilator;
   class ZoneHVACEnergyRecoveryVentilatorController;
   class ZoneHVACEquipmentList;
+  class ZoneHVACEvaporativeCoolerUnit;
   class ZoneHVACExhaustControl;
   class ZoneHVACFourPipeFanCoil;
   class ZoneHVACHighTemperatureRadiant;
@@ -1554,6 +1555,8 @@ namespace energyplus {
     boost::optional<IdfObject> translateZoneHVACEnergyRecoveryVentilatorController(model::ZoneHVACEnergyRecoveryVentilatorController& modelObject);
 
     boost::optional<IdfObject> translateZoneHVACEquipmentList(model::ZoneHVACEquipmentList& modelObject);
+
+    boost::optional<IdfObject> translateZoneHVACEvaporativeCoolerUnit(model::ZoneHVACEvaporativeCoolerUnit& modelObject);
 
     boost::optional<IdfObject> translateZoneHVACExhaustControl(model::ZoneHVACExhaustControl& modelObject);
 
