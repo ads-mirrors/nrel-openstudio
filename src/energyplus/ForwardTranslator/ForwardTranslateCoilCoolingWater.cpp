@@ -152,9 +152,6 @@ namespace energyplus {
   }
 
   boost::optional<IdfObject> ForwardTranslator::translateCoilCoolingWater(CoilCoolingWater& modelObject) {
-    boost::optional<std::string> s;
-    boost::optional<double> value;
-
     IdfObject coilSystemCoolingWaterIdf(IddObjectType::CoilSystem_Cooling_Water);
 
     m_idfObjects.push_back(coilSystemCoolingWaterIdf);
@@ -183,7 +180,7 @@ namespace energyplus {
 
     coilSystemCoolingWaterIdf.setString(CoilSystem_Cooling_WaterFields::AvailabilityScheduleName, sched.name().get());
 
-    OptionalModelObject omo = modelObject.inletModelObject();
+    OptionalModelObject omo = modelObject.airInletModelObject();
     if (omo) {
       translateAndMapModelObject(*omo);
       s = omo->name();
@@ -192,7 +189,7 @@ namespace energyplus {
       }
     }
 
-    omo = modelObject.outletModelObject();
+    omo = modelObject.airOutletModelObject();
     if (omo) {
       translateAndMapModelObject(*omo);
       s = omo->name();
