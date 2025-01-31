@@ -1,6 +1,6 @@
 # OpenStudio Version 3.9.0
 
-_Release Notes_ -  _TDB_
+_Release Notes_ - 2024-11-13
 
 These release notes describe version 3.9.0 of the OpenStudio SDK developed by the National Renewable Energy Laboratory (NREL), Buildings and Thermal Sciences Center, Commercial Buildings Research Group, Tools Development Section, and associated collaborators. The notes are organized into the following sections:
 
@@ -39,7 +39,6 @@ OpenStudio SDK 3.9.0 is supported on:
 * 64-bit Windows 7 – 11
 * macOS: 11.6+ x86_64, 12.1+ arm64
 * Ubuntu: 20.04 x86_64, 22.04 x86_64, 22.04 arm64
-* Centos7
 
 OpenStudio SDK 3.9.0 supports [EnergyPlus Release 24.2.0a](https://github.com/NREL/EnergyPlus/releases/tag/24.2.0a), which is bundled with the OpenStudio installer. It is no longer necessary to download and install EnergyPlus separately. Other builds of EnergyPlus are not supported by OpenStudio SDK 3.9.0.
 
@@ -91,20 +90,14 @@ You can also refer to the [OpenStudio SDK Python Binding Version Compatibility M
 
 Refer to the changelog on the release page at [v3.9.0](https://github.com/NREL/OpenStudio/releases/v3.9.0)
 
-**Full Changelog**: https://github.com/NREL/OpenStudio/compare/v3.9.0...v3.9.0
+**Full Changelog**: https://github.com/NREL/OpenStudio/compare/v3.8.0...v3.9.0
 
 **New Contributors**:
 
-### OpenStudio Standards v@STANDARDS_VERSION@
+### OpenStudio Standards v0.7.0
 
-Update the openstudio-standards gem to version [@STANDARDS_VERSION@](https://github.com/NREL/openstudio-standards/releases/tag/v@STANDARDS_VERSION@)
+Update the openstudio-standards gem to version [0.7.0](https://github.com/NREL/openstudio-standards/releases/tag/v0.7.0)
 In addition to some refactoring, this release also included conversion of 90.1 data to formal database.
-
-
-### OpenStudio Server vXXX
-
-
-
 
 ---
 # This YAML header controls the pandoc (via TeX) to PDF settings

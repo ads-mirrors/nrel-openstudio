@@ -28,7 +28,7 @@ if __package__ or "." in __name__:
     from . import openstudioosversion as osversion
     from . import openstudioradiance as radiance
     from . import openstudiosdd as sdd
-    from . import openstudioualfalfa as alfalfa
+    from . import openstudioalfalfa as alfalfa
     from .openstudioutilities import *
     from .openstudioutilitiesbcl import *
     from .openstudioutilitiescore import *
@@ -45,6 +45,15 @@ if __package__ or "." in __name__:
     from .openstudioutilitiesxml import *
 
 else:
+    import os
+    if os.name == 'nt':
+        # When we're using system python to load the **installed** C:\openstudio-X.Y-Z\Python stuff (not PyPi package)
+        # This allows finding openstudiolib.dll and the msvc ones in the bin/ folder while we're in the Python/ folder
+        # Otherwise you'd have to manually copy these DLLs from bin/ to Python/
+        bin_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'bin'))
+        if os.path.isdir(bin_dir):
+            os.add_dll_directory(bin_dir)
+
     import openstudioairflow as airflow
     import openstudioenergyplus as energyplus
     import openstudioepjson as epjson

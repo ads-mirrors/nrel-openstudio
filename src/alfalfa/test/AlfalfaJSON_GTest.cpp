@@ -1,5 +1,6 @@
 #include <fmt/core.h>
 #include <gtest/gtest.h>
+#include <stdexcept>
 #include <vector>
 
 #include "../AlfalfaJSON.hpp"
@@ -194,74 +195,46 @@ TEST(AlfalfaJSON, json_serialization) {
   const bool parsing_success = Json::parseFromStream(r_builder, ifs, &root, &formatted_errors);
   EXPECT_TRUE(parsing_success);
   EXPECT_EQ(alfalfa.toJSON(), root);
-  for (const AlfalfaPoint& point : alfalfa.points()) {
-    EXPECT_EQ(root[point.id().get()], point.toJSON());
+  for (Json::ArrayIndex i = 0; const auto& point : alfalfa.points()) {
+    EXPECT_EQ(root[i++], point.toJSON());
   }
 }
 
 TEST(AlfalfaJSON, point_exceptions_logging) {
-  const std::string ID_VALID_CHARS_MSG = "IDs can only contain letters, numbers, and the following special characters _-[]():";
-  const std::string DISPLAY_NAME_VALID_CHARS_MSG = "Display name '{}' does not produce a valid point ID. Manually set a valid ID or export will fail.";
+  const std::string DISPLAY_NAME_EMPTY_ERROR = "Display name must have non-zero length";
+  const std::string ID_EMPTY_ERROR = "Id must have non-zero length";
   const std::string LOG_CHANNEL = "openstudio.AlfalfaPoint";
   StringStreamLogSink ss;
   ss.setLogLevel(Warn);
 
-  const AlfalfaPoint point("Point");
+  AlfalfaPoint point("Point");
   ASSERT_EQ(0, ss.logMessages().size());
   point.id();
   ASSERT_EQ(0, ss.logMessages().size());
 
   //Test logging in constructor
-  AlfalfaPoint invalid_point("Point$$$");
-  ASSERT_EQ(1, ss.logMessages().size());
-  LogMessage invalid_id_msg = ss.logMessages().at(0);
-  EXPECT_EQ(invalid_id_msg.logMessage(), fmt::format(fmt::runtime(DISPLAY_NAME_VALID_CHARS_MSG), "Point$$$"));
-  EXPECT_EQ(invalid_id_msg.logLevel(), Warn);
-  EXPECT_EQ(invalid_id_msg.logChannel(), LOG_CHANNEL);
-  ss.resetStringStream();
-  ASSERT_EQ(ss.logMessages().size(), 0);
-
-  // Test logging when getting id()
-  const boost::optional<std::string> invalid_point_id = invalid_point.id();
-  EXPECT_FALSE(invalid_point_id.is_initialized());
-  ASSERT_EQ(ss.logMessages().size(), 1);
-  invalid_id_msg = ss.logMessages().at(0);
-  EXPECT_EQ(invalid_id_msg.logMessage(), fmt::format(fmt::runtime(DISPLAY_NAME_VALID_CHARS_MSG), "Point$$$"));
-  EXPECT_EQ(invalid_id_msg.logLevel(), Warn);
-  EXPECT_EQ(invalid_id_msg.logChannel(), LOG_CHANNEL);
-  ss.resetStringStream();
-  ASSERT_EQ(ss.logMessages().size(), 0);
+  EXPECT_THROW(
+    {
+      try {
+        const AlfalfaPoint invalid_point("");
+      } catch (const std::runtime_error& error) {
+        EXPECT_EQ(error.what(), DISPLAY_NAME_EMPTY_ERROR);
+        throw;
+      }
+    },
+    std::runtime_error);
 
   // Test exception handling in setId()
   EXPECT_THROW(
     {
       try {
-        invalid_point.setId("Point_123_$$$");
+        point.setId("");
       } catch (const std::runtime_error& error) {
-        EXPECT_EQ(error.what(), ID_VALID_CHARS_MSG);
+        EXPECT_EQ(error.what(), ID_EMPTY_ERROR);
         throw;
       }
     },
     std::runtime_error);
-  ASSERT_EQ(ss.logMessages().size(), 0);
-
-  // Test exception handling in toJSON()
-  EXPECT_THROW(
-    {
-      try {
-        Json::Value root = invalid_point.toJSON();
-      } catch (const std::runtime_error& error) {
-        EXPECT_EQ(error.what(), "Point requires a valid ID for export. " + ID_VALID_CHARS_MSG);
-        throw;
-      }
-    },
-    std::runtime_error);
-  ASSERT_EQ(ss.logMessages().size(), 1);
-  invalid_id_msg = ss.logMessages().at(0);
-  EXPECT_EQ(invalid_id_msg.logMessage(), fmt::format(fmt::runtime(DISPLAY_NAME_VALID_CHARS_MSG), "Point$$$"));
-  EXPECT_EQ(invalid_id_msg.logLevel(), Warn);
-  EXPECT_EQ(invalid_id_msg.logChannel(), LOG_CHANNEL);
-  ss.resetStringStream();
   ASSERT_EQ(ss.logMessages().size(), 0);
 
   //Test Calls work when provided with legal input
@@ -277,8 +250,7 @@ TEST(AlfalfaJSON, point_exceptions_logging) {
   // Test that changing display name changes the ID if an ID has not been set.
   valid_point.setDisplayName("Another Good Point");
   ASSERT_EQ(ss.logMessages().size(), 0);
-  ASSERT_TRUE(valid_point.id().is_initialized());
-  ASSERT_EQ(valid_point.id().get(), "Another_Good_Point");
+  ASSERT_EQ(valid_point.id(), "Another_Good_Point");
   ASSERT_EQ(ss.logMessages().size(), 0);
 
   Json::Value valid_json = valid_point.toJSON();
@@ -288,8 +260,7 @@ TEST(AlfalfaJSON, point_exceptions_logging) {
   const std::string new_id = "Another_Valid_Point(123)";
   valid_point.setId(new_id);
   ASSERT_EQ(ss.logMessages().size(), 0);
-  ASSERT_TRUE(valid_point.id().is_initialized());
-  ASSERT_EQ(valid_point.id().get(), new_id);
+  ASSERT_EQ(valid_point.id(), new_id);
 
   valid_json = valid_point.toJSON();
   ASSERT_EQ(ss.logMessages().size(), 0);
@@ -297,25 +268,25 @@ TEST(AlfalfaJSON, point_exceptions_logging) {
   // Test that once an ID is set, setting a new display name won't throw a warning.
   valid_point.setDisplayName("Valid Name, but Invalid Id $$$");
   ASSERT_EQ(ss.logMessages().size(), 0);
-  ASSERT_EQ(valid_point.id().get(), new_id);
+  ASSERT_EQ(valid_point.id(), new_id);
 
   valid_json = valid_point.toJSON();
   ASSERT_EQ(ss.logMessages().size(), 0);
 }
 
-class InputComponent : public ComponentBase
+class InputComponent : public AlfalfaComponentBase
 {
  public:
   InputComponent() = default;
-  ComponentCapability capability() const override {
-    return ComponentCapability::Input;
+  AlfalfaComponentCapability capability() const override {
+    return AlfalfaComponentCapability::Input;
   }
 
-  openstudio::alfalfa::ComponentType type() const override {
-    return openstudio::alfalfa::ComponentType::Constant;
+  AlfalfaComponentType type() const override {
+    return AlfalfaComponentType::Constant;
   }
 
-  std::unique_ptr<ComponentBase> clone() const override {
+  std::unique_ptr<AlfalfaComponentBase> clone() const override {
     return std::make_unique<InputComponent>(*this);
   }
 
@@ -420,6 +391,15 @@ TEST(AlfalfaJSON, expose_meter) {
   EXPECT_FALSE(str_point.input().is_initialized());
   EXPECT_TRUE(str_point.output().is_initialized());
   EXPECT_EQ(str_point.displayName(), display_name);
+
+  // Test Other Point Construction Methods
+  const AlfalfaPoint component_point = alfalfa.exposeFromComponent(str_component, display_name).get();
+  AlfalfaPoint custom_point(display_name);
+  EXPECT_THROW({ custom_point.setInput(str_component); }, std::runtime_error);
+  custom_point.setOutput(str_component);
+
+  EXPECT_EQ(str_point, custom_point);
+  EXPECT_EQ(str_point, component_point);
 }
 
 TEST(AlfalfaJSON, expose_output_variable) {
@@ -490,6 +470,15 @@ TEST(AlfalfaJSON, expose_output_variable) {
   EXPECT_TRUE(str_point.output().is_initialized());
   EXPECT_FALSE(str_point.input().is_initialized());
   EXPECT_EQ(str_point.displayName(), display_name);
+
+  // Test Other Point Construction Methods
+  const AlfalfaPoint component_point = alfalfa.exposeFromComponent(str_component, display_name).get();
+  AlfalfaPoint custom_point(display_name);
+  EXPECT_THROW({ custom_point.setInput(str_component); }, std::runtime_error);
+  custom_point.setOutput(str_component);
+
+  EXPECT_EQ(str_point, custom_point);
+  EXPECT_EQ(str_point, component_point);
 }
 
 TEST(AlfalfaJSON, expose_global_variable) {
@@ -530,6 +519,15 @@ TEST(AlfalfaJSON, expose_global_variable) {
   EXPECT_TRUE(str_point.input().is_initialized());
   EXPECT_TRUE(str_point.output().is_initialized());
   EXPECT_EQ(str_point.displayName(), display_name);
+
+  // Test Other Point Construction Methods
+  const AlfalfaPoint component_point = alfalfa.exposeFromComponent(str_component, display_name).get();
+  AlfalfaPoint custom_point(display_name);
+  custom_point.setInput(str_component);
+  custom_point.setOutput(str_component);
+
+  EXPECT_EQ(str_point, custom_point);
+  EXPECT_EQ(str_point, component_point);
 }
 
 TEST(AlfalfaJSON, expose_actuator) {
@@ -579,4 +577,13 @@ TEST(AlfalfaJSON, expose_actuator) {
   EXPECT_TRUE(str_point.input().is_initialized());
   EXPECT_TRUE(str_point.output().is_initialized());
   EXPECT_EQ(str_point.displayName(), display_name);
+
+  // Test Other Point Construction Methods
+  const AlfalfaPoint component_point = alfalfa.exposeFromComponent(str_component, display_name).get();
+  AlfalfaPoint custom_point(display_name);
+  custom_point.setInput(str_component);
+  custom_point.setOutput(str_component);
+
+  EXPECT_EQ(str_point, custom_point);
+  EXPECT_EQ(str_point, component_point);
 }
