@@ -800,6 +800,8 @@ namespace energyplus {
 
     boost::optional<IdfObject> translateCoilCoolingWater(model::CoilCoolingWater& modelObject);
 
+    boost::optional<IdfObject> translateCoilCoolingWaterWithoutUnitary(model::CoilCoolingWater& modelObject);
+
     boost::optional<IdfObject> translateCoilCoolingWaterToAirHeatPumpEquationFit(model::CoilCoolingWaterToAirHeatPumpEquationFit& modelObject);
 
     boost::optional<IdfObject>

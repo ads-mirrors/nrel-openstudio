@@ -1072,7 +1072,11 @@ namespace energyplus {
       }
       case openstudio::IddObjectType::OS_Coil_Cooling_Water: {
         auto coil = modelObject.cast<CoilCoolingWater>();
-        retVal = translateCoilCoolingWater(coil);
+        if (isHVACComponentWithinUnitary(coil)) {
+          retVal = translateCoilCoolingWaterWithoutUnitary(coil);
+        } else {
+          retVal = translateCoilCoolingWater(coil);
+        }
         break;
       }
       case openstudio::IddObjectType::OS_Coil_Cooling_Water_Panel_Radiant: {
