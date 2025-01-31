@@ -704,6 +704,7 @@ set(${target_name}_test_src
   Test/CoilCoolingDXTwoSpeed_GTest.cpp
   Test/CoilCoolingDXTwoStageWithHumidityControlMode_GTest.cpp
   Test/CoilCoolingDXVariableSpeed_GTest.cpp
+  Test/CoilCoolingWater_GTest.cpp
   Test/CoilCoolingWaterToAirHeatPumpEquationFit_GTest.cpp
   Test/CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit_GTest.cpp
   Test/CoilHeatingDXMultiSpeed_GTest.cpp
