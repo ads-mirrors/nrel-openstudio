@@ -83,7 +83,8 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerA
             idfCoil.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::AirOutletNodeName).get());
 
   EXPECT_EQ("My CoilSystemCoolingWaterHeatExchangerAssisted", idfCoil.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::Name).get());
-  EXPECT_EQ("HeatExchanger:AirToAir:SensibleAndLatent", idfCoil.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::HeatExchangerObjectType).get());
+  EXPECT_EQ("HeatExchanger:AirToAir:SensibleAndLatent",
+            idfCoil.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::HeatExchangerObjectType).get());
   EXPECT_EQ(coil.heatExchanger().nameString(), idfCoil.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::HeatExchangerName).get());
   EXPECT_EQ("Coil:Cooling:Water", idfCoil.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::CoolingCoilObjectType).get());
   EXPECT_EQ(coil.coolingCoil().nameString(), idfCoil.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::CoolingCoilName).get());
