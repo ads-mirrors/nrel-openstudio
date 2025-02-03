@@ -143,8 +143,8 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilCoolingWater_AirLoopHVAC) {
   ASSERT_EQ(1u, idf_branch.extensibleGroups().size());
   auto w_eg2 = idf_branch.extensibleGroups()[0].cast<WorkspaceExtensibleGroup>();
 
-  EXPECT_EQ(w_eg2.getString(BranchExtensibleFields::ComponentInletNodeName).get(), coil.inletModelObject().get().nameString());
-  EXPECT_EQ(w_eg2.getString(BranchExtensibleFields::ComponentOutletNodeName).get(), coil.outletModelObject().get().nameString());
+  EXPECT_EQ(w_eg2.getString(BranchExtensibleFields::ComponentInletNodeName).get(), coil.airInletModelObject().get().nameString());
+  EXPECT_EQ(w_eg2.getString(BranchExtensibleFields::ComponentOutletNodeName).get(), coil.airOutletModelObject().get().nameString());
 
   EXPECT_EQ("CoilSystem:Cooling:Water", w_eg2.getString(BranchExtensibleFields::ComponentObjectType).get());
   auto idf_coilSystem = w_eg2.getTarget(BranchExtensibleFields::ComponentName).get();
