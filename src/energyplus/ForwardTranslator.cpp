@@ -1212,8 +1212,12 @@ namespace energyplus {
         break;
       }
       case openstudio::IddObjectType::OS_CoilSystem_Cooling_Water_HeatExchangerAssisted: {
-        auto mo = modelObject.cast<CoilSystemCoolingWaterHeatExchangerAssisted>();
-        retVal = translateCoilSystemCoolingWaterHeatExchangerAssisted(mo);
+        auto coil = modelObject.cast<CoilSystemCoolingWaterHeatExchangerAssisted>();
+        if (isHVACComponentWithinUnitary(coil)) {
+          retVal = translateCoilSystemCoolingWaterHeatExchangerAssistedWithoutUnitary(coil);
+        } else {
+          retVal = translateCoilSystemCoolingWaterHeatExchangerAssisted(coil);
+        }
         break;
       }
       case openstudio::IddObjectType::OS_CoilSystem_Cooling_DX_HeatExchangerAssisted: {

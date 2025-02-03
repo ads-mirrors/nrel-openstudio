@@ -201,9 +201,6 @@ namespace energyplus {
     return coilSystemCoolingWaterIdf;
   }
 
-  //((Name)(Name))
-  //((AvailabilityScheduleName)(Availability Schedule Name))
-
 }  // namespace energyplus
 
 }  // namespace openstudio
