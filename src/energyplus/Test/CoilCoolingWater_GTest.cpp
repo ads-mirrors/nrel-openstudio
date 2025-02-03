@@ -83,21 +83,21 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilCoolingWater_Unitary) {
             idfCoil.getString(Coil_Cooling_WaterFields::AirOutletNodeName).get());
 
   EXPECT_EQ("My CoilCoolingWater", idfCoil.getString(Coil_Cooling_WaterFields::Name).get());
-  EXPECT_EQ("", idfCoil.getString(Coil_Cooling_WaterFields::AvailabilityScheduleName).get());
-  EXPECT_EQ(0.6, idfCoil.getDouble(Coil_Cooling_WaterFields::DesignWaterFlowRate).get());
-  EXPECT_EQ(0.6, idfCoil.getDouble(Coil_Cooling_WaterFields::DesignAirFlowRate).get());
-  EXPECT_EQ(0.6, idfCoil.getDouble(Coil_Cooling_WaterFields::DesignInletWaterTemperature).get());
-  EXPECT_EQ(0.6, idfCoil.getDouble(Coil_Cooling_WaterFields::DesignInletAirTemperature).get());
-  EXPECT_EQ(0.6, idfCoil.getDouble(Coil_Cooling_WaterFields::DesignInletAirHumidityRatio).get());
-  EXPECT_EQ(0.6, idfCoil.getDouble(Coil_Cooling_WaterFields::DesignOutletAirHumidityRatio).get());
+  EXPECT_EQ("Always On Discrete", idfCoil.getString(Coil_Cooling_WaterFields::AvailabilityScheduleName).get());
+  EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignWaterFlowRate).get());
+  EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignAirFlowRate).get());
+  EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignInletWaterTemperature).get());
+  EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignInletAirTemperature).get());
+  EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignInletAirHumidityRatio).get());
+  EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignOutletAirHumidityRatio).get());
   EXPECT_EQ("Coil Water Inlet Node", idfCoil.getString(Coil_Cooling_WaterFields::WaterInletNodeName).get());
   EXPECT_EQ("Coil Water Outlet Node", idfCoil.getString(Coil_Cooling_WaterFields::WaterOutletNodeName).get());
   EXPECT_EQ("Coil Air Inlet Node", idfCoil.getString(Coil_Cooling_WaterFields::AirInletNodeName).get());
   EXPECT_EQ("Coil Air Outlet Node", idfCoil.getString(Coil_Cooling_WaterFields::AirOutletNodeName).get());
-  EXPECT_EQ("", idfCoil.getString(Coil_Cooling_WaterFields::TypeofAnalysis).get());
-  EXPECT_EQ("", idfCoil.getString(Coil_Cooling_WaterFields::HeatExchangerConfiguration).get());
-  EXPECT_EQ("", idfCoil.getString(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName).get());
-  EXPECT_EQ(0.9, idfCoil.getDouble(Coil_Cooling_WaterFields::DesignWaterTemperatureDifference).get());
+  EXPECT_EQ("SimpleAnalysis", idfCoil.getString(Coil_Cooling_WaterFields::TypeofAnalysis).get());
+  EXPECT_EQ("CrossFlow", idfCoil.getString(Coil_Cooling_WaterFields::HeatExchangerConfiguration).get());
+  EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
+  EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::DesignWaterTemperatureDifference));
 }
 
 TEST_F(EnergyPlusFixture, ForwardTranslator_CoilCoolingWater_AirLoopHVAC) {
@@ -157,11 +157,11 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilCoolingWater_AirLoopHVAC) {
   EXPECT_EQ("Coil:Cooling:Water", idf_coilSystem.getString(CoilSystem_Cooling_WaterFields::CoolingCoilObjectType).get());
   EXPECT_EQ(coil.nameString(), idf_coilSystem.getString(CoilSystem_Cooling_WaterFields::CoolingCoilName).get());
   EXPECT_EQ(idfCoil, idf_coilSystem.getTarget(CoilSystem_Cooling_WaterFields::CoolingCoilName).get());
-  EXPECT_EQ("", idf_coilSystem.getString(CoilSystem_Cooling_WaterFields::DehumidificationControlType).get());
-  EXPECT_EQ("", idf_coilSystem.getString(CoilSystem_Cooling_WaterFields::RunonSensibleLoad).get());
-  EXPECT_EQ("", idf_coilSystem.getString(CoilSystem_Cooling_WaterFields::RunonLatentLoad).get());
-  EXPECT_EQ("", idf_coilSystem.getString(CoilSystem_Cooling_WaterFields::MinimumAirToWaterTemperatureOffset).get());
-  EXPECT_EQ("", idf_coilSystem.getString(CoilSystem_Cooling_WaterFields::EconomizerLockout).get());
-  EXPECT_EQ("", idf_coilSystem.getString(CoilSystem_Cooling_WaterFields::MinimumWaterLoopTemperatureForHeatRecovery).get());
-  EXPECT_EQ("", idf_coilSystem.getString(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery).get());
+  EXPECT_TRUE(idf_coilSystem.isEmpty(CoilSystem_Cooling_WaterFields::DehumidificationControlType));
+  EXPECT_TRUE(idf_coilSystem.isEmpty(CoilSystem_Cooling_WaterFields::RunonSensibleLoad));
+  EXPECT_TRUE(idf_coilSystem.isEmpty(CoilSystem_Cooling_WaterFields::RunonLatentLoad));
+  EXPECT_TRUE(idf_coilSystem.isEmpty(CoilSystem_Cooling_WaterFields::MinimumAirToWaterTemperatureOffset));
+  EXPECT_TRUE(idf_coilSystem.isEmpty(CoilSystem_Cooling_WaterFields::EconomizerLockout));
+  EXPECT_TRUE(idf_coilSystem.isEmpty(CoilSystem_Cooling_WaterFields::MinimumWaterLoopTemperatureForHeatRecovery));
+  EXPECT_TRUE(idf_coilSystem.isEmpty(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery));
 }
