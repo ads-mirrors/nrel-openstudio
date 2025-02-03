@@ -23,7 +23,7 @@
 #include "../../utilities/idf/IdfExtensibleGroup.hpp"
 #include "../../utilities/idf/WorkspaceExtensibleGroup.hpp"
 
-#include <utilities/idd/CoilSystem_Cooling_Water_HeatExhangerAssisted_FieldEnums.hxx>
+#include <utilities/idd/CoilSystem_Cooling_Water_HeatExchangerAssisted_FieldEnums.hxx>
 #include <utilities/idd/CoilSystem_Cooling_Water_FieldEnums.hxx>
 #include <utilities/idd/AirLoopHVAC_FieldEnums.hxx>
 #include <utilities/idd/BranchList_FieldEnums.hxx>
