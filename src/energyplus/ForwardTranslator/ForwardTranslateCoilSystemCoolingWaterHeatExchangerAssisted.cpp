@@ -183,12 +183,7 @@ namespace energyplus {
       coilSystemCoolingWaterIdf.setName(*s + " CoilSystem");
     }
 
-    Schedule sched = modelObject.availabilitySchedule();
-    translateAndMapModelObject(sched);
-
-    coilSystemCoolingWaterIdf.setString(CoilSystem_Cooling_WaterFields::AvailabilityScheduleName, sched.name().get());
-
-    OptionalModelObject omo = modelObject.airInletModelObject();
+    OptionalModelObject omo = modelObject.inletModelObject();
     if (omo) {
       translateAndMapModelObject(*omo);
       s = omo->name();
@@ -197,7 +192,7 @@ namespace energyplus {
       }
     }
 
-    omo = modelObject.airOutletModelObject();
+    omo = modelObject.outletModelObject();
     if (omo) {
       translateAndMapModelObject(*omo);
       s = omo->name();
