@@ -27,6 +27,7 @@
 
 #include "../../model/Model.hpp"
 #include "../../utilities/core/Assert.hpp"
+#include <utilities/idd/CoilSystem_Cooling_Water_FieldEnums.hxx>
 #include <utilities/idd/CoilSystem_Cooling_Water_HeatExchangerAssisted_FieldEnums.hxx>
 #include <utilities/idd/HeatExchanger_AirToAir_SensibleAndLatent_FieldEnums.hxx>
 #include <utilities/idd/Coil_Cooling_Water_FieldEnums.hxx>
@@ -41,8 +42,8 @@ namespace openstudio {
 
 namespace energyplus {
 
-  boost::optional<IdfObject>
-    ForwardTranslator::translateCoilSystemCoolingWaterHeatExchangerAssistedWithoutUnitary(CoilSystemCoolingWaterHeatExchangerAssisted& modelObject) {
+  boost::optional<IdfObject> ForwardTranslator::translateCoilSystemCoolingWaterHeatExchangerAssistedWithoutUnitary(
+    model::CoilSystemCoolingWaterHeatExchangerAssisted& modelObject) {
 
     IdfObject idfObject = createRegisterAndNameIdfObject(openstudio::IddObjectType::CoilSystem_Cooling_Water_HeatExchangerAssisted, modelObject);
 
@@ -157,7 +158,8 @@ namespace energyplus {
     return idfObject;
   }
 
-  boost::optional<IdfObject> ForwardTranslator::translateCoilSystemCoolingWaterHeatExchangerAssisted(CoilCoolingWater& modelObject) {
+  boost::optional<IdfObject>
+    ForwardTranslator::translateCoilSystemCoolingWaterHeatExchangerAssisted(CoilSystemCoolingWaterHeatExchangerAssisted& modelObject) {
     IdfObject coilSystemCoolingWaterIdf(IddObjectType::CoilSystem_Cooling_Water);
 
     m_idfObjects.push_back(coilSystemCoolingWaterIdf);

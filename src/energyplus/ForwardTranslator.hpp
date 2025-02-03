@@ -846,6 +846,9 @@ namespace energyplus {
 
     boost::optional<IdfObject> translateCoilSystemCoolingWaterHeatExchangerAssisted(model::CoilSystemCoolingWaterHeatExchangerAssisted& modelObject);
 
+    boost::optional<IdfObject>
+      translateCoilSystemCoolingWaterHeatExchangerAssistedWithoutUnitary(model::CoilSystemCoolingWaterHeatExchangerAssisted& modelObject);
+
     boost::optional<IdfObject> translateCoilSystemIntegratedHeatPumpAirSource(model::CoilSystemIntegratedHeatPumpAirSource& modelObject);
 
     boost::optional<IdfObject> translateCoilUserDefined(model::CoilUserDefined& modelObject);
