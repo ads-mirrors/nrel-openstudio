@@ -68,7 +68,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilCoolingWater_Unitary) {
   ASSERT_EQ(1u, idfCoils.size());
   WorkspaceObject idfCoil(idfCoils[0]);
 
-  // No CoilSystem:Cooling:DX wrapper needed, it's inside a unitary
+  // No CoilSystem:Cooling:Water wrapper needed, it's inside a unitary
   EXPECT_EQ(0, w.getObjectsByType(IddObjectType::CoilSystem_Cooling_Water).size());
 
   // Check that the Unitary ends up with the CoilCoolingWater
