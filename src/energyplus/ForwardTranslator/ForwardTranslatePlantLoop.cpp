@@ -76,6 +76,8 @@
 #include "../../model/CoilCoolingCooledBeam_Impl.hpp"
 #include "../../model/CoilCoolingFourPipeBeam.hpp"
 #include "../../model/CoilCoolingFourPipeBeam_Impl.hpp"
+#include "../../model/CoilCoolingWater.hpp"
+#include "../../model/CoilCoolingWater_Impl.hpp"
 #include "../../model/CoilHeatingFourPipeBeam.hpp"
 #include "../../model/CoilHeatingFourPipeBeam_Impl.hpp"
 #include "../../model/StraightComponent.hpp"
@@ -116,6 +118,7 @@
 #include <utilities/idd/ZoneHVAC_AirDistributionUnit_FieldEnums.hxx>
 #include <utilities/idd/FluidProperties_Name_FieldEnums.hxx>
 #include <utilities/idd/AvailabilityManagerAssignmentList_FieldEnums.hxx>
+#include <utilities/idd/CoilSystem_Cooling_Water_FieldEnums.hxx>
 #include "../../utilities/core/Assert.hpp"
 
 using namespace openstudio::model;
@@ -300,6 +303,17 @@ namespace energyplus {
           if (loop.optionalCast<PlantLoop>()) {
             inletNode = waterToAirComponent->waterInletModelObject()->optionalCast<Node>();
             outletNode = waterToAirComponent->waterOutletModelObject()->optionalCast<Node>();
+            // Special case for Coil:Cooling:Water.
+            if (boost::optional<CoilCoolingWater> ccw = modelObject.optionalCast<CoilCoolingWater>()) {
+              boost::optional<IdfObject> idfCoil = this->translateAndMapModelObject(*ccw);
+              if (idfCoil) {
+                if (idfCoil->iddObject().type() == IddObjectType::CoilSystem_Cooling_Water) {
+                  //Get the name and idd type of the coil cooling water inside the coil system
+                  objectName = idfCoil->getString(CoilSystem_Cooling_WaterFields::CoolingCoilName).get();
+                  iddType = idfCoil->getString(CoilSystem_Cooling_WaterFields::CoolingCoilObjectType).get();
+                }
+              }
+            }
           } else {
             inletNode = waterToAirComponent->airInletModelObject()->optionalCast<Node>();
             outletNode = waterToAirComponent->airOutletModelObject()->optionalCast<Node>();
