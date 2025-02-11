@@ -226,7 +226,7 @@ class UTILITIES_API EpwDataPoint
 {
  public:
   /** Create an empty EpwDataPoint object */
-  EpwDataPoint();
+  EpwDataPoint() = default;
   /** Create an EpwDataPoint object with specified properties */
   EpwDataPoint(int year, int month, int day, int hour, int minute, const std::string& dataSourceandUncertaintyFlags, double dryBulbTemperature,
                double dewPointTemperature, double relativeHumidity, double atmosphericStationPressure, double extraterrestrialHorizontalRadiation,
@@ -436,41 +436,42 @@ class UTILITIES_API EpwDataPoint
   void setLiquidPrecipitationQuantity(double liquidPrecipitationQuantity);
   bool setLiquidPrecipitationQuantity(const std::string& liquidPrecipitationQuantity);
 
-  int m_year;
-  int m_month;
-  int m_day;
-  int m_hour;
-  int m_minute;
+  int m_year = 1;
+  int m_month = 1;
+  int m_day = 1;
+  int m_hour = 1;
+  int m_minute = 0;
   std::string m_dataSourceandUncertaintyFlags;
-  std::string m_dryBulbTemperature;                     // units C, minimum> -70, maximum< 70, missing 99.9
-  std::string m_dewPointTemperature;                    // units C, minimum> -70, maximum< 70, missing 99.9
-  std::string m_relativeHumidity;                       // missing 999., minimum 0, maximum 110
-  std::string m_atmosphericStationPressure;             // units Pa, missing 999999.,  minimum> 31000, maximum< 120000
-  std::string m_extraterrestrialHorizontalRadiation;    // units Wh/m2, missing 9999., minimum 0
-  std::string m_extraterrestrialDirectNormalRadiation;  //units Wh/m2, missing 9999., minimum 0
-  std::string m_horizontalInfraredRadiationIntensity;   // units Wh/m2, missing 9999., minimum 0
-  std::string m_globalHorizontalRadiation;              // units Wh/m2, missing 9999., minimum 0
-  std::string m_directNormalRadiation;                  // units Wh/m2, missing 9999., minimum 0
-  std::string m_diffuseHorizontalRadiation;             // units Wh/m2, missing 9999., minimum 0
-  std::string m_globalHorizontalIlluminance;            // units lux, missing 999999., will be missing if >= 999900, minimum 0
-  std::string m_directNormalIlluminance;                // units lux, missing 999999., will be missing if >= 999900, minimum 0
-  std::string m_diffuseHorizontalIlluminance;           // units lux, missing 999999., will be missing if >= 999900, minimum 0
-  std::string m_zenithLuminance;                        // units Cd/m2, missing 9999., will be missing if >= 9999, minimum 0
-  std::string m_windDirection;                          // units degrees, missing 999., minimum 0, maximum 360
-  std::string m_windSpeed;                              // units m/s, missing 999., minimum 0, maximum 40
-  int m_totalSkyCover;                                  // missing 99, minimum 0, maximum 10
-  int m_opaqueSkyCover;                                 // used if Horizontal IR Intensity missing, missing 99, minimum 0, maximum 10
-  std::string m_visibility;                             // units km, missing 9999
-  std::string m_ceilingHeight;                          // units m, missing 99999
-  int m_presentWeatherObservation;
-  int m_presentWeatherCodes;
-  std::string m_precipitableWater;            // units mm, missing 999
-  std::string m_aerosolOpticalDepth;          // units thousandths, missing .999
-  std::string m_snowDepth;                    // units cm, missing 999
-  std::string m_daysSinceLastSnowfall;        // missing 99
-  std::string m_albedo;                       //missing 999
-  std::string m_liquidPrecipitationDepth;     // units mm, missing 999
-  std::string m_liquidPrecipitationQuantity;  // units hr, missing 99
+  // Note: all numeric fields should be stored as optional<T> instead of being string based
+  std::string m_dryBulbTemperature = "99.9";                     // units C, minimum> -70, maximum< 70, missing 99.9
+  std::string m_dewPointTemperature = "99.9";                    // units C, minimum> -70, maximum< 70, missing 99.9
+  std::string m_relativeHumidity = "999";                        // missing 999., minimum 0, maximum 110
+  std::string m_atmosphericStationPressure = "999999";           // units Pa, missing 999999.,  minimum> 31000, maximum< 120000
+  std::string m_extraterrestrialHorizontalRadiation = "9999";    // units Wh/m2, missing 9999., minimum 0
+  std::string m_extraterrestrialDirectNormalRadiation = "9999";  //units Wh/m2, missing 9999., minimum 0
+  std::string m_horizontalInfraredRadiationIntensity = "9999";   // units Wh/m2, missing 9999., minimum 0
+  std::string m_globalHorizontalRadiation = "9999";              // units Wh/m2, missing 9999., minimum 0
+  std::string m_directNormalRadiation = "9999";                  // units Wh/m2, missing 9999., minimum 0
+  std::string m_diffuseHorizontalRadiation = "9999";             // units Wh/m2, missing 9999., minimum 0
+  std::string m_globalHorizontalIlluminance = "999999";          // units lux, missing 999999., will be missing if >= 999900, minimum 0
+  std::string m_directNormalIlluminance = "999999";              // units lux, missing 999999., will be missing if >= 999900, minimum 0
+  std::string m_diffuseHorizontalIlluminance = "999999";         // units lux, missing 999999., will be missing if >= 999900, minimum 0
+  std::string m_zenithLuminance = "9999";                        // units Cd/m2, missing 9999., will be missing if >= 9999, minimum 0
+  std::string m_windDirection = "999";                           // units degrees, missing 999., minimum 0, maximum 360
+  std::string m_windSpeed = "999";                               // units m/s, missing 999., minimum 0, maximum 40
+  int m_totalSkyCover = 99;                                      // missing 99, minimum 0, maximum 10
+  int m_opaqueSkyCover = 99;                                     // used if Horizontal IR Intensity missing, missing 99, minimum 0, maximum 10
+  std::string m_visibility = "9999";                             // units km, missing 9999
+  std::string m_ceilingHeight = "99999";                         // units m, missing 99999
+  int m_presentWeatherObservation = 0;                           // TODO: this should be a bool, in EPW 0 = present, 9 = missing
+  int m_presentWeatherCodes = 0;                                 // TODO: this should be a struct, it stores 9 integer fields, only if prev field is 0
+  std::string m_precipitableWater = "999";                       // units mm, missing 999
+  std::string m_aerosolOpticalDepth = ".999";                    // units thousandths, missing .999
+  std::string m_snowDepth = "999";                               // units cm, missing 999
+  std::string m_daysSinceLastSnowfall = "99";                    // missing 99
+  std::string m_albedo = "999";                                  // missing 999
+  std::string m_liquidPrecipitationDepth = "999";                // units mm, missing 999
+  std::string m_liquidPrecipitationQuantity = "99";              // units hr, missing 99
 };
 
 class UTILITIES_API EpwHoliday
@@ -499,7 +500,7 @@ class UTILITIES_API EpwDesignCondition
 {
  public:
   /** Create an empty EpwDesignCondition object */
-  EpwDesignCondition();
+  EpwDesignCondition() = default;
   /** Create an EpwDesignCondition object with specified properties */
   EpwDesignCondition(
     const std::string& titleOfDesignCondition, int heatingColdestMonth, double heatingDryBulb99pt6, double heatingDryBulb99,
