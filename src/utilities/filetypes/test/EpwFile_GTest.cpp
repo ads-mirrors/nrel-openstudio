@@ -264,9 +264,24 @@ TEST(Filetypes, EpwFile_Ground) {
     const auto& expected_values = expected_depth_values.at(i);
 
     EXPECT_DOUBLE_EQ(expected_values.at(0), depth.groundTemperatureDepth());
-    EXPECT_DOUBLE_EQ(expected_values.at(1), depth.soilConductivity());
-    EXPECT_DOUBLE_EQ(expected_values.at(2), depth.soilDensity());
-    EXPECT_DOUBLE_EQ(expected_values.at(3), depth.soilSpecificHeat());
+    if (expected_values.at(1) < 0) {
+      EXPECT_FALSE(depth.soilConductivity());
+    } else {
+      ASSERT_TRUE(depth.soilConductivity());
+      EXPECT_DOUBLE_EQ(expected_values.at(1), depth.soilConductivity().get());
+    }
+    if (expected_values.at(2) < 0) {
+      EXPECT_FALSE(depth.soilDensity());
+    } else {
+      ASSERT_TRUE(depth.soilDensity());
+      EXPECT_DOUBLE_EQ(expected_values.at(2), depth.soilDensity().get());
+    }
+    if (expected_values.at(3) < 0) {
+      EXPECT_FALSE(depth.soilSpecificHeat());
+    } else {
+      ASSERT_TRUE(depth.soilSpecificHeat());
+      EXPECT_DOUBLE_EQ(expected_values.at(3), depth.soilSpecificHeat().get());
+    }
     EXPECT_DOUBLE_EQ(expected_values.at(4), depth.janGroundTemperature());
     EXPECT_DOUBLE_EQ(expected_values.at(5), depth.febGroundTemperature());
     EXPECT_DOUBLE_EQ(expected_values.at(6), depth.marGroundTemperature());

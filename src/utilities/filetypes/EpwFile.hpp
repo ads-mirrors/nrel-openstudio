@@ -871,10 +871,13 @@ class UTILITIES_API EpwGroundTemperatureDepth
   /** Create an empty EpwGroundTemperatureDepth object */
   EpwGroundTemperatureDepth() = default;
   /** Create an EpwGroundTemperatureDepth object with specified properties */
-  EpwGroundTemperatureDepth(double groundTemperatureDepth, double soilConductivity, double soilDensity, double soilSpecificHeat,
-                            double janGroundTemperature, double febGroundTemperature, double marGroundTemperature, double aprGroundTemperature,
-                            double mayGroundTemperature, double junGroundTemperature, double julGroundTemperature, double augGroundTemperature,
-                            double sepGroundTemperature, double octGroundTemperature, double novGroundTemperature, double decGroundTemperature);
+  EpwGroundTemperatureDepth(double groundTemperatureDepth, double janGroundTemperature, double febGroundTemperature, double marGroundTemperature,
+                            double aprGroundTemperature, double mayGroundTemperature, double junGroundTemperature, double julGroundTemperature,
+                            double augGroundTemperature, double sepGroundTemperature, double octGroundTemperature, double novGroundTemperature,
+                            double decGroundTemperature,
+                            // Optional parameters
+                            boost::optional<double> soilConductivity_ = boost::none, boost::optional<double> soilDensity_ = boost::none,
+                            boost::optional<double> soilSpecificHeat_ = boost::none);
   // Static
   /** Returns the units of the named field */
   static boost::optional<std::string> getUnitsByName(const std::string& name);
@@ -894,11 +897,11 @@ class UTILITIES_API EpwGroundTemperatureDepth
   /** Returns the depth of ground temperature in m*/
   double groundTemperatureDepth() const;
   /** Returns the soil conductivity in W/m-K*/
-  double soilConductivity() const;
+  boost::optional<double> soilConductivity() const;
   /** Returns the soil density in kg/m3*/
-  double soilDensity() const;
+  boost::optional<double> soilDensity() const;
   /** Returns the soil specific heat in J/kg-K*/
-  double soilSpecificHeat() const;
+  boost::optional<double> soilSpecificHeat() const;
   /** Returns the Jan undisturbed ground temperature in degrees C*/
   double janGroundTemperature() const;
   /** Returns the Feb undisturbed ground temperature in degrees C*/
@@ -960,9 +963,9 @@ class UTILITIES_API EpwGroundTemperatureDepth
   bool setDecGroundTemperature(const std::string& decGroundTemperature);
 
   double m_groundTemperatureDepth = -9999;
-  double m_soilConductivity = -9999;
-  double m_soilDensity = -9999;
-  double m_soilSpecificHeat = -9999;
+  boost::optional<double> m_soilConductivity_;
+  boost::optional<double> m_soilDensity_;
+  boost::optional<double> m_soilSpecificHeat_;
   double m_janGroundTemperature = -9999;
   double m_febGroundTemperature = -9999;
   double m_marGroundTemperature = -9999;

@@ -3894,16 +3894,14 @@ std::vector<EpwDesignCondition> EpwFile::designConditions() {
 *****************************************************************************************************************************************************/
 static constexpr size_t NUMBER_GROUND_TEMP_STRINGS = 16;
 
-EpwGroundTemperatureDepth::EpwGroundTemperatureDepth(double groundTemperatureDepth, double soilConductivity, double soilDensity,
-                                                     double soilSpecificHeat, double janGroundTemperature, double febGroundTemperature,
+EpwGroundTemperatureDepth::EpwGroundTemperatureDepth(double groundTemperatureDepth, double janGroundTemperature, double febGroundTemperature,
                                                      double marGroundTemperature, double aprGroundTemperature, double mayGroundTemperature,
                                                      double junGroundTemperature, double julGroundTemperature, double augGroundTemperature,
                                                      double sepGroundTemperature, double octGroundTemperature, double novGroundTemperature,
-                                                     double decGroundTemperature) {
+                                                     double decGroundTemperature, boost::optional<double> soilConductivity_,
+                                                     boost::optional<double> soilDensity_, boost::optional<double> soilSpecificHeat_) {
   setGroundTemperatureDepth(groundTemperatureDepth);
-  setSoilConductivity(soilConductivity);
-  setSoilDensity(soilDensity);
-  setSoilSpecificHeat(soilSpecificHeat);
+
   setJanGroundTemperature(janGroundTemperature);
   setFebGroundTemperature(febGroundTemperature);
   setMarGroundTemperature(marGroundTemperature);
@@ -3916,6 +3914,16 @@ EpwGroundTemperatureDepth::EpwGroundTemperatureDepth(double groundTemperatureDep
   setOctGroundTemperature(octGroundTemperature);
   setNovGroundTemperature(novGroundTemperature);
   setDecGroundTemperature(decGroundTemperature);
+
+  if (soilConductivity_) {
+    setSoilConductivity(*soilConductivity_);
+  }
+  if (soilDensity_) {
+    setSoilDensity(*soilDensity_);
+  }
+  if (soilSpecificHeat_) {
+    setSoilSpecificHeat(*soilSpecificHeat_);
+  }
 }
 
 boost::optional<EpwGroundTemperatureDepth> EpwGroundTemperatureDepth::fromGroundTemperatureDepthsString(const std::string& line) {
@@ -4091,16 +4099,16 @@ double EpwGroundTemperatureDepth::groundTemperatureDepth() const {
   return m_groundTemperatureDepth;
 }
 
-double EpwGroundTemperatureDepth::soilConductivity() const {
-  return m_soilConductivity;
+boost::optional<double> EpwGroundTemperatureDepth::soilConductivity() const {
+  return m_soilConductivity_;
 }
 
-double EpwGroundTemperatureDepth::soilDensity() const {
-  return m_soilDensity;
+boost::optional<double> EpwGroundTemperatureDepth::soilDensity() const {
+  return m_soilDensity_;
 }
 
-double EpwGroundTemperatureDepth::soilSpecificHeat() const {
-  return m_soilSpecificHeat;
+boost::optional<double> EpwGroundTemperatureDepth::soilSpecificHeat() const {
+  return m_soilSpecificHeat_;
 }
 
 double EpwGroundTemperatureDepth::janGroundTemperature() const {
@@ -4176,7 +4184,7 @@ bool EpwGroundTemperatureDepth::setSoilConductivity(const std::string& soilCondu
 }
 
 void EpwGroundTemperatureDepth::setSoilConductivity(double soilConductivity) {
-  m_soilConductivity = soilConductivity;
+  m_soilConductivity_ = soilConductivity;
 }
 
 bool EpwGroundTemperatureDepth::setSoilDensity(const std::string& soilDensity) {
@@ -4190,7 +4198,7 @@ bool EpwGroundTemperatureDepth::setSoilDensity(const std::string& soilDensity) {
 }
 
 void EpwGroundTemperatureDepth::setSoilDensity(double soilDensity) {
-  m_soilDensity = soilDensity;
+  m_soilDensity_ = soilDensity;
 }
 
 bool EpwGroundTemperatureDepth::setSoilSpecificHeat(const std::string& soilSpecificHeat) {
@@ -4204,7 +4212,7 @@ bool EpwGroundTemperatureDepth::setSoilSpecificHeat(const std::string& soilSpeci
 }
 
 void EpwGroundTemperatureDepth::setSoilSpecificHeat(double soilSpecificHeat) {
-  m_soilSpecificHeat = soilSpecificHeat;
+  m_soilSpecificHeat_ = soilSpecificHeat;
 }
 
 bool EpwGroundTemperatureDepth::setJanGroundTemperature(const std::string& janGroundTemperature) {
