@@ -16,7 +16,7 @@
 
 namespace openstudio {
 
-constexpr double psat(double T) {
+static double psat(double T) {
   // Compute water vapor saturation pressure, eqns 5 and 6 from ASHRAE Fundamentals 2009 Ch. 1
   // This version takes T in C rather than Kelvin since most of the other eqns use C
   T += 273.15;
@@ -42,7 +42,7 @@ constexpr double psat(double T) {
   return exp(rhs);
 }
 
-constexpr double psatp(double T, double psat) {
+static double psatp(double T, double psat) {
   // Compute the derivative of the water vapor saturation pressure function (eqns 5 and 6 from
   // ASHRAE Fundamentals 2009 Ch. 1)
   // This version takes T in C rather than Kelvin since most of the other eqns use C
@@ -71,14 +71,14 @@ constexpr double psatp(double T, double psat) {
 }
 
 // Note JM 2019-01-03: suppress -Wunused-function warning for this API function
-[[maybe_unused]] constexpr double enthalpy(double T, double p, double phi) {
+[[maybe_unused]] static double enthalpy(double T, double p, double phi) {
   // Compute moist air enthalpy, eqns 5, 6, 22, 24, and 32 from ASHRAE Fundamentals 2009 Ch. 1
   const double pw = phi * psat(T);            // Partial pressure of water vapor, eqn 24 (uses eqns 5 and 6)
   const double W = 0.621945 * pw / (p - pw);  // Humidity ratio, eqn 22
   return 1.006 * T + W * (2501 + 1.86 * T);   // Moist air specific enthalpy, eqn 32
 }
 
-[[maybe_unused]] constexpr double enthalpyFromDewPoint(double T, double p, double Tdewpoint) {
+[[maybe_unused]] static double enthalpyFromDewPoint(double T, double p, double Tdewpoint) {
   // Compute moist air enthalpy, eqns 5, 6, 22, 32, and 38 from ASHRAE Fundamentals 2009 Ch. 1
   const double pw = openstudio::psat(Tdewpoint);  // Partial pressure of water vapor, eqn 38 (uses eqns 5 and 6)
   const double W = 0.621945 * pw / (p - pw);      // Humidity ratio, eqn 22
@@ -431,89 +431,89 @@ EpwDesignCondition::EpwDesignCondition(
 }
 
 boost::optional<EpwDataPoint> EpwDataPoint::fromEpwString(const std::string& line) {
-  std::vector<std::string> list = splitString(line, ',');
-  return fromEpwStrings(list);
+  std::vector<std::string> strings = splitString(line, ',');
+  return fromEpwStrings(strings);
 }
 
-boost::optional<EpwDataPoint> EpwDataPoint::fromEpwStrings(const std::vector<std::string>& list, bool pedantic) {
+boost::optional<EpwDataPoint> EpwDataPoint::fromEpwStrings(const std::vector<std::string>& strings, bool pedantic) {
   EpwDataPoint pt;
-  // Expect 35 items in the list
-  if (list.size() < 35) {
+  // Expect 35 items in the strings
+  if (strings.size() < 35) {
     if (pedantic) {
-      LOG_FREE(Error, "openstudio.EpwFile", "Expected 35 fields in EPW data instead of the " << list.size() << " received");
+      LOG_FREE(Error, "openstudio.EpwFile", "Expected 35 fields in EPW data instead of the " << strings.size() << " received");
       return boost::none;
     } else {
       LOG_FREE(Warn, "openstudio.EpwFile",
-               "Expected 35 fields in EPW data instead of the " << list.size() << " received. The remaining fields will not be available");
+               "Expected 35 fields in EPW data instead of the " << strings.size() << " received. The remaining fields will not be available");
     }
-  } else if (list.size() > 35) {
+  } else if (strings.size() > 35) {
     LOG_FREE(Warn, "openstudio.EpwFile",
-             "Expected 35 fields in EPW data instead of the " << list.size() << " received. The additional data will be ignored");
+             "Expected 35 fields in EPW data instead of the " << strings.size() << " received. The additional data will be ignored");
   }
   // Use the appropriate setter on each field
-  if (!pt.setYear(list[EpwDataField::Year])) {
+  if (!pt.setYear(strings[EpwDataField::Year])) {
     return boost::none;
   }
-  if (!pt.setMonth(list[EpwDataField::Month])) {
+  if (!pt.setMonth(strings[EpwDataField::Month])) {
     return boost::none;
   }
-  if (!pt.setDay(list[EpwDataField::Day])) {
+  if (!pt.setDay(strings[EpwDataField::Day])) {
     return boost::none;
   }
-  if (!pt.setHour(list[EpwDataField::Hour])) {
+  if (!pt.setHour(strings[EpwDataField::Hour])) {
     return boost::none;
   }
-  if (!pt.setMinute(list[EpwDataField::Minute])) {
+  if (!pt.setMinute(strings[EpwDataField::Minute])) {
     return boost::none;
   }
-  pt.setDataSourceandUncertaintyFlags(list[EpwDataField::DataSourceandUncertaintyFlags]);
-  pt.setDryBulbTemperature(list[EpwDataField::DryBulbTemperature]);
-  pt.setDewPointTemperature(list[EpwDataField::DewPointTemperature]);
-  pt.setRelativeHumidity(list[EpwDataField::RelativeHumidity]);
-  pt.setAtmosphericStationPressure(list[EpwDataField::AtmosphericStationPressure]);
-  pt.setExtraterrestrialHorizontalRadiation(list[EpwDataField::ExtraterrestrialHorizontalRadiation]);
-  pt.setExtraterrestrialDirectNormalRadiation(list[EpwDataField::ExtraterrestrialDirectNormalRadiation]);
-  pt.setHorizontalInfraredRadiationIntensity(list[EpwDataField::HorizontalInfraredRadiationIntensity]);
-  pt.setGlobalHorizontalRadiation(list[EpwDataField::GlobalHorizontalRadiation]);
-  pt.setDirectNormalRadiation(list[EpwDataField::DirectNormalRadiation]);
-  pt.setDiffuseHorizontalRadiation(list[EpwDataField::DiffuseHorizontalRadiation]);
-  pt.setGlobalHorizontalIlluminance(list[EpwDataField::GlobalHorizontalIlluminance]);
-  pt.setDirectNormalIlluminance(list[EpwDataField::DirectNormalIlluminance]);
-  pt.setDiffuseHorizontalIlluminance(list[EpwDataField::DiffuseHorizontalIlluminance]);
-  pt.setZenithLuminance(list[EpwDataField::ZenithLuminance]);
-  pt.setWindDirection(list[EpwDataField::WindDirection]);
-  pt.setWindSpeed(list[EpwDataField::WindSpeed]);
-  pt.setTotalSkyCover(list[EpwDataField::TotalSkyCover]);
-  pt.setOpaqueSkyCover(list[EpwDataField::OpaqueSkyCover]);
-  pt.setVisibility(list[EpwDataField::Visibility]);
-  pt.setCeilingHeight(list[EpwDataField::CeilingHeight]);
-  pt.setPresentWeatherObservation(list[EpwDataField::PresentWeatherObservation]);
-  pt.setPresentWeatherCodes(list[EpwDataField::PresentWeatherCodes]);
-  pt.setPrecipitableWater(list[EpwDataField::PrecipitableWater]);
-  pt.setAerosolOpticalDepth(list[EpwDataField::AerosolOpticalDepth]);
-  pt.setSnowDepth(list[EpwDataField::SnowDepth]);
-  pt.setDaysSinceLastSnowfall(list[EpwDataField::DaysSinceLastSnowfall]);
-  pt.setAlbedo(list[EpwDataField::Albedo]);
-  pt.setLiquidPrecipitationDepth(list[EpwDataField::LiquidPrecipitationDepth]);
-  pt.setLiquidPrecipitationQuantity(list[EpwDataField::LiquidPrecipitationQuantity]);
+  pt.setDataSourceandUncertaintyFlags(strings[EpwDataField::DataSourceandUncertaintyFlags]);
+  pt.setDryBulbTemperature(strings[EpwDataField::DryBulbTemperature]);
+  pt.setDewPointTemperature(strings[EpwDataField::DewPointTemperature]);
+  pt.setRelativeHumidity(strings[EpwDataField::RelativeHumidity]);
+  pt.setAtmosphericStationPressure(strings[EpwDataField::AtmosphericStationPressure]);
+  pt.setExtraterrestrialHorizontalRadiation(strings[EpwDataField::ExtraterrestrialHorizontalRadiation]);
+  pt.setExtraterrestrialDirectNormalRadiation(strings[EpwDataField::ExtraterrestrialDirectNormalRadiation]);
+  pt.setHorizontalInfraredRadiationIntensity(strings[EpwDataField::HorizontalInfraredRadiationIntensity]);
+  pt.setGlobalHorizontalRadiation(strings[EpwDataField::GlobalHorizontalRadiation]);
+  pt.setDirectNormalRadiation(strings[EpwDataField::DirectNormalRadiation]);
+  pt.setDiffuseHorizontalRadiation(strings[EpwDataField::DiffuseHorizontalRadiation]);
+  pt.setGlobalHorizontalIlluminance(strings[EpwDataField::GlobalHorizontalIlluminance]);
+  pt.setDirectNormalIlluminance(strings[EpwDataField::DirectNormalIlluminance]);
+  pt.setDiffuseHorizontalIlluminance(strings[EpwDataField::DiffuseHorizontalIlluminance]);
+  pt.setZenithLuminance(strings[EpwDataField::ZenithLuminance]);
+  pt.setWindDirection(strings[EpwDataField::WindDirection]);
+  pt.setWindSpeed(strings[EpwDataField::WindSpeed]);
+  pt.setTotalSkyCover(strings[EpwDataField::TotalSkyCover]);
+  pt.setOpaqueSkyCover(strings[EpwDataField::OpaqueSkyCover]);
+  pt.setVisibility(strings[EpwDataField::Visibility]);
+  pt.setCeilingHeight(strings[EpwDataField::CeilingHeight]);
+  pt.setPresentWeatherObservation(strings[EpwDataField::PresentWeatherObservation]);
+  pt.setPresentWeatherCodes(strings[EpwDataField::PresentWeatherCodes]);
+  pt.setPrecipitableWater(strings[EpwDataField::PrecipitableWater]);
+  pt.setAerosolOpticalDepth(strings[EpwDataField::AerosolOpticalDepth]);
+  pt.setSnowDepth(strings[EpwDataField::SnowDepth]);
+  pt.setDaysSinceLastSnowfall(strings[EpwDataField::DaysSinceLastSnowfall]);
+  pt.setAlbedo(strings[EpwDataField::Albedo]);
+  pt.setLiquidPrecipitationDepth(strings[EpwDataField::LiquidPrecipitationDepth]);
+  pt.setLiquidPrecipitationQuantity(strings[EpwDataField::LiquidPrecipitationQuantity]);
   return boost::optional<EpwDataPoint>(pt);
 }
 
-boost::optional<EpwDataPoint> EpwDataPoint::fromEpwStrings(int year, int month, int day, int hour, int minute, const std::vector<std::string>& list,
-                                                           bool pedantic) {
+boost::optional<EpwDataPoint> EpwDataPoint::fromEpwStrings(int year, int month, int day, int hour, int minute,
+                                                           const std::vector<std::string>& strings, bool pedantic) {
   EpwDataPoint pt;
-  // Expect 30 items in the list
-  if (list.size() < 35) {
+  // Expect 30 items in the strings
+  if (strings.size() < 35) {
     if (pedantic) {
-      LOG_FREE(Error, "openstudio.EpwFile", "Expected 35 fields in EPW data instead of the " << list.size() << " received");
+      LOG_FREE(Error, "openstudio.EpwFile", "Expected 35 fields in EPW data instead of the " << strings.size() << " received");
       return boost::none;
     } else {
       LOG_FREE(Warn, "openstudio.EpwFile",
-               "Expected 35 fields in EPW data instead of the " << list.size() << " received. The remaining fields will not be available");
+               "Expected 35 fields in EPW data instead of the " << strings.size() << " received. The remaining fields will not be available");
     }
-  } else if (list.size() > 35) {
+  } else if (strings.size() > 35) {
     LOG_FREE(Warn, "openstudio.EpwFile",
-             "Expected 35 fields in EPW data instead of the " << list.size() << " received. The additional data will be ignored");
+             "Expected 35 fields in EPW data instead of the " << strings.size() << " received. The additional data will be ignored");
   }
   // Use the appropriate setter on each field
   pt.setYear(year);
@@ -529,158 +529,158 @@ boost::optional<EpwDataPoint> EpwDataPoint::fromEpwStrings(int year, int month, 
   if (!pt.setMinute(minute)) {
     return boost::none;
   }
-  pt.setDataSourceandUncertaintyFlags(list[EpwDataField::DataSourceandUncertaintyFlags]);
-  pt.setDryBulbTemperature(list[EpwDataField::DryBulbTemperature]);
-  pt.setDewPointTemperature(list[EpwDataField::DewPointTemperature]);
-  pt.setRelativeHumidity(list[EpwDataField::RelativeHumidity]);
-  pt.setAtmosphericStationPressure(list[EpwDataField::AtmosphericStationPressure]);
-  pt.setExtraterrestrialHorizontalRadiation(list[EpwDataField::ExtraterrestrialHorizontalRadiation]);
-  pt.setExtraterrestrialDirectNormalRadiation(list[EpwDataField::ExtraterrestrialDirectNormalRadiation]);
-  pt.setHorizontalInfraredRadiationIntensity(list[EpwDataField::HorizontalInfraredRadiationIntensity]);
-  pt.setGlobalHorizontalRadiation(list[EpwDataField::GlobalHorizontalRadiation]);
-  pt.setDirectNormalRadiation(list[EpwDataField::DirectNormalRadiation]);
-  pt.setDiffuseHorizontalRadiation(list[EpwDataField::DiffuseHorizontalRadiation]);
-  pt.setGlobalHorizontalIlluminance(list[EpwDataField::GlobalHorizontalIlluminance]);
-  pt.setDirectNormalIlluminance(list[EpwDataField::DirectNormalIlluminance]);
-  pt.setDiffuseHorizontalIlluminance(list[EpwDataField::DiffuseHorizontalIlluminance]);
-  pt.setZenithLuminance(list[EpwDataField::ZenithLuminance]);
-  pt.setWindDirection(list[EpwDataField::WindDirection]);
-  pt.setWindSpeed(list[EpwDataField::WindSpeed]);
-  pt.setTotalSkyCover(list[EpwDataField::TotalSkyCover]);
-  pt.setOpaqueSkyCover(list[EpwDataField::OpaqueSkyCover]);
-  pt.setVisibility(list[EpwDataField::Visibility]);
-  pt.setCeilingHeight(list[EpwDataField::CeilingHeight]);
-  pt.setPresentWeatherObservation(list[EpwDataField::PresentWeatherObservation]);
-  pt.setPresentWeatherCodes(list[EpwDataField::PresentWeatherCodes]);
-  pt.setPrecipitableWater(list[EpwDataField::PrecipitableWater]);
-  pt.setAerosolOpticalDepth(list[EpwDataField::AerosolOpticalDepth]);
-  pt.setSnowDepth(list[EpwDataField::SnowDepth]);
-  pt.setDaysSinceLastSnowfall(list[EpwDataField::DaysSinceLastSnowfall]);
-  pt.setAlbedo(list[EpwDataField::Albedo]);
-  pt.setLiquidPrecipitationDepth(list[EpwDataField::LiquidPrecipitationDepth]);
-  pt.setLiquidPrecipitationQuantity(list[EpwDataField::LiquidPrecipitationQuantity]);
+  pt.setDataSourceandUncertaintyFlags(strings[EpwDataField::DataSourceandUncertaintyFlags]);
+  pt.setDryBulbTemperature(strings[EpwDataField::DryBulbTemperature]);
+  pt.setDewPointTemperature(strings[EpwDataField::DewPointTemperature]);
+  pt.setRelativeHumidity(strings[EpwDataField::RelativeHumidity]);
+  pt.setAtmosphericStationPressure(strings[EpwDataField::AtmosphericStationPressure]);
+  pt.setExtraterrestrialHorizontalRadiation(strings[EpwDataField::ExtraterrestrialHorizontalRadiation]);
+  pt.setExtraterrestrialDirectNormalRadiation(strings[EpwDataField::ExtraterrestrialDirectNormalRadiation]);
+  pt.setHorizontalInfraredRadiationIntensity(strings[EpwDataField::HorizontalInfraredRadiationIntensity]);
+  pt.setGlobalHorizontalRadiation(strings[EpwDataField::GlobalHorizontalRadiation]);
+  pt.setDirectNormalRadiation(strings[EpwDataField::DirectNormalRadiation]);
+  pt.setDiffuseHorizontalRadiation(strings[EpwDataField::DiffuseHorizontalRadiation]);
+  pt.setGlobalHorizontalIlluminance(strings[EpwDataField::GlobalHorizontalIlluminance]);
+  pt.setDirectNormalIlluminance(strings[EpwDataField::DirectNormalIlluminance]);
+  pt.setDiffuseHorizontalIlluminance(strings[EpwDataField::DiffuseHorizontalIlluminance]);
+  pt.setZenithLuminance(strings[EpwDataField::ZenithLuminance]);
+  pt.setWindDirection(strings[EpwDataField::WindDirection]);
+  pt.setWindSpeed(strings[EpwDataField::WindSpeed]);
+  pt.setTotalSkyCover(strings[EpwDataField::TotalSkyCover]);
+  pt.setOpaqueSkyCover(strings[EpwDataField::OpaqueSkyCover]);
+  pt.setVisibility(strings[EpwDataField::Visibility]);
+  pt.setCeilingHeight(strings[EpwDataField::CeilingHeight]);
+  pt.setPresentWeatherObservation(strings[EpwDataField::PresentWeatherObservation]);
+  pt.setPresentWeatherCodes(strings[EpwDataField::PresentWeatherCodes]);
+  pt.setPrecipitableWater(strings[EpwDataField::PrecipitableWater]);
+  pt.setAerosolOpticalDepth(strings[EpwDataField::AerosolOpticalDepth]);
+  pt.setSnowDepth(strings[EpwDataField::SnowDepth]);
+  pt.setDaysSinceLastSnowfall(strings[EpwDataField::DaysSinceLastSnowfall]);
+  pt.setAlbedo(strings[EpwDataField::Albedo]);
+  pt.setLiquidPrecipitationDepth(strings[EpwDataField::LiquidPrecipitationDepth]);
+  pt.setLiquidPrecipitationQuantity(strings[EpwDataField::LiquidPrecipitationQuantity]);
   return boost::optional<EpwDataPoint>(pt);
 }
 
 boost::optional<EpwDesignCondition> EpwDesignCondition::fromDesignConditionsString(const std::string& line) {
-  std::vector<std::string> list = splitString(line, ',');
-  return fromDesignConditionsStrings(list);
+  std::vector<std::string> strings = splitString(line, ',');
+  return fromDesignConditionsStrings(strings);
 }
 
-boost::optional<EpwDesignCondition> EpwDesignCondition::fromDesignConditionsStrings(const std::vector<std::string>& list) {
+boost::optional<EpwDesignCondition> EpwDesignCondition::fromDesignConditionsStrings(const std::vector<std::string>& strings) {
   EpwDesignCondition dc;
-  // Expect 68 items in the list
-  if (list.size() < 68) {
-    LOG_FREE(Error, "openstudio.EpwFile", "Expected 68 fields in EPW design condition instead of the " << list.size() << " received");
+  // Expect 68 items in the strings
+  if (strings.size() < 68) {
+    LOG_FREE(Error, "openstudio.EpwFile", "Expected 68 fields in EPW design condition instead of the " << strings.size() << " received");
     return boost::none;
   }
   // Use the appropriate setter on each field
-  dc.setTitleOfDesignCondition(list[EpwDesignField::TitleOfDesignCondition]);
-  dc.setHeatingColdestMonth(list[EpwDesignField::HeatingColdestMonth]);
-  dc.setHeatingDryBulb99pt6(list[EpwDesignField::HeatingDryBulb99pt6]);
-  dc.setHeatingDryBulb99(list[EpwDesignField::HeatingDryBulb99]);
-  dc.setHeatingHumidificationDewPoint99pt6(list[EpwDesignField::HeatingHumidificationDewPoint99pt6]);
-  dc.setHeatingHumidificationHumidityRatio99pt6(list[EpwDesignField::HeatingHumidificationHumidityRatio99pt6]);
-  dc.setHeatingHumidificationMeanCoincidentDryBulb99pt6(list[EpwDesignField::HeatingHumidificationMeanCoincidentDryBulb99pt6]);
-  dc.setHeatingHumidificationDewPoint99(list[EpwDesignField::HeatingHumidificationDewPoint99]);
-  dc.setHeatingHumidificationHumidityRatio99(list[EpwDesignField::HeatingHumidificationHumidityRatio99]);
-  dc.setHeatingHumidificationMeanCoincidentDryBulb99(list[EpwDesignField::HeatingHumidificationMeanCoincidentDryBulb99]);
-  dc.setHeatingColdestMonthWindSpeed0pt4(list[EpwDesignField::HeatingColdestMonthWindSpeed0pt4]);
-  dc.setHeatingColdestMonthMeanCoincidentDryBulb0pt4(list[EpwDesignField::HeatingColdestMonthMeanCoincidentDryBulb0pt4]);
-  dc.setHeatingColdestMonthWindSpeed1(list[EpwDesignField::HeatingColdestMonthWindSpeed1]);
-  dc.setHeatingColdestMonthMeanCoincidentDryBulb1(list[EpwDesignField::HeatingColdestMonthMeanCoincidentDryBulb1]);
-  dc.setHeatingMeanCoincidentWindSpeed99pt6(list[EpwDesignField::HeatingMeanCoincidentWindSpeed99pt6]);
-  dc.setHeatingPrevailingCoincidentWindDirection99pt6(list[EpwDesignField::HeatingPrevailingCoincidentWindDirection99pt6]);
-  dc.setCoolingHottestMonth(list[EpwDesignField::CoolingHottestMonth]);
-  dc.setCoolingDryBulbRange(list[EpwDesignField::CoolingDryBulbRange]);
-  dc.setCoolingDryBulb0pt4(list[EpwDesignField::CoolingDryBulb0pt4]);
-  dc.setCoolingMeanCoincidentWetBulb0pt4(list[EpwDesignField::CoolingMeanCoincidentWetBulb0pt4]);
-  dc.setCoolingDryBulb1(list[EpwDesignField::CoolingDryBulb1]);
-  dc.setCoolingMeanCoincidentWetBulb1(list[EpwDesignField::CoolingMeanCoincidentWetBulb1]);
-  dc.setCoolingDryBulb2(list[EpwDesignField::CoolingDryBulb2]);
-  dc.setCoolingMeanCoincidentWetBulb2(list[EpwDesignField::CoolingMeanCoincidentWetBulb2]);
-  dc.setCoolingEvaporationWetBulb0pt4(list[EpwDesignField::CoolingEvaporationWetBulb0pt4]);
-  dc.setCoolingEvaporationMeanCoincidentDryBulb0pt4(list[EpwDesignField::CoolingEvaporationMeanCoincidentDryBulb0pt4]);
-  dc.setCoolingEvaporationWetBulb1(list[EpwDesignField::CoolingEvaporationWetBulb1]);
-  dc.setCoolingEvaporationMeanCoincidentDryBulb1(list[EpwDesignField::CoolingEvaporationMeanCoincidentDryBulb1]);
-  dc.setCoolingEvaporationWetBulb2(list[EpwDesignField::CoolingEvaporationWetBulb2]);
-  dc.setCoolingEvaporationMeanCoincidentDryBulb2(list[EpwDesignField::CoolingEvaporationMeanCoincidentDryBulb2]);
-  dc.setCoolingMeanCoincidentWindSpeed0pt4(list[EpwDesignField::CoolingMeanCoincidentWindSpeed0pt4]);
-  dc.setCoolingPrevailingCoincidentWindDirection0pt4(list[EpwDesignField::CoolingPrevailingCoincidentWindDirection0pt4]);
-  dc.setCoolingDehumidificationDewPoint0pt4(list[EpwDesignField::CoolingDehumidificationDewPoint0pt4]);
-  dc.setCoolingDehumidificationHumidityRatio0pt4(list[EpwDesignField::CoolingDehumidificationHumidityRatio0pt4]);
-  dc.setCoolingDehumidificationMeanCoincidentDryBulb0pt4(list[EpwDesignField::CoolingDehumidificationMeanCoincidentDryBulb0pt4]);
-  dc.setCoolingDehumidificationDewPoint1(list[EpwDesignField::CoolingDehumidificationDewPoint1]);
-  dc.setCoolingDehumidificationHumidityRatio1(list[EpwDesignField::CoolingDehumidificationHumidityRatio1]);
-  dc.setCoolingDehumidificationMeanCoincidentDryBulb1(list[EpwDesignField::CoolingDehumidificationMeanCoincidentDryBulb1]);
-  dc.setCoolingDehumidificationDewPoint2(list[EpwDesignField::CoolingDehumidificationDewPoint2]);
-  dc.setCoolingDehumidificationHumidityRatio2(list[EpwDesignField::CoolingDehumidificationHumidityRatio2]);
-  dc.setCoolingDehumidificationMeanCoincidentDryBulb2(list[EpwDesignField::CoolingDehumidificationMeanCoincidentDryBulb2]);
-  dc.setCoolingEnthalpy0pt4(list[EpwDesignField::CoolingEnthalpy0pt4]);
-  dc.setCoolingEnthalpyMeanCoincidentDryBulb0pt4(list[EpwDesignField::CoolingEnthalpyMeanCoincidentDryBulb0pt4]);
-  dc.setCoolingEnthalpy1(list[EpwDesignField::CoolingEnthalpy1]);
-  dc.setCoolingEnthalpyMeanCoincidentDryBulb1(list[EpwDesignField::CoolingEnthalpyMeanCoincidentDryBulb1]);
-  dc.setCoolingEnthalpy2(list[EpwDesignField::CoolingEnthalpy2]);
-  dc.setCoolingEnthalpyMeanCoincidentDryBulb2(list[EpwDesignField::CoolingEnthalpyMeanCoincidentDryBulb2]);
-  dc.setCoolingHours8To4AndDryBulb12pt8To20pt6(list[EpwDesignField::CoolingHours8To4AndDryBulb12pt8To20pt6]);
-  dc.setExtremeWindSpeed1(list[EpwDesignField::ExtremeWindSpeed1]);
-  dc.setExtremeWindSpeed2pt5(list[EpwDesignField::ExtremeWindSpeed2pt5]);
-  dc.setExtremeWindSpeed5(list[EpwDesignField::ExtremeWindSpeed5]);
-  dc.setExtremeMaxWetBulb(list[EpwDesignField::ExtremeMaxWetBulb]);
-  dc.setExtremeMeanMinDryBulb(list[EpwDesignField::ExtremeMeanMinDryBulb]);
-  dc.setExtremeMeanMaxDryBulb(list[EpwDesignField::ExtremeMeanMaxDryBulb]);
-  dc.setExtremeStdDevMinDryBulb(list[EpwDesignField::ExtremeStdDevMinDryBulb]);
-  dc.setExtremeStdDevMaxDryBulb(list[EpwDesignField::ExtremeStdDevMaxDryBulb]);
-  dc.setExtremeN5YearsMinDryBulb(list[EpwDesignField::ExtremeN5YearsMinDryBulb]);
-  dc.setExtremeN5YearsMaxDryBulb(list[EpwDesignField::ExtremeN5YearsMaxDryBulb]);
-  dc.setExtremeN10YearsMinDryBulb(list[EpwDesignField::ExtremeN10YearsMinDryBulb]);
-  dc.setExtremeN10YearsMaxDryBulb(list[EpwDesignField::ExtremeN10YearsMaxDryBulb]);
-  dc.setExtremeN20YearsMinDryBulb(list[EpwDesignField::ExtremeN20YearsMinDryBulb]);
-  dc.setExtremeN20YearsMaxDryBulb(list[EpwDesignField::ExtremeN20YearsMaxDryBulb]);
-  dc.setExtremeN50YearsMinDryBulb(list[EpwDesignField::ExtremeN50YearsMinDryBulb]);
-  dc.setExtremeN50YearsMaxDryBulb(list[EpwDesignField::ExtremeN50YearsMaxDryBulb]);
+  dc.setTitleOfDesignCondition(strings[EpwDesignField::TitleOfDesignCondition]);
+  dc.setHeatingColdestMonth(strings[EpwDesignField::HeatingColdestMonth]);
+  dc.setHeatingDryBulb99pt6(strings[EpwDesignField::HeatingDryBulb99pt6]);
+  dc.setHeatingDryBulb99(strings[EpwDesignField::HeatingDryBulb99]);
+  dc.setHeatingHumidificationDewPoint99pt6(strings[EpwDesignField::HeatingHumidificationDewPoint99pt6]);
+  dc.setHeatingHumidificationHumidityRatio99pt6(strings[EpwDesignField::HeatingHumidificationHumidityRatio99pt6]);
+  dc.setHeatingHumidificationMeanCoincidentDryBulb99pt6(strings[EpwDesignField::HeatingHumidificationMeanCoincidentDryBulb99pt6]);
+  dc.setHeatingHumidificationDewPoint99(strings[EpwDesignField::HeatingHumidificationDewPoint99]);
+  dc.setHeatingHumidificationHumidityRatio99(strings[EpwDesignField::HeatingHumidificationHumidityRatio99]);
+  dc.setHeatingHumidificationMeanCoincidentDryBulb99(strings[EpwDesignField::HeatingHumidificationMeanCoincidentDryBulb99]);
+  dc.setHeatingColdestMonthWindSpeed0pt4(strings[EpwDesignField::HeatingColdestMonthWindSpeed0pt4]);
+  dc.setHeatingColdestMonthMeanCoincidentDryBulb0pt4(strings[EpwDesignField::HeatingColdestMonthMeanCoincidentDryBulb0pt4]);
+  dc.setHeatingColdestMonthWindSpeed1(strings[EpwDesignField::HeatingColdestMonthWindSpeed1]);
+  dc.setHeatingColdestMonthMeanCoincidentDryBulb1(strings[EpwDesignField::HeatingColdestMonthMeanCoincidentDryBulb1]);
+  dc.setHeatingMeanCoincidentWindSpeed99pt6(strings[EpwDesignField::HeatingMeanCoincidentWindSpeed99pt6]);
+  dc.setHeatingPrevailingCoincidentWindDirection99pt6(strings[EpwDesignField::HeatingPrevailingCoincidentWindDirection99pt6]);
+  dc.setCoolingHottestMonth(strings[EpwDesignField::CoolingHottestMonth]);
+  dc.setCoolingDryBulbRange(strings[EpwDesignField::CoolingDryBulbRange]);
+  dc.setCoolingDryBulb0pt4(strings[EpwDesignField::CoolingDryBulb0pt4]);
+  dc.setCoolingMeanCoincidentWetBulb0pt4(strings[EpwDesignField::CoolingMeanCoincidentWetBulb0pt4]);
+  dc.setCoolingDryBulb1(strings[EpwDesignField::CoolingDryBulb1]);
+  dc.setCoolingMeanCoincidentWetBulb1(strings[EpwDesignField::CoolingMeanCoincidentWetBulb1]);
+  dc.setCoolingDryBulb2(strings[EpwDesignField::CoolingDryBulb2]);
+  dc.setCoolingMeanCoincidentWetBulb2(strings[EpwDesignField::CoolingMeanCoincidentWetBulb2]);
+  dc.setCoolingEvaporationWetBulb0pt4(strings[EpwDesignField::CoolingEvaporationWetBulb0pt4]);
+  dc.setCoolingEvaporationMeanCoincidentDryBulb0pt4(strings[EpwDesignField::CoolingEvaporationMeanCoincidentDryBulb0pt4]);
+  dc.setCoolingEvaporationWetBulb1(strings[EpwDesignField::CoolingEvaporationWetBulb1]);
+  dc.setCoolingEvaporationMeanCoincidentDryBulb1(strings[EpwDesignField::CoolingEvaporationMeanCoincidentDryBulb1]);
+  dc.setCoolingEvaporationWetBulb2(strings[EpwDesignField::CoolingEvaporationWetBulb2]);
+  dc.setCoolingEvaporationMeanCoincidentDryBulb2(strings[EpwDesignField::CoolingEvaporationMeanCoincidentDryBulb2]);
+  dc.setCoolingMeanCoincidentWindSpeed0pt4(strings[EpwDesignField::CoolingMeanCoincidentWindSpeed0pt4]);
+  dc.setCoolingPrevailingCoincidentWindDirection0pt4(strings[EpwDesignField::CoolingPrevailingCoincidentWindDirection0pt4]);
+  dc.setCoolingDehumidificationDewPoint0pt4(strings[EpwDesignField::CoolingDehumidificationDewPoint0pt4]);
+  dc.setCoolingDehumidificationHumidityRatio0pt4(strings[EpwDesignField::CoolingDehumidificationHumidityRatio0pt4]);
+  dc.setCoolingDehumidificationMeanCoincidentDryBulb0pt4(strings[EpwDesignField::CoolingDehumidificationMeanCoincidentDryBulb0pt4]);
+  dc.setCoolingDehumidificationDewPoint1(strings[EpwDesignField::CoolingDehumidificationDewPoint1]);
+  dc.setCoolingDehumidificationHumidityRatio1(strings[EpwDesignField::CoolingDehumidificationHumidityRatio1]);
+  dc.setCoolingDehumidificationMeanCoincidentDryBulb1(strings[EpwDesignField::CoolingDehumidificationMeanCoincidentDryBulb1]);
+  dc.setCoolingDehumidificationDewPoint2(strings[EpwDesignField::CoolingDehumidificationDewPoint2]);
+  dc.setCoolingDehumidificationHumidityRatio2(strings[EpwDesignField::CoolingDehumidificationHumidityRatio2]);
+  dc.setCoolingDehumidificationMeanCoincidentDryBulb2(strings[EpwDesignField::CoolingDehumidificationMeanCoincidentDryBulb2]);
+  dc.setCoolingEnthalpy0pt4(strings[EpwDesignField::CoolingEnthalpy0pt4]);
+  dc.setCoolingEnthalpyMeanCoincidentDryBulb0pt4(strings[EpwDesignField::CoolingEnthalpyMeanCoincidentDryBulb0pt4]);
+  dc.setCoolingEnthalpy1(strings[EpwDesignField::CoolingEnthalpy1]);
+  dc.setCoolingEnthalpyMeanCoincidentDryBulb1(strings[EpwDesignField::CoolingEnthalpyMeanCoincidentDryBulb1]);
+  dc.setCoolingEnthalpy2(strings[EpwDesignField::CoolingEnthalpy2]);
+  dc.setCoolingEnthalpyMeanCoincidentDryBulb2(strings[EpwDesignField::CoolingEnthalpyMeanCoincidentDryBulb2]);
+  dc.setCoolingHours8To4AndDryBulb12pt8To20pt6(strings[EpwDesignField::CoolingHours8To4AndDryBulb12pt8To20pt6]);
+  dc.setExtremeWindSpeed1(strings[EpwDesignField::ExtremeWindSpeed1]);
+  dc.setExtremeWindSpeed2pt5(strings[EpwDesignField::ExtremeWindSpeed2pt5]);
+  dc.setExtremeWindSpeed5(strings[EpwDesignField::ExtremeWindSpeed5]);
+  dc.setExtremeMaxWetBulb(strings[EpwDesignField::ExtremeMaxWetBulb]);
+  dc.setExtremeMeanMinDryBulb(strings[EpwDesignField::ExtremeMeanMinDryBulb]);
+  dc.setExtremeMeanMaxDryBulb(strings[EpwDesignField::ExtremeMeanMaxDryBulb]);
+  dc.setExtremeStdDevMinDryBulb(strings[EpwDesignField::ExtremeStdDevMinDryBulb]);
+  dc.setExtremeStdDevMaxDryBulb(strings[EpwDesignField::ExtremeStdDevMaxDryBulb]);
+  dc.setExtremeN5YearsMinDryBulb(strings[EpwDesignField::ExtremeN5YearsMinDryBulb]);
+  dc.setExtremeN5YearsMaxDryBulb(strings[EpwDesignField::ExtremeN5YearsMaxDryBulb]);
+  dc.setExtremeN10YearsMinDryBulb(strings[EpwDesignField::ExtremeN10YearsMinDryBulb]);
+  dc.setExtremeN10YearsMaxDryBulb(strings[EpwDesignField::ExtremeN10YearsMaxDryBulb]);
+  dc.setExtremeN20YearsMinDryBulb(strings[EpwDesignField::ExtremeN20YearsMinDryBulb]);
+  dc.setExtremeN20YearsMaxDryBulb(strings[EpwDesignField::ExtremeN20YearsMaxDryBulb]);
+  dc.setExtremeN50YearsMinDryBulb(strings[EpwDesignField::ExtremeN50YearsMinDryBulb]);
+  dc.setExtremeN50YearsMaxDryBulb(strings[EpwDesignField::ExtremeN50YearsMaxDryBulb]);
   return boost::optional<EpwDesignCondition>(dc);
 }
 
 std::vector<std::string> EpwDataPoint::toEpwStrings() const {
-  std::vector<std::string> list;
-  list.reserve(35);
-  list.push_back(std::to_string(m_year));
-  list.push_back(std::to_string(m_month));
-  list.push_back(std::to_string(m_day));
-  list.push_back(std::to_string(m_hour));
-  list.push_back(std::to_string(m_minute));
-  list.push_back(m_dataSourceandUncertaintyFlags);
-  list.push_back(m_dryBulbTemperature);
-  list.push_back(m_dewPointTemperature);
-  list.push_back(m_relativeHumidity);
-  list.push_back(m_atmosphericStationPressure);
-  list.push_back(m_extraterrestrialHorizontalRadiation);
-  list.push_back(m_extraterrestrialDirectNormalRadiation);
-  list.push_back(m_horizontalInfraredRadiationIntensity);
-  list.push_back(m_globalHorizontalRadiation);
-  list.push_back(m_directNormalRadiation);
-  list.push_back(m_diffuseHorizontalRadiation);
-  list.push_back(m_globalHorizontalIlluminance);
-  list.push_back(m_directNormalIlluminance);
-  list.push_back(m_diffuseHorizontalIlluminance);
-  list.push_back(m_zenithLuminance);
-  list.push_back(m_windDirection);
-  list.push_back(m_windSpeed);
-  list.push_back(std::to_string(m_totalSkyCover));
-  list.push_back(std::to_string(m_opaqueSkyCover));
-  list.push_back(m_visibility);
-  list.push_back(m_ceilingHeight);
-  list.push_back(std::to_string(m_presentWeatherObservation));
-  list.push_back(std::to_string(m_presentWeatherCodes));
-  list.push_back(m_precipitableWater);
-  list.push_back(m_aerosolOpticalDepth);
-  list.push_back(m_snowDepth);
-  list.push_back(m_daysSinceLastSnowfall);
-  list.push_back(m_albedo);
-  list.push_back(m_liquidPrecipitationDepth);
-  list.push_back(m_liquidPrecipitationQuantity);
-  return list;
+  std::vector<std::string> strings;
+  strings.reserve(35);
+  strings.push_back(std::to_string(m_year));
+  strings.push_back(std::to_string(m_month));
+  strings.push_back(std::to_string(m_day));
+  strings.push_back(std::to_string(m_hour));
+  strings.push_back(std::to_string(m_minute));
+  strings.push_back(m_dataSourceandUncertaintyFlags);
+  strings.push_back(m_dryBulbTemperature);
+  strings.push_back(m_dewPointTemperature);
+  strings.push_back(m_relativeHumidity);
+  strings.push_back(m_atmosphericStationPressure);
+  strings.push_back(m_extraterrestrialHorizontalRadiation);
+  strings.push_back(m_extraterrestrialDirectNormalRadiation);
+  strings.push_back(m_horizontalInfraredRadiationIntensity);
+  strings.push_back(m_globalHorizontalRadiation);
+  strings.push_back(m_directNormalRadiation);
+  strings.push_back(m_diffuseHorizontalRadiation);
+  strings.push_back(m_globalHorizontalIlluminance);
+  strings.push_back(m_directNormalIlluminance);
+  strings.push_back(m_diffuseHorizontalIlluminance);
+  strings.push_back(m_zenithLuminance);
+  strings.push_back(m_windDirection);
+  strings.push_back(m_windSpeed);
+  strings.push_back(std::to_string(m_totalSkyCover));
+  strings.push_back(std::to_string(m_opaqueSkyCover));
+  strings.push_back(m_visibility);
+  strings.push_back(m_ceilingHeight);
+  strings.push_back(std::to_string(m_presentWeatherObservation));
+  strings.push_back(std::to_string(m_presentWeatherCodes));
+  strings.push_back(m_precipitableWater);
+  strings.push_back(m_aerosolOpticalDepth);
+  strings.push_back(m_snowDepth);
+  strings.push_back(m_daysSinceLastSnowfall);
+  strings.push_back(m_albedo);
+  strings.push_back(m_liquidPrecipitationDepth);
+  strings.push_back(m_liquidPrecipitationQuantity);
+  return strings;
 }
 
 boost::optional<std::string> EpwDataPoint::getUnitsByName(const std::string& name) {
