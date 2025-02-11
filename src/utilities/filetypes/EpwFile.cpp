@@ -16,24 +16,24 @@
 
 namespace openstudio {
 
-static double psat(double T) {
+constexpr double psat(double T) {
   // Compute water vapor saturation pressure, eqns 5 and 6 from ASHRAE Fundamentals 2009 Ch. 1
   // This version takes T in C rather than Kelvin since most of the other eqns use C
   T += 273.15;
-  double C1 = -5.6745359e+03;
-  double C2 = 6.3925247e+00;
-  double C3 = -9.6778430e-03;
-  double C4 = 6.2215701e-07;
-  double C5 = 2.0747825e-09;
-  double C6 = -9.4840240e-13;
-  double C7 = 4.1635019e+00;
-  double C8 = -5.8002206e+03;
-  double C9 = 1.3914993e+00;
-  double C10 = -4.8640239e-02;
-  double C11 = 4.1764768e-05;
-  double C12 = -1.4452093e-08;
-  double C13 = 6.5459673e+00;
-  double rhs;
+  constexpr double C1 = -5.6745359e+03;
+  constexpr double C2 = 6.3925247e+00;
+  constexpr double C3 = -9.6778430e-03;
+  constexpr double C4 = 6.2215701e-07;
+  constexpr double C5 = 2.0747825e-09;
+  constexpr double C6 = -9.4840240e-13;
+  constexpr double C7 = 4.1635019e+00;
+  constexpr double C8 = -5.8002206e+03;
+  constexpr double C9 = 1.3914993e+00;
+  constexpr double C10 = -4.8640239e-02;
+  constexpr double C11 = 4.1764768e-05;
+  constexpr double C12 = -1.4452093e-08;
+  constexpr double C13 = 6.5459673e+00;
+  double rhs = 0.0;
   if (T < 273.15) {
     rhs = C1 / T + C2 + T * (C3 + T * (C4 + T * (C5 + T * C6))) + C7 * std::log(T);
   } else {
@@ -42,25 +42,25 @@ static double psat(double T) {
   return exp(rhs);
 }
 
-static double psatp(double T, double psat) {
+constexpr double psatp(double T, double psat) {
   // Compute the derivative of the water vapor saturation pressure function (eqns 5 and 6 from
   // ASHRAE Fundamentals 2009 Ch. 1)
   // This version takes T in C rather than Kelvin since most of the other eqns use C
   T += 273.15;
-  double C1 = -5.6745359e+03;
-  double C3 = -9.6778430e-03;
-  double C4 = 6.2215701e-07;
-  double C5 = 2.0747825e-09;
-  double C6 = -9.4840240e-13;
-  double C7 = 4.1635019e+00;
-  double C8 = -5.8002206e+03;
-  double C10 = -4.8640239e-02;
-  double C11 = 4.1764768e-05;
-  double C12 = -1.4452093e-08;
-  double C13 = 6.5459673e+00;
-  double fp;
-  double T2 = T * T;
-  double T3 = T * T2;
+  constexpr double C1 = -5.6745359e+03;
+  constexpr double C3 = -9.6778430e-03;
+  constexpr double C4 = 6.2215701e-07;
+  constexpr double C5 = 2.0747825e-09;
+  constexpr double C6 = -9.4840240e-13;
+  constexpr double C7 = 4.1635019e+00;
+  constexpr double C8 = -5.8002206e+03;
+  constexpr double C10 = -4.8640239e-02;
+  constexpr double C11 = 4.1764768e-05;
+  constexpr double C12 = -1.4452093e-08;
+  constexpr double C13 = 6.5459673e+00;
+  const double T2 = T * T;
+  const double T3 = T * T2;
+  double fp = 0.0;
   if (T < 273.15) {
     fp = -C1 / T2 + C3 + 2 * T * C4 + 3 * T2 * C5 + 4 * T3 * C6 + C7 / T;
   } else {
@@ -71,18 +71,18 @@ static double psatp(double T, double psat) {
 }
 
 // Note JM 2019-01-03: suppress -Wunused-function warning for this API function
-[[maybe_unused]] static double enthalpy(double T, double p, double phi) {
+[[maybe_unused]] constexpr double enthalpy(double T, double p, double phi) {
   // Compute moist air enthalpy, eqns 5, 6, 22, 24, and 32 from ASHRAE Fundamentals 2009 Ch. 1
-  double pw = phi * psat(T);                 // Partial pressure of water vapor, eqn 24 (uses eqns 5 and 6)
-  double W = 0.621945 * pw / (p - pw);       // Humidity ratio, eqn 22
-  return 1.006 * T + W * (2501 + 1.86 * T);  // Moist air specific enthalpy, eqn 32
+  const double pw = phi * psat(T);            // Partial pressure of water vapor, eqn 24 (uses eqns 5 and 6)
+  const double W = 0.621945 * pw / (p - pw);  // Humidity ratio, eqn 22
+  return 1.006 * T + W * (2501 + 1.86 * T);   // Moist air specific enthalpy, eqn 32
 }
 
-[[maybe_unused]] static double enthalpyFromDewPoint(double T, double p, double Tdewpoint) {
+[[maybe_unused]] constexpr double enthalpyFromDewPoint(double T, double p, double Tdewpoint) {
   // Compute moist air enthalpy, eqns 5, 6, 22, 32, and 38 from ASHRAE Fundamentals 2009 Ch. 1
-  double pw = openstudio::psat(Tdewpoint);   // Partial pressure of water vapor, eqn 38 (uses eqns 5 and 6)
-  double W = 0.621945 * pw / (p - pw);       // Humidity ratio, eqn 22
-  return 1.006 * T + W * (2501 + 1.86 * T);  // Moist air specific enthalpy, eqn 32
+  const double pw = openstudio::psat(Tdewpoint);  // Partial pressure of water vapor, eqn 38 (uses eqns 5 and 6)
+  const double W = 0.621945 * pw / (p - pw);      // Humidity ratio, eqn 22
+  return 1.006 * T + W * (2501 + 1.86 * T);       // Moist air specific enthalpy, eqn 32
 }
 
 // Using equation 35/37 in ASHRAE Fundamentals 2009 Ch. 1:
@@ -101,26 +101,15 @@ static double psatp(double T, double psat) {
 //  C = c0 + c1 t + c2 t*
 //
 static boost::optional<double> solveForWetBulb(double drybulb, double p, double W, double deltaLimit, int itermax) {
-  double tstar = drybulb;
-  double Ap;
-  double Bp;
-  double Cp;
-  double a0;
-  double a1;
-  double b;
-  double c0;
-  double c1t;
-  double c2;
-  int i = 0;
-  a0 = 2501;
-  a1 = -2.326;
-  b = 1.006;
-  c0 = 2501;
-  c1t = 1.86 * drybulb;
-  c2 = -4.186;
-  Ap = -2.326;
-  Bp = -1.006;
-  Cp = -4.186;
+  const double Bp = -1.006;
+  const double b = 1.006;
+  const double c1t = 1.86 * drybulb;
+  double a0 = 2501;
+  double a1 = -2.326;
+  double c0 = 2501;
+  double c2 = -4.186;
+  double Ap = -2.326;
+  double Cp = -4.186;
   if (drybulb < 0) {
     a0 = 2830;
     a1 = -0.24;
@@ -130,23 +119,25 @@ static boost::optional<double> solveForWetBulb(double drybulb, double p, double 
     Cp = -2.1;
   }
 
+  int i = 0;
+  double tstar = drybulb;
   while (i < itermax) {
     i++;
-    double A = a0 + a1 * tstar;
-    double B = b * (drybulb - tstar);
-    double C = c0 + c1t + c2 * tstar;
-    double pwsstar = psat(tstar);
-    double pwsstarp = psatp(tstar, pwsstar);
-    double deltap = p - pwsstar;
-    double Wsstar = 0.621945 * pwsstar / deltap;
-    double Wsstarp = (0.621945 * pwsstarp * deltap + 0.621945 * pwsstar * pwsstarp) / (deltap * deltap);
-    double f = W * C - A * Wsstar + B;
-    double fp = W * Cp - A * Wsstarp - Ap * Wsstar + Bp;
-    double delta = -f / fp;
+    const double A = a0 + a1 * tstar;
+    const double B = b * (drybulb - tstar);
+    const double C = c0 + c1t + c2 * tstar;
+    const double pwsstar = psat(tstar);
+    const double pwsstarp = psatp(tstar, pwsstar);
+    const double deltap = p - pwsstar;
+    const double Wsstar = 0.621945 * pwsstar / deltap;
+    const double Wsstarp = (0.621945 * pwsstarp * deltap + 0.621945 * pwsstar * pwsstarp) / (deltap * deltap);
+    const double f = W * C - A * Wsstar + B;
+    const double fp = W * Cp - A * Wsstarp - Ap * Wsstar + Bp;
+    const double delta = -f / fp;
     tstar += delta;
     // std::cout << i << " " << tstar << " " << delta / (273.15 + tstar) << '\n';
     if (std::fabs(delta / (273.15 + tstar)) <= deltaLimit) {
-      return boost::optional<double>(tstar);
+      return {tstar};
     }
   }
   return boost::none;
@@ -163,26 +154,27 @@ static boost::optional<double> solveForDewPoint(double drybulb, double pw, doubl
 
   while (i < itermax) {
     i++;
-    double pws = psat(tdew);
-    double f = pws - pw;
-    double fp = psatp(tdew, pws);
-    double delta = -f / fp;
+    const double pws = psat(tdew);
+    const double f = pws - pw;
+    const double fp = psatp(tdew, pws);
+    const double delta = -f / fp;
     tdew += delta;
     // std::cout << i << " " << tdew << " " << delta / (273.15 + tdew) << '\n';
     if (std::fabs(delta / (273.15 + tdew)) <= deltaLimit) {
-      return boost::optional<double>(tdew);
+      return {tdew};
     }
   }
   return boost::none;
 }
 
-AirState::AirState() {
-  // Set parameters
-  m_drybulb = 20.0;
-  m_pressure = 101325.0;
-  m_phi = 0.5;
+AirState::AirState()
+  :  // Set parameters
+    m_drybulb(20.0),
+    m_pressure(101325.0),
+    m_psat(psat(m_drybulb)),
+    m_phi(0.5) {
   // Compute moist air properties, eqns from ASHRAE Fundamentals 2009 Ch. 1, should probably just set all of these
-  m_psat = psat(m_drybulb);                 // Water vapor saturation pressure (uses eqns 5 and 6)
+  // Water vapor saturation pressure (uses eqns 5 and 6)
   double pw = m_phi * m_psat;               // Relative humidity, eqn 24
   m_W = 0.621945 * pw / (m_pressure - pw);  // Humidity ratio, eqn 22
   // TODO: Use the function above
@@ -4990,11 +4982,7 @@ bool EpwFile::parseHolidaysDaylightSavings(const std::string& line) {
 
   std::string leapYearObserved = split[1];
   boost::trim(leapYearObserved);
-  if (istringEqual("Yes", leapYearObserved)) {
-    m_leapYearObserved = true;
-  } else {
-    m_leapYearObserved = false;
-  }
+  m_leapYearObserved = istringEqual("Yes", leapYearObserved);
 
   std::string daylightSavingStartDay = split[2];
   boost::trim(daylightSavingStartDay);
