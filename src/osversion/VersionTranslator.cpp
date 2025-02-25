@@ -145,7 +145,7 @@ namespace osversion {
     m_updateMethods[VersionString("3.7.0")] = &VersionTranslator::update_3_6_1_to_3_7_0;
     m_updateMethods[VersionString("3.8.0")] = &VersionTranslator::update_3_7_0_to_3_8_0;
     m_updateMethods[VersionString("3.9.0")] = &VersionTranslator::update_3_8_0_to_3_9_0;
-    m_updateMethods[VersionString("3.9.1")] = &VersionTranslator::update_3_9_0_to_3_9_1;
+    m_updateMethods[VersionString("3.10.0")] = &VersionTranslator::update_3_9_0_to_3_10_0;
     // m_updateMethods[VersionString("3.10.0")] = &VersionTranslator::defaultUpdate;
 
     // List of previous versions that may be updated to this one.
@@ -185,7 +185,7 @@ namespace osversion {
       VersionString("3.2.1"),  VersionString("3.3.0"),  VersionString("3.4.0"),  VersionString("3.5.0"),  VersionString("3.5.1"),
       VersionString("3.6.0"),  VersionString("3.6.1"),  VersionString("3.7.0"),  VersionString("3.8.0"),  VersionString("3.9.0"),
       // Note: do **not** include the **current** version in m_startVersions, stop at the previous release
-      //VersionString("3.9.1"),
+      //VersionString("3.10.0"),
     };
   }
 
@@ -9636,12 +9636,12 @@ namespace osversion {
 
   }  // end update_3_8_0_to_3_9_0
 
-  std::string VersionTranslator::update_3_9_0_to_3_9_1(const IdfFile& idf_3_9_0, const IddFileAndFactoryWrapper& idd_3_9_1) {
+  std::string VersionTranslator::update_3_9_0_to_3_10_0(const IdfFile& idf_3_9_0, const IddFileAndFactoryWrapper& idd_3_10_0) {
     std::stringstream ss;
     boost::optional<std::string> value;
 
     ss << idf_3_9_0.header() << '\n' << '\n';
-    IdfFile targetIdf(idd_3_9_1.iddFile());
+    IdfFile targetIdf(idd_3_10_0.iddFile());
     ss << targetIdf.versionObject().get();
 
     for (const IdfObject& object : idf_3_9_0.objects()) {
@@ -9652,7 +9652,7 @@ namespace osversion {
         // 1 Field has been inserted from 3.9.0 to 3.9.1:
         // ----------------------------------------------
         // * Tank Element Control Logic * 25
-        auto iddObject = idd_3_9_1.getObject(iddname);
+        auto iddObject = idd_3_10_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -9676,7 +9676,7 @@ namespace osversion {
         // ----------------------------------------------
         // * Bore Hole Top Depth * 6
 
-        auto iddObject = idd_3_9_1.getObject(iddname);
+        auto iddObject = idd_3_10_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -9702,7 +9702,7 @@ namespace osversion {
 
     return ss.str();
 
-  }  // end update_3_9_0_to_3_9_1
+  }  // end update_3_9_0_to_3_10_0
 
 }  // namespace osversion
 }  // namespace openstudio

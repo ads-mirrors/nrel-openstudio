@@ -18,7 +18,7 @@ if(CCACHE_PROGRAM)
 endif()
 
 # Project macro can only take digits in the version, it splits these out to specific variables
-project(OpenStudio VERSION 3.9.1)
+project(OpenStudio VERSION 3.10.0)
 
 include(CMake/compiler_flags.cmake)
 
@@ -191,16 +191,16 @@ if(hasParent)
 endif()
 
 # EnergyPlus Idd version
-set(ENERGYPLUS_VERSION_MAJOR 24)
-set(ENERGYPLUS_VERSION_MINOR 2)
+set(ENERGYPLUS_VERSION_MAJOR 25)
+set(ENERGYPLUS_VERSION_MINOR 1)
 set(ENERGYPLUS_VERSION_PATCH 0)
 set(ENERGYPLUS_VERSION "${ENERGYPLUS_VERSION_MAJOR}.${ENERGYPLUS_VERSION_MINOR}.${ENERGYPLUS_VERSION_PATCH}")
 # Build SHA is not required to have a value, but if it does OpenStudio will require this build.
-set(ENERGYPLUS_BUILD_SHA "94a887817b")
+set(ENERGYPLUS_BUILD_SHA "46864d6807")
 
 # ENERGYPLUS_RELEASE_NAME is used to locate the E+ download
 # from the github releases
-set(ENERGYPLUS_RELEASE_NAME "v24.2.0a")
+set(ENERGYPLUS_RELEASE_NAME "v25.1.0-IOFreeze")
 
 set(ENERGYPLUS_REPO "NREL")
 
@@ -643,7 +643,7 @@ if(UNIX)
     set(ENERGYPLUS_RELEASE_NAME "v24.2.0a-entitlements")
 
     if (ARCH MATCHES "arm64")
-      set(ENERGYPLUS_EXPECTED_HASH 29616d6aa23e2fc0f71362da9794ef08)
+      set(ENERGYPLUS_EXPECTED_HASH 8a7336112955e90c525cf78fd33ce927)
       set(ENERGYPLUS_PLATFORM "Darwin-macOS13-arm64")
     else()
       set(ENERGYPLUS_EXPECTED_HASH 21bdad40fbc560b4b382469ef9f96936)
@@ -657,13 +657,13 @@ if(UNIX)
       if (ARCH MATCHES "arm64")
         set(ENERGYPLUS_EXPECTED_HASH afc61e89b7f9e2658c3d99778be50be0)
       else()
-        set(ENERGYPLUS_EXPECTED_HASH 22b3e5f6071d6011ffeeacf854a97c73)
+        set(ENERGYPLUS_EXPECTED_HASH aa57a2f74c476e56cdf93f7f60c855ba)
       endif()
     elseif(LSB_RELEASE_VERSION_SHORT MATCHES "22.04")
       if (ARCH MATCHES "arm64")
         set(ENERGYPLUS_EXPECTED_HASH 3c18cb8063ec30ef591109ddf8842bf0)
       else()
-        set(ENERGYPLUS_EXPECTED_HASH 9f11a16e6f8a7d658791c5389d700ef1)
+        set(ENERGYPLUS_EXPECTED_HASH 2710ff0d929fd1f3d7208de71f54a279)
       endif()
     else() # e.g., 18.04, 20.04
       message(FATAL_ERROR "EnergyPlus no longer provides packages for Ubuntu < 22.04")
@@ -700,7 +700,7 @@ elseif(WIN32)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8) # 64 bit
     set(ENERGYPLUS_PATH "EnergyPlus-${ENERGYPLUS_VERSION}-${ENERGYPLUS_BUILD_SHA}-Windows-x86_64")
     set(ENERGYPLUS_ARCH 64)
-    set(ENERGYPLUS_EXPECTED_HASH 6a2d1d43d64490c87d894ed58f71ccdc)
+    set(ENERGYPLUS_EXPECTED_HASH b68d91d8e2a3aa83fc581e89bd8e03b7)
   else()
     set(ENERGYPLUS_PATH "EnergyPlus-${ENERGYPLUS_VERSION}-${ENERGYPLUS_BUILD_SHA}-Windows-i386")
     set(ENERGYPLUS_ARCH 32)
