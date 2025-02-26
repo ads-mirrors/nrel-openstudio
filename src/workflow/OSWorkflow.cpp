@@ -372,15 +372,15 @@ bool OSWorkflow::run() {
 
   // Can't use a regular map, it's not retaining order
   static constexpr std::array<std::pair<std::string_view, JobInfo>, 9> known_jobs{{
-    {"Initialization", {&OSWorkflow::runInitialization, true}},
-    {"OpenStudioMeasures", {&OSWorkflow::runOpenStudioMeasures, true}},
-    {"Translator", {&OSWorkflow::runTranslator, true}},
-    {"EnergyPlusMeasures", {&OSWorkflow::runEnergyPlusMeasures, true}},
-    {"PreProcess", {&OSWorkflow::runPreProcess, true}},
-    {"EnergyPlus", {&OSWorkflow::runEnergyPlus, true}},
-    {"ReportingMeasures", {&OSWorkflow::runReportingMeasures, true}},
-    {"PostProcess", {&OSWorkflow::runPostProcess, true}},
-    {"Cleanup", {&OSWorkflow::runCleanup, true}},
+    {"Initialization", {.jobFun = &OSWorkflow::runInitialization, .selected = true}},
+    {"OpenStudioMeasures", {.jobFun = &OSWorkflow::runOpenStudioMeasures, .selected = true}},
+    {"Translator", {.jobFun = &OSWorkflow::runTranslator, .selected = true}},
+    {"EnergyPlusMeasures", {.jobFun = &OSWorkflow::runEnergyPlusMeasures, .selected = true}},
+    {"PreProcess", {.jobFun = &OSWorkflow::runPreProcess, .selected = true}},
+    {"EnergyPlus", {.jobFun = &OSWorkflow::runEnergyPlus, .selected = true}},
+    {"ReportingMeasures", {.jobFun = &OSWorkflow::runReportingMeasures, .selected = true}},
+    {"PostProcess", {.jobFun = &OSWorkflow::runPostProcess, .selected = true}},
+    {"Cleanup", {.jobFun = &OSWorkflow::runCleanup, .selected = true}},
   }};
 
   JobMap jobMap{{known_jobs}};

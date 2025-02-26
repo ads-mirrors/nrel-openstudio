@@ -553,6 +553,27 @@ namespace detail {
     onUpdate();
   }
 
+  boost::optional<openstudio::path> WorkflowJSON_Impl::modelicaSeedFile() const {
+    Json::Value defaultValue("");
+    Json::Value seed = m_value.get("modelica_seed_file", defaultValue);
+    std::string result = seed.asString();
+    if (result.empty()) {
+      return boost::none;
+    }
+    return toPath(result);
+  }
+
+  bool WorkflowJSON_Impl::setModelicaSeedFile(const openstudio::path& seedFile) {
+    m_value["modelica_seed_file"] = toString(seedFile);
+    onUpdate();
+    return true;
+  }
+
+  void WorkflowJSON_Impl::resetModelicaSeedFile() {
+    m_value.removeMember("modelica_seed_file");
+    onUpdate();
+  }
+
   boost::optional<openstudio::path> WorkflowJSON_Impl::weatherFile() const {
     Json::Value defaultValue("");
     Json::Value weather = m_value.get("weather_file", defaultValue);
@@ -1124,7 +1145,19 @@ bool WorkflowJSON::setSeedFile(const openstudio::path& seedFile) {
 }
 
 void WorkflowJSON::resetSeedFile() {
-  return getImpl<detail::WorkflowJSON_Impl>()->resetSeedFile();
+  getImpl<detail::WorkflowJSON_Impl>()->resetSeedFile();
+}
+
+boost::optional<openstudio::path> WorkflowJSON::modelicaSeedFile() const {
+  return getImpl<detail::WorkflowJSON_Impl>()->modelicaSeedFile();
+}
+
+bool WorkflowJSON::setModelicaSeedFile(const openstudio::path& modelicaSeedFile) {
+  return getImpl<detail::WorkflowJSON_Impl>()->setModelicaSeedFile(modelicaSeedFile);
+}
+
+void WorkflowJSON::resetModelicaSeedFile() {
+  getImpl<detail::WorkflowJSON_Impl>()->resetModelicaSeedFile();
 }
 
 boost::optional<openstudio::path> WorkflowJSON::weatherFile() const {
