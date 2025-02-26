@@ -72,7 +72,8 @@ TEST_F(IddFixture, EpIddFile) {
           IddObjectType iddObjectType(iddObject.name());
           loadedIddObjectTypes.insert(iddObjectType);
         } catch (...) {
-          LOG(Debug, "Unable to convert IddObject name '" << iddObject.name() << "' " << "to IddObjectType.");
+          LOG(Debug, "Unable to convert IddObject name '" << iddObject.name() << "' "
+                                                          << "to IddObjectType.");
         }
       } else {
         loadedIddObjectTypes.insert(iddObject.type());
@@ -146,7 +147,8 @@ TEST_F(IddFixture, OSIddFile) {
           IddObjectType iddObjectType(iddObject.name());
           loadedIddObjectTypes.insert(iddObjectType);
         } catch (...) {
-          LOG(Debug, "Unable to convert IddObject name '" << iddObject.name() << "' " << "to IddObjectType.");
+          LOG(Debug, "Unable to convert IddObject name '" << iddObject.name() << "' "
+                                                          << "to IddObjectType.");
         }
       } else {
         loadedIddObjectTypes.insert(iddObject.type());
@@ -319,8 +321,8 @@ TEST_F(IddFixture, IddFile_EpMinFields) {
         }
       }
       if (setTo > 0) {
-        LOG(Debug,
-            "IddObject " << object.name() << " has no min-fields property, but its last " << "required field is " << fields[setTo].name() << ".");
+        LOG(Debug, "IddObject " << object.name() << " has no min-fields property, but its last "
+                                << "required field is " << fields[setTo].name() << ".");
       }
       fields = object.extensibleGroup();
       for (const IddField& field : fields) {

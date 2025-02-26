@@ -333,7 +333,8 @@ namespace osversion {
     OS_ASSERT(tempModel.strictnessLevel() == StrictnessLevel::Minimal);
     std::vector<std::shared_ptr<InterobjectIssueInformation>> issueInfo = fixInterobjectIssuesStage1(tempModel, m_originalVersion);
     if (!tempModel.isValid(StrictnessLevel::Draft)) {
-      LOG(Error, "Model with Version " << openStudioVersion() << " IDD is not valid to draft " << "strictness level.");
+      LOG(Error, "Model with Version " << openStudioVersion() << " IDD is not valid to draft "
+                                       << "strictness level.");
       LOG(Error, tempModel.validityReport(StrictnessLevel::Draft));
       return boost::none;
     }
@@ -382,7 +383,8 @@ namespace osversion {
     // bracket allowable versions
     LOG(Debug, "Starting translation from Version " << currentVersion.str() << ".");
     if (currentVersion < VersionString("0.7.0")) {
-      LOG(Error, "Version translation is not provided for OpenStudio models created prior to " << "Version 0.7.0.");
+      LOG(Error, "Version translation is not provided for OpenStudio models created prior to "
+                   << "Version 0.7.0.");
       return;
     }
     if (currentVersion > VersionString(openStudioVersion())) {
@@ -390,8 +392,8 @@ namespace osversion {
         // if currentVersion is just one ahead, may be a developer using the cloud.
         // let it pass as if currentVersion == openStudioVersion(), with a warning
         if (VersionString(openStudioVersion()).isNextVersion(currentVersion)) {
-          LOG(Warn, "Version extracted from file '" << currentVersion.str() << "' is one " << "increment ahead of OpenStudio Version "
-                                                    << openStudioVersion() << ". "
+          LOG(Warn, "Version extracted from file '" << currentVersion.str() << "' is one "
+                                                    << "increment ahead of OpenStudio Version " << openStudioVersion() << ". "
                                                     << "Proceeding as if these versions are the same. Use with caution.");
           currentVersion = VersionString(openStudioVersion());
         } else {
@@ -620,7 +622,8 @@ namespace osversion {
           OS_ASSERT(ok);
           result = objCopy;
         } else {
-          LOG(Warn, "Tried to update the file path '" << original << "' to the new format, " << "but was unsuccessful.");
+          LOG(Warn, "Tried to update the file path '" << original << "' to the new format, "
+                                                      << "but was unsuccessful.");
         }
       }
     }
@@ -770,8 +773,8 @@ namespace osversion {
               match = candidates[0];
             }
             if (match && match->name()) {
-              LOG(Warn, "Found match for object in OS:ComponentData contents list by type only, even " << "though this type of object (" << typeStr
-                                                                                                       << ") has a name field.");
+              LOG(Warn, "Found match for object in OS:ComponentData contents list by type only, even "
+                          << "though this type of object (" << typeStr << ") has a name field.");
             }
           }
 
@@ -785,7 +788,8 @@ namespace osversion {
             } else {
               LOG(Warn, "Unable to locate object in OS:ComponentData contents list called out "
                           << "as object type '" << typeStr << "', and with name '" << nameStr
-                          << "'. Skipping this object (that is, removing it from the Component " << "definition).");
+                          << "'. Skipping this object (that is, removing it from the Component "
+                          << "definition).");
               continue;
             }
           }
@@ -1093,7 +1097,7 @@ namespace osversion {
             }
           }
         }  // for keys
-      }  // for users
+      }    // for users
       m_refactored.emplace_back(originalSchedule, schedule.idfObject());
       for (const auto& candidate : candidates) {
         model::ModelObjectVector wholeCandidate = getRecursiveChildren(candidate);
@@ -9649,7 +9653,7 @@ namespace osversion {
 
       if (iddname == "OS:WaterHeater:HeatPump") {
 
-        // 1 Field has been inserted from 3.9.0 to 3.9.1:
+        // 1 Field has been inserted from 3.9.0 to 3.10.0:
         // ----------------------------------------------
         // * Tank Element Control Logic * 25
         auto iddObject = idd_3_10_0.getObject(iddname);
@@ -9672,7 +9676,7 @@ namespace osversion {
 
       } else if (iddname == "OS:GroundHeatExchanger:Vertical") {
 
-        // 1 Field has been inserted from 3.9.0 to 3.9.1:
+        // 1 Field has been inserted from 3.9.0 to 3.10.0:
         // ----------------------------------------------
         // * Bore Hole Top Depth * 6
 
@@ -9693,6 +9697,25 @@ namespace osversion {
 
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+      } else if (iddname == "OS:ZoneVentilation:DesignFlowRate") {
+
+        // 1 Field has been added from 3.9.0 to 3.10.0:
+        // -------------------------------------------
+        // * Density Basis * 26
+        auto iddObject = idd_3_10_0.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setString(26, "Outdoor");
+
+        m_refactored.push_back(RefactoredObjectData(object, newObject));
+        ss << newObject;
 
         // No-op
       } else {

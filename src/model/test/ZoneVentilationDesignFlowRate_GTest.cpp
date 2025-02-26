@@ -65,4 +65,9 @@ TEST_F(ModelFixture, ZoneVentilationDesignFlowRate_setFlow) {
   ASSERT_FALSE(zv.designFlowRate());
   ASSERT_FALSE(zv.flowRateperZoneFloorArea());
   ASSERT_FALSE(zv.flowRateperPerson());
+
+  // DensityBasis
+  EXPECT_EQ("Outdoor", zv.densityBasis());
+  EXPECT_TRUE(zv.setDensityBasis("Standard"));
+  EXPECT_EQ("Standard", zv.densityBasis());
 }

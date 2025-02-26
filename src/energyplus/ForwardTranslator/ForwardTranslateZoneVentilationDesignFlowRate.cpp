@@ -150,6 +150,11 @@ namespace energyplus {
       idfObject.setDouble(ZoneVentilation_DesignFlowRateFields::MaximumWindSpeed, value);
     }
 
+    {
+      auto value = modelObject.densityBasis();
+      idfObject.setDouble(ZoneVentilation_DesignFlowRateFields::DensityBasis, value);
+    }
+
     return idfObject;
   }
 

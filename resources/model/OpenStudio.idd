@@ -29298,12 +29298,19 @@ OS:ZoneVentilation:DesignFlowRate,
        \object-list ScheduleNames
        \note This schedule contains the outdoor temperature versus time above which
        \note ventilation is shutoff.
-  N16; \field Maximum Wind Speed
+  N16, \field Maximum Wind Speed
        \note this is the outdoor wind speed above which ventilation is shutoff
        \units m/s
        \type real
        \minimum 0
        \maximum 40
+       \required-field
+  A11; \field Density Basis
+       \note The air density to use when converting from volume flow to mass flow.
+       \type choice
+       \key Outdoor
+       \key Standard
+       \key Indoor
        \required-field
 
 OS:ZoneVentilation:WindandStackOpenArea,
