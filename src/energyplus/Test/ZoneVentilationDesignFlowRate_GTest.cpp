@@ -127,15 +127,19 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ZoneVentilationDesignFlowRate) {
   EXPECT_EQ(1.4, idfObject.getDouble(ZoneVentilation_DesignFlowRateFields::VelocityTermCoefficient).get());
   EXPECT_EQ(1.5, idfObject.getDouble(ZoneVentilation_DesignFlowRateFields::VelocitySquaredTermCoefficient).get());
   EXPECT_EQ(88.235, idfObject.getDouble(ZoneVentilation_DesignFlowRateFields::MinimumIndoorTemperature).get());
-  EXPECT_EQ(minimumIndoorTemperatureSchedule.nameString(), idfObject.getString(ZoneVentilation_DesignFlowRateFields::MinimumIndoorTemperatureScheduleName).get());
+  EXPECT_EQ(minimumIndoorTemperatureSchedule.nameString(),
+            idfObject.getString(ZoneVentilation_DesignFlowRateFields::MinimumIndoorTemperatureScheduleName).get());
   EXPECT_EQ(89.474, idfObject.getDouble(ZoneVentilation_DesignFlowRateFields::MaximumIndoorTemperature).get());
-  EXPECT_EQ(maximumIndoorTemperatureSchedule.nameString(), idfObject.getString(ZoneVentilation_DesignFlowRateFields::MaximumIndoorTemperatureScheduleName).get());
+  EXPECT_EQ(maximumIndoorTemperatureSchedule.nameString(),
+            idfObject.getString(ZoneVentilation_DesignFlowRateFields::MaximumIndoorTemperatureScheduleName).get());
   EXPECT_EQ(-98.0, idfObject.getDouble(ZoneVentilation_DesignFlowRateFields::DeltaTemperature).get());
   EXPECT_EQ(deltaTemperatureSchedule.nameString(), idfObject.getString(ZoneVentilation_DesignFlowRateFields::DeltaTemperatureScheduleName).get());
   EXPECT_EQ(91.304, idfObject.getDouble(ZoneVentilation_DesignFlowRateFields::MinimumOutdoorTemperature).get());
-  EXPECT_EQ(minimumOutdoorTemperatureSchedule.nameString(), idfObject.getString(ZoneVentilation_DesignFlowRateFields::MinimumOutdoorTemperatureScheduleName).get());
+  EXPECT_EQ(minimumOutdoorTemperatureSchedule.nameString(),
+            idfObject.getString(ZoneVentilation_DesignFlowRateFields::MinimumOutdoorTemperatureScheduleName).get());
   EXPECT_EQ(92.0, idfObject.getDouble(ZoneVentilation_DesignFlowRateFields::MaximumOutdoorTemperature).get());
-  EXPECT_EQ(maximumOutdoorTemperatureSchedule.nameString(), idfObject.getString(ZoneVentilation_DesignFlowRateFields::MaximumOutdoorTemperatureScheduleName).get());
+  EXPECT_EQ(maximumOutdoorTemperatureSchedule.nameString(),
+            idfObject.getString(ZoneVentilation_DesignFlowRateFields::MaximumOutdoorTemperatureScheduleName).get());
   EXPECT_EQ(38.519, idfObject.getDouble(ZoneVentilation_DesignFlowRateFields::MaximumWindSpeed).get());
   EXPECT_EQ("Outdoor", idfObject.getString(ZoneVentilation_DesignFlowRateFields::DensityBasis).get());
 }

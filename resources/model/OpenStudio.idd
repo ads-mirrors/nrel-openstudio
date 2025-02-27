@@ -15090,6 +15090,8 @@ OS:Chiller:Electric:EIR,
        \note when the "Condenser Flow Control" input is set to "ModulatedChillerPLR", "ModulatedLoopPLR" or
        \note "ModulatedDeltaTemperature".
        \type real
+       \minimum 0.0
+       \maximum 1
        \required-field
   A21, \field Thermosiphon Capacity Fraction Curve Name
        \type object-list
@@ -15351,6 +15353,8 @@ OS:Chiller:Electric:ReformulatedEIR,
        \note when the "Condenser Flow Control" input is set to "ModulatedChillerPLR", "ModulatedLoopPLR" or
        \note "ModulatedDeltaTemperature".
        \type real
+       \minimum 0.0
+       \maximum 1
        \required-field
   A20, \field Thermosiphon Capacity Fraction Curve Name
        \type object-list
