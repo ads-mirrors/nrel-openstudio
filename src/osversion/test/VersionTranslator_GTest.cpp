@@ -4583,6 +4583,6 @@ TEST_F(OSVersionFixture, update_3_9_0_to_3_10_0_ZoneVentilationDesignFlowRate) {
   ASSERT_EQ(1u, zv_dfrs.size());
   WorkspaceObject zv_dfr = zv_dfrs[0];
 
-  EXPECT_EQ(40, zv_dfr.getDouble(25).get());      // Maximum Wind Speed
-  EXPECT_EQ("Outdoor", zv_dfr.getString(26).get());   // Density Basis
+  EXPECT_EQ(40, zv_dfr.getDouble(25).get());         // Maximum Wind Speed
+  EXPECT_EQ("Outdoor", zv_dfr.getString(26).get());  // Density Basis
 }

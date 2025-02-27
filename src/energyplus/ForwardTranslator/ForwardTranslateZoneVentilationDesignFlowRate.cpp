@@ -152,7 +152,7 @@ namespace energyplus {
 
     {
       auto value = modelObject.densityBasis();
-      idfObject.setDouble(ZoneVentilation_DesignFlowRateFields::DensityBasis, value);
+      idfObject.setString(ZoneVentilation_DesignFlowRateFields::DensityBasis, value);
     }
 
     return idfObject;

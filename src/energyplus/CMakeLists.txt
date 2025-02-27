@@ -852,6 +852,7 @@ set(${target_name}_test_src
   Test/ZoneHVACWaterToAirHeatPump_GTest.cpp
   Test/ZoneMixing_GTest.cpp
   Test/ZonePropertyUserViewFactorsBySurfaceName_GTest.cpp
+  Test/ZoneVentilationDesignFlowRate_GTest.cpp
   Test/ZoneVentilationWindandStackOpenArea_GTest.cpp
 )
 
