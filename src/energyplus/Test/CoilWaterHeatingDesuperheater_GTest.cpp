@@ -23,6 +23,7 @@
 
 // Not DX
 #include "../../model/CoilCoolingWaterToAirHeatPumpEquationFit.hpp"
+#include "../../model/CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit.hpp"
 #include "../../model/RefrigerationCondenserAirCooled.hpp"
 #include "../../model/RefrigerationCondenserEvaporativeCooled.hpp"
 #include "../../model/RefrigerationCondenserWaterCooled.hpp"
@@ -81,8 +82,8 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilWaterHeatingDesuperheater_NonDX)
   desuperheater.setRatedHeatReclaimRecoveryEfficiency(0.25);
 
   // Refrigeration stuff aren't HVACComponent but ParentObject
-  std::vector<ModelObject> testCoils = {CoilCoolingWaterToAirHeatPumpEquationFit(m), RefrigerationCondenserAirCooled(m),
-                                        RefrigerationCondenserEvaporativeCooled(m), RefrigerationCondenserWaterCooled(m)};
+  std::vector<ModelObject> testCoils = {CoilCoolingWaterToAirHeatPumpEquationFit(m), CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit(m);
+                                        RefrigerationCondenserAirCooled(m), RefrigerationCondenserEvaporativeCooled(m), RefrigerationCondenserWaterCooled(m)};
 
   ForwardTranslator forwardTranslator;
 
