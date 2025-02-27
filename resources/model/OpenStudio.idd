@@ -21653,6 +21653,7 @@ OS:Coil:Heating:DX:VariableSpeed,
         \required-field
         \type alpha
         \reference HeatingCoilsDXVariableSpeed
+        \reference AFNCoilNames
         \reference ConnectionObject
    A3,  \field Indoor Air Inlet Node Name
         \type object-list
@@ -21833,6 +21834,7 @@ OS:Coil:Cooling:DX:VariableSpeed,
         \type alpha
         \reference CoolingCoilsDXVariableSpeed
         \reference DesuperHeatingCoilSources
+        \reference AFNCoilNames
         \reference ConnectionObject
    A3,  \field Indoor Air Inlet Node Name
         \type object-list
