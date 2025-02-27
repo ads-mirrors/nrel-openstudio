@@ -82,25 +82,26 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilWaterHeatingDesuperheater_NonDX)
   desuperheater.setRatedHeatReclaimRecoveryEfficiency(0.25);
 
   // Refrigeration stuff aren't HVACComponent but ParentObject
-  std::vector<ModelObject> testCoils = {CoilCoolingWaterToAirHeatPumpEquationFit(m), CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit(m);
-                                        RefrigerationCondenserAirCooled(m), RefrigerationCondenserEvaporativeCooled(m), RefrigerationCondenserWaterCooled(m)};
+  std::vector<ModelObject> testCoils = { CoilCoolingWaterToAirHeatPumpEquationFit(m), CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit(m);
+  RefrigerationCondenserAirCooled(m), RefrigerationCondenserEvaporativeCooled(m), RefrigerationCondenserWaterCooled(m)
+};
 
-  ForwardTranslator forwardTranslator;
+ForwardTranslator forwardTranslator;
 
-  for (const auto& nodxCoil : testCoils) {
+for (const auto& nodxCoil : testCoils) {
 
-    EXPECT_TRUE(desuperheater.setHeatingSource(nodxCoil));
+  EXPECT_TRUE(desuperheater.setHeatingSource(nodxCoil));
 
-    Workspace workspace = forwardTranslator.translateModel(m);
+  Workspace workspace = forwardTranslator.translateModel(m);
 
-    WorkspaceObjectVector idfObjs(workspace.getObjectsByType(IddObjectType::Coil_WaterHeating_Desuperheater));
-    ASSERT_EQ(1u, idfObjs.size());
-    WorkspaceObject idf_desuperheater(idfObjs[0]);
+  WorkspaceObjectVector idfObjs(workspace.getObjectsByType(IddObjectType::Coil_WaterHeating_Desuperheater));
+  ASSERT_EQ(1u, idfObjs.size());
+  WorkspaceObject idf_desuperheater(idfObjs[0]);
 
-    std::string ep_idd_name = nodxCoil.iddObject().name().substr(3);
+  std::string ep_idd_name = nodxCoil.iddObject().name().substr(3);
 
-    // Check that the coil ends up directly onto the object (shouldn't be a problem)
-    EXPECT_EQ(ep_idd_name, idf_desuperheater.getString(Coil_WaterHeating_DesuperheaterFields::HeatingSourceObjectType).get());
-    EXPECT_EQ(nodxCoil.nameString(), idf_desuperheater.getString(Coil_WaterHeating_DesuperheaterFields::HeatingSourceName).get());
-  }
+  // Check that the coil ends up directly onto the object (shouldn't be a problem)
+  EXPECT_EQ(ep_idd_name, idf_desuperheater.getString(Coil_WaterHeating_DesuperheaterFields::HeatingSourceObjectType).get());
+  EXPECT_EQ(nodxCoil.nameString(), idf_desuperheater.getString(Coil_WaterHeating_DesuperheaterFields::HeatingSourceName).get());
+}
 }

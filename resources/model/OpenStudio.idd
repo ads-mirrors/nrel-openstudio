@@ -22161,6 +22161,7 @@ OS:Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
         \required-field
         \type alpha
         \reference CoolingCoilsWaterToAirVSHP
+        \reference DesuperHeatingWaterOnlySources
         \reference ConnectionObject
    A3,  \field Water-to-Refrigerant HX Water Inlet Node Name
         \type object-list
