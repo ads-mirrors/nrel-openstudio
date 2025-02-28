@@ -87,6 +87,7 @@ class OSWorkflow
     EnergyPlusMeasures,
     PreProcess,
     EnergyPlus,
+    Modelica,
     ReportingMeasures,
     PostProcess,
     Cleanup,
@@ -115,6 +116,7 @@ class OSWorkflow
   void runEnergyPlusMeasures();
   void runPreProcess();
   void runEnergyPlus();
+  void runModelica();
   void runReportingMeasures();
   void runPostProcess();
 

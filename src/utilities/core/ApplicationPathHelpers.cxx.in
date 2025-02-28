@@ -327,6 +327,10 @@ openstudio::path getEnergyPlusExecutable() {
   return openstudio::path();
 }
 
+openstudio::path getOMCExecutable() {
+  return findInSystemPath(std::string("omc") + executableFileExtension());
+}
+
 openstudio::path getRadianceDirectory() {
   // handle developer case first
   if (moduleIsRunningFromBuildDirectory()) {

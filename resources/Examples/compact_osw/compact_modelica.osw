@@ -1,0 +1,8 @@
+{
+	"weather_file": "srrl_2013_amy.epw",
+	"seed_file": "seb.osm",
+	"seed_modelica_file": "/home/kbenne/Development/OpenStudio2/resources/Examples/compact_osw/modelica/Template_IdealHeat/package.mo",
+	"seed_modelica_model": "Template_IdealHeat.Model",
+	"steps": [
+	]
+}
