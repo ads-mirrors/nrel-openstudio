@@ -331,6 +331,11 @@ openstudio::path getOMCExecutable() {
   return findInSystemPath(std::string("omc") + executableFileExtension());
 }
 
+openstudio::path getMBLPath() {
+  const auto* mblPath = std::getenv("MBL_PATH");
+  return mblPath ? mblPath : "";
+}
+
 openstudio::path getRadianceDirectory() {
   // handle developer case first
   if (moduleIsRunningFromBuildDirectory()) {

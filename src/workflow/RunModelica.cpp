@@ -19,10 +19,16 @@ setParameterValue(Template_IdealHeat.Model, zoneNames, {{"LIVING ZONE"}});
 simulate(Template_IdealHeat.Model, stopTime=604800, stepSize=0.1);
   )";
 
-    const auto seedModelicaFile = workflowJSON.seedModelicaFile();
+    auto seedModelicaFile = workflowJSON.seedModelicaFile();
+    // There should be a check for seedModelicaFile, prior to reaching this point.
     OS_ASSERT(seedModelicaFile);
-    const auto mblPath = std::getenv("MBL_PATH");
-    const auto formatted_content = fmt::format(content, fmt::arg("mblPath", mblPath), fmt::arg("seedModelicaFile", seedModelicaFile->string()));
+    seedModelicaFile = workflowJSON.findFile(seedModelicaFile.get());
+    if (!seedModelicaFile) {
+      throw std::runtime_error(std::format("Could not find seed_modelica_file, {}.", workflowJSON.seedModelicaFile()->string()));
+    }
+    const auto mblPath = getMBLPath();
+    const auto formatted_content =
+      fmt::format(content, fmt::arg("mblPath", mblPath.string()), fmt::arg("seedModelicaFile", seedModelicaFile->string()));
 
     constexpr auto mosPath = "run.mos";
     std::ofstream mosFile(mosPath);
@@ -44,8 +50,8 @@ void OSWorkflow::runModelica() {
     state = State::Modelica;
 
     int result = 0;
-    const auto script = createModelicaScript(workflowJSON);
-    const auto cmd = fmt::format("{} {}", getOMCExecutable().string(), script.string());
+    const auto script_path = createModelicaScript(workflowJSON);
+    const auto cmd = fmt::format("{} {}", getOMCExecutable().string(), script_path.string());
 
     detailedTimeBlock("Running Modelica", [&cmd, &result] { result = std::system(cmd.c_str()); });
 

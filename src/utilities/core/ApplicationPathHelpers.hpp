@@ -48,6 +48,9 @@ UTILITIES_API openstudio::path getEnergyPlusExecutable();
 /// \returns The path to the OpenModelica compiler executable if it exists.
 UTILITIES_API openstudio::path getOMCExecutable();
 
+/// |returns The path to the Modelica Buildings Library package.mo file.
+UTILITIES_API openstudio::path getMBLPath();
+
 /// \returns The path to the Radiance installation if it exists.
 UTILITIES_API openstudio::path getRadianceDirectory();
 
