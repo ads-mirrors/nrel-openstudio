@@ -172,38 +172,19 @@ bool mergeOutputTableSummaryReports(IdfObject& existingObject, const IdfObject& 
 
 bool addEnergyPlusOutputRequest(Workspace& workspace, IdfObject& idfObject) {
 
-  static const std::vector<IddObjectType> allowedObjects{
-    IddObjectType::Output_Surfaces_List,
-    IddObjectType::Output_Surfaces_Drawing,
-    IddObjectType::Output_Schedules,
-    IddObjectType::Output_Constructions,
-    IddObjectType::Output_Table_TimeBins,
-    IddObjectType::Output_Table_Monthly,
-    IddObjectType::Output_Variable,
-    IddObjectType::Output_Meter,
-    IddObjectType::Output_Meter_MeterFileOnly,
-    IddObjectType::Output_Meter_Cumulative,
-    IddObjectType::Output_Meter_Cumulative_MeterFileOnly,
-    IddObjectType::Meter_Custom,
-    IddObjectType::Meter_CustomDecrement,
-    IddObjectType::EnergyManagementSystem_OutputVariable,
-  };
-
   auto iddObjectType = idfObject.iddObject().type();
 
-  if (std::find(allowedObjects.cbegin(), allowedObjects.end(), iddObjectType) != allowedObjects.end()) {
-
-    // If already present, don't do it
-    for (const auto& wo : workspace.getObjectsByType(iddObjectType)) {
-      if (idfObject.dataFieldsEqual(wo)) {
-        return false;
-      }
+  // If already present, don't do it
+  for (const auto& wo : workspace.getObjectsByType(iddObjectType)) {
+    if (idfObject.dataFieldsEqual(wo)) {
+      return false;
     }
-
-    workspace.addObject(idfObject);
-
-    return true;
   }
+
+  workspace.addObject(idfObject);
+
+  return true;
+
 
   //  static const std::vector<IddObjectType> allowedUniqueObjects{
   //    // IddObjectType::Output_EnergyManagementSystem, // TODO: have to merge
