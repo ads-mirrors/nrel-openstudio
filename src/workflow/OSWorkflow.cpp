@@ -397,6 +397,8 @@ bool OSWorkflow::run() {
     jobMap.at("ReportingMeasures").selected = false;
     jobMap.at("PostProcess").selected = false;
     jobMap.at("Cleanup").selected = true;
+
+    workflowJSON.runOptions()->forwardTranslatorOptions().setExcludeSpaceTranslation(true);
   } else if (m_no_simulation) {
     jobMap.at("Initialization").selected = true;
     jobMap.at("OpenStudioMeasures").selected = true;

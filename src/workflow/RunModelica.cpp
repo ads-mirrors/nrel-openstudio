@@ -10,12 +10,13 @@
 namespace openstudio {
 
 namespace {
-  openstudio::path createModelicaScript([[maybe_unused]] const WorkflowJSON& workflowJSON) {
+  openstudio::path createModelicaScript(const WorkflowJSON& workflowJSON) {
     constexpr auto content = R"(
 setModelicaPath(getHomeDirectoryPath() + "/.openmodelica/libraries/");
 loadFile("{mblPath}");
 loadFile("{seedModelicaFile}");
-setParameterValue(Template_IdealHeat.Model, zoneNames, {{"LIVING ZONE"}});
+setParameterValue(Template_IdealHeat.Model, zoneNames, {{"Single zone"}});
+setParameterValue(Template_IdealHeat.Model, idfPath, "{idfPath}");
 simulate(Template_IdealHeat.Model, stopTime=604800, stepSize=0.1);
   )";
 
@@ -26,9 +27,12 @@ simulate(Template_IdealHeat.Model, stopTime=604800, stepSize=0.1);
     if (!seedModelicaFile) {
       throw std::runtime_error(std::format("Could not find seed_modelica_file, {}.", workflowJSON.seedModelicaFile()->string()));
     }
+
     const auto mblPath = getMBLPath();
-    const auto formatted_content =
-      fmt::format(content, fmt::arg("mblPath", mblPath.string()), fmt::arg("seedModelicaFile", seedModelicaFile->string()));
+    const auto idfPath = workflowJSON.absoluteRunDir() / "in.idf";
+
+    const auto formatted_content = fmt::format(content, fmt::arg("mblPath", mblPath.string()),
+                                               fmt::arg("seedModelicaFile", seedModelicaFile->string()), fmt::arg("idfPath", idfPath.string()));
 
     constexpr auto mosPath = "run.mos";
     std::ofstream mosFile(mosPath);

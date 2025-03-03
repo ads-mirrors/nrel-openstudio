@@ -7,7 +7,7 @@ model Model
 
   parameter Integer n = 1 "Number of zones";
   parameter String zoneNames[n] = {"LIVING ZONE"} "Zone names in idf";
-  parameter String idfPath = "modelica://Buildings/Resources/Data/ThermalZones/EnergyPlus_9_6_0/Examples/SingleFamilyHouse_TwoSpeed_ZoneAirBalance/SingleFamilyHouse_TwoSpeed_ZoneAirBalance.idf" "Path to idf file";
+  parameter String idfPath = "modelica://Buildings/Resources/Data/ThermalZones/EnergyPlus_24_2_0/Examples/SingleFamilyHouse_TwoSpeed_ZoneAirBalance/SingleFamilyHouse_TwoSpeed_ZoneAirBalance.idf" "Path to idf file";
   parameter String epwPath = "modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw" "Path to epw file";
   parameter String weaPath = "modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos" "Path to weather file";
   parameter Modelica.Units.SI.Temperature TSetCoo[n] = {273.15+24} "Temperature set points for cooling";
@@ -17,7 +17,7 @@ model Model
 
   // Building Definition
 
-  inner Buildings.ThermalZones.EnergyPlus_9_6_0.Building building(
+  inner Buildings.ThermalZones.EnergyPlus_24_2_0.Building building(
     idfName = Modelica.Utilities.Files.loadResource(idfPath),
     epwName = Modelica.Utilities.Files.loadResource(epwPath),
     weaName = Modelica.Utilities.Files.loadResource(weaPath),
@@ -28,7 +28,7 @@ model Model
   // Zone Definition
 
   package Medium = Buildings.Media.Air "Medium model";
-  Buildings.ThermalZones.EnergyPlus_9_6_0.ThermalZone zon[n](redeclare package Medium = Medium, zoneName = zoneNames) "Thermal zones" annotation(
+  Buildings.ThermalZones.EnergyPlus_24_2_0.ThermalZone zon[n](redeclare package Medium = Medium, zoneName = zoneNames) "Thermal zones" annotation(
     Placement(transformation(extent = {{0, -20}, {40, 20}})));
   Modelica.Blocks.Sources.Constant qIntGai[n,3](each k = 0) "Internal heat gains, set to zero because these are modeled in EnergyPlus" annotation(
     Placement(transformation(extent = {{-40, 0}, {-20, 20}})));
