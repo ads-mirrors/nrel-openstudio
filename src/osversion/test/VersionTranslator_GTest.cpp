@@ -4586,3 +4586,21 @@ TEST_F(OSVersionFixture, update_3_9_0_to_3_10_0_ZoneVentilationDesignFlowRate) {
   EXPECT_EQ(40, zv_dfr.getDouble(25).get());         // Maximum Wind Speed
   EXPECT_EQ("Outdoor", zv_dfr.getString(26).get());  // Density Basis
 }
+
+TEST_F(OSVersionFixture, update_3_9_0_to_3_10_0_SpaceInfiltrationDesignFlowRate) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_0/test_vt_SpaceInfiltrationDesignFlowRate.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_0/test_vt_SpaceInfiltrationDesignFlowRate_updated.osm");
+  model->save(outPath, true);
+
+  std::vector<WorkspaceObject> sis = model->getObjectsByType("OS:SpaceInfiltration:DesignFlowRate");
+  ASSERT_EQ(1u, sis.size());
+  const auto& si = sis.front();
+
+  // Previous last field: Velocity Squared Term Coefficient
+  EXPECT_EQ(0.2, si.getDouble(12).get());
+  EXPECT_EQ("Outdoor", si.getString(13).get());  // Density Basis
+}

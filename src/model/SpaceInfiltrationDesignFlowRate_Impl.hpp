@@ -91,6 +91,8 @@ namespace model {
 
       virtual std::vector<std::string> emsInternalVariableNames() const override;
 
+      std::string densityBasis() const;
+
       //@}
       /** @name Setters */
       //@{
@@ -126,6 +128,8 @@ namespace model {
       bool setVelocitySquaredTermCoefficient(double velocitySquaredTermCoefficient);
 
       void resetVelocitySquaredTermCoefficient();
+
+      bool setDensityBasis(const std::string& densityBasis);
 
       //@}
       /** @name Other */

@@ -383,8 +383,7 @@ namespace osversion {
     // bracket allowable versions
     LOG(Debug, "Starting translation from Version " << currentVersion.str() << ".");
     if (currentVersion < VersionString("0.7.0")) {
-      LOG(Error, "Version translation is not provided for OpenStudio models created prior to "
-                   << "Version 0.7.0.");
+      LOG(Error, "Version translation is not provided for OpenStudio models created prior to " << "Version 0.7.0.");
       return;
     }
     if (currentVersion > VersionString(openStudioVersion())) {
@@ -773,8 +772,8 @@ namespace osversion {
               match = candidates[0];
             }
             if (match && match->name()) {
-              LOG(Warn, "Found match for object in OS:ComponentData contents list by type only, even "
-                          << "though this type of object (" << typeStr << ") has a name field.");
+              LOG(Warn, "Found match for object in OS:ComponentData contents list by type only, even " << "though this type of object (" << typeStr
+                                                                                                       << ") has a name field.");
             }
           }
 
@@ -1097,7 +1096,7 @@ namespace osversion {
             }
           }
         }  // for keys
-      }    // for users
+      }  // for users
       m_refactored.emplace_back(originalSchedule, schedule.idfObject());
       for (const auto& candidate : candidates) {
         model::ModelObjectVector wholeCandidate = getRecursiveChildren(candidate);
@@ -9713,6 +9712,25 @@ namespace osversion {
         }
 
         newObject.setString(26, "Outdoor");
+
+        m_refactored.push_back(RefactoredObjectData(object, newObject));
+        ss << newObject;
+
+      } else if (iddname == "OS:SpaceInfiltration:DesignFlowRate") {
+
+        // 1 Field has been added from 3.9.0 to 3.10.0:
+        // -------------------------------------------
+        // * Density Basis * 13
+        auto iddObject = idd_3_10_0.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setString(13, "Outdoor");
 
         m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;

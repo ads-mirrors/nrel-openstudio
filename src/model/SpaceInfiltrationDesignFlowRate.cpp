@@ -382,6 +382,17 @@ namespace model {
       OS_ASSERT(result);
     }
 
+    std::string SpaceInfiltrationDesignFlowRate_Impl::densityBasis() const {
+      boost::optional<std::string> value = getString(OS_SpaceInfiltration_DesignFlowRateFields::DensityBasis, true);
+      OS_ASSERT(value);
+      return value.get();
+    }
+
+    bool SpaceInfiltrationDesignFlowRate_Impl::setDensityBasis(const std::string& densityBasis) {
+      bool result = setString(OS_SpaceInfiltration_DesignFlowRateFields::DensityBasis, densityBasis);
+      return result;
+    }
+
     double SpaceInfiltrationDesignFlowRate_Impl::getDesignFlowRate(double floorArea, double exteriorSurfaceArea, double exteriorWallArea,
                                                                    double airVolume) const {
       std::string method = designFlowRateCalculationMethod();
@@ -556,6 +567,7 @@ namespace model {
     OS_ASSERT(getImpl<detail::SpaceInfiltrationDesignFlowRate_Impl>());
     bool test = this->setDesignFlowRate(0);
     OS_ASSERT(test);
+    setDensityBasis("Outdoor");
   }
 
   IddObjectType SpaceInfiltrationDesignFlowRate::iddObjectType() {
@@ -586,6 +598,10 @@ namespace model {
 
   std::vector<std::string> SpaceInfiltrationDesignFlowRate::validDesignFlowRateCalculationMethodValues() {
     return SpaceInfiltrationDesignFlowRate::designFlowRateCalculationMethodValues();
+  }
+
+  std::vector<std::string> SpaceInfiltrationDesignFlowRate::densityBasisValues() {
+    return getIddKeyNames(IddFactory::instance().getObject(iddObjectType()).get(), OS_SpaceInfiltration_DesignFlowRateFields::DensityBasis);
   }
 
   std::string SpaceInfiltrationDesignFlowRate::designFlowRateCalculationMethod() const {
@@ -694,6 +710,14 @@ namespace model {
 
   void SpaceInfiltrationDesignFlowRate::resetVelocitySquaredTermCoefficient() {
     getImpl<detail::SpaceInfiltrationDesignFlowRate_Impl>()->resetVelocitySquaredTermCoefficient();
+  }
+
+  std::string SpaceInfiltrationDesignFlowRate::densityBasis() const {
+    return getImpl<detail::SpaceInfiltrationDesignFlowRate_Impl>()->densityBasis();
+  }
+
+  bool SpaceInfiltrationDesignFlowRate::setDensityBasis(const std::string& densityBasis) {
+    return getImpl<detail::SpaceInfiltrationDesignFlowRate_Impl>()->setDensityBasis(densityBasis);
   }
 
   double SpaceInfiltrationDesignFlowRate::getDesignFlowRate(double floorArea, double exteriorSurfaceArea, double exteriorWallArea,

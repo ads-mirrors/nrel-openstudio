@@ -45,8 +45,9 @@ namespace model {
 
     static std::vector<std::string> validDesignFlowRateCalculationMethodValues();
 
-    /** \deprecated */
     static std::vector<std::string> designFlowRateCalculationMethodValues();
+
+    static std::vector<std::string> densityBasisValues();
 
     //@}
     /** @name Getters */
@@ -87,6 +88,8 @@ namespace model {
 
     bool isVelocitySquaredTermCoefficientDefaulted() const;
 
+    std::string densityBasis() const;
+
     //@}
     /** @name Setters */
     //@{
@@ -122,6 +125,8 @@ namespace model {
     bool setVelocitySquaredTermCoefficient(double velocitySquaredTermCoefficient);
 
     void resetVelocitySquaredTermCoefficient();
+
+    bool setDensityBasis(const std::string& densityBasis);
 
     //@}
     /** @name Other */

@@ -7444,10 +7444,17 @@ OS:SpaceInfiltration:DesignFlowRate,
        \note "C" in Equation
        \type real
        \default 0.0
-  N8;  \field Velocity Squared Term Coefficient
+  N8,  \field Velocity Squared Term Coefficient
        \note "D" in Equation
        \type real
        \default 0.0
+  A6; \field Density Basis
+       \note The air density to use when converting from volume flow to mass flow.
+       \type choice
+       \key Outdoor
+       \key Standard
+       \key Indoor
+       \required-field
 
 OS:SpaceInfiltration:EffectiveLeakageArea,
        \min-fields 7
