@@ -122,6 +122,8 @@ namespace detail {
 
     boost::optional<openstudio::path> seedModelicaFile() const;
 
+    boost::optional<std::string> seedModelicaModel() const;
+
     bool setSeedModelicaFile(const openstudio::path& modelicaSeedFile);
 
     void resetSeedModelicaFile();

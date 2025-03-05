@@ -563,6 +563,16 @@ namespace detail {
     return toPath(result);
   }
 
+  boost::optional<std::string> WorkflowJSON_Impl::seedModelicaModel() const {
+    Json::Value defaultValue("");
+    Json::Value seed = m_value.get("seed_modelica_model", defaultValue);
+    std::string result = seed.asString();
+    if (result.empty()) {
+      return boost::none;
+    }
+    return result;
+  }
+
   bool WorkflowJSON_Impl::setSeedModelicaFile(const openstudio::path& seedFile) {
     m_value["seed_modelica_file"] = toString(seedFile);
     onUpdate();
@@ -1150,6 +1160,10 @@ void WorkflowJSON::resetSeedFile() {
 
 boost::optional<openstudio::path> WorkflowJSON::seedModelicaFile() const {
   return getImpl<detail::WorkflowJSON_Impl>()->seedModelicaFile();
+}
+
+boost::optional<std::string> WorkflowJSON::seedModelicaModel() const {
+  return getImpl<detail::WorkflowJSON_Impl>()->seedModelicaModel();
 }
 
 bool WorkflowJSON::setSeedModelicaFile(const openstudio::path& modelicaSeedFile) {

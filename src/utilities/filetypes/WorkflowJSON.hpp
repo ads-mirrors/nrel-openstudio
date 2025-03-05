@@ -189,8 +189,14 @@ class UTILITIES_API WorkflowJSON
   /** Resets the seed file path. */
   void resetSeedFile();
 
-  /** Returns the seed Modelica file path. Evaluated relative to filePaths if not absolute. */
+  /** Returns the seed Modelica file path. 
+   *  Evaluated relative to filePaths if not absolute.
+   *  This can be a single .mo file or a package.mo.*/
   boost::optional<openstudio::path> seedModelicaFile() const;
+
+  /** Returns name of the seed Modelica model.
+   *  This will be the model that is simulated. */
+  boost::optional<std::string> seedModelicaModel() const;
 
   /** Sets the seed Modelica file path. */
   bool setSeedModelicaFile(const openstudio::path& modelicaSeedFile);

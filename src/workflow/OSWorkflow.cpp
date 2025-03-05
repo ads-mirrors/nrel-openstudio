@@ -386,7 +386,7 @@ bool OSWorkflow::run() {
 
   JobMap jobMap{{known_jobs}};
 
-  if (workflowJSON.seedModelicaFile()) {
+  if (workflowJSON.seedModelicaModel()) {
     jobMap.at("Initialization").selected = true;
     jobMap.at("OpenStudioMeasures").selected = true;
     jobMap.at("Translator").selected = true;

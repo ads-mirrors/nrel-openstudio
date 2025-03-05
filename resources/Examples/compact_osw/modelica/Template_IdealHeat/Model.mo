@@ -5,15 +5,18 @@ model Model
 
   // Zone and HVAC Parameters
 
-  parameter Integer n = 1 "Number of zones";
-  parameter String zoneNames[n] = {"LIVING ZONE"} "Zone names in idf";
+  // KSB: These params are being overridden by OpenStudio
+  parameter Integer zoneCount = 1 "Number of zones";
+  parameter String zoneNames[zoneCount] = {"LIVING ZONE"} "Zone names in idf";
   parameter String idfPath = "modelica://Buildings/Resources/Data/ThermalZones/EnergyPlus_24_2_0/Examples/SingleFamilyHouse_TwoSpeed_ZoneAirBalance/SingleFamilyHouse_TwoSpeed_ZoneAirBalance.idf" "Path to idf file";
+
+  // KSB: These params are not (yet)
   parameter String epwPath = "modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw" "Path to epw file";
   parameter String weaPath = "modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos" "Path to weather file";
-  parameter Modelica.Units.SI.Temperature TSetCoo[n] = {273.15+24} "Temperature set points for cooling";
-  parameter Modelica.Units.SI.Temperature TSetHea[n] = {273.15+21} "Temperature set points for heating";
-  parameter Modelica.Units.SI.Power QCoo_flow_nominal[n] = {10000} "Nominal cooling capacities (>0)";
-  parameter Modelica.Units.SI.Power QHea_flow_nominal[n] = {10000} "Nominal heating capacities (>0)";
+  parameter Modelica.Units.SI.Temperature TSetCoo[zoneCount] = {273.15+24} "Temperature set points for cooling";
+  parameter Modelica.Units.SI.Temperature TSetHea[zoneCount] = {273.15+21} "Temperature set points for heating";
+  parameter Modelica.Units.SI.Power QCoo_flow_nominal[zoneCount] = {10000} "Nominal cooling capacities (>0)";
+  parameter Modelica.Units.SI.Power QHea_flow_nominal[zoneCount] = {10000} "Nominal heating capacities (>0)";
 
   // Building Definition
 
@@ -28,16 +31,16 @@ model Model
   // Zone Definition
 
   package Medium = Buildings.Media.Air "Medium model";
-  Buildings.ThermalZones.EnergyPlus_24_2_0.ThermalZone zon[n](redeclare package Medium = Medium, zoneName = zoneNames) "Thermal zones" annotation(
+  Buildings.ThermalZones.EnergyPlus_24_2_0.ThermalZone zon[zoneCount](redeclare package Medium = Medium, zoneName = zoneNames) "Thermal zones" annotation(
     Placement(transformation(extent = {{0, -20}, {40, 20}})));
-  Modelica.Blocks.Sources.Constant qIntGai[n,3](each k = 0) "Internal heat gains, set to zero because these are modeled in EnergyPlus" annotation(
+  Modelica.Blocks.Sources.Constant qIntGai[zoneCount,3](each k = 0) "Internal heat gains, set to zero because these are modeled in EnergyPlus" annotation(
     Placement(transformation(extent = {{-40, 0}, {-20, 20}})));
 
   // HVAC Definition
   // KSB: Can the `HVAC` model be contained within a Measure?
   // KSB: Can / should it be replaceable?
 
-  HVAC hvac[n](
+  HVAC hvac[zoneCount](
     TSetCoo=TSetCoo,
     TSetHea=TSetHea,
     QCoo_flow_nominal=QCoo_flow_nominal,
