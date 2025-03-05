@@ -14488,7 +14488,7 @@ OS:HeatPump:PlantLoop:EIR:Cooling,
        \minimum 0.0
        \required-field
        \note Thermosiphon model is disabled below this minimum limit and
-       \note when the load is greater than calculated using the prevoius field.
+       \note when the load is greater than calculated using the previous field.
 
 OS:HeatPump:AirToWater:FuelFired:Heating,
        \memo The object defines a fuel-fired absorption heat pump based on equation-fit models.
@@ -15105,7 +15105,7 @@ OS:Chiller:Electric:EIR,
        \minimum 0.0
        \required-field
        \note Thermosiphon model is disabled below this minimum limit and
-       \note when the load is greater than calculated using the prevoius field.
+       \note when the load is greater than calculated using the previous field.
 
 OS:Chiller:Electric:ReformulatedEIR,
        \min-fields 23
@@ -15368,7 +15368,7 @@ OS:Chiller:Electric:ReformulatedEIR,
        \minimum 0.0
        \required-field
        \note Thermosiphon model is disabled below this minimum limit and
-       \note when the load is greater than calculated using the prevoius field.
+       \note when the load is greater than calculated using the previous field.
 
 OS:Chiller:Electric:ASHRAE205,
    \min-fields 12
@@ -25884,7 +25884,7 @@ OS:HeatExchanger:AirToAir:SensibleAndLatent,
       \note when the economizer is operating or high humidity control is active
   A12,\field Sensible Effectiveness of Heating Air Flow Curve Name
       \note optional
-      \note if this field has value, then the sensivle effectiveness for heating
+      \note if this field has value, then the sensible effectiveness for heating
       \note will be the value in N2 multiplied by this curve value
       \type object-list
       \object-list UnivariateFunctions
@@ -25896,7 +25896,7 @@ OS:HeatExchanger:AirToAir:SensibleAndLatent,
       \object-list UnivariateFunctions
   A14,\field Sensible Effectiveness of Cooling Air Flow Curve Name
       \note optional
-      \note if this field has value, then the sensivle effectiveness for cooling
+      \note if this field has value, then the sensible effectiveness for cooling
       \note will be the value in N4 multiplied by this curve value
       \type object-list
       \object-list UnivariateFunctions
