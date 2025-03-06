@@ -333,8 +333,7 @@ namespace osversion {
     OS_ASSERT(tempModel.strictnessLevel() == StrictnessLevel::Minimal);
     std::vector<std::shared_ptr<InterobjectIssueInformation>> issueInfo = fixInterobjectIssuesStage1(tempModel, m_originalVersion);
     if (!tempModel.isValid(StrictnessLevel::Draft)) {
-      LOG(Error, "Model with Version " << openStudioVersion() << " IDD is not valid to draft "
-                                       << "strictness level.");
+      LOG(Error, "Model with Version " << openStudioVersion() << " IDD is not valid to draft " << "strictness level.");
       LOG(Error, tempModel.validityReport(StrictnessLevel::Draft));
       return boost::none;
     }
@@ -391,8 +390,8 @@ namespace osversion {
         // if currentVersion is just one ahead, may be a developer using the cloud.
         // let it pass as if currentVersion == openStudioVersion(), with a warning
         if (VersionString(openStudioVersion()).isNextVersion(currentVersion)) {
-          LOG(Warn, "Version extracted from file '" << currentVersion.str() << "' is one "
-                                                    << "increment ahead of OpenStudio Version " << openStudioVersion() << ". "
+          LOG(Warn, "Version extracted from file '" << currentVersion.str() << "' is one " << "increment ahead of OpenStudio Version "
+                                                    << openStudioVersion() << ". "
                                                     << "Proceeding as if these versions are the same. Use with caution.");
           currentVersion = VersionString(openStudioVersion());
         } else {
@@ -621,8 +620,7 @@ namespace osversion {
           OS_ASSERT(ok);
           result = objCopy;
         } else {
-          LOG(Warn, "Tried to update the file path '" << original << "' to the new format, "
-                                                      << "but was unsuccessful.");
+          LOG(Warn, "Tried to update the file path '" << original << "' to the new format, " << "but was unsuccessful.");
         }
       }
     }
@@ -787,8 +785,7 @@ namespace osversion {
             } else {
               LOG(Warn, "Unable to locate object in OS:ComponentData contents list called out "
                           << "as object type '" << typeStr << "', and with name '" << nameStr
-                          << "'. Skipping this object (that is, removing it from the Component "
-                          << "definition).");
+                          << "'. Skipping this object (that is, removing it from the Component " << "definition).");
               continue;
             }
           }
