@@ -338,7 +338,7 @@ bool OSWorkflow::run() {
 
   struct JobMap
   {
-    std::array<std::pair<std::string_view, JobInfo>, 10> data;
+    std::array<std::pair<std::string_view, JobInfo>, 11> data;
 
     [[nodiscard]] JobInfo& at(const std::string_view& key) {
       auto itr = std::find_if(std::begin(data), std::end(data), [&key](const auto& v) { return v.first == key; });
@@ -371,11 +371,12 @@ bool OSWorkflow::run() {
   };
 
   // Can't use a regular map, it's not retaining order
-  static constexpr std::array<std::pair<std::string_view, JobInfo>, 10> known_jobs{{
+  static constexpr std::array<std::pair<std::string_view, JobInfo>, 11> known_jobs{{
     {"Initialization", {.jobFun = &OSWorkflow::runInitialization, .selected = true}},
     {"OpenStudioMeasures", {.jobFun = &OSWorkflow::runOpenStudioMeasures, .selected = true}},
     {"Translator", {.jobFun = &OSWorkflow::runTranslator, .selected = true}},
     {"EnergyPlusMeasures", {.jobFun = &OSWorkflow::runEnergyPlusMeasures, .selected = true}},
+    {"ModelicaMeasures", {.jobFun = &OSWorkflow::runModelicaMeasures, .selected = false}},
     {"PreProcess", {.jobFun = &OSWorkflow::runPreProcess, .selected = true}},
     {"EnergyPlus", {.jobFun = &OSWorkflow::runEnergyPlus, .selected = true}},
     {"Modelica", {.jobFun = &OSWorkflow::runModelica, .selected = false}},
@@ -391,6 +392,7 @@ bool OSWorkflow::run() {
     jobMap.at("OpenStudioMeasures").selected = true;
     jobMap.at("Translator").selected = true;
     jobMap.at("EnergyPlusMeasures").selected = true;
+    jobMap.at("ModelicaMeasures").selected = true;
     jobMap.at("PreProcess").selected = true;
     jobMap.at("EnergyPlus").selected = false;
     jobMap.at("Modelica").selected = true;
@@ -404,6 +406,7 @@ bool OSWorkflow::run() {
     jobMap.at("OpenStudioMeasures").selected = true;
     jobMap.at("Translator").selected = true;
     jobMap.at("EnergyPlusMeasures").selected = true;
+    jobMap.at("ModelicaMeasures").selected = false;
     jobMap.at("PreProcess").selected = true;
     jobMap.at("EnergyPlus").selected = false;
     jobMap.at("Modelica").selected = false;
@@ -415,6 +418,7 @@ bool OSWorkflow::run() {
     jobMap.at("OpenStudioMeasures").selected = false;
     jobMap.at("Translator").selected = false;
     jobMap.at("EnergyPlusMeasures").selected = false;
+    jobMap.at("ModelicaMeasures").selected = false;
     jobMap.at("PreProcess").selected = false;
     jobMap.at("EnergyPlus").selected = false;
     jobMap.at("Modelica").selected = false;

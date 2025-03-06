@@ -85,6 +85,7 @@ class OSWorkflow
     OpenStudioMeasures,
     Translator,
     EnergyPlusMeasures,
+    ModelicaMeasures,
     PreProcess,
     EnergyPlus,
     Modelica,
@@ -114,6 +115,7 @@ class OSWorkflow
   void runOpenStudioMeasures();
   void runTranslator();
   void runEnergyPlusMeasures();
+  void runModelicaMeasures();
   void runPreProcess();
   void runEnergyPlus();
   void runModelica();

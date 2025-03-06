@@ -11,6 +11,7 @@
 #include "../measure/OSMeasure.hpp"
 #include "../measure/ModelMeasure.hpp"
 #include "../measure/EnergyPlusMeasure.hpp"
+#include "../measure/ModelicaMeasure.hpp"
 #include "../measure/ReportingMeasure.hpp"
 #include "../measure/OSArgument.hpp"
 #include "../measure/OSRunner.hpp"
@@ -22,11 +23,7 @@
 #include "../utilities/data/Variant.hpp"
 #include "../utilities/core/Filesystem.hpp"
 #include "../utilities/core/Logger.hpp"
-#include "../energyplus/ForwardTranslator.hpp"
-
-#include "../utilities/core/ASCIIStrings.hpp"
 #include "../utilities/filetypes/WorkflowJSON.hpp"
-#include "../utilities/filetypes/RunOptions.hpp"
 #include <boost/filesystem/operations.hpp>
 
 #include <fmt/format.h>
@@ -171,6 +168,10 @@ void OSWorkflow::applyMeasures(MeasureType measureType, bool energyplus_output_r
       } else if (measureType == MeasureType::EnergyPlusMeasure) {
         auto workspaceClone = workspace_->clone(true).cast<openstudio::Workspace>();
         arguments = static_cast<openstudio::measure::EnergyPlusMeasure*>(measurePtr)->arguments(workspaceClone);  // NOLINT
+      } else if (measureType == MeasureType::ModelicaMeasure) {
+        auto workspaceClone = workspace_->clone(true).cast<openstudio::Workspace>();
+        auto modelClone = model.clone(true).cast<model::Model>();
+        arguments = static_cast<openstudio::measure::ModelicaMeasure*>(measurePtr)->arguments(modelClone, workspaceClone);  // NOLINT
       } else if (measureType == MeasureType::ReportingMeasure) {
         auto modelClone = model.clone(true).cast<model::Model>();
         arguments = static_cast<openstudio::measure::ReportingMeasure*>(measurePtr)->arguments(modelClone);  // NOLINT
@@ -275,6 +276,8 @@ end
         static_cast<openstudio::measure::ModelMeasure*>(measurePtr)->run(model, runner, argmap);
       } else if (measureType == MeasureType::EnergyPlusMeasure) {
         static_cast<openstudio::measure::EnergyPlusMeasure*>(measurePtr)->run(workspace_.get(), runner, argmap);
+      } else if (measureType == MeasureType::ModelicaMeasure) {
+        static_cast<openstudio::measure::ModelicaMeasure*>(measurePtr)->run(model, workspace_.get(), runner, argmap);
       } else if (measureType == MeasureType::ReportingMeasure) {
         if (energyplus_output_requests) {
           LOG(Debug, "Calling measure.energyPlusOutputRequests for '" << measureDirName << "'");

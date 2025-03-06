@@ -17,6 +17,7 @@
 #include "../utilities/filetypes/WorkflowJSON.hpp"
 #include "../alfalfa/AlfalfaJSON.hpp"
 #include "../utilities/core/Logger.hpp"
+#include "../measure/ModelicaParameters.hpp"
 
 namespace openstudio {
 
@@ -341,6 +342,7 @@ namespace measure {
     std::set<openstudio::path> m_currentDirFiles;
 
     openstudio::alfalfa::AlfalfaJSON m_alfalfa;
+    openstudio::measure::ModelicaParameters m_modelicaParameters;
   };
 
 }  // namespace measure

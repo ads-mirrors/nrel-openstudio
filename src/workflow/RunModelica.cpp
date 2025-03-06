@@ -108,17 +108,13 @@ namespace {
     std::ofstream mosFile(mosPath);
 
     mosFile << "setModelicaPath(getHomeDirectoryPath() + \"/.openmodelica/libraries/\");\n";
-
     for (const auto& file : files) {
       mosFile << fmt::format("loadFile(\"{}\");\n", file.string());
     }
-
     for (const auto& param : params) {
       mosFile << fmt::format("setParameterValue({}, {}, {});\n", param.model, param.key, param.value);
     }
-
     mosFile << fmt::format("simulate({}, stopTime=604800, stepSize=10);", *seedModelicaModel);
-
     mosFile.close();
 
     return mosPath;
