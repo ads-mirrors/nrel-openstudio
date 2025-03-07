@@ -5,9 +5,6 @@
 
 #include "OSWorkflow.hpp"
 #include "utilities/core/ApplicationPathHelpers.hpp"
-#include "utilities/idd/Zone_FieldEnums.hxx"
-#include <algorithm>
-#include <numeric>
 #include <utilities/idd/OS_ThermalZone_FieldEnums.hxx>
 #include <utilities/idd/IddEnums.hxx>
 #include <fmt/format.h>
