@@ -4,5 +4,8 @@
 	"seed_modelica_file": "modelica/Template_IdealHeat/package.mo",
 	"seed_modelica_model": "Template_IdealHeat.Model",
 	"steps": [
+		{
+			"measure_dir_name": "SetModelicaZones"
+		}
 	]
 }

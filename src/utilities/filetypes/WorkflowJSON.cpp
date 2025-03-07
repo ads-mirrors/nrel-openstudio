@@ -919,12 +919,19 @@ namespace detail {
             LOG(Error, "OpenStudio measure '" << measureDirName << "' called after transition to EnergyPlus.");
             result = false;
           }
+          if (state == MeasureType::ModelicaMeasure) {
+            LOG(Error, "OpenStudio measure '" << measureDirName << "' called after Modelica measure.");
+            result = false;
+          }
           if (state == MeasureType::ReportingMeasure) {
             LOG(Error, "OpenStudio measure '" << measureDirName << "' called after Energyplus simulation.");
             result = false;
           }
-
         } else if (measureType == MeasureType::EnergyPlusMeasure) {
+          if (state == MeasureType::ModelicaMeasure) {
+            LOG(Error, "EnergyPlus measure '" << measureDirName << "' called after Modelica measure.");
+            result = false;
+          }
           if (state == MeasureType::ReportingMeasure) {
             LOG(Error, "EnergyPlus measure '" << measureDirName << "' called after Energyplus simulation.");
             result = false;
@@ -932,10 +939,16 @@ namespace detail {
           if (state == MeasureType::ModelMeasure) {
             state = MeasureType::EnergyPlusMeasure;
           }
-
+        } else if (measureType == MeasureType::ModelicaMeasure) {
+          if (state == MeasureType::ReportingMeasure) {
+            LOG(Error, "Modelica measure '" << measureDirName << "' called after Energyplus simulation.");
+            result = false;
+          }
+          if (state == MeasureType::EnergyPlusMeasure) {
+            state = MeasureType::ModelicaMeasure;
+          }
         } else if (measureType == MeasureType::ReportingMeasure) {
           state = MeasureType::ReportingMeasure;
-
         } else {
           LOG(Error, "MeasureType " << measureType.valueName() << " of measure '" << measureDirName << "' is not supported");
           result = false;

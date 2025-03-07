@@ -48,6 +48,10 @@ namespace measure {
     return m_alfalfa;
   }
 
+  ModelicaParameters OSRunner::modelicaParameters() const {
+    return m_modelicaParameters;
+  }
+
   std::string OSRunner::unitsPreference() const {
     return m_unitsPreference;
   }

@@ -16,68 +16,7 @@
 namespace openstudio {
 
 namespace {
-  struct ModelicaParam
-  {
-    std::string model;
-    std::string key;
-    std::string value;
-  };
-
-  using ModelicaParams = std::vector<ModelicaParam>;
   using ModelicaFiles = std::vector<openstudio::path>;
-
-  std::vector<WorkspaceObject> getConditionedZones(const Workspace& workspace) {
-    // We want a list of zones to condition.
-    // If a zone is not included in the floor area (plenum), then it is not conditioned
-    const auto isUnconditioned = [](const WorkspaceObject& zone) {
-      const auto floorArea = zone.getString(ZoneFields::PartofTotalFloorArea);
-      if (floorArea) {
-        std::string lowerFloorArea = *floorArea;
-        boost::to_lower(lowerFloorArea);
-        if (lowerFloorArea == "no") {
-          return true;
-        }
-      }
-      return false;
-    };
-
-    auto zones = workspace.getObjectsByType(IddObjectType::Zone);
-    const auto e = std::ranges::remove_if(zones, isUnconditioned);
-    zones.erase(e.begin(), e.end());
-
-    return zones;
-  }
-
-  std::string getZoneNamesString(const std::vector<WorkspaceObject>& zones) {
-    std::stringstream ss;
-
-    ss << "{";
-    if (!zones.empty()) {
-      // Create a comma separated list of the zone names to condition.
-      // Names will be quoted.
-      ss << std::accumulate(std::next(zones.begin()), zones.end(), fmt::format("\"{}\"", zones.front().nameString()),
-                            [](const std::string& a, const WorkspaceObject& obj) { return fmt::format("{}, \"{}\"", a, obj.nameString()); });
-    }
-    ss << "}";
-
-    return ss.str();
-  }
-
-  ModelicaParams getModelicaParams(const WorkflowJSON& workflowJSON, [[maybe_unused]] const Workspace& workspace) {
-    const auto seedModelicaModel = workflowJSON.seedModelicaModel();
-    OS_ASSERT(seedModelicaModel);
-
-    const auto idfPath = workflowJSON.absoluteRunDir() / "in.idf";
-    const auto conditionedZones = getConditionedZones(workspace);
-
-    std::vector<ModelicaParam> params;
-
-    params.push_back({seedModelicaModel.get(), "idfPath", fmt::format("\"{}\"", idfPath.string())});
-    params.push_back({seedModelicaModel.get(), "zoneCount", toString(conditionedZones.size())});
-    params.push_back({seedModelicaModel.get(), "zoneNames", getZoneNamesString(conditionedZones)});
-
-    return params;
-  }
 
   ModelicaFiles getModelicaFiles(const WorkflowJSON& workflowJSON) {
     ModelicaFiles files;
@@ -98,7 +37,7 @@ namespace {
     return files;
   }
 
-  openstudio::path createModelicaScript(const WorkflowJSON& workflowJSON, const ModelicaFiles& files, const ModelicaParams& params) {
+  openstudio::path createModelicaScript(const WorkflowJSON& workflowJSON, const ModelicaFiles& files, const measure::ModelicaParameters& params) {
     auto seedModelicaModel = workflowJSON.seedModelicaModel();
     // There is a check for seedModelicaModel, prior to reaching this point.
     // In other words, we shouldn't be trying to "runModelica" if there is no seed model.
@@ -111,8 +50,9 @@ namespace {
     for (const auto& file : files) {
       mosFile << fmt::format("loadFile(\"{}\");\n", file.string());
     }
-    for (const auto& param : params) {
-      mosFile << fmt::format("setParameterValue({}, {}, {});\n", param.model, param.key, param.value);
+    const auto allParams = params.getAllParameters();
+    for (const auto& param : allParams) {
+      mosFile << fmt::format("setParameterValue({}, {}, {});\n", param.model(), param.key(), param.value());
     }
     mosFile << fmt::format("simulate({}, stopTime=604800, stepSize=10);", *seedModelicaModel);
     mosFile.close();
@@ -133,7 +73,8 @@ void OSWorkflow::runModelica() {
 
     int result = 0;
     OS_ASSERT(workspace_);
-    const auto params = getModelicaParams(workflowJSON, *workspace_);
+    //const auto params = getModelicaParams(workflowJSON, *workspace_);
+    const auto params = runner.modelicaParameters();
     const auto files = getModelicaFiles(workflowJSON);
     const auto script_path = createModelicaScript(workflowJSON, files, params);
     const auto cmd = fmt::format("{} {}", getOMCExecutable().string(), script_path.string());

@@ -42,6 +42,7 @@
 #endif
 
 %{
+  #include <measure/ModelicaParameters.hpp>
   #include <measure/OSArgument.hpp>
   #include <measure/OSOutput.hpp>
   #include <measure/OSRunner.hpp>
@@ -51,7 +52,6 @@
   #include <measure/EnergyPlusMeasure.hpp>
   #include <measure/ModelMeasure.hpp>
   #include <measure/ModelicaMeasure.hpp>
-  #include <measure/ModelicaParameters.hpp>
   #include <measure/ReportingMeasure.hpp>
 
   #include <model/Component.hpp>
@@ -85,13 +85,13 @@
 %template(OptionalOSArgument) boost::optional<openstudio::measure::OSArgument>;
 %template(OSArgumentMap) std::map<std::string, openstudio::measure::OSArgument>;
 
+%include <measure/ModelicaParameters.hpp>
 %include <measure/OSArgument.hpp>
 %include <measure/OSOutput.hpp>
 %include <measure/OSRunner.hpp>
 %include <measure/OSMeasure.hpp>
 %include <measure/ModelMeasure.hpp>
 %include <measure/ModelicaMeasure.hpp>
-%include <measure/ModelicaParameters.hpp>
 %include <measure/EnergyPlusMeasure.hpp>
 %include <measure/ReportingMeasure.hpp>
 

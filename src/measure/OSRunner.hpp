@@ -56,6 +56,10 @@ namespace measure {
     /** Returns the alfalfa json contrainer */
     alfalfa::AlfalfaJSON alfalfa() const;
 
+    /** Returns Modelica Parameters. 
+     * This is a key/value store of parameters that will be set on a Modelica simulation  */
+    ModelicaParameters modelicaParameters() const;
+
     /** Returns preferred unit system, either 'IP' or 'SI'. New in OS 2.0. */
     std::string unitsPreference() const;
 
