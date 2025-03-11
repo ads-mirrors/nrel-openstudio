@@ -37807,6 +37807,21 @@ OS:OutputControl:ReportingTolerances,
        \minimum 0
        \maximum 10
 
+OS:OutputControl:ResilienceSummaries,
+       \memo Specifies methods for resilience reporting variables
+       \unique-object
+  A1,  \field Handle
+       \type handle
+       \required-field
+  A2 ; \field Heat Index Algorithm
+       \note Whether the simplified or the extended method should be used for heat index
+       \note Simplified: based on regression analysis carried out by Lans P. Rothfusz
+       \note Extended: Based on paper by Lu & Romps
+       \type choice
+       \key Simplified
+       \key Extended
+       \default Simplified
+
 OS:OutputControl:Table:Style,
        \memo default style for the OutputControl:Table:Style is comma -- this works well for
        \memo importing into spreadsheet programs such as Excel(tm) but not so well for word
