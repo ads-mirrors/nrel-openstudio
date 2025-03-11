@@ -29,6 +29,7 @@ namespace model {
   class FoundationKivaSettings;
   class OutputControlFiles;
   class OutputControlReportingTolerances;
+  class OutputControlResilienceSummaries;
   class OutputControlTableStyle;
   class OutputControlTimestamp;
   class OutputDiagnostics;
@@ -148,6 +149,10 @@ namespace model {
     /** Get the OutputControlReportingTolerances object if there is one, this implementation uses a cached reference to the OutputControlReportingTolerances
    *  object which can be significantly faster than calling getOptionalUniqueModelObject<OutputControlReportingTolerances>(). */
     boost::optional<OutputControlReportingTolerances> outputControlReportingTolerances() const;
+
+    /** Get the OutputControlResilienceSummaries object if there is one, this implementation uses a cached reference to the OutputControlResilienceSummaries
+   *  object which can be significantly faster than calling getOptionalUniqueModelObject<OutputControlResilienceSummaries>(). */
+    boost::optional<OutputControlResilienceSummaries> outputControlResilienceSummaries() const;
 
     /** Get the OutputControlTableStyle object if there is one, this implementation uses a cached reference to the OutputControlTableStyle
    *  object which can be significantly faster than calling getOptionalUniqueModelObject<OutputControlTableStyle>(). */
@@ -707,6 +712,9 @@ namespace model {
 
   template <>
   MODEL_API OutputControlReportingTolerances Model::getUniqueModelObject<OutputControlReportingTolerances>();
+
+  template <>
+  MODEL_API OutputControlResilienceSummaries Model::getUniqueModelObject<OutputControlResilienceSummaries>();
 
   template <>
   MODEL_API OutputControlTableStyle Model::getUniqueModelObject<OutputControlTableStyle>();

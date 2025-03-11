@@ -74,6 +74,7 @@ UNIQUEMODELOBJECT_TEMPLATES(HeatBalanceAlgorithm);
 UNIQUEMODELOBJECT_TEMPLATES(InsideSurfaceConvectionAlgorithm);
 UNIQUEMODELOBJECT_TEMPLATES(OutputControlFiles);
 UNIQUEMODELOBJECT_TEMPLATES(OutputControlReportingTolerances);
+UNIQUEMODELOBJECT_TEMPLATES(OutputControlResilienceSummaries);
 UNIQUEMODELOBJECT_TEMPLATES(OutputControlTableStyle);
 UNIQUEMODELOBJECT_TEMPLATES(OutputControlTimestamp);
 UNIQUEMODELOBJECT_TEMPLATES(OutputDebuggingData);
@@ -129,6 +130,7 @@ SWIG_UNIQUEMODELOBJECT(HeatBalanceAlgorithm);
 SWIG_UNIQUEMODELOBJECT(InsideSurfaceConvectionAlgorithm);
 SWIG_UNIQUEMODELOBJECT(OutputControlFiles);
 SWIG_UNIQUEMODELOBJECT(OutputControlReportingTolerances);
+SWIG_UNIQUEMODELOBJECT(OutputControlResilienceSummaries);
 SWIG_UNIQUEMODELOBJECT(OutputControlTableStyle);
 SWIG_UNIQUEMODELOBJECT(OutputControlTimestamp);
 SWIG_UNIQUEMODELOBJECT(OutputDebuggingData);
@@ -209,6 +211,10 @@ SWIG_UNIQUEMODELOBJECT(PerformancePrecisionTradeoffs);
 
         boost::optional<OutputControlReportingTolerances> outputControlReportingTolerances(const openstudio::model::Model& model) {
           return model.outputControlReportingTolerances();
+        }
+
+        boost::optional<OutputControlResilienceSummaries> outputControlResilienceSummaries(const openstudio::model::Model& model) {
+          return model.outputControlResilienceSummaries();
         }
 
         boost::optional<OutputControlTableStyle> outputControlTableStyle(const openstudio::model::Model& model) {
@@ -380,6 +386,10 @@ SWIG_UNIQUEMODELOBJECT(PerformancePrecisionTradeoffs);
 
       public OptionalOutputControlReportingTolerances outputControlReportingTolerances() {
         return OpenStudio.OpenStudioModelSimulation.outputControlReportingTolerances(this);
+      }
+
+      public OptionalOutputControlResilienceSummaries outputControlResilienceSummaries() {
+        return OpenStudio.OpenStudioModelSimulation.outputControlResilienceSummaries(this);
       }
 
       public OptionalOutputControlTableStyle outputControlTableStyle() {

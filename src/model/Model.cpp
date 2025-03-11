@@ -263,6 +263,22 @@ namespace model {
       return m_cachedOutputControlReportingTolerances;
     }
 
+    boost::optional<OutputControlResilienceSummaries> Model_Impl::outputControlResilienceSummaries() const {
+      if (m_cachedOutputControlResilienceSummaries) {
+        return m_cachedOutputControlResilienceSummaries;
+      }
+
+      boost::optional<OutputControlResilienceSummaries> result = this->model().getOptionalUniqueModelObject<OutputControlResilienceSummaries>();
+      if (result) {
+        m_cachedOutputControlResilienceSummaries = result;
+        result->getImpl<OutputControlResilienceSummaries_Impl>()
+          ->OutputControlResilienceSummaries_Impl::onRemoveFromWorkspace
+          .connect<Model_Impl, &Model_Impl::clearCachedOutputControlResilienceSummaries>(const_cast<openstudio::model::detail::Model_Impl*>(this));
+      }
+
+      return m_cachedOutputControlResilienceSummaries;
+    }
+
     boost::optional<OutputControlTableStyle> Model_Impl::outputControlTableStyle() const {
       if (m_cachedOutputControlTableStyle) {
         return m_cachedOutputControlTableStyle;
@@ -1518,6 +1534,7 @@ namespace model {
       clearCachedFoundationKivaSettings(dummy);
       clearCachedOutputControlFiles(dummy);
       clearCachedOutputControlReportingTolerances(dummy);
+      clearCachedOutputControlResilienceSummaries(dummy);
       clearCachedOutputControlTableStyle(dummy);
       clearCachedOutputControlTimestamp(dummy);
       clearCachedOutputDiagnostics(dummy);
@@ -1577,6 +1594,10 @@ namespace model {
 
     void Model_Impl::clearCachedOutputControlReportingTolerances(const Handle&) {
       m_cachedOutputControlReportingTolerances.reset();
+    }
+
+    void Model_Impl::clearCachedOutputControlResilienceSummaries(const Handle&) {
+      m_cachedOutputControlResilienceSummaries.reset();
     }
 
     void Model_Impl::clearCachedOutputControlTableStyle(const Handle&) {
@@ -1917,6 +1938,10 @@ namespace model {
     return getImpl<detail::Model_Impl>()->outputControlReportingTolerances();
   }
 
+  boost::optional<OutputControlResilienceSummaries> Model::outputControlResilienceSummaries() const {
+    return getImpl<detail::Model_Impl>()->outputControlResilienceSummaries();
+  }
+
   boost::optional<OutputControlTableStyle> Model::outputControlTableStyle() const {
     return getImpl<detail::Model_Impl>()->outputControlTableStyle();
   }
@@ -2254,9 +2279,9 @@ namespace model {
     if (!openstudio::equal(inputResult, outputResult, tol)) {
       LOG_FREE(logLevel, "openstudio.model.Model",
                "The " << attributeName << " values determined for " << object.briefDescription()
-                      << " using input and output data differ by a (relative) error "
-                      << "greater than " << tol << ". The value calculated from input data was " << inputResult
-                      << ", whereas the value calculated from output data was " << outputResult << ".");
+                      << " using input and output data differ by a (relative) error " << "greater than " << tol
+                      << ". The value calculated from input data was " << inputResult << ", whereas the value calculated from output data was "
+                      << outputResult << ".");
       return false;
     }
     return true;
@@ -3456,6 +3481,15 @@ namespace model {
   }
 
   template <>
+  OutputControlResilienceSummaries Model::getUniqueModelObject<OutputControlResilienceSummaries>() {
+    if (boost::optional<OutputControlResilienceSummaries> _b = outputControlResilienceSummaries()) {
+      return _b.get();
+    } else {
+      return OutputControlResilienceSummaries(*this);
+    }
+  }
+
+  template <>
   OutputControlTableStyle Model::getUniqueModelObject<OutputControlTableStyle>() {
     if (boost::optional<OutputControlTableStyle> _b = outputControlTableStyle()) {
       return _b.get();
@@ -4193,6 +4227,7 @@ namespace model {
     REGISTER_CONSTRUCTOR(OtherEquipmentDefinition);
     REGISTER_CONSTRUCTOR(OutputControlFiles);
     REGISTER_CONSTRUCTOR(OutputControlReportingTolerances);
+    REGISTER_CONSTRUCTOR(OutputControlResilienceSummaries);
     REGISTER_CONSTRUCTOR(OutputControlTableStyle);
     REGISTER_CONSTRUCTOR(OutputControlTimestamp);
     REGISTER_CONSTRUCTOR(OutputDebuggingData);
@@ -4768,6 +4803,7 @@ namespace model {
     REGISTER_COPYCONSTRUCTORS(OtherEquipmentDefinition);
     REGISTER_COPYCONSTRUCTORS(OutputControlFiles);
     REGISTER_COPYCONSTRUCTORS(OutputControlReportingTolerances);
+    REGISTER_COPYCONSTRUCTORS(OutputControlResilienceSummaries);
     REGISTER_COPYCONSTRUCTORS(OutputControlTableStyle);
     REGISTER_COPYCONSTRUCTORS(OutputControlTimestamp);
     REGISTER_COPYCONSTRUCTORS(OutputDebuggingData);
