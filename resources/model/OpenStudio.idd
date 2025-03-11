@@ -37813,14 +37813,14 @@ OS:OutputControl:ResilienceSummaries,
   A1,  \field Handle
        \type handle
        \required-field
-  A2 ; \field Heat Index Algorithm
+  A2;  \field Heat Index Algorithm
        \note Whether the simplified or the extended method should be used for heat index
        \note Simplified: based on regression analysis carried out by Lans P. Rothfusz
        \note Extended: Based on paper by Lu & Romps
        \type choice
        \key Simplified
        \key Extended
-       \default Simplified
+       \required-field
 
 OS:OutputControl:Table:Style,
        \memo default style for the OutputControl:Table:Style is comma -- this works well for
