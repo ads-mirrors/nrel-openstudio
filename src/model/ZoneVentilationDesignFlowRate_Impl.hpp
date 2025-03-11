@@ -98,6 +98,8 @@ namespace model {
 
       double maximumWindSpeed() const;
 
+      std::string densityBasis() const;
+
       virtual std::vector<EMSActuatorNames> emsActuatorNames() const override;
 
       virtual std::vector<std::string> emsInternalVariableNames() const override;
@@ -165,6 +167,8 @@ namespace model {
       void resetMaximumOutdoorTemperatureSchedule();
 
       bool setMaximumWindSpeed(double maximumWindSpeed);
+
+      bool setDensityBasis(const std::string& densityBasis);
 
       //@}
       /** @name Other */

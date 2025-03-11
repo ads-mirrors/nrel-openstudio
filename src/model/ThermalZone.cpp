@@ -362,15 +362,17 @@ namespace model {
         "Zone Infiltration Latent Heat Gain Energy", "Zone Infiltration Total Heat Loss Energy", "Zone Infiltration Total Heat Gain Energy",
         "Zone Infiltration Current Density Volume Flow Rate", "Zone Infiltration Standard Density Volume Flow Rate",
         "Zone Infiltration Current Density Volume", "Zone Infiltration Standard Density Volume", "Zone Infiltration Mass",
-        "Zone Infiltration Mass Flow Rate", "Zone Infiltration Air Change Rate",
+        "Zone Infiltration Mass Flow Rate", "Zone Infiltration Current Density Air Change Rate", "Zone Infiltration Outdoor Density Volume Flow Rate",
+        "Zone Infiltration Standard Density Air Change Rate", "Zone Infiltration Outdoor Density Air Change Rate",
 
         // ZoneVentilation:DesignFlowRate
         "Zone Ventilation Sensible Heat Loss Energy", "Zone Ventilation Sensible Heat Gain Energy", "Zone Ventilation Latent Heat Loss Energy",
         "Zone Ventilation Latent Heat Gain Energy", "Zone Ventilation Total Heat Loss Energy", "Zone Ventilation Total Heat Gain Energy",
         "Zone Ventilation Current Density Volume Flow Rate", "Zone Ventilation Standard Density Volume Flow Rate",
         "Zone Ventilation Current Density Volume", "Zone Ventilation Standard Density Volume", "Zone Ventilation Mass",
-        "Zone Ventilation Mass Flow Rate", "Zone Ventilation Air Change Rate", "Zone Ventilation Fan Electricity Energy",
-        "Zone Ventilation Air Inlet Temperature",
+        "Zone Ventilation Mass Flow Rate", "Zone Ventilation Current Density Air Change Rate", "Zone Ventilation Fan Electricity Energy",
+        "Zone Ventilation Air Inlet Temperature", "Zone Ventilation Outdoor Density Volume Flow Rate",
+        "Zone Ventilation Standard Density Air Change Rate", "Zone Ventilation Outdoor Density Air Change Rate",
 
         "Zone Predicted Sensible Load to Setpoint Heat Transfer Rate", "Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate",
         "Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate", "Zone Predicted Moisture Load Moisture Transfer Rate",

@@ -2515,7 +2515,7 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_GroundHeatExchangerVertical) {
   EXPECT_TRUE(ghx.isEmpty(3));                                            // Outlet Node Name
   EXPECT_EQ(0.0033, ghx.getDouble(4).get());                              // Design Flow Rate
   EXPECT_EQ(120, ghx.getInt(5).get());                                    // Number of Bore Holes
-  EXPECT_EQ(1.0, ghx.getDouble(6).get());                                 // Bore Hole Top Depth {m} (added 3.9.1)
+  EXPECT_EQ(1.0, ghx.getDouble(6).get());                                 // Bore Hole Top Depth {m} (added 3.10.0)
   EXPECT_EQ(76.2, ghx.getDouble(7).get());                                // Bore Hole Length
   EXPECT_EQ(0.063508, ghx.getDouble(8).get());                            // Bore Hole Radius
   EXPECT_EQ(0.692626, ghx.getDouble(9).get());                            // Ground Thermal Conductivity
@@ -4526,13 +4526,13 @@ TEST_F(OSVersionFixture, update_3_8_0_to_3_9_0_SizingZone) {
   EXPECT_EQ("Coincident", sizing_zone.getString(39).get());  // Sizing Option
 }
 
-TEST_F(OSVersionFixture, update_3_9_0_to_3_9_1_WaterHeaterHeatPump) {
-  openstudio::path path = resourcesPath() / toPath("osversion/3_9_1/test_vt_WaterHeaterHeatPump.osm");
+TEST_F(OSVersionFixture, update_3_9_0_to_3_10_0_WaterHeaterHeatPump) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_0/test_vt_WaterHeaterHeatPump.osm");
   osversion::VersionTranslator vt;
   boost::optional<model::Model> model = vt.loadModel(path);
   ASSERT_TRUE(model) << "Failed to load " << path;
 
-  openstudio::path outPath = resourcesPath() / toPath("osversion/3_9_1/test_vt_WaterHeaterHeatPump_updated.osm");
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_0/test_vt_WaterHeaterHeatPump_updated.osm");
   model->save(outPath, true);
 
   std::vector<WorkspaceObject> hpwhs = model->getObjectsByType("OS:WaterHeater:HeatPump");
@@ -4552,13 +4552,13 @@ TEST_F(OSVersionFixture, update_3_9_0_to_3_9_1_WaterHeaterHeatPump) {
   EXPECT_EQ("Heater2", hpwh.getString(26).get());
 }
 
-TEST_F(OSVersionFixture, update_3_9_0_to_3_9_1_GroundHeatExchangerVertical) {
-  openstudio::path path = resourcesPath() / toPath("osversion/3_9_1/test_vt_GroundHeatExchangerVertical.osm");
+TEST_F(OSVersionFixture, update_3_9_0_to_3_10_0_GroundHeatExchangerVertical) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_0/test_vt_GroundHeatExchangerVertical.osm");
   osversion::VersionTranslator vt;
   boost::optional<model::Model> model = vt.loadModel(path);
   ASSERT_TRUE(model) << "Failed to load " << path;
 
-  openstudio::path outPath = resourcesPath() / toPath("osversion/3_9_1/test_vt_GroundHeatExchangerVertical_updated.osm");
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_0/test_vt_GroundHeatExchangerVertical_updated.osm");
   model->save(outPath, true);
 
   std::vector<WorkspaceObject> ghe_verts = model->getObjectsByType("OS:GroundHeatExchanger:Vertical");
@@ -4568,4 +4568,39 @@ TEST_F(OSVersionFixture, update_3_9_0_to_3_9_1_GroundHeatExchangerVertical) {
   EXPECT_EQ(120, ghe_vert.getInt(5).get());      // Number of Bore Holes
   EXPECT_EQ(1.0, ghe_vert.getDouble(6).get());   // Bore Hole Top Depth
   EXPECT_EQ(76.2, ghe_vert.getDouble(7).get());  // Bore Hole Length
+}
+
+TEST_F(OSVersionFixture, update_3_9_0_to_3_10_0_ZoneVentilationDesignFlowRate) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_0/test_vt_ZoneVentilationDesignFlowRate.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_0/test_vt_ZoneVentilationDesignFlowRate_updated.osm");
+  model->save(outPath, true);
+
+  std::vector<WorkspaceObject> zv_dfrs = model->getObjectsByType("OS:ZoneVentilation:DesignFlowRate");
+  ASSERT_EQ(1u, zv_dfrs.size());
+  WorkspaceObject zv_dfr = zv_dfrs[0];
+
+  EXPECT_EQ(40, zv_dfr.getDouble(25).get());         // Maximum Wind Speed
+  EXPECT_EQ("Outdoor", zv_dfr.getString(26).get());  // Density Basis
+}
+
+TEST_F(OSVersionFixture, update_3_9_0_to_3_10_0_SpaceInfiltrationDesignFlowRate) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_0/test_vt_SpaceInfiltrationDesignFlowRate.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_0/test_vt_SpaceInfiltrationDesignFlowRate_updated.osm");
+  model->save(outPath, true);
+
+  std::vector<WorkspaceObject> sis = model->getObjectsByType("OS:SpaceInfiltration:DesignFlowRate");
+  ASSERT_EQ(1u, sis.size());
+  const auto& si = sis.front();
+
+  // Previous last field: Velocity Squared Term Coefficient
+  EXPECT_EQ(0.2, si.getDouble(12).get());
+  EXPECT_EQ("Outdoor", si.getString(13).get());  // Density Basis
 }

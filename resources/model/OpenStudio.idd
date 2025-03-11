@@ -1,4 +1,4 @@
-!IDD_Version 3.9.1
+!IDD_Version 3.10.0
 ! *****************************************************************************
 ! This file is the Input Data Dictionary (IDD) for OpenStudio Model.
 !
@@ -40,7 +40,7 @@ OS:Version,
        \required-field
   A2, \field Version Identifier
        \type alpha
-       \default 3.9.1
+       \default 3.10.0
   A3; \field Prerelease Identifier
        \type alpha
 
@@ -7444,10 +7444,17 @@ OS:SpaceInfiltration:DesignFlowRate,
        \note "C" in Equation
        \type real
        \default 0.0
-  N8;  \field Velocity Squared Term Coefficient
+  N8,  \field Velocity Squared Term Coefficient
        \note "D" in Equation
        \type real
        \default 0.0
+  A6; \field Density Basis
+       \note The air density to use when converting from volume flow to mass flow.
+       \type choice
+       \key Outdoor
+       \key Standard
+       \key Indoor
+       \required-field
 
 OS:SpaceInfiltration:EffectiveLeakageArea,
        \min-fields 7
@@ -14488,7 +14495,7 @@ OS:HeatPump:PlantLoop:EIR:Cooling,
        \minimum 0.0
        \required-field
        \note Thermosiphon model is disabled below this minimum limit and
-       \note when the load is greater than calculated using the prevoius field.
+       \note when the load is greater than calculated using the previous field.
 
 OS:HeatPump:AirToWater:FuelFired:Heating,
        \memo The object defines a fuel-fired absorption heat pump based on equation-fit models.
@@ -15090,6 +15097,8 @@ OS:Chiller:Electric:EIR,
        \note when the "Condenser Flow Control" input is set to "ModulatedChillerPLR", "ModulatedLoopPLR" or
        \note "ModulatedDeltaTemperature".
        \type real
+       \minimum 0.0
+       \maximum 1
        \required-field
   A21, \field Thermosiphon Capacity Fraction Curve Name
        \type object-list
@@ -15103,7 +15112,7 @@ OS:Chiller:Electric:EIR,
        \minimum 0.0
        \required-field
        \note Thermosiphon model is disabled below this minimum limit and
-       \note when the load is greater than calculated using the prevoius field.
+       \note when the load is greater than calculated using the previous field.
 
 OS:Chiller:Electric:ReformulatedEIR,
        \min-fields 23
@@ -15351,6 +15360,8 @@ OS:Chiller:Electric:ReformulatedEIR,
        \note when the "Condenser Flow Control" input is set to "ModulatedChillerPLR", "ModulatedLoopPLR" or
        \note "ModulatedDeltaTemperature".
        \type real
+       \minimum 0.0
+       \maximum 1
        \required-field
   A20, \field Thermosiphon Capacity Fraction Curve Name
        \type object-list
@@ -15364,7 +15375,7 @@ OS:Chiller:Electric:ReformulatedEIR,
        \minimum 0.0
        \required-field
        \note Thermosiphon model is disabled below this minimum limit and
-       \note when the load is greater than calculated using the prevoius field.
+       \note when the load is greater than calculated using the previous field.
 
 OS:Chiller:Electric:ASHRAE205,
    \min-fields 12
@@ -21649,6 +21660,7 @@ OS:Coil:Heating:DX:VariableSpeed,
         \required-field
         \type alpha
         \reference HeatingCoilsDXVariableSpeed
+        \reference AFNCoilNames
         \reference ConnectionObject
    A3,  \field Indoor Air Inlet Node Name
         \type object-list
@@ -21829,6 +21841,7 @@ OS:Coil:Cooling:DX:VariableSpeed,
         \type alpha
         \reference CoolingCoilsDXVariableSpeed
         \reference DesuperHeatingCoilSources
+        \reference AFNCoilNames
         \reference ConnectionObject
    A3,  \field Indoor Air Inlet Node Name
         \type object-list
@@ -22157,6 +22170,7 @@ OS:Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
         \required-field
         \type alpha
         \reference CoolingCoilsWaterToAirVSHP
+        \reference DesuperHeatingWaterOnlySources
         \reference ConnectionObject
    A3,  \field Water-to-Refrigerant HX Water Inlet Node Name
         \type object-list
@@ -25877,7 +25891,7 @@ OS:HeatExchanger:AirToAir:SensibleAndLatent,
       \note when the economizer is operating or high humidity control is active
   A12,\field Sensible Effectiveness of Heating Air Flow Curve Name
       \note optional
-      \note if this field has value, then the sensivle effectiveness for heating
+      \note if this field has value, then the sensible effectiveness for heating
       \note will be the value in N2 multiplied by this curve value
       \type object-list
       \object-list UnivariateFunctions
@@ -25889,7 +25903,7 @@ OS:HeatExchanger:AirToAir:SensibleAndLatent,
       \object-list UnivariateFunctions
   A14,\field Sensible Effectiveness of Cooling Air Flow Curve Name
       \note optional
-      \note if this field has value, then the sensivle effectiveness for cooling
+      \note if this field has value, then the sensible effectiveness for cooling
       \note will be the value in N4 multiplied by this curve value
       \type object-list
       \object-list UnivariateFunctions
@@ -29298,12 +29312,19 @@ OS:ZoneVentilation:DesignFlowRate,
        \object-list ScheduleNames
        \note This schedule contains the outdoor temperature versus time above which
        \note ventilation is shutoff.
-  N16; \field Maximum Wind Speed
+  N16, \field Maximum Wind Speed
        \note this is the outdoor wind speed above which ventilation is shutoff
        \units m/s
        \type real
        \minimum 0
        \maximum 40
+       \required-field
+  A11; \field Density Basis
+       \note The air density to use when converting from volume flow to mass flow.
+       \type choice
+       \key Outdoor
+       \key Standard
+       \key Indoor
        \required-field
 
 OS:ZoneVentilation:WindandStackOpenArea,

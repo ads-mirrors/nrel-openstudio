@@ -506,7 +506,7 @@ namespace energyplus {
     struct ForwardTranslatorInitializer;
   };
 
-#define ENERGYPLUS_VERSION "24.2"
+#define ENERGYPLUS_VERSION "25.1"
 
   class ENERGYPLUS_API ForwardTranslator
   {
