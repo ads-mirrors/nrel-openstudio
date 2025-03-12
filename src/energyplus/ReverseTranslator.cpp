@@ -716,6 +716,10 @@ namespace energyplus {
         modelObject = translateOutputControlReportingTolerances(workspaceObject);
         break;
       }
+      case openstudio::IddObjectType::OutputControl_ResilienceSummaries: {
+        modelObject = translateOutputControlResilienceSummaries(workspaceObject);
+        break;
+      }
       case openstudio::IddObjectType::OutputControl_Table_Style: {
         modelObject = translateOutputControlTableStyle(workspaceObject);
         break;

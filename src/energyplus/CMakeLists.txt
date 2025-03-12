@@ -259,6 +259,7 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslateOutsideSurfaceConvectionAlgorithm.cpp
   ForwardTranslator/ForwardTranslateOutputControlFiles.cpp
   ForwardTranslator/ForwardTranslateOutputControlReportingTolerances.cpp
+  ForwardTranslator/ForwardTranslateOutputControlResilienceSummaries.cpp
   ForwardTranslator/ForwardTranslateOutputControlTableStyle.cpp
   ForwardTranslator/ForwardTranslateOutputControlTimestamp.cpp
   ForwardTranslator/ForwardTranslateOutputMeter.cpp
@@ -553,6 +554,7 @@ set(${target_name}_src
   ReverseTranslator/ReverseTranslateOtherEquipment.cpp
   ReverseTranslator/ReverseTranslateOutputControlFiles.cpp
   ReverseTranslator/ReverseTranslateOutputControlReportingTolerances.cpp
+  ReverseTranslator/ReverseTranslateOutputControlResilienceSummaries.cpp
   ReverseTranslator/ReverseTranslateOutputControlTableStyle.cpp
   ReverseTranslator/ReverseTranslateOutputControlTimestamp.cpp
   ReverseTranslator/ReverseTranslateOutputDebuggingData.cpp
@@ -775,6 +777,7 @@ set(${target_name}_test_src
   Test/Meter_GTest.cpp
   Test/OutputControlFiles_GTest.cpp
   Test/OutputControlReportingTolerances_GTest.cpp
+  Test/OutputControlResilienceSummaries_GTest.cpp
   Test/OutputControlTableStyle_GTest.cpp
   Test/OutputControlTimestamp_GTest.cpp
   Test/OutputDebuggingData_GTest.cpp
