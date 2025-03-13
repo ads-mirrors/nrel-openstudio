@@ -73,6 +73,7 @@
 #include "../model/OutputMeter.hpp"
 #include "../model/ModelObjectList.hpp"
 #include "../model/OutputControlReportingTolerances.hpp"
+#include "../model/OutputControlResilienceSummaries.hpp"
 #include "../model/OutputVariable.hpp"
 #include "../model/OutsideSurfaceConvectionAlgorithm.hpp"
 #include "../model/CoilCoolingDXMultiSpeedStageData.hpp"
@@ -459,6 +460,7 @@ namespace sdd {
     m_ignoreTypes.push_back(model::ModelObjectList::iddObjectType());
     m_ignoreTypes.push_back(model::Node::iddObjectType());
     m_ignoreTypes.push_back(model::OutputControlReportingTolerances::iddObjectType());
+    m_ignoreTypes.push_back(model::OutputControlResilienceSummaries::iddObjectType());
     m_ignoreTypes.push_back(model::OutputMeter::iddObjectType());
     m_ignoreTypes.push_back(model::OutputVariable::iddObjectType());
     m_ignoreTypes.push_back(model::OutsideSurfaceConvectionAlgorithm::iddObjectType());

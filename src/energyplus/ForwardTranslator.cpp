@@ -2300,6 +2300,11 @@ namespace energyplus {
         retVal = translateOutputControlReportingTolerances(outputControlReportingTolerances);
         break;
       }
+      case openstudio::IddObjectType::OS_OutputControl_ResilienceSummaries: {
+        auto outputControlResilienceSummaries = modelObject.cast<OutputControlResilienceSummaries>();
+        retVal = translateOutputControlResilienceSummaries(outputControlResilienceSummaries);
+        break;
+      }
       case openstudio::IddObjectType::OS_OutputControl_Table_Style: {
         auto outputControlTableStyle = modelObject.cast<OutputControlTableStyle>();
         retVal = translateOutputControlTableStyle(outputControlTableStyle);
@@ -3366,6 +3371,7 @@ namespace energyplus {
       IddObjectType::OS_ZoneCapacitanceMultiplier_ResearchSpecial,
       IddObjectType::OS_OutputControl_Files,
       IddObjectType::OS_OutputControl_ReportingTolerances,
+      IddObjectType::OS_OutputControl_ResilienceSummaries,
       IddObjectType::OS_OutputControl_Table_Style,
       IddObjectType::OS_OutputControl_Timestamp,
       IddObjectType::OS_Output_Constructions,

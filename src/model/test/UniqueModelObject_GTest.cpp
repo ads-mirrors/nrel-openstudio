@@ -34,6 +34,8 @@
 #include "../OutputControlFiles_Impl.hpp"
 #include "../OutputControlReportingTolerances.hpp"
 #include "../OutputControlReportingTolerances_Impl.hpp"
+#include "../OutputControlResilienceSummaries.hpp"
+#include "../OutputControlResilienceSummaries_Impl.hpp"
 #include "../OutputControlTableStyle.hpp"
 #include "../OutputControlTableStyle_Impl.hpp"
 #include "../OutputControlTimestamp.hpp"
@@ -375,6 +377,31 @@ TEST_F(ModelFixture, OutputControlReportingTolerances_UniqueModelObject_Clone) {
   auto outputControlReportingTolerancesClone2 = outputControlReportingTolerances.clone(model2).cast<OutputControlReportingTolerances>();
   EXPECT_TRUE(model2.getOptionalUniqueModelObject<OutputControlReportingTolerances>());
   EXPECT_EQ("! Custom Object", outputControlReportingTolerancesClone2.comment());
+}
+
+TEST_F(ModelFixture, OutputControlResilienceSummaries_UniqueModelObject_Clone) {
+  // create a model to use
+  Model model;
+
+  // Get the Unique ModelObject
+  EXPECT_FALSE(model.getOptionalUniqueModelObject<OutputControlResilienceSummaries>());
+  auto outputControlResilienceSummaries = model.getUniqueModelObject<OutputControlResilienceSummaries>();
+  EXPECT_TRUE(model.getOptionalUniqueModelObject<OutputControlResilienceSummaries>());
+  // We use a comment to see if cloning to another model works
+  outputControlResilienceSummaries.setComment("Custom Object");
+
+  // clone it into the same model
+  auto outputControlResilienceSummariesClone = outputControlResilienceSummaries.clone(model).cast<OutputControlResilienceSummaries>();
+  // UniqueModelObject: should be the same as the original
+  EXPECT_EQ(outputControlResilienceSummaries, outputControlResilienceSummariesClone);
+  EXPECT_EQ("! Custom Object", outputControlResilienceSummariesClone.comment());
+
+  // clone it into a different model
+  Model model2;
+  EXPECT_FALSE(model2.getOptionalUniqueModelObject<OutputControlResilienceSummaries>());
+  auto outputControlResilienceSummariesClone2 = outputControlResilienceSummaries.clone(model2).cast<OutputControlResilienceSummaries>();
+  EXPECT_TRUE(model2.getOptionalUniqueModelObject<OutputControlResilienceSummaries>());
+  EXPECT_EQ("! Custom Object", outputControlResilienceSummariesClone2.comment());
 }
 
 TEST_F(ModelFixture, OutputControlTableStyle_UniqueModelObject_Clone) {
