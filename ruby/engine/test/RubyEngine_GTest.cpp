@@ -176,3 +176,21 @@ Traceback (most recent call last):
     },
     "stack level too deep");
 }
+
+TEST_F(RubyEngineFixture, hasMethod) {
+  {
+    const std::string classAndDirName = "ReportingMeasureWithoutModelOutputs";
+    const auto scriptPath = getScriptPath(classAndDirName);
+    auto measureScriptObject = (*thisEngine)->loadMeasure(scriptPath, classAndDirName);
+    EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "doesNotExists"));
+    // TODO: this will fail, because the BASE class has it.
+    EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests"));
+  }
+  {
+    const std::string classAndDirName = "ReportingMeasureWithModelOutputs";
+    const auto scriptPath = getScriptPath(classAndDirName);
+    auto measureScriptObject = (*thisEngine)->loadMeasure(scriptPath, classAndDirName);
+    EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "doesNotExists"));
+    EXPECT_TRUE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests"));
+  }
+}

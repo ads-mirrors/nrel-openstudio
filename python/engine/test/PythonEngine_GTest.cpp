@@ -174,3 +174,21 @@ TEST_F(PythonEngineFixture, AlfalfaMeasure) {
   measurePtr->run(model, runner, arguments);
   EXPECT_EQ(5, runner.alfalfa().points().size());
 }
+
+TEST_F(PythonEngineFixture, hasMethod) {
+  {
+    const std::string classAndDirName = "ReportingMeasureWithoutModelOutputs";
+    const auto scriptPath = getScriptPath(classAndDirName);
+    auto measureScriptObject = (*thisEngine)->loadMeasure(scriptPath, classAndDirName);
+    EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "doesNotExists"));
+    // TODO: this will fail, because the BASE class has it.
+    EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests"));
+  }
+  {
+    const std::string classAndDirName = "ReportingMeasureWithModelOutputs";
+    const auto scriptPath = getScriptPath(classAndDirName);
+    auto measureScriptObject = (*thisEngine)->loadMeasure(scriptPath, classAndDirName);
+    EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "doesNotExists"));
+    EXPECT_TRUE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests"));
+  }
+}
