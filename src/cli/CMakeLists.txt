@@ -358,6 +358,11 @@ if(BUILD_TESTING)
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/workflow/output_test/"
     )
 
+    add_test(NAME OpenStudioCLI.test_reporting_modeloutputrequests
+      COMMAND ${Python_EXECUTABLE} -m pytest --verbose --os-cli-path $<TARGET_FILE:openstudio> "${CMAKE_CURRENT_SOURCE_DIR}/test/test_reporting_modeloutputrequests.py"
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/workflow/reporting_modeloutputrequests/"
+    )
+
     file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/Testing/")
     add_test(NAME OpenStudioCLI.test_bcl_measure_templates
       COMMAND ${Python_EXECUTABLE} -m pytest --verbose --os-cli-path $<TARGET_FILE:openstudio> "${CMAKE_CURRENT_SOURCE_DIR}/test/test_bcl_measure_templates.py"

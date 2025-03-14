@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<measure>
+  <schema_version>3.1</schema_version>
+  <name>ruby_reporting_measure_without_model_output_requests</name>
+  <uid>7fe3d1eb-2118-4cac-91e3-94fd489b97af</uid>
+  <version_id>0339fec9-7f58-4e81-8239-d8423927bcdb</version_id>
+  <version_modified>2025-03-14T16:33:21Z</version_modified>
+  <xml_checksum>58F01CAA</xml_checksum>
+  <class_name>RubyReportingMeasureWithoutModelOutputRequests</class_name>
+  <display_name>Reporting Measure without Model Output Requests</display_name>
+  <description>An older reporting measure that does not have modelOutputRequests</description>
+  <modeler_description>This is a measure that was added before 3.10.0</modeler_description>
+  <arguments>
+    <argument>
+      <name>report_drybulb_temp</name>
+      <display_name>Add output variables for Drybulb Temperature</display_name>
+      <description>Will add drybulb temp and report min/mix value in html.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+  </arguments>
+  <outputs />
+  <provenances />
+  <tags>
+    <tag>Reporting.QAQC</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ReportingMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Measure Language</name>
+      <value>Ruby</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.9.0</identifier>
+        <min_compatible>3.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>B60F2759</checksum>
+    </file>
+  </files>
+</measure>
