@@ -251,8 +251,8 @@ bool RubyEngine::hasMethod(ScriptObject& methodObject, std::string_view methodNa
   // Instead, this is equivalent to `instance_obj.class.instance_methods(false).include?(:methodName)`
   VALUE klass = rb_obj_class(val);
   // include_methods_from_ancestors: false;
-  VALUE argv[1] = {Qfalse};
-  VALUE methods_without_ancestors = rb_class_instance_methods(1, argv, klass);
+  VALUE args[1] = {Qfalse};
+  VALUE methods_without_ancestors = rb_class_instance_methods(1, args, klass);
   return rb_ary_includes(methods_without_ancestors, ID2SYM(method_id)) == Qtrue;
 }
 
