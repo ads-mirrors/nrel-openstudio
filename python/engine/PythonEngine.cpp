@@ -413,18 +413,33 @@ int PythonEngine::numberOfArguments(ScriptObject& methodObject, std::string_view
   return numberOfArguments;
 }
 
-bool PythonEngine::hasMethod(ScriptObject& methodObject, std::string_view methodName) {
+bool PythonEngine::hasMethod(ScriptObject& methodObject, std::string_view methodName, bool overriden_only) {
   auto val = std::any_cast<PythonObject>(methodObject.object);
   if (PyObject_HasAttrString(val.obj_, methodName.data()) == 0) {
     return false;
   }
   PyObject* method = PyObject_GetAttrString(val.obj_, methodName.data());  // New reference
-  bool result = false;
-  if (PyMethod_Check(method)) {
-    result = true;
+  if (PyMethod_Check(method) == 0) {
+    // Should never happen with modelOutputRequests since the Base class (C++) has it
+    return false;
+  }
+  Py_DECREF(method);
+  if (!overriden_only) {
+    return true;
   }
 
-  Py_DECREF(method);
+  // equivalent to getattr(instance_obj.__class__, method_name) == getattr(instance_obj.__class__.__bases__[0], method_name)
+  PyTypeObject* class_type = Py_TYPE(val.obj_);  // PyObject_Type returns a strong (New) reference, not needed for us
+  PyObject* class_method = PyObject_GetAttrString((PyObject*)class_type, methodName.data());  // New reference
+
+  assert(class_type->tp_base != nullptr);
+  auto* base = (PyTypeObject*)class_type->tp_base;
+  PyObject* base_method = PyObject_GetAttrString((PyObject*)base, methodName.data());  // New reference
+
+  bool result = class_method != base_method;
+  Py_DECREF(class_method);
+  Py_DECREF(base_method);
+
   return result;
 }
 

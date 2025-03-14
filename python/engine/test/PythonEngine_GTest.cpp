@@ -181,7 +181,7 @@ TEST_F(PythonEngineFixture, hasMethod) {
     const auto scriptPath = getScriptPath(classAndDirName);
     auto measureScriptObject = (*thisEngine)->loadMeasure(scriptPath, classAndDirName);
     EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "doesNotExists"));
-    // TODO: this will fail, because the BASE class has it.
+    EXPECT_TRUE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests", false));  // overriden_only = false
     EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests"));
   }
   {
@@ -189,6 +189,7 @@ TEST_F(PythonEngineFixture, hasMethod) {
     const auto scriptPath = getScriptPath(classAndDirName);
     auto measureScriptObject = (*thisEngine)->loadMeasure(scriptPath, classAndDirName);
     EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "doesNotExists"));
+    EXPECT_TRUE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests", false));  // overriden_only = false
     EXPECT_TRUE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests"));
   }
 }

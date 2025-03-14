@@ -80,8 +80,8 @@ class ScriptEngine
   // Returns number of arguments for methodName of the object methodObject
   virtual int numberOfArguments(ScriptObject& methodObject, std::string_view methodName) = 0;
 
-  // Check if methodObject has a method called methodName
-  virtual bool hasMethod(ScriptObject& methodObject, std::string_view methodName) = 0;
+  // Check if methodObject has a method called methodName. If overriden_only, will only look into the current subclass, not the parent ones
+  virtual bool hasMethod(ScriptObject& methodObject, std::string_view methodName, bool overriden_only = true) = 0;
 
   template <typename T>
   T getAs(ScriptObject& obj) {

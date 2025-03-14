@@ -38,7 +38,7 @@ class PythonEngine final : public ScriptEngine
 
   virtual int numberOfArguments(ScriptObject& methodObject, std::string_view methodName) override;
 
-  virtual bool hasMethod(ScriptObject& methodObject, std::string_view methodName) override;
+  virtual bool hasMethod(ScriptObject& methodObject, std::string_view methodName, bool overriden_only) override;
 
  protected:
   void* getAs_impl(ScriptObject& obj, const std::type_info&) override;
