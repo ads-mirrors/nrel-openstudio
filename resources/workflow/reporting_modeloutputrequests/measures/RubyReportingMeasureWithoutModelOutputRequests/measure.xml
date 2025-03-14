@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>ruby_reporting_measure_without_model_output_requests</name>
   <uid>7fe3d1eb-2118-4cac-91e3-94fd489b97af</uid>
-  <version_id>0339fec9-7f58-4e81-8239-d8423927bcdb</version_id>
-  <version_modified>2025-03-14T16:33:21Z</version_modified>
+  <version_id>e1ce6548-a004-4697-9c10-090eee9f413b</version_id>
+  <version_modified>2025-03-14T16:42:49Z</version_modified>
   <xml_checksum>58F01CAA</xml_checksum>
   <class_name>RubyReportingMeasureWithoutModelOutputRequests</class_name>
   <display_name>Reporting Measure without Model Output Requests</display_name>
@@ -57,7 +57,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B60F2759</checksum>
+      <checksum>3605AEE1</checksum>
     </file>
   </files>
 </measure>

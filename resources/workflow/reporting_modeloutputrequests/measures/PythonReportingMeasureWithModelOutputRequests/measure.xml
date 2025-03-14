@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>python_reporting_measure_with_model_output_requests</name>
   <uid>90b5aa6c-a23d-4be3-b24a-a695d27e3848</uid>
-  <version_id>5ddc1769-f3f2-466f-9272-617a0cd080d9</version_id>
-  <version_modified>2025-03-14T16:35:06Z</version_modified>
+  <version_id>735c4950-ce2a-49da-bec9-d08a55e06496</version_id>
+  <version_modified>2025-03-14T16:42:28Z</version_modified>
   <xml_checksum>1DA817AF</xml_checksum>
   <class_name>PythonReportingMeasureWithModelOutputRequests</class_name>
   <display_name>Reporting Measure with Model Output Requests</display_name>
@@ -77,7 +77,7 @@
       <filename>measure.py</filename>
       <filetype>py</filetype>
       <usage_type>script</usage_type>
-      <checksum>C198FABF</checksum>
+      <checksum>70ECC2B3</checksum>
     </file>
   </files>
 </measure>

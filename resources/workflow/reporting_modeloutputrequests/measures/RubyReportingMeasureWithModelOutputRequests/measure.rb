@@ -84,13 +84,13 @@ class RubyReportingMeasureWithModelOutputRequests < OpenStudio::Measure::Reporti
     model = runner.lastOpenStudioModel
     if model.empty?
       runner.registerError('Cannot find last model.')
-      return false
+      return result
     end
     model = model.get
 
     # use the built-in error checking
     if !runner.validateUserArguments(arguments(model), user_arguments)
-      return false
+      return result
     end
 
     # NOTE: this should rather be done in modelOutputRequests

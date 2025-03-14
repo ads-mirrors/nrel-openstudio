@@ -111,13 +111,13 @@ class PythonReportingMeasureWithModelOutputRequests(openstudio.measure.Reporting
         model = runner.lastOpenStudioModel()
         if not model.is_initialized():
             runner.registerError("Cannot find last model.")
-            return False
+            return result
 
         model = model.get()
 
         # use the built-in error checking
         if not runner.validateUserArguments(self.arguments(model), user_arguments):
-            return False
+            return result
 
         if runner.getBoolArgumentValue("report_drybulb_temp", user_arguments):
             request = openstudio.IdfObject.load(
