@@ -14,7 +14,7 @@
 namespace openstudio {
 namespace measure {
 
-  ReportingMeasure::ReportingMeasure() : OSMeasure(MeasureType::ReportingMeasure){};
+  ReportingMeasure::ReportingMeasure() : OSMeasure(MeasureType::ReportingMeasure) {};
 
   std::vector<OSArgument> ReportingMeasure::arguments(const openstudio::model::Model& /*model*/) const {
     return {};
@@ -26,6 +26,11 @@ namespace measure {
 
   bool ReportingMeasure::run(OSRunner& runner, const std::map<std::string, OSArgument>& /*user_arguments*/) const {
     runner.prepareForMeasureRun(*this);
+    return true;
+  }
+
+  bool ReportingMeasure::modelOutputRequests(openstudio::model::Model& /*model*/, OSRunner& /*runner*/,
+                                             const std::map<std::string, OSArgument>& /*user_arguments*/) const {
     return true;
   }
 
