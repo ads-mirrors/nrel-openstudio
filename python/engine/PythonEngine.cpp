@@ -413,6 +413,21 @@ int PythonEngine::numberOfArguments(ScriptObject& methodObject, std::string_view
   return numberOfArguments;
 }
 
+bool PythonEngine::hasMethod(ScriptObject& methodObject, std::string_view methodName) {
+  auto val = std::any_cast<PythonObject>(methodObject.object);
+  if (PyObject_HasAttrString(val.obj_, methodName.data()) == 0) {
+    return false;
+  }
+  PyObject* method = PyObject_GetAttrString(val.obj_, methodName.data());  // New reference
+  bool result = false;
+  if (PyMethod_Check(method)) {
+    result = true;
+  }
+
+  Py_DECREF(method);
+  return result;
+}
+
 }  // namespace openstudio
 
 extern "C"

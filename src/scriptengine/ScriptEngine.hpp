@@ -77,7 +77,11 @@ class ScriptEngine
   // issue for the underlying ScriptObject (and VALUE or PyObject), so just return the ScriptObject
   virtual ScriptObject loadMeasure(const openstudio::path& measureScriptPath, std::string_view className) = 0;
 
+  // Returns number of arguments for methodName of the object methodObject
   virtual int numberOfArguments(ScriptObject& methodObject, std::string_view methodName) = 0;
+
+  // Check if methodObject has a method called methodName
+  virtual bool hasMethod(ScriptObject& methodObject, std::string_view methodName) = 0;
 
   template <typename T>
   T getAs(ScriptObject& obj) {

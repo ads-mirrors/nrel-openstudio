@@ -237,6 +237,12 @@ int RubyEngine::numberOfArguments(ScriptObject& methodObject, std::string_view m
   return rb_obj_method_arity(val, method_id);
 }
 
+bool RubyEngine::hasMethod(ScriptObject& methodObject, std::string_view methodName) {
+  auto val = std::any_cast<VALUE>(methodObject.object);
+  ID method_id = rb_intern(methodName.data());
+  return rb_respond_to(val, method_id) == 1;
+}
+
 }  // namespace openstudio
 
 extern "C"
