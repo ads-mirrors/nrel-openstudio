@@ -48,12 +48,40 @@ class RubyReportingMeasureWithoutModelOutputRequests < OpenStudio::Measure::Repo
 
   # return a vector of IdfObject's to request EnergyPlus objects needed by the run method
   # Warning: Do not change the name of this method to be snake_case. The method must be lowerCamelCase.
+  # This is done after ForwardTranslation to IDF, and there is a list of
+  # accepted objects
   def energyPlusOutputRequests(runner, user_arguments)
     super(runner, user_arguments)  # Do **NOT** remove this line
 
     result = OpenStudio::IdfObjectVector.new
 
     # To use the built-in error checking we need the model...
+    # get the last model and sql file
+    model = runner.lastOpenStudioModel
+    if model.empty?
+      runner.registerError('Cannot find last model.')
+      return result
+    end
+    model = model.get
+
+    # use the built-in error checking
+    if !runner.validateUserArguments(arguments(model), user_arguments)
+      return result
+    end
+
+    # NOTE: this should rather be done in modelOutputRequests
+    if runner.getBoolArgumentValue('report_drybulb_temp', user_arguments)
+      request = OpenStudio::IdfObject.load('Output:Variable,,Site Outdoor Air Drybulb Temperature,Hourly;').get
+      result << request
+    end
+
+    return result
+  end
+
+  # define what happens when the measure is run
+  def run(runner, user_arguments)
+    super(runner, user_arguments)
+
     # get the last model and sql file
     model = runner.lastOpenStudioModel
     if model.empty?

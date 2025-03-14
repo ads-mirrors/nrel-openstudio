@@ -154,7 +154,7 @@ class PythonReportingMeasureWithModelOutputRequests(openstudio.measure.Reporting
 
         sql_file = sql_file.get()
         model.setSqlFile(sql_file)
-        # write html file: any file named 'report*.*' in the current working directory
+        # write file: any file named 'report*.*' in the current working directory
         # will be copied to the ./reports/ folder as 'reports/<measure_class_name>_<filename>.html'
         Path("report_python_with.txt").write_text("OK")
 

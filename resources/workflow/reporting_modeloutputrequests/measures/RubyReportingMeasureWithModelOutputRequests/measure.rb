@@ -110,13 +110,13 @@ class RubyReportingMeasureWithModelOutputRequests < OpenStudio::Measure::Reporti
     model = runner.lastOpenStudioModel
     if model.empty?
       runner.registerError('Cannot find last model.')
-      return false
+      return result
     end
     model = model.get
 
     # use the built-in error checking (need model)
     if !runner.validateUserArguments(arguments(model), user_arguments)
-      return false
+      return result
     end
 
     # get measure arguments
@@ -126,7 +126,7 @@ class RubyReportingMeasureWithModelOutputRequests < OpenStudio::Measure::Reporti
     sql_file = runner.lastEnergyPlusSqlFile
     if sql_file.empty?
       runner.registerError('Cannot find last sql file.')
-      return false
+      return result
     end
     sql_file = sql_file.get
     model.setSqlFile(sql_file)
