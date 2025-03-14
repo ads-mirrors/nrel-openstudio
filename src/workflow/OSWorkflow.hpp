@@ -124,7 +124,15 @@ class OSWorkflow
 
   void initializeWeatherFileFromOSW();
   void updateLastWeatherFileFromModel();
-  void applyMeasures(MeasureType measureType, bool energyplus_output_requests = false);
+
+  enum class ApplyMeasureType
+  {
+    Regular = 0,
+    ModelOutputRequests,
+    EnergyPlusOutputRequest
+  };
+
+  void applyMeasures(MeasureType measureType, ApplyMeasureType = ApplyMeasureType::Regular);
   static void applyArguments(measure::OSArgumentMap& argumentMap, const std::string& argumentName, const openstudio::Variant& argumentValue);
   void saveOSMToRootDirIfDebug();
   void saveIDFToRootDirIfDebug();

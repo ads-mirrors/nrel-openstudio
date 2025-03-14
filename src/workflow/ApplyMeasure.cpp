@@ -45,7 +45,7 @@ bool isStepMarkedSkip(const std::map<std::string, openstudio::Variant>& stepArgs
   return skip_measure;
 }
 
-void OSWorkflow::applyMeasures(MeasureType measureType, bool energyplus_output_requests) {
+void OSWorkflow::applyMeasures(MeasureType measureType, ApplyMeasureType apply_measure_type) {
 
   if (m_add_timings && m_detailed_timings) {
     m_timers->newTimer(fmt::format("{}:apply_measures", measureType.valueName()), 1);
@@ -66,7 +66,7 @@ void OSWorkflow::applyMeasures(MeasureType measureType, bool energyplus_output_r
     auto stepArgs = step.arguments();
     const bool skip_measure = isStepMarkedSkip(stepArgs);
     if (skip_measure || runner.halted()) {
-      if (!energyplus_output_requests) {
+      if (apply_measure_type == ApplyMeasureType::Regular) {
         if (runner.halted()) {
           LOG(Info, fmt::format("Skipping measure '{}' because simulation halted", measureDirName));
         } else {
@@ -276,7 +276,16 @@ end
       } else if (measureType == MeasureType::EnergyPlusMeasure) {
         static_cast<openstudio::measure::EnergyPlusMeasure*>(measurePtr)->run(workspace_.get(), runner, argmap);
       } else if (measureType == MeasureType::ReportingMeasure) {
-        if (energyplus_output_requests) {
+        if (apply_measure_type == ApplyMeasureType::ModelOutputRequests) {
+          if ((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests")) {
+            auto n = model.numObjects();
+            LOG(Debug, "Calling measure.modelOutputRequests for '" << measureDirName << "'");
+            static_cast<openstudio::measure::ReportingMeasure*>(measurePtr)->modelOutputRequests(model, runner, argmap);
+            LOG(Debug, "Finished measure.modelOutputRequests for '" << measureDirName << "', " << (model.numObjects() - n) << " objects added");
+          } else {
+            LOG(Debug, "Reporting Measure '" << measureDirName << "' does not have a modelOutputRequests method");
+          }
+        } else if (apply_measure_type == ApplyMeasureType::EnergyPlusOutputRequest) {
           LOG(Debug, "Calling measure.energyPlusOutputRequests for '" << measureDirName << "'");
 
           std::vector<IdfObject> idfObjects;
@@ -295,7 +304,7 @@ end
       }
     } catch (const std::exception& e) {
       runner.registerError(e.what());
-      if (!energyplus_output_requests) {
+      if (apply_measure_type == ApplyMeasureType::Regular) {
         WorkflowStepResult result = runner.result();
         // incrementStep must be called after run
         runner.incrementStep();
@@ -306,7 +315,7 @@ end
     }
 
     // if doing output requests we are done now
-    if (!energyplus_output_requests) {
+    if (apply_measure_type == ApplyMeasureType::Regular) {
       WorkflowStepResult result = runner.result();
 
       // incrementStep must be called after run
