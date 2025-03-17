@@ -167,8 +167,13 @@ TEST_F(WorkflowFixture, Util_addEnergyPlusOutputRequest) {
     auto& newObject = energyPlusOutputRequests.emplace_back(IddObjectType::Schedule_Constant);
     newObject.setString(0, "AlwaysOn");
     newObject.setDouble(2, 1.0);
+
+    EXPECT_TRUE(w.getObjectByTypeAndName(IddObjectType::Schedule_Constant, "AlwaysOn"));
     EXPECT_FALSE(openstudio::workflow::util::addEnergyPlusOutputRequest(w, newObject));
-    EXPECT_EQ(1, w.getObjectsByType(IddObjectType::Schedule_Constant).size());
+    {
+      EXPECT_EQ(1, w.getObjectsByType(IddObjectType::Schedule_Constant).size());
+      EXPECT_TRUE(w.getObjectByTypeAndName(IddObjectType::Schedule_Constant, "AlwaysOn"));
+    }
   }
   {
     // Non unique, and not present already

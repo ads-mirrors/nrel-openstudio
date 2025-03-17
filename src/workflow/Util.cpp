@@ -172,43 +172,44 @@ bool mergeOutputTableSummaryReports(IdfObject& existingObject, const IdfObject& 
 }
 
 bool addEnergyPlusOutputRequest(Workspace& workspace, IdfObject& idfObject) {
+  const auto iddObject = idfObject.iddObject();
+  const bool is_unique = iddObject.properties().unique;
+  const auto iddObjectType = iddObject.type();
+  if (!is_unique) {
 
-  auto iddObjectType = idfObject.iddObject().type();
-
-  // If already present, don't do it
-  for (const auto& wo : workspace.getObjectsByType(iddObjectType)) {
-    if (idfObject.dataFieldsEqual(wo)) {
-      return false;
+    // If already present, don't do it
+    for (const auto& wo : workspace.getObjectsByType(iddObjectType)) {
+      if (idfObject.dataFieldsEqual(wo)) {
+        return false;
+      }
     }
-  }
 
-  workspace.addObject(idfObject);
+    workspace.addObject(idfObject);
 
-  return true;
-
-
-  //  static const std::vector<IddObjectType> allowedUniqueObjects{
-  //    // IddObjectType::Output_EnergyManagementSystem, // TODO: have to merge
-  //    // IddObjectType::OutputControl_SurfaceColorScheme, // TODO: have to merge
-  //    IddObjectType::Output_Table_SummaryReports,  // TODO: have to merge
-  //
-  //    // Not allowed
-  //    // IddObjectType::OutputControl_Table_Style,
-  //    // IddObjectType::OutputControl_ReportingTolerances,
-  //    // IddObjectType::Output_SQLite,
-  //  };
-
-  if (iddObjectType == IddObjectType::Output_Table_SummaryReports) {
+    return true;
+  } else if (iddObjectType == IddObjectType::Output_Table_SummaryReports) {
     auto summaryReports = workspace.getObjectsByType(iddObjectType);
     if (summaryReports.empty()) {
       workspace.addObject(idfObject);
       return true;
     } else {
-      mergeOutputTableSummaryReports(summaryReports.front(), idfObject);
+      return mergeOutputTableSummaryReports(summaryReports.front(), idfObject);
     }
+  } else {
+    // It's a unique one, for which we didn't write a merge, so remove it first
+    auto existingUniqueObjects = workspace.getObjectsByType(iddObjectType);
+    if (!existingUniqueObjects.empty()) {
+      // Technically it should be size == 1
+      if (std::ranges::any_of(existingUniqueObjects, [&idfObject](const auto& wo) { return idfObject.dataFieldsEqual(wo); })) {
+        return false;
+      }
+      for (auto& wo : existingUniqueObjects) {
+        wo.remove();
+      }
+    }
+    workspace.addObject(idfObject);
+    return true;
   }
-
-  return false;
 }
 
 /*****************************************************************************************************************************************************
