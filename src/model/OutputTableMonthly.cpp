@@ -52,8 +52,8 @@ namespace model {
   }
 
   std::ostream& operator<<(std::ostream& out, const openstudio::model::MonthlyVariableGroup& monthlyVariableGroup) {
-    out << "(Output Variable or Meter = '" << monthlyVariableGroup.variableOrMeterName() << "', "
-        << "Aggregation Type = '" << monthlyVariableGroup.aggregationType() << "')";
+    out << "(Output Variable or Meter = '" << monthlyVariableGroup.variableOrMeterName() << "', Aggregation Type = '"
+        << monthlyVariableGroup.aggregationType() << "')";
     return out;
   }
 
@@ -744,7 +744,7 @@ namespace model {
       const std::vector<MonthlyVariableGroup> groups = monthlyVariableGroups();
       auto it = std::find(groups.cbegin(), groups.cend(), monthlyVariableGroup);
       if (it != groups.end()) {
-        return std::distance(groups.cbegin(), it);
+        return static_cast<unsigned>(std::distance(groups.cbegin(), it));
       }
       return boost::none;
     }

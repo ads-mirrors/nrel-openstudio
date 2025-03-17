@@ -62,7 +62,7 @@ namespace model {
   }
 
   std::ostream& operator<<(std::ostream& out, const openstudio::model::AnnualVariableGroup& annualVariableGroup) {
-    out << "(Output Variable or Meter = '" << annualVariableGroup.variableorMeterorEMSVariableorField() << "', " << "Aggregation Type = '"
+    out << "(Output Variable or Meter = '" << annualVariableGroup.variableorMeterorEMSVariableorField() << "', Aggregation Type = '"
         << annualVariableGroup.aggregationType() << "', Digits After Decimal = " << annualVariableGroup.digitsAfterDecimal() << ")";
     return out;
   }
@@ -160,7 +160,7 @@ namespace model {
       const std::vector<AnnualVariableGroup> groups = annualVariableGroups();
       auto it = std::find(groups.cbegin(), groups.cend(), annualVariableGroup);
       if (it != groups.end()) {
-        return std::distance(groups.cbegin(), it);
+        return static_cast<unsigned>(std::distance(groups.cbegin(), it));
       }
       return boost::none;
     }
@@ -217,6 +217,7 @@ namespace model {
 
       for (const auto& annualVariableGroup : annualVariableGroups) {
         bool thisResult = addAnnualVariableGroup(annualVariableGroup);
+        // cppcheck-suppress knownConditionTrueFalse
         if (!thisResult) {
           LOG(Error, "Could not add AnnualVariableGroup " << annualVariableGroup << " to " << briefDescription() << ". Continuing with others.");
           // OS_ASSERT(false);
