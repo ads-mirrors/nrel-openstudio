@@ -274,8 +274,9 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslateOutputConstructions.cpp
   ForwardTranslator/ForwardTranslateEnvironmentalImpactFactors.cpp
   ForwardTranslator/ForwardTranslateFuelFactors.cpp
-  ForwardTranslator/ForwardTranslateOutputTableSummaryReports.cpp
+  ForwardTranslator/ForwardTranslateOutputTableAnnual.cpp
   ForwardTranslator/ForwardTranslateOutputTableMonthly.cpp
+  ForwardTranslator/ForwardTranslateOutputTableSummaryReports.cpp
   ForwardTranslator/ForwardTranslatePeople.cpp
   ForwardTranslator/ForwardTranslatePerformancePrecisionTradeoffs.cpp
   ForwardTranslator/ForwardTranslatePhotovoltaicPerformanceEquivalentOneDiode.cpp
@@ -574,8 +575,9 @@ set(${target_name}_src
   ReverseTranslator/ReverseTranslateOutputMeterCumulativeMeterFileOnly.cpp
   ReverseTranslator/ReverseTranslateOutputMeterMeterFileOnly.cpp
   ReverseTranslator/ReverseTranslateOutputVariable.cpp
-  ReverseTranslator/ReverseTranslateOutputTableSummaryReports.cpp
+  ReverseTranslator/ReverseTranslateOutputTableAnnual.cpp
   ReverseTranslator/ReverseTranslateOutputTableMonthly.cpp
+  ReverseTranslator/ReverseTranslateOutputTableSummaryReports.cpp
   ReverseTranslator/ReverseTranslatePeople.cpp
   ReverseTranslator/ReverseTranslatePerformancePrecisionTradeoffs.cpp
   ReverseTranslator/ReverseTranslatePhotovoltaicPerformanceSandia.cpp
@@ -788,6 +790,7 @@ set(${target_name}_test_src
   Test/OutputSQLite_GTest.cpp
   Test/OutputEnvironmentalImpactFactors_GTest.cpp
   Test/OutputTableSummaryReports_GTest.cpp
+  Test/OutputTableAnnual_GTest.cpp
   Test/OutputTableMonthly_GTest.cpp
   Test/OutputSchedules_GTest.cpp
   Test/OutputConstructions_GTest.cpp

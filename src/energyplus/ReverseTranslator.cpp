@@ -697,6 +697,10 @@ namespace energyplus {
         modelObject = translateOutputMeterMeterFileOnly(workspaceObject);
         break;
       }
+      case openstudio::IddObjectType::Output_Table_Annual: {
+        modelObject = translateOutputTableAnnual(workspaceObject);
+        break;
+      }
       case openstudio::IddObjectType::Output_Table_Monthly: {
         modelObject = translateOutputTableMonthly(workspaceObject);
         break;

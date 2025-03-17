@@ -51,7 +51,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_OutputTableMonthly) {
     EXPECT_TRUE(outputTableMonthly.addMonthlyVariableGroups(groups));
     EXPECT_EQ(2, outputTableMonthly.numberofMonthlyVariableGroups());
 
-    // Zero Extensible Groups = not translated
     const Workspace w = ft.translateModel(m);
     const auto wos = w.getObjectsByType(IddObjectType::Output_Table_Monthly);
     ASSERT_EQ(1u, wos.size());
