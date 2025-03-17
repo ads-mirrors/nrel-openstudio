@@ -49,7 +49,7 @@ namespace model {
 
   std::ostream& operator<<(std::ostream& out, const openstudio::model::MonthlyVariableGroup& monthlyVariableGroup) {
     out << "(Output Variable or Meter = '" << monthlyVariableGroup.variableOrMeterName() << "', "
-        << "Aggregation Type = " << monthlyVariableGroup.aggregationType() << "')";
+        << "Aggregation Type = '" << monthlyVariableGroup.aggregationType() << "')";
     return out;
   }
 
