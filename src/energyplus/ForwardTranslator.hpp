@@ -311,6 +311,7 @@ namespace model {
   class OutputVariable;
   class OutputEnergyManagementSystem;
   class OutputTableSummaryReports;
+  class OutputTableMonthly;
   class People;
   class PerformancePrecisionTradeoffs;
   class PhotovoltaicPerformanceEquivalentOneDiode;
@@ -1200,6 +1201,8 @@ namespace energyplus {
     boost::optional<IdfObject> translateOutputEnergyManagementSystem(model::OutputEnergyManagementSystem& modelObject);
 
     boost::optional<IdfObject> translateOutputTableSummaryReports(model::OutputTableSummaryReports& modelObject);
+
+    boost::optional<IdfObject> translateOutputTableMonthly(model::OutputTableMonthly& modelObject);
 
     boost::optional<IdfObject> translatePeople(model::People& modelObject);
 

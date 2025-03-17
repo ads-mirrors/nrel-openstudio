@@ -2380,6 +2380,11 @@ namespace energyplus {
         retVal = translateOutputTableSummaryReports(summaryReports);
         break;
       }
+      case openstudio::IddObjectType::OS_Output_Table_Monthly: {
+        auto mo = modelObject.cast<OutputTableMonthly>();
+        retVal = translateOutputTableMonthly(mo);
+        break;
+      }
       case openstudio::IddObjectType::OS_People: {
         auto people = modelObject.cast<People>();
         retVal = translatePeople(people);
@@ -3387,6 +3392,8 @@ namespace energyplus {
       // IddObjectType::OS_FuelFactors,
 
       IddObjectType::OS_Output_Table_SummaryReports,
+      IddObjectType::OS_Output_Table_Monthly,
+
       IddObjectType::OS_PerformancePrecisionTradeoffs,
 
       IddObjectType::OS_Site,

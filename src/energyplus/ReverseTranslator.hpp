@@ -251,6 +251,8 @@ namespace energyplus {
 
     boost::optional<model::ModelObject> translateOutputTableSummaryReports(const WorkspaceObject& workspaceObject);
 
+    boost::optional<model::ModelObject> translateOutputTableMonthly(const WorkspaceObject& workspaceObject);
+
     boost::optional<model::ModelObject> translateOtherEquipment(const WorkspaceObject& workspaceObject);
 
     boost::optional<model::ModelObject> translateOutputEnergyManagementSystem(const WorkspaceObject& workspaceObject);
