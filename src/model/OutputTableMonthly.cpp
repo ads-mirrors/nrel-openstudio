@@ -47,6 +47,10 @@ namespace model {
     return (!operator==(other));
   }
 
+  bool MonthlyVariableGroup::isAggregationTypeAdvanced() const {
+    return OutputTableMonthly::isAggregationTypeAdvanced(m_aggregationType);
+  }
+
   std::ostream& operator<<(std::ostream& out, const openstudio::model::MonthlyVariableGroup& monthlyVariableGroup) {
     out << "(Output Variable or Meter = '" << monthlyVariableGroup.variableOrMeterName() << "', "
         << "Aggregation Type = '" << monthlyVariableGroup.aggregationType() << "')";
@@ -147,12 +151,14 @@ namespace model {
     }
 
     bool OutputTableMonthly_Impl::addMonthlyVariableGroup(const MonthlyVariableGroup& monthlyVariableGroup) {
-      boost::optional<unsigned> existingIndex_ = monthlyVariableGroupIndex(monthlyVariableGroup);
-      if (existingIndex_) {
-        LOG(Warn, "For " << briefDescription() << ", MonthlyVariableGroup already exists: " << monthlyVariableGroup);
-        return false;
+      if (!monthlyVariableGroup.isAggregationTypeAdvanced()) {
+        boost::optional<unsigned> existingIndex_ = monthlyVariableGroupIndex(monthlyVariableGroup);
+        if (existingIndex_) {
+          LOG(Warn, "For " << briefDescription()
+                           << ", MonthlyVariableGroup already exists and is not an Advanced Aggregation Type: " << monthlyVariableGroup);
+          return false;
+        }
       }
-
       IdfExtensibleGroup eg = pushExtensibleGroup(StringVector());
       eg.setString(OS_Output_Table_MonthlyExtensibleFields::VariableorMeterName, monthlyVariableGroup.variableOrMeterName());
       eg.setString(OS_Output_Table_MonthlyExtensibleFields::AggregationTypeforVariableorMeter, monthlyVariableGroup.aggregationType());
@@ -213,6 +219,21 @@ namespace model {
     return std::find_if(vals.cbegin(), vals.cend(),
                         [&aggregationType](const std::string& choice) { return openstudio::istringEqual(aggregationType, choice); })
            != vals.cend();
+  }
+
+  bool OutputTableMonthly::isAggregationTypeAdvanced(const std::string& aggregationType) {
+    auto const& vals = advancedAggregationTypes();
+    return std::find_if(vals.cbegin(), vals.cend(),
+                        [&aggregationType](const std::string& choice) { return openstudio::istringEqual(aggregationType, choice); })
+           != vals.cend();
+  }
+
+  const std::vector<std::string>& OutputTableMonthly::advancedAggregationTypes() {
+    static std::vector<std::string> result;
+    if (result.empty()) {
+      result = {"ValueWhenMaximumOrMinimum", "SumOrAverageDuringHoursShown", "MaximumDuringHoursShown", "MinimumDuringHoursShown"};
+    }
+    return result;
   }
 
   IddObjectType OutputTableMonthly::iddObjectType() {

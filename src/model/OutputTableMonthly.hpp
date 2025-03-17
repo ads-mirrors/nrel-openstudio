@@ -26,6 +26,8 @@ namespace model {
     std::string variableOrMeterName() const;
     std::string aggregationType() const;
 
+    bool isAggregationTypeAdvanced() const;
+
     bool operator==(const MonthlyVariableGroup& other) const;
     bool operator!=(const MonthlyVariableGroup& other) const;
 
@@ -61,6 +63,8 @@ namespace model {
     static std::vector<std::string> aggregationTypeValues();
     static std::vector<std::string> validAggregationTypes();
     static bool isAggregationTypeValid(const std::string& aggregationType);
+    static bool isAggregationTypeAdvanced(const std::string& aggregationType);
+    static const std::vector<std::string>& advancedAggregationTypes();
 
     /** @name Getters */
     //@{

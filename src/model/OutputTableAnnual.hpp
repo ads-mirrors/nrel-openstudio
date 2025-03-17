@@ -30,6 +30,8 @@ namespace model {
     std::string aggregationType() const;
     int digitsAfterDecimal() const;
 
+    bool isAggregationTypeAdvanced() const;
+
     // Only checks on variableorMeterorEMSVariableorField and aggregationType, not digitsAfterDecimal
     bool operator==(const AnnualVariableGroup& other) const;
     bool operator!=(const AnnualVariableGroup& other) const;
@@ -67,6 +69,8 @@ namespace model {
     static std::vector<std::string> aggregationTypeValues();
     static std::vector<std::string> validAggregationTypes();
     static bool isAggregationTypeValid(const std::string& aggregationType);
+    static bool isAggregationTypeAdvanced(const std::string& aggregationType);
+    static const std::vector<std::string>& advancedAggregationTypes();
 
     /** @name Getters */
     //@{
@@ -86,8 +90,6 @@ namespace model {
     bool setSchedule(Schedule& schedule);
 
     void resetSchedule();
-
-    // TODO: Handle this object's extensible fields.
 
     //@}
     /** @name Other */

@@ -48,6 +48,10 @@ namespace model {
     return m_digitsAfterDecimal;
   }
 
+  bool AnnualVariableGroup::isAggregationTypeAdvanced() const {
+    return OutputTableAnnual::isAggregationTypeAdvanced(m_aggregationType);
+  }
+
   bool AnnualVariableGroup::operator==(const AnnualVariableGroup& other) const {
     return openstudio::istringEqual(variableorMeterorEMSVariableorField(), other.variableorMeterorEMSVariableorField())
            && openstudio::istringEqual(aggregationType(), other.aggregationType());
@@ -187,12 +191,16 @@ namespace model {
     }
 
     bool OutputTableAnnual_Impl::addAnnualVariableGroup(const AnnualVariableGroup& annualVariableGroup) {
-      boost::optional<unsigned> existingIndex_ = annualVariableGroupIndex(annualVariableGroup);
-      if (existingIndex_) {
-        boost::optional<AnnualVariableGroup> group_ = getAnnualVariableGroup(existingIndex_.get());
-        OS_ASSERT(group_);
-        LOG(Warn, "For " << briefDescription() << ", AnnualVariableGroup already exists, will be modified in place from " << group_.get() << " to "
-                         << annualVariableGroup << ".");
+      boost::optional<unsigned> existingIndex_;
+      if (!annualVariableGroup.isAggregationTypeAdvanced()) {
+        existingIndex_ = annualVariableGroupIndex(annualVariableGroup);
+        if (existingIndex_) {
+          boost::optional<AnnualVariableGroup> group_ = getAnnualVariableGroup(existingIndex_.get());
+          OS_ASSERT(group_);
+          LOG(Warn, "For " << briefDescription()
+                           << ", AnnualVariableGroup already exists and is not an Advanced Aggregation Type, will be modified in place from "
+                           << group_.get() << " to " << annualVariableGroup << ".");
+        }
       }
 
       // If existing, get it, otherwise Push an extensible group. ModelExtensibleGroup cannot be default-constructed, so use a ternary operator
@@ -255,6 +263,21 @@ namespace model {
     return std::find_if(vals.cbegin(), vals.cend(),
                         [&aggregationType](const std::string& choice) { return openstudio::istringEqual(aggregationType, choice); })
            != vals.cend();
+  }
+
+  bool OutputTableAnnual::isAggregationTypeAdvanced(const std::string& aggregationType) {
+    auto const& vals = advancedAggregationTypes();
+    return std::find_if(vals.cbegin(), vals.cend(),
+                        [&aggregationType](const std::string& choice) { return openstudio::istringEqual(aggregationType, choice); })
+           != vals.cend();
+  }
+
+  const std::vector<std::string>& OutputTableAnnual::advancedAggregationTypes() {
+    static std::vector<std::string> result;
+    if (result.empty()) {
+      result = {"ValueWhenMaximumOrMinimum", "SumOrAverageDuringHoursShown", "MaximumDuringHoursShown", "MinimumDuringHoursShown"};
+    }
+    return result;
   }
 
   IddObjectType OutputTableAnnual::iddObjectType() {

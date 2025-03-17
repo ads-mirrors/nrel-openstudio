@@ -151,3 +151,24 @@ TEST_F(ModelFixture, OutputTableAnnual_AnnualVariableGroups) {
   EXPECT_EQ(group3.digitsAfterDecimal(), groups[2].digitsAfterDecimal());
   EXPECT_EQ(group3, groups[2]);
 }
+
+TEST_F(ModelFixture, OutputTableAnnual_AdvancedAggregationTypes) {
+
+  Model m;
+  EXPECT_FALSE(OutputTableAnnual::isAggregationTypeAdvanced("SumOrAverage"));
+  EXPECT_TRUE(OutputTableAnnual::isAggregationTypeAdvanced("ValueWhenMaximumOrMinimum"));
+
+  std::vector<AnnualVariableGroup> groups{
+    {"Zone Air System Sensible Cooling Energy", "SumOrAverage"},
+    {"Site Outdoor Air Drybulb Temperature", "ValueWhenMaximumOrMinimum"},
+    {"Zone Total Internal Latent Gain Energy", "SumOrAverage"},
+    {"Site Outdoor Air Drybulb Temperature", "ValueWhenMaximumOrMinimum"},
+  };
+
+  OutputTableAnnual table(m);
+
+  for (const auto& group : groups) {
+    EXPECT_TRUE(table.addAnnualVariableGroup(group));
+  }
+  EXPECT_EQ(4, table.numberofAnnualVariableGroups());
+}

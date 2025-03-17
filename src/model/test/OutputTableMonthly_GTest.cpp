@@ -123,3 +123,24 @@ TEST_F(ModelFixture, OutputTableMonthly_MonthlyVariableGroups) {
   EXPECT_EQ(group3.aggregationType(), groups[2].aggregationType());
   EXPECT_EQ(group3, groups[2]);
 }
+
+TEST_F(ModelFixture, OutputTableMonthly_AdvancedAggregationTypes) {
+
+  Model m;
+  EXPECT_FALSE(OutputTableMonthly::isAggregationTypeAdvanced("SumOrAverage"));
+  EXPECT_TRUE(OutputTableMonthly::isAggregationTypeAdvanced("ValueWhenMaximumOrMinimum"));
+
+  std::vector<MonthlyVariableGroup> groups{
+    {"Zone Air System Sensible Cooling Energy", "SumOrAverage"},
+    {"Site Outdoor Air Drybulb Temperature", "ValueWhenMaximumOrMinimum"},
+    {"Zone Total Internal Latent Gain Energy", "SumOrAverage"},
+    {"Site Outdoor Air Drybulb Temperature", "ValueWhenMaximumOrMinimum"},
+  };
+
+  OutputTableMonthly table(m);
+
+  for (const auto& group : groups) {
+    EXPECT_TRUE(table.addMonthlyVariableGroup(group));
+  }
+  EXPECT_EQ(4, table.numberofMonthlyVariableGroups());
+}
