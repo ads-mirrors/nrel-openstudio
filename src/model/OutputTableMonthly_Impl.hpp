@@ -29,7 +29,7 @@ namespace model {
 
       OutputTableMonthly_Impl(const OutputTableMonthly_Impl& other, Model_Impl* model, bool keepHandle);
 
-      virtual ~OutputTableMonthly_Impl() = default;
+      virtual ~OutputTableMonthly_Impl() override = default;
 
       //@}
       /** @name Virtual Methods */
@@ -63,7 +63,7 @@ namespace model {
       boost::optional<unsigned> monthlyVariableGroupIndex(const MonthlyVariableGroup& monthlyVariableGroup) const;
       boost::optional<MonthlyVariableGroup> getMonthlyVariableGroup(unsigned groupIndex) const;
 
-      bool addMonthlyVariableGroup(const MonthlyVariableGroup& group);
+      bool addMonthlyVariableGroup(const MonthlyVariableGroup& monthlyVariableGroup);
       bool addMonthlyVariableGroups(const std::vector<MonthlyVariableGroup>& monthlyVariableGroups);
       bool removeMonthlyVariableGroup(unsigned groupIndex);
       void removeAllMonthlyVariableGroups();

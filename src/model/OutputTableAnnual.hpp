@@ -53,7 +53,7 @@ namespace model {
 
     explicit OutputTableAnnual(const Model& model);
 
-    virtual ~OutputTableAnnual() = default;
+    virtual ~OutputTableAnnual() override = default;
     // Default the copy and move operators because the virtual dtor is explicit
     OutputTableAnnual(const OutputTableAnnual& other) = default;
     OutputTableAnnual(OutputTableAnnual&& other) = default;

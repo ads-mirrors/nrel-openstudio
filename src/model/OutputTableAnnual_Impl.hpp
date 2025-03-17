@@ -30,7 +30,7 @@ namespace model {
 
       OutputTableAnnual_Impl(const OutputTableAnnual_Impl& other, Model_Impl* model, bool keepHandle);
 
-      virtual ~OutputTableAnnual_Impl() = default;
+      virtual ~OutputTableAnnual_Impl() override = default;
 
       //@}
       /** @name Virtual Methods */
@@ -74,7 +74,7 @@ namespace model {
       boost::optional<unsigned> annualVariableGroupIndex(const AnnualVariableGroup& annualVariableGroup) const;
       boost::optional<AnnualVariableGroup> getAnnualVariableGroup(unsigned groupIndex) const;
 
-      bool addAnnualVariableGroup(const AnnualVariableGroup& group);
+      bool addAnnualVariableGroup(const AnnualVariableGroup& annualVariableGroup);
       bool addAnnualVariableGroups(const std::vector<AnnualVariableGroup>& annualVariableGroups);
       bool removeAnnualVariableGroup(unsigned groupIndex);
       void removeAllAnnualVariableGroups();

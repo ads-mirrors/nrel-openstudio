@@ -301,8 +301,8 @@ namespace model {
     return getImpl<detail::OutputTableAnnual_Impl>()->getAnnualVariableGroup(groupIndex);
   }
 
-  bool OutputTableAnnual::addAnnualVariableGroup(const AnnualVariableGroup& group) {
-    return getImpl<detail::OutputTableAnnual_Impl>()->addAnnualVariableGroup(group);
+  bool OutputTableAnnual::addAnnualVariableGroup(const AnnualVariableGroup& annualVariableGroup) {
+    return getImpl<detail::OutputTableAnnual_Impl>()->addAnnualVariableGroup(annualVariableGroup);
   }
 
   bool OutputTableAnnual::addAnnualVariableGroup(std::string variableorMeterorEMSVariableorField, std::string aggregationType,

@@ -243,8 +243,8 @@ namespace model {
     return getImpl<detail::OutputTableMonthly_Impl>()->getMonthlyVariableGroup(groupIndex);
   }
 
-  bool OutputTableMonthly::addMonthlyVariableGroup(const MonthlyVariableGroup& group) {
-    return getImpl<detail::OutputTableMonthly_Impl>()->addMonthlyVariableGroup(group);
+  bool OutputTableMonthly::addMonthlyVariableGroup(const MonthlyVariableGroup& monthlyVariableGroup) {
+    return getImpl<detail::OutputTableMonthly_Impl>()->addMonthlyVariableGroup(monthlyVariableGroup);
   }
 
   bool OutputTableMonthly::addMonthlyVariableGroup(std::string variableOrMeterName, std::string aggregationType) {

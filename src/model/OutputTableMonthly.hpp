@@ -47,7 +47,7 @@ namespace model {
 
     explicit OutputTableMonthly(const Model& model);
 
-    virtual ~OutputTableMonthly() = default;
+    virtual ~OutputTableMonthly() override = default;
     // Default the copy and move operators because the virtual dtor is explicit
     OutputTableMonthly(const OutputTableMonthly& other) = default;
     OutputTableMonthly(OutputTableMonthly&& other) = default;
