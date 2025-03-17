@@ -12,6 +12,8 @@
 namespace openstudio {
 namespace model {
 
+  class MonthlyVariableGroup;
+
   namespace detail {
 
     /** OutputTableMonthly_Impl is a ModelObject_Impl that is the implementation class for OutputTableMonthly.*/
@@ -43,19 +45,28 @@ namespace model {
 
       int digitsAfterDecimal() const;
 
-      // TODO: Handle this object's extensible fields.
-
       //@}
       /** @name Setters */
       //@{
 
       bool setDigitsAfterDecimal(int digitsAfterDecimal);
 
-      // TODO: Handle this object's extensible fields.
-
       //@}
       /** @name Other */
       //@{
+
+      // Handle this object's extensible fields.
+      std::vector<MonthlyVariableGroup> monthlyVariableGroups() const;
+
+      unsigned int numberofMonthlyVariableGroups() const;
+
+      boost::optional<unsigned> monthlyVariableGroupIndex(const MonthlyVariableGroup& monthlyVariableGroup) const;
+      boost::optional<MonthlyVariableGroup> getMonthlyVariableGroup(unsigned groupIndex) const;
+
+      bool addMonthlyVariableGroup(const MonthlyVariableGroup& group);
+      bool addMonthlyVariableGroups(const std::vector<MonthlyVariableGroup>& monthlyVariableGroups);
+      bool removeMonthlyVariableGroup(unsigned groupIndex);
+      void removeAllMonthlyVariableGroups();
 
       //@}
      protected:

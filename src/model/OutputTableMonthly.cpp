@@ -6,13 +6,52 @@
 #include "OutputTableMonthly.hpp"
 #include "OutputTableMonthly_Impl.hpp"
 
+#include "ModelExtensibleGroup.hpp"
+
 #include "../utilities/core/Assert.hpp"
 
 #include <utilities/idd/IddEnums.hxx>
+#include <utilities/idd/IddFactory.hxx>
 #include <utilities/idd/OS_Output_Table_Monthly_FieldEnums.hxx>
+
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 
 namespace openstudio {
 namespace model {
+
+  MonthlyVariableGroup::MonthlyVariableGroup(std::string variableOrMeterName, std::string aggregationType)
+    : m_variableOrMeterName(std::move(variableOrMeterName)), m_aggregationType(std::move(aggregationType)) {
+    if (m_variableOrMeterName.empty()) {
+      LOG_AND_THROW("Variable or Meter Name can't be empty");
+    }
+    if (!OutputTableMonthly::isAggregationTypeValid(m_aggregationType)) {
+      LOG_AND_THROW(fmt::format("Invalid aggregation type '{}': {}", m_aggregationType, OutputTableMonthly::aggregationTypeValues()));
+    }
+  }
+
+  std::string MonthlyVariableGroup::variableOrMeterName() const {
+    return m_variableOrMeterName;
+  }
+
+  std::string MonthlyVariableGroup::aggregationType() const {
+    return m_aggregationType;
+  }
+
+  bool MonthlyVariableGroup::operator==(const MonthlyVariableGroup& other) const {
+    return openstudio::istringEqual(variableOrMeterName(), other.variableOrMeterName())
+           && openstudio::istringEqual(aggregationType(), other.aggregationType());
+  }
+
+  bool MonthlyVariableGroup::operator!=(const MonthlyVariableGroup& other) const {
+    return (!operator==(other));
+  }
+
+  std::ostream& operator<<(std::ostream& out, const openstudio::model::MonthlyVariableGroup& monthlyVariableGroup) {
+    out << "(Output Variable or Meter = '" << monthlyVariableGroup.variableOrMeterName() << "', "
+        << "Aggregation Type = " << monthlyVariableGroup.aggregationType() << "')";
+    return out;
+  }
 
   namespace detail {
 
@@ -51,17 +90,129 @@ namespace model {
       return result;
     }
 
+    unsigned int OutputTableMonthly_Impl::numberofMonthlyVariableGroups() const {
+      return numExtensibleGroups();
+    }
+
+    std::vector<MonthlyVariableGroup> OutputTableMonthly_Impl::monthlyVariableGroups() const {
+      std::vector<MonthlyVariableGroup> result;
+
+      for (unsigned i = 0; i < numberofMonthlyVariableGroups(); ++i) {
+
+        boost::optional<MonthlyVariableGroup> group_ = getMonthlyVariableGroup(i);
+
+        // getMonthlyVariableGroup is responsible for handling error and issuing Error log messages.
+        // Here we add it to the result array if it worked, and if it didn't, we keep going
+        // We just issue a message about index so user can delete it easily
+        if (group_) {
+          result.push_back(std::move(*group_));
+        } else {
+          LOG(Error, briefDescription() << " has an invalid MonthlyVariableGroup group at index " << i);
+        }
+      }
+
+      return result;
+    }
+
+    boost::optional<unsigned> OutputTableMonthly_Impl::monthlyVariableGroupIndex(const MonthlyVariableGroup& monthlyVariableGroup) const {
+      const std::vector<MonthlyVariableGroup> groups = monthlyVariableGroups();
+      auto it = std::find(groups.cbegin(), groups.cend(), monthlyVariableGroup);
+      if (it != groups.end()) {
+        return std::distance(groups.cbegin(), it);
+      }
+      return boost::none;
+    }
+
+    boost::optional<MonthlyVariableGroup> OutputTableMonthly_Impl::getMonthlyVariableGroup(unsigned groupIndex) const {
+      if (groupIndex >= numberofMonthlyVariableGroups()) {
+        LOG(Error, "Asked to get MonthlyVariableGroup with index " << groupIndex << ", but " << briefDescription() << " has just "
+                                                                   << numberofMonthlyVariableGroups() << " MonthlyVariableGroups.");
+        return boost::none;
+      }
+      auto group = getExtensibleGroup(groupIndex).cast<ModelExtensibleGroup>();
+
+      boost::optional<std::string> variableOrMeterName_ = group.getString(OS_Output_Table_MonthlyExtensibleFields::VariableorMeterName);
+      boost::optional<std::string> aggregationType_ = group.getString(OS_Output_Table_MonthlyExtensibleFields::AggregationTypeforVariableorMeter);
+
+      if (!variableOrMeterName_) {
+        LOG(Error, "Could not retrieve VariableorMeterName_ for extensible group " << group.groupIndex() << ".");
+        return boost::none;
+      }
+      if (!aggregationType_) {
+        LOG(Error, "Could not retrieve Aggregation Type for extensible group " << group.groupIndex() << ".");
+        return boost::none;
+      }
+
+      return {MonthlyVariableGroup(std::move(*variableOrMeterName_), std::move(*aggregationType_))};
+    }
+
+    bool OutputTableMonthly_Impl::addMonthlyVariableGroup(const MonthlyVariableGroup& monthlyVariableGroup) {
+      boost::optional<unsigned> existingIndex_ = monthlyVariableGroupIndex(monthlyVariableGroup);
+      if (existingIndex_) {
+        LOG(Warn, "For " << briefDescription() << ", MonthlyVariableGroup already exists: " << monthlyVariableGroup);
+        return false;
+      }
+
+      IdfExtensibleGroup eg = pushExtensibleGroup(StringVector());
+      eg.setString(OS_Output_Table_MonthlyExtensibleFields::VariableorMeterName, monthlyVariableGroup.variableOrMeterName());
+      eg.setString(OS_Output_Table_MonthlyExtensibleFields::AggregationTypeforVariableorMeter, monthlyVariableGroup.aggregationType());
+      return true;
+    }
+
+    bool OutputTableMonthly_Impl::addMonthlyVariableGroups(const std::vector<MonthlyVariableGroup>& monthlyVariableGroups) {
+      bool result = true;
+
+      for (const auto& monthlyVariableGroup : monthlyVariableGroups) {
+        bool thisResult = addMonthlyVariableGroup(monthlyVariableGroup);
+        if (!thisResult) {
+          LOG(Error, "Could not add MonthlyVariableGroup " << monthlyVariableGroup << " to " << briefDescription() << ". Continuing with others.");
+          // OS_ASSERT(false);
+          // result = false;
+        }
+      }
+
+      return result;
+    }
+
+    bool OutputTableMonthly_Impl::removeMonthlyVariableGroup(unsigned groupIndex) {
+      bool result = false;
+
+      unsigned int num = numberofMonthlyVariableGroups();
+      if (groupIndex < num) {
+        getObject<ModelObject>().eraseExtensibleGroup(groupIndex);
+        result = true;
+      }
+      return result;
+    }
+
+    void OutputTableMonthly_Impl::removeAllMonthlyVariableGroups() {
+      getObject<ModelObject>().clearExtensibleGroups();
+    }
+
   }  // namespace detail
 
   OutputTableMonthly::OutputTableMonthly(const Model& model) : ModelObject(OutputTableMonthly::iddObjectType(), model) {
     OS_ASSERT(getImpl<detail::OutputTableMonthly_Impl>());
-
-    // TODO: consider adding (overloaded or not) explicit ctors taking required objects as argument
-
-    // TODO: Appropriately handle the following required object-list fields.
     bool ok = true;
-    // ok = setDigitsAfterDecimal();
+    ok = setDigitsAfterDecimal(2);
     OS_ASSERT(ok);
+  }
+
+  std::vector<std::string> OutputTableMonthly::aggregationTypeValues() {
+    IddObject obj = IddFactory::instance().getObject(iddObjectType()).get();
+    // Return IddKeyNames in extensible portion
+    return getIddKeyNames(obj, obj.numFields() + OS_Output_Table_MonthlyExtensibleFields::AggregationTypeforVariableorMeter);
+  }
+
+  std::vector<std::string> OutputTableMonthly::validAggregationTypes() {
+    return aggregationTypeValues();
+  }
+
+  bool OutputTableMonthly::isAggregationTypeValid(const std::string& aggregationType) {
+    const auto vals = aggregationTypeValues();
+    return std::find_if(vals.cbegin(), vals.cend(),
+                        [&aggregationType](const std::string& choice) { return openstudio::istringEqual(aggregationType, choice); })
+           != vals.cend();
   }
 
   IddObjectType OutputTableMonthly::iddObjectType() {
@@ -74,6 +225,42 @@ namespace model {
 
   bool OutputTableMonthly::setDigitsAfterDecimal(int digitsAfterDecimal) {
     return getImpl<detail::OutputTableMonthly_Impl>()->setDigitsAfterDecimal(digitsAfterDecimal);
+  }
+
+  std::vector<MonthlyVariableGroup> OutputTableMonthly::monthlyVariableGroups() const {
+    return getImpl<detail::OutputTableMonthly_Impl>()->monthlyVariableGroups();
+  }
+
+  unsigned int OutputTableMonthly::numberofMonthlyVariableGroups() const {
+    return getImpl<detail::OutputTableMonthly_Impl>()->numberofMonthlyVariableGroups();
+  }
+
+  boost::optional<unsigned> OutputTableMonthly::monthlyVariableGroupIndex(const MonthlyVariableGroup& monthlyVariableGroup) const {
+    return getImpl<detail::OutputTableMonthly_Impl>()->monthlyVariableGroupIndex(monthlyVariableGroup);
+  }
+
+  boost::optional<MonthlyVariableGroup> OutputTableMonthly::getMonthlyVariableGroup(unsigned groupIndex) const {
+    return getImpl<detail::OutputTableMonthly_Impl>()->getMonthlyVariableGroup(groupIndex);
+  }
+
+  bool OutputTableMonthly::addMonthlyVariableGroup(const MonthlyVariableGroup& group) {
+    return getImpl<detail::OutputTableMonthly_Impl>()->addMonthlyVariableGroup(group);
+  }
+
+  bool OutputTableMonthly::addMonthlyVariableGroup(std::string variableOrMeterName, std::string aggregationType) {
+    return addMonthlyVariableGroup(MonthlyVariableGroup(std::move(variableOrMeterName), std::move(aggregationType)));
+  }
+
+  bool OutputTableMonthly::addMonthlyVariableGroups(const std::vector<MonthlyVariableGroup>& monthlyVariableGroups) {
+    return getImpl<detail::OutputTableMonthly_Impl>()->addMonthlyVariableGroups(monthlyVariableGroups);
+  }
+
+  bool OutputTableMonthly::removeMonthlyVariableGroup(unsigned groupIndex) {
+    return getImpl<detail::OutputTableMonthly_Impl>()->removeMonthlyVariableGroup(groupIndex);
+  }
+
+  void OutputTableMonthly::removeAllMonthlyVariableGroups() {
+    getImpl<detail::OutputTableMonthly_Impl>()->removeAllMonthlyVariableGroups();
   }
 
   /// @cond

@@ -1117,6 +1117,9 @@ set(${target_name}_src
   OutputTableSummaryReports.hpp
   OutputTableSummaryReports_Impl.hpp
   OutputTableSummaryReports.cpp
+  OutputTableMonthly.hpp
+  OutputTableMonthly_Impl.hpp
+  OutputTableMonthly.cpp
   OutputSchedules.hpp
   OutputSchedules_Impl.hpp
   OutputSchedules.cpp

@@ -18,6 +18,26 @@ namespace model {
 
   }  // namespace detail
 
+  class MODEL_API MonthlyVariableGroup
+  {
+   public:
+    MonthlyVariableGroup(std::string variableOrMeterName, std::string aggregationType = "SumOrAverage");
+
+    std::string variableOrMeterName() const;
+    std::string aggregationType() const;
+
+    bool operator==(const MonthlyVariableGroup& other) const;
+    bool operator!=(const MonthlyVariableGroup& other) const;
+
+   private:
+    std::string m_variableOrMeterName;
+    std::string m_aggregationType;
+    REGISTER_LOGGER("openstudio.model.MonthlyVariableGroup");
+  };
+
+  // Overload operator<<
+  MODEL_API std::ostream& operator<<(std::ostream& out, const openstudio::model::MonthlyVariableGroup& monthlyVariableGroup);
+
   /** OutputTableMonthly is a ModelObject that wraps the OpenStudio IDD object 'OS:Output:Table:Monthly'. */
   class MODEL_API OutputTableMonthly : public ModelObject
   {
@@ -38,12 +58,14 @@ namespace model {
 
     static IddObjectType iddObjectType();
 
+    static std::vector<std::string> aggregationTypeValues();
+    static std::vector<std::string> validAggregationTypes();
+    static bool isAggregationTypeValid(const std::string& aggregationType);
+
     /** @name Getters */
     //@{
 
     int digitsAfterDecimal() const;
-
-    // TODO: Handle this object's extensible fields.
 
     //@}
     /** @name Setters */
@@ -51,11 +73,27 @@ namespace model {
 
     bool setDigitsAfterDecimal(int digitsAfterDecimal);
 
-    // TODO: Handle this object's extensible fields.
-
     //@}
     /** @name Other */
     //@{
+
+    // Handle this object's extensible fields.
+
+    std::vector<MonthlyVariableGroup> monthlyVariableGroups() const;
+
+    unsigned int numberofMonthlyVariableGroups() const;
+
+    boost::optional<unsigned> monthlyVariableGroupIndex(const MonthlyVariableGroup& monthlyVariableGroup) const;
+    boost::optional<MonthlyVariableGroup> getMonthlyVariableGroup(unsigned groupIndex) const;
+
+    bool addMonthlyVariableGroup(const MonthlyVariableGroup& monthlyVariableGroup);
+
+    // Convenience fucntion that will create a MonthlyVariableGroup
+    bool addMonthlyVariableGroup(std::string variableOrMeterName, std::string aggregationType = "SumOrAverage");
+
+    bool addMonthlyVariableGroups(const std::vector<MonthlyVariableGroup>& monthlyVariableGroups);
+    bool removeMonthlyVariableGroup(unsigned groupIndex);
+    void removeAllMonthlyVariableGroups();
 
     //@}
    protected:
