@@ -302,6 +302,25 @@ namespace model {
   }
 };
 
+%extend openstudio::model::AnnualVariableGroup {
+  // Use the overloaded operator<< for string representation
+  std::string __str__() {
+    std::ostringstream os;
+    os << *$self;
+    return os.str();
+  }
+};
+
+%extend openstudio::model::MonthlyVariableGroup {
+  // Use the overloaded operator<< for string representation
+  std::string __str__() {
+    std::ostringstream os;
+    os << *$self;
+    return os.str();
+  }
+};
+
+
 //MODELOBJECT_TEMPLATES(ModelObject); // swig preprocessor did not seem to see these for other objects so these are defined above
 MODELOBJECT_TEMPLATES(ScheduleTypeKey);
 MODELOBJECT_TEMPLATES(EMSActuatorNames);
@@ -327,7 +346,9 @@ MODELOBJECT_TEMPLATES(ScheduleYear);
 MODELOBJECT_TEMPLATES(ScheduleRule);
 MODELOBJECT_TEMPLATES(ScheduleRuleset);
 MODELOBJECT_TEMPLATES(OutputVariable);
+MODELOBJECT_TEMPLATES(AnnualVariableGroup); // helper for extensible fields for OutputTableAnnual
 MODELOBJECT_TEMPLATES(OutputTableAnnual);
+MODELOBJECT_TEMPLATES(MonthlyVariableGroup); // helper for extensible fields for OutputTableMonthly
 MODELOBJECT_TEMPLATES(OutputTableMonthly);
 MODELOBJECT_TEMPLATES(AdditionalProperties);
 MODELOBJECT_TEMPLATES(GenericModelObject);
