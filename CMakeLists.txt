@@ -448,6 +448,7 @@ find_package(TinyGLTF)
 find_package(CLI11)
 find_package(minizip)
 find_package(OpenSSL)
+find_package(antlr4-runtime)
 find_package(ZLIB)
 if(BUILD_TESTING)
   find_package(GTest)
@@ -1037,6 +1038,7 @@ set(project_directories
   generateiddfactory
   utilities
   model
+  modelica
   energyplus
   epjson
   radiance
