@@ -34,7 +34,6 @@ namespace energyplus {
     // Schedule Name: Optional Object
     if (boost::optional<WorkspaceObject> wo_ = workspaceObject.getTarget(Output_Table_AnnualFields::ScheduleName)) {
       if (boost::optional<ModelObject> mo_ = translateAndMapWorkspaceObject(wo_.get())) {
-        // TODO: check return types
         if (boost::optional<Schedule> schedule_ = mo_->optionalCast<Schedule>()) {
           modelObject.setSchedule(schedule_.get());
         } else {
