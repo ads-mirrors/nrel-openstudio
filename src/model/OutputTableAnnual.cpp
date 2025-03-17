@@ -58,9 +58,8 @@ namespace model {
   }
 
   std::ostream& operator<<(std::ostream& out, const openstudio::model::AnnualVariableGroup& annualVariableGroup) {
-    out << "(Output Variable or Meter = '" << annualVariableGroup.variableorMeterorEMSVariableorField() << "', "
-        << "Aggregation Type = '" << annualVariableGroup.aggregationType() << "', Digits After Decimal = " << annualVariableGroup.digitsAfterDecimal()
-        << ")";
+    out << "(Output Variable or Meter = '" << annualVariableGroup.variableorMeterorEMSVariableorField() << "', " << "Aggregation Type = '"
+        << annualVariableGroup.aggregationType() << "', Digits After Decimal = " << annualVariableGroup.digitsAfterDecimal() << ")";
     return out;
   }
 
