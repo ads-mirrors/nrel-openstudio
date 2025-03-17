@@ -22,6 +22,7 @@
 #include "../utilities/bcl/BCLMeasure.hpp"
 #include "../utilities/time/DateTime.hpp"
 
+#include <algorithm>
 #include <boost/filesystem/operations.hpp>
 #include <utilities/idd/IddEnums.hxx>
 
@@ -161,7 +162,7 @@ bool mergeOutputTableSummaryReports(IdfObject& existingObject, const IdfObject& 
   }
 
   for (const auto& newReport : reportsToAdd) {
-    if (std::find(reports.cbegin(), reports.cend(), newReport) != reports.cend()) {
+    if (std::find(reports.cbegin(), reports.cend(), newReport) == reports.cend()) {
       existingObject.pushExtensibleGroup({newReport});
       added = true;
     }
