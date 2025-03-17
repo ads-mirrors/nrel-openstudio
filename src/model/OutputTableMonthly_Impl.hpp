@@ -68,6 +68,10 @@ namespace model {
       bool removeMonthlyVariableGroup(unsigned groupIndex);
       void removeAllMonthlyVariableGroups();
 
+      static const std::vector<std::pair<std::string, std::vector<MonthlyVariableGroup>>>& standardReports();
+      static const std::vector<std::string>& validStandardReportNames();
+      static const std::vector<MonthlyVariableGroup>& getGroupsForStandardReport(const std::string& standardReportName);
+
       //@}
      protected:
      private:

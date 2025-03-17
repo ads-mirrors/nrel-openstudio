@@ -144,3 +144,15 @@ TEST_F(ModelFixture, OutputTableMonthly_AdvancedAggregationTypes) {
   }
   EXPECT_EQ(4, table.numberofMonthlyVariableGroups());
 }
+
+TEST_F(ModelFixture, OutputTableMonthly_FactoryMethod) {
+  Model m;
+
+  std::vector<std::string> standardReportNames = OutputTableMonthly::validStandardReportNames();
+  EXPECT_GT(standardReportNames.size(), 50);
+
+  for (const auto& standardReportName : standardReportNames) {
+    EXPECT_NO_THROW(OutputTableMonthly::fromStandardReports(m, standardReportName));
+  }
+  EXPECT_EQ(standardReportNames.size(), m.getConcreteModelObjects<OutputTableMonthly>().size());
+}

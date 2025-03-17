@@ -80,6 +80,10 @@ You can also refer to the [OpenStudio SDK Python Binding Version Compatibility M
     * Note: in EnergyPlus 24.2.0, the `Zone Relief Air Node Name` is an optional field. The OpenStudio SDK always fills with the connected zone's Exhaust Air Node, meaning the airflow is always being balanced by EnergyPlus: the object will extract air from the zone to balance the air supplied to the zone by the cooler outlet node.
 
 * [#5369](https://github.com/NREL/OpenStudio/pull/5369) - Wrap Output:Table:Annual and Output:Table:Monthly
+    * Both objects were wrapped in the SDK
+    * The OutputTableMonthly also includes a convenient factory methods to create the reports that are in the E+ datasets/StandardReports.idf
+        * See `std::vector<std::string> OutputTableMonthly::validStandardReportNames` to get a list of valid methods
+        * and the factory method itself: `OutputTableMonthly OutputTableMonthly::fromStandardReports(const Model& model, const std::string& standardReportName)`
 
 * [#5365](https://github.com/NREL/OpenStudio/pull/5365) - E+ 25.1.0: Wrap OutputControl:ResilienceSummaries
 

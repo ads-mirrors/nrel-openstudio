@@ -66,6 +66,13 @@ namespace model {
     static bool isAggregationTypeAdvanced(const std::string& aggregationType);
     static const std::vector<std::string>& advancedAggregationTypes();
 
+    /// Factory method to create a OutputTableMonthly by looking up characteristics in the embedded  database (from E+ datasets/StandardReports.idf)
+    /// by its name.
+    /// Please use the OutputTableMonthly::validStandardReportNames() static method to look up the valid names
+    // as it will throw if it cannot find it
+    static OutputTableMonthly fromStandardReports(const Model& model, const std::string& standardReportName);
+    static const std::vector<std::string>& validStandardReportNames();
+
     /** @name Getters */
     //@{
 
