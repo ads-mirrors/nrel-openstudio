@@ -325,18 +325,15 @@ namespace model {
       }
 
       const std::vector<EndUseType> heatingTypes{
-        EndUseType::Heating,      EndUseType::HeatingCoils,           EndUseType::Boilers,      EndUseType::Baseboard,
-        EndUseType::CoolingCoils, EndUseType::HeatRecoveryForHeating, EndUseType::Cogeneration,
+        EndUseType::Heating,   EndUseType::HeatingCoils,           EndUseType::Boilers,
+        EndUseType::Baseboard, EndUseType::HeatRecoveryForHeating, EndUseType::Cogeneration,
       };
       if (std::find(heatingTypes.cbegin(), heatingTypes.cend(), end_use_type) != heatingTypes.end()) {
         return ComponentType::Heating;
       }
 
       const std::vector<EndUseType> coolingTypes{
-        EndUseType::Cooling,
-        EndUseType::Refrigeration,
-        EndUseType::HeatRecoveryForCooling,
-        EndUseType::Chillers,
+        EndUseType::Cooling, EndUseType::Refrigeration, EndUseType::HeatRecoveryForCooling, EndUseType::Chillers, EndUseType::CoolingCoils,
       };
       if (std::find(coolingTypes.cbegin(), coolingTypes.cend(), end_use_type) != coolingTypes.end()) {
         return ComponentType::Cooling;
