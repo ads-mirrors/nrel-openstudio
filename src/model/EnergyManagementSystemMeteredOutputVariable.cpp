@@ -31,6 +31,7 @@
 #include <utilities/idd/OS_EnergyManagementSystem_MeteredOutputVariable_FieldEnums.hxx>
 
 #include "../utilities/core/Assert.hpp"
+#include "../utilities/data/DataEnums.hpp"
 
 namespace openstudio {
 namespace model {
@@ -306,6 +307,99 @@ namespace model {
         value = m.getModelObject<EnergyManagementSystemConstructionIndexVariable>(toUUID(handle.get()));
       }
       return value;
+    }
+
+    ComponentType EnergyManagementSystemMeteredOutputVariable_Impl::componentType() const {
+      // endUseCategoryValues: contains all EndUseType but also "OnSiteGeneration", and I can't
+      auto const end_use_cat_str = this->endUseCategory();
+      EndUseType end_use_type;
+      try {
+        end_use_type = EndUseType(end_use_cat_str);
+      } catch (...) {
+
+        if (openstudio::istringEqual(end_use_cat_str, "OnSiteGeneration")) {
+          end_use_type = EndUseType::Cogeneration;
+        } else {
+          return ComponentType::None;
+        }
+      }
+
+      const std::vector<EndUseType> heatingTypes{
+        EndUseType::Heating,      EndUseType::HeatingCoils,           EndUseType::Boilers,      EndUseType::Baseboard,
+        EndUseType::CoolingCoils, EndUseType::HeatRecoveryForHeating, EndUseType::Cogeneration,
+      };
+      if (std::find(heatingTypes.cbegin(), heatingTypes.cend(), end_use_type) != heatingTypes.end()) {
+        return ComponentType::Heating;
+      }
+
+      const std::vector<EndUseType> coolingTypes{
+        EndUseType::Cooling,
+        EndUseType::Refrigeration,
+        EndUseType::HeatRecoveryForCooling,
+        EndUseType::Chillers,
+      };
+      if (std::find(coolingTypes.cbegin(), coolingTypes.cend(), end_use_type) != coolingTypes.end()) {
+        return ComponentType::Cooling;
+      }
+
+      // const std::vector<EndUseType> otherTypes{
+      //   EndUseType::InteriorLights, EndUseType::ExteriorLights, EndUseType::InteriorEquipment, EndUseType::ExteriorEquipment,
+      //   EndUseType::Fans,           EndUseType::Pumps,          EndUseType::HeatRejection,     EndUseType::Humidifier,
+      //   EndUseType::HeatRecovery,   EndUseType::WaterSystems,
+      // };
+      LOG(Info, "For " << briefDescription() << ", unable to determine componentType from End Use Category = '" << end_use_cat_str
+                       << "', assuming ComponentType::None");
+      return ComponentType::None;
+    }
+
+    boost::optional<FuelType> EnergyManagementSystemMeteredOutputVariable_Impl::fuelTypeFromResourceType() const {
+      // resourceTypeValues: contains all of the FuelType plus these
+      // ["WaterUse", "OnSiteWaterProduced", "MainsWaterSupply", "RainWaterCollected", "WellWaterDrawn", "CondensateWaterCollected",
+      //  "ElectricityProducedOnSite", "SolarWaterHeating", "SolarAirHeating"]
+      auto const res_type_str = this->resourceType();
+      FuelType ft;
+      try {
+        ft = FuelType(res_type_str);
+      } catch (...) {
+        if (openstudio::istringEqual(res_type_str, "SolarWaterHeating") || openstudio::istringEqual(res_type_str, "SolarAirHeating")
+            || openstudio::istringEqual(res_type_str, "ElectricityProducedOnSite")) {
+          ft = FuelType::Solar;
+        } else {
+          LOG(Info, "For " << briefDescription() << ", unable to determine fuelType From Resource Type = '" << res_type_str << "', assuming None");
+          return boost::none;
+        }
+      }
+      return ft;
+    }
+
+    std::vector<FuelType> EnergyManagementSystemMeteredOutputVariable_Impl::coolingFuelTypes() const {
+      std::vector<FuelType> result;
+      if (componentType() == ComponentType::Cooling) {
+        if (auto ft_ = fuelTypeFromResourceType()) {
+          result.emplace_back(*ft_);
+        }
+      }
+      return result;
+    }
+
+    std::vector<FuelType> EnergyManagementSystemMeteredOutputVariable_Impl::heatingFuelTypes() const {
+      std::vector<FuelType> result;
+      if (componentType() == ComponentType::Heating) {
+        if (auto ft_ = fuelTypeFromResourceType()) {
+          result.emplace_back(*ft_);
+        }
+      }
+      return result;
+    }
+
+    std::vector<AppGFuelType> EnergyManagementSystemMeteredOutputVariable_Impl::appGHeatingFuelTypes() const {
+      std::vector<AppGFuelType> result;
+      if (componentType() == ComponentType::Heating) {
+        if (auto ft_ = fuelTypeFromResourceType()) {
+          result.emplace_back(convertFuelTypeToAppG(*ft_));
+        }
+      }
+      return result;
     }
 
   }  // namespace detail
@@ -615,6 +709,22 @@ namespace model {
     std::shared_ptr<detail::EnergyManagementSystemMeteredOutputVariable_Impl> impl)
     : ModelObject(std::move(impl)) {}
   /// @endcond
+
+  ComponentType EnergyManagementSystemMeteredOutputVariable::componentType() const {
+    return getImpl<detail::EnergyManagementSystemMeteredOutputVariable_Impl>()->componentType();
+  }
+
+  std::vector<FuelType> EnergyManagementSystemMeteredOutputVariable::coolingFuelTypes() const {
+    return getImpl<detail::EnergyManagementSystemMeteredOutputVariable_Impl>()->coolingFuelTypes();
+  }
+
+  std::vector<FuelType> EnergyManagementSystemMeteredOutputVariable::heatingFuelTypes() const {
+    return getImpl<detail::EnergyManagementSystemMeteredOutputVariable_Impl>()->heatingFuelTypes();
+  }
+
+  std::vector<AppGFuelType> EnergyManagementSystemMeteredOutputVariable::appGHeatingFuelTypes() const {
+    return getImpl<detail::EnergyManagementSystemMeteredOutputVariable_Impl>()->appGHeatingFuelTypes();
+  }
 
 }  // namespace model
 }  // namespace openstudio
