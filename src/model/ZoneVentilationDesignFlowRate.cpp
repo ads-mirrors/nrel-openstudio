@@ -58,7 +58,7 @@ namespace model {
       //result.push_back("Zone Ventilation Standard Density Volume");
       //result.push_back("Zone Ventilation Mass");
       //result.push_back("Zone Ventilation Mass Flow Rate");
-      //result.push_back("Zone Ventilation Air Change Rate");
+      //result.push_back("Zone Ventilation Current Density Air Change Rate");
       //result.push_back("Zone Ventilation Fan Electricity Energy");
       //result.push_back("Zone Ventilation Air Inlet Temperature");
       return result;
@@ -226,6 +226,12 @@ namespace model {
 
     double ZoneVentilationDesignFlowRate_Impl::maximumWindSpeed() const {
       boost::optional<double> value = getDouble(OS_ZoneVentilation_DesignFlowRateFields::MaximumWindSpeed, true);
+      OS_ASSERT(value);
+      return value.get();
+    }
+
+    std::string ZoneVentilationDesignFlowRate_Impl::densityBasis() const {
+      boost::optional<std::string> value = getString(OS_ZoneVentilation_DesignFlowRateFields::DensityBasis, true);
       OS_ASSERT(value);
       return value.get();
     }
@@ -449,6 +455,11 @@ namespace model {
       return result;
     }
 
+    bool ZoneVentilationDesignFlowRate_Impl::setDensityBasis(const std::string& densityBasis) {
+      bool result = setString(OS_ZoneVentilation_DesignFlowRateFields::DensityBasis, densityBasis);
+      return result;
+    }
+
     boost::optional<Schedule> ZoneVentilationDesignFlowRate_Impl::optionalSchedule() const {
       return getObject<ModelObject>().getModelObjectTarget<Schedule>(OS_ZoneVentilation_DesignFlowRateFields::ScheduleName);
     }
@@ -551,6 +562,7 @@ namespace model {
     setMinimumOutdoorTemperature(-100.0);
     setMaximumOutdoorTemperature(100.0);
     setMaximumWindSpeed(40.0);
+    setDensityBasis("Outdoor");
   }
 
   IddObjectType ZoneVentilationDesignFlowRate::iddObjectType() {
@@ -564,6 +576,10 @@ namespace model {
 
   std::vector<std::string> ZoneVentilationDesignFlowRate::ventilationTypeValues() {
     return getIddKeyNames(IddFactory::instance().getObject(iddObjectType()).get(), OS_ZoneVentilation_DesignFlowRateFields::VentilationType);
+  }
+
+  std::vector<std::string> ZoneVentilationDesignFlowRate::densityBasisValues() {
+    return getIddKeyNames(IddFactory::instance().getObject(iddObjectType()).get(), OS_ZoneVentilation_DesignFlowRateFields::DensityBasis);
   }
 
   Schedule ZoneVentilationDesignFlowRate::schedule() const {
@@ -660,6 +676,10 @@ namespace model {
 
   double ZoneVentilationDesignFlowRate::maximumWindSpeed() const {
     return getImpl<detail::ZoneVentilationDesignFlowRate_Impl>()->maximumWindSpeed();
+  }
+
+  std::string ZoneVentilationDesignFlowRate::densityBasis() const {
+    return getImpl<detail::ZoneVentilationDesignFlowRate_Impl>()->densityBasis();
   }
 
   bool ZoneVentilationDesignFlowRate::setSchedule(Schedule& schedule) {
@@ -772,6 +792,10 @@ namespace model {
 
   bool ZoneVentilationDesignFlowRate::setMaximumWindSpeed(double maximumWindSpeed) {
     return getImpl<detail::ZoneVentilationDesignFlowRate_Impl>()->setMaximumWindSpeed(maximumWindSpeed);
+  }
+
+  bool ZoneVentilationDesignFlowRate::setDensityBasis(const std::string& densityBasis) {
+    return getImpl<detail::ZoneVentilationDesignFlowRate_Impl>()->setDensityBasis(densityBasis);
   }
 
   /// @cond

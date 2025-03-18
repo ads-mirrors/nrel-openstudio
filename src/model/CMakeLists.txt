@@ -1075,6 +1075,9 @@ set(${target_name}_src
   OutputControlReportingTolerances.hpp
   OutputControlReportingTolerances_Impl.hpp
   OutputControlReportingTolerances.cpp
+  OutputControlResilienceSummaries.hpp
+  OutputControlResilienceSummaries_Impl.hpp
+  OutputControlResilienceSummaries.cpp
   OutputControlTableStyle.hpp
   OutputControlTableStyle_Impl.hpp
   OutputControlTableStyle.cpp
@@ -2189,6 +2192,7 @@ set(${target_name}_test_src
   test/OtherEquipment_GTest.cpp
   test/OutputControlFiles_GTest.cpp
   test/OutputControlReportingTolerances_GTest.cpp
+  test/OutputControlResilienceSummaries_GTest.cpp
   test/OutputControlTableStyle_GTest.cpp
   test/OutputControlTimestamp_GTest.cpp
   test/OutputDebuggingData_GTest.cpp

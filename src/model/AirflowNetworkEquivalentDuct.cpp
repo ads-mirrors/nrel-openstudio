@@ -76,6 +76,10 @@ namespace model {
             return std::string("Coil:Cooling:DX:MultiSpeed");
           case IddObjectType::OS_Coil_Heating_DX_MultiSpeed:
             return std::string("Coil:Heating:DX:MultiSpeed");
+          case IddObjectType::OS_Coil_Cooling_DX_VariableSpeed:
+            return std::string("Coil:Cooling:DX:VariableSpeed");
+          case IddObjectType::OS_Coil_Heating_DX_VariableSpeed:
+            return std::string("Coil:Heating:DX:VariableSpeed");
           case IddObjectType::OS_Coil_Heating_Desuperheater:
             return std::string("Coil:Heating:Desuperheater");
           case IddObjectType::OS_Coil_Cooling_DX:

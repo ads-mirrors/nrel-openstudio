@@ -45,6 +45,8 @@ namespace model {
 
     static std::vector<std::string> ventilationTypeValues();
 
+    static std::vector<std::string> densityBasisValues();
+
     /** @name Getters */
     //@{
 
@@ -95,6 +97,8 @@ namespace model {
     boost::optional<Schedule> maximumOutdoorTemperatureSchedule() const;
 
     double maximumWindSpeed() const;
+
+    std::string densityBasis() const;
 
     //@}
     /** @name Setters */
@@ -155,6 +159,8 @@ namespace model {
     void resetMaximumOutdoorTemperatureSchedule();
 
     bool setMaximumWindSpeed(double maximumWindSpeed);
+
+    bool setDensityBasis(const std::string& densityBasis);
 
     //@}
     /** @name Other */

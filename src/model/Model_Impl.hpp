@@ -11,6 +11,7 @@
 #include "FoundationKivaSettings.hpp"
 #include "OutputControlFiles.hpp"
 #include "OutputControlReportingTolerances.hpp"
+#include "OutputControlResilienceSummaries.hpp"
 #include "OutputControlTableStyle.hpp"
 #include "OutputControlTimestamp.hpp"
 #include "OutputDiagnostics.hpp"
@@ -167,6 +168,10 @@ namespace model {
       /** Get the OutputControlReportingTolerances object if there is one, this implementation uses a cached reference to the OutputControlReportingTolerances
      *  object which can be significantly faster than calling getOptionalUniqueModelObject<OutputControlReportingTolerances>(). */
       boost::optional<OutputControlReportingTolerances> outputControlReportingTolerances() const;
+
+      /** Get the OutputControlResilienceSummaries object if there is one, this implementation uses a cached reference to the OutputControlResilienceSummaries
+     *  object which can be significantly faster than calling getOptionalUniqueModelObject<OutputControlResilienceSummaries>(). */
+      boost::optional<OutputControlResilienceSummaries> outputControlResilienceSummaries() const;
 
       /** Get the OutputControlTableStyle object if there is one, this implementation uses a cached reference to the OutputControlTableStyle
      *  object which can be significantly faster than calling getOptionalUniqueModelObject<OutputControlTableStyle>(). */
@@ -470,6 +475,7 @@ namespace model {
       mutable boost::optional<FoundationKivaSettings> m_cachedFoundationKivaSettings;
       mutable boost::optional<OutputControlFiles> m_cachedOutputControlFiles;
       mutable boost::optional<OutputControlReportingTolerances> m_cachedOutputControlReportingTolerances;
+      mutable boost::optional<OutputControlResilienceSummaries> m_cachedOutputControlResilienceSummaries;
       mutable boost::optional<OutputControlTableStyle> m_cachedOutputControlTableStyle;
       mutable boost::optional<OutputControlTimestamp> m_cachedOutputControlTimestamp;
       mutable boost::optional<OutputDiagnostics> m_cachedOutputDiagnostics;
@@ -521,6 +527,7 @@ namespace model {
       void clearCachedFoundationKivaSettings(const Handle& handle);
       void clearCachedOutputControlFiles(const Handle& handle);
       void clearCachedOutputControlReportingTolerances(const Handle& handle);
+      void clearCachedOutputControlResilienceSummaries(const Handle& handle);
       void clearCachedOutputControlTableStyle(const Handle& handle);
       void clearCachedOutputControlTimestamp(const Handle& handle);
       void clearCachedOutputDiagnostics(const Handle& handle);

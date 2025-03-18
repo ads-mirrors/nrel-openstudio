@@ -58,6 +58,8 @@
 #include "../OutputControlFiles_Impl.hpp"
 #include "../OutputControlReportingTolerances.hpp"
 #include "../OutputControlReportingTolerances_Impl.hpp"
+#include "../OutputControlResilienceSummaries.hpp"
+#include "../OutputControlResilienceSummaries_Impl.hpp"
 #include "../OutputControlTableStyle.hpp"
 #include "../OutputControlTableStyle_Impl.hpp"
 #include "../OutputDiagnostics.hpp"
@@ -934,6 +936,12 @@ TEST_F(ModelFixture, UniqueModelObjectCachedGetters) {
   EXPECT_EQ(i, m.getModelObjects<ModelObject>().size());
   auto outputControlReportingTolerances = m.getUniqueModelObject<OutputControlReportingTolerances>();
   EXPECT_TRUE(m.getOptionalUniqueModelObject<OutputControlReportingTolerances>());
+  EXPECT_EQ(++i, m.getModelObjects<ModelObject>().size());
+
+  EXPECT_FALSE(m.getOptionalUniqueModelObject<OutputControlResilienceSummaries>());
+  EXPECT_EQ(i, m.getModelObjects<ModelObject>().size());
+  auto outputControlResilienceSummaries = m.getUniqueModelObject<OutputControlResilienceSummaries>();
+  EXPECT_TRUE(m.getOptionalUniqueModelObject<OutputControlResilienceSummaries>());
   EXPECT_EQ(++i, m.getModelObjects<ModelObject>().size());
 
   EXPECT_FALSE(m.getOptionalUniqueModelObject<OutputControlTableStyle>());

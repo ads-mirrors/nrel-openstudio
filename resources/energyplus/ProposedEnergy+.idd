@@ -1,4 +1,4 @@
-!IDD_Version 24.2.0
+!IDD_Version 25.1.0
 !IDD_BUILD TBD
 ! **************************************************************************
 ! This file is the Input Data Dictionary (IDD) for EnergyPlus.
@@ -405,7 +405,7 @@ Version,
       \format singleLine
       \min-fields 1
   A1 ; \field Version Identifier
-      \default 24.2
+      \default 25.1
 
 SimulationControl,
       \unique-object
@@ -5742,6 +5742,7 @@ Space,
        \reference SpaceNames
        \reference SpaceAndSpaceListNames
        \reference ZoneAndZoneListAndSpaceAndSpaceListNames
+       \reference OutFaceEnvNames
   A2,  \field Zone Name
        \required-field
        \type object-list
@@ -5992,6 +5993,7 @@ BuildingSurface:Detailed,
        \key Adiabatic
        \key Surface
        \key Zone
+       \key Space
        \key Outdoors
        \key Foundation
        \key Ground
@@ -6009,7 +6011,7 @@ BuildingSurface:Detailed,
        \type object-list
        \object-list OutFaceEnvNames
        \note Non-blank only if the field Outside Boundary Condition is Surface,
-       \note Zone, OtherSideCoefficients or OtherSideConditionsModel
+       \note Zone, Space, OtherSideCoefficients or OtherSideConditionsModel
        \note If Surface, specify name of corresponding surface in adjacent zone or
        \note specify current surface name for internal partition separating like zones
        \note If Zone, specify the name of the corresponding zone and
@@ -6096,6 +6098,7 @@ Wall:Detailed,
        \key Adiabatic
        \key Surface
        \key Zone
+       \key Space
        \key Outdoors
        \key Foundation
        \key Ground
@@ -6113,7 +6116,7 @@ Wall:Detailed,
        \type object-list
        \object-list OutFaceEnvNames
        \note Non-blank only if the field Outside Boundary Condition is Surface,
-       \note Zone, OtherSideCoefficients or OtherSideConditionsModel
+       \note Zone, Space, OtherSideCoefficients or OtherSideConditionsModel
        \note If Surface, specify name of corresponding surface in adjacent zone or
        \note specify current surface name for internal partition separating like zones
        \note If Zone, specify the name of the corresponding zone and
@@ -6197,6 +6200,7 @@ RoofCeiling:Detailed,
        \key Adiabatic
        \key Surface
        \key Zone
+       \key Space
        \key Outdoors
        \key Ground
        \key OtherSideCoefficients
@@ -6212,7 +6216,7 @@ RoofCeiling:Detailed,
        \type object-list
        \object-list OutFaceEnvNames
        \note Non-blank only if the field Outside Boundary Condition is Surface,
-       \note Zone, OtherSideCoefficients or OtherSideConditionsModel
+       \note Zone, Space, OtherSideCoefficients or OtherSideConditionsModel
        \note If Surface, specify name of corresponding surface in adjacent zone or
        \note specify current surface name for internal partition separating like zones
        \note If Zone, specify the name of the corresponding zone and
@@ -6296,6 +6300,7 @@ Floor:Detailed,
        \key Adiabatic
        \key Surface
        \key Zone
+       \key Space
        \key Outdoors
        \key Foundation
        \key Ground
@@ -6313,7 +6318,7 @@ Floor:Detailed,
        \type object-list
        \object-list OutFaceEnvNames
        \note Non-blank only if the field Outside Boundary Condition is Surface,
-       \note Zone, OtherSideCoefficients or OtherSideConditionsModel
+       \note Zone, Space, OtherSideCoefficients or OtherSideConditionsModel
        \note If Surface, specify name of corresponding surface in adjacent zone or
        \note specify current surface name for internal partition separating like zones
        \note If Zone, specify the name of the corresponding zone and
@@ -12122,7 +12127,7 @@ IndoorLivingWall,
        \object-list ScheduleNames
        \note units in Schedule should be fraction applied to design level of other equipment, generally (0.0 - 1.0)
   A4 , \field Evapotranspiration Calculation Method
-       \note Model selection for caclulating evapotranspiration of indoor greenery system.
+       \note Model selection for calculating evapotranspiration of indoor greenery system.
        \note This rate can also be actuated with user-defined calculations, see EMS application guide for actuator details.
        \type choice
        \key Penman-Monteith
@@ -12139,8 +12144,8 @@ IndoorLivingWall,
        \object-list ScheduleNames
   A7 , \field Daylighting Control Name
        \note If daylighting is used in the selected lighting methods (Daylight or LED-Daylight),
-       \note users should define an object of Daylighting:Control to obtain the daylighting illumance level
-       \note and an object for Daylighing:ReferencePoint for the daylighting sensor location in the thermal zone.
+       \note users should define an object of Daylighting:Control to obtain the daylighting illuminance level
+       \note and an object for Daylighting:ReferencePoint for the daylighting sensor location in the thermal zone.
        \note The name of the object of Daylighting:Controls should be specified in this field.
        \type alpha
   A8 , \field LED-Daylight Targeted Lighting Intensity Schedule Name
@@ -13114,10 +13119,17 @@ ZoneInfiltration:DesignFlowRate,
        \note  "C" in Equation
        \type real
        \default 0
-  N8 ; \field Velocity Squared Term Coefficient
+  N8 , \field Velocity Squared Term Coefficient
        \note  "D" in Equation
        \type real
        \default 0
+  A5 ; \field Density Basis
+       \note The air density to use when converting from volume flow to mass flow.
+       \type choice
+       \key Outdoor
+       \key Standard
+       \key Indoor
+       \default Outdoor
 
 ZoneInfiltration:EffectiveLeakageArea,
        \min-fields 6
@@ -13351,13 +13363,20 @@ ZoneVentilation:DesignFlowRate,
        \object-list ScheduleNames
        \note This schedule contains the outdoor temperature versus time above which
        \note ventilation is shutoff.
-  N16; \field Maximum Wind Speed
+  N16, \field Maximum Wind Speed
        \note this is the outdoor wind speed above which ventilation is shutoff
        \units m/s
        \type real
        \minimum 0
        \maximum 40
        \default 40
+  A11; \field Density Basis
+       \note The air density to use when converting from volume flow to mass flow.
+       \type choice
+       \key Outdoor
+       \key Standard
+       \key Indoor
+       \default Outdoor
 
 ZoneVentilation:WindandStackOpenArea,
   \min-fields 8
@@ -15107,6 +15126,8 @@ AirflowNetwork:Distribution:Component:Coil,
       \key Coil:Cooling:DX:TwoStageWithHumidityControlMode
       \key Coil:Cooling:DX:MultiSpeed
       \key Coil:Heating:DX:MultiSpeed
+      \key Coil:Cooling:DX:VariableSpeed
+      \key Coil:Heating:DX:VariableSpeed
       \key Coil:Heating:Desuperheater
       \key Coil:Heating:Electric:MultiStage
       \key Coil:Heating:Gas:MultiStage
@@ -23701,7 +23722,7 @@ ZoneControl:ContaminantController,
        \note million (ppm)
        \note This field is used when the field System Outdoor Air Method =
        \note ProportionalControlBasedOnOccupancySchedule or ProportionalControlBasedOnDesignOccupancy
-       \note or ProportionalControlBasedOnDesignOARate.
+       \note or ProportionalControlBasedOnDesignOARate in Controller:MechanicalVentilation
   A7 , \field Generic Contaminant Control Availability Schedule Name
        \note Availability schedule name for generic contaminant controller. Schedule value > 0 means
        \note the generic contaminant controller is enabled. If this field is blank, then generic
@@ -23724,7 +23745,7 @@ ZoneHVAC:IdealLoadsAirSystem,
        \memo the ideal loads system component. This component can be thought of as an ideal unit
        \memo that mixes zone air with the specified amount of outdoor air and then adds or removes
        \memo heat and moisture at 100% efficiency in order to meet the specified controls. Energy
-       \memo use is reported as DistrictHeating and DistrictCooling.
+       \memo use is reported as DistrictHeatingWater and DistrictCooling.
        \min-fields 27
   A1 , \field Name
        \required-field
@@ -33793,6 +33814,7 @@ Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
         \reference CoolingCoilsWaterToAirVSHP
         \reference-class-name validBranchEquipmentTypes
         \reference validBranchEquipmentNames
+        \reference DesuperHeatingWaterOnlySources
    A2,  \field Water-to-Refrigerant HX Water Inlet Node Name
         \required-field
         \type node
@@ -34937,6 +34959,7 @@ Coil:WaterHeating:Desuperheater,
        \key Coil:Cooling:DX:VariableSpeed
        \key Coil:Cooling:DX:MultiSpeed
        \key Coil:Cooling:WaterToAirHeatPump:EquationFit
+       \key Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit
        \key Refrigeration:CompressorRack
        \key Refrigeration:Condenser:AirCooled
        \key Refrigeration:Condenser:EvaporativeCooled
@@ -37126,7 +37149,7 @@ HeatExchanger:AirToAir:SensibleAndLatent,
       \note when the economizer is operating or high humidity control is active
   A11,\field Sensible Effectiveness of Heating Air Flow Curve Name
       \note optional
-      \note if this field has value, then the sensivle effectiveness for heating
+      \note if this field has value, then the sensible effectiveness for heating
       \note will be the value in N2 multiplied by this curve value
       \type object-list
       \object-list UnivariateFunctions
@@ -37138,7 +37161,7 @@ HeatExchanger:AirToAir:SensibleAndLatent,
       \object-list UnivariateFunctions
   A13,\field Sensible Effectiveness of Cooling Air Flow Curve Name
       \note optional
-      \note if this field has value, then the sensivle effectiveness for cooling
+      \note if this field has value, then the sensible effectiveness for cooling
       \note will be the value in N4 multiplied by this curve value
       \type object-list
       \object-list UnivariateFunctions
@@ -43493,6 +43516,9 @@ Chiller:Electric:EIR,
        \note corresponds to this fraction multiplied by the maximum condenser flow rate. This input is only used
        \note when the "Condenser Flow Control" input is set to "ModulatedChillerPLR", "ModulatedLoopPLR" or
        \note "ModulatedDeltaTemperature".
+       \minimum 0.0
+       \maximum 1
+       \default 0.2
   A20, \field Thermosiphon Capacity Fraction Curve Name
        \type object-list
        \object-list UnivariateFunctions
@@ -43505,7 +43531,7 @@ Chiller:Electric:EIR,
        \minimum 0.0
        \default 0.0
        \note Thermosiphon model is disabled below this minimum limit and
-       \note when the load is greater than calculated using the prevoius field.
+       \note when the load is greater than calculated using the previous field.
 
 Chiller:Electric:ReformulatedEIR,
        \min-fields 22
@@ -43742,6 +43768,9 @@ Chiller:Electric:ReformulatedEIR,
        \note corresponds to this fraction multiplied by the maximum condenser flow rate. This input is only used
        \note when the "Condenser Flow Control" input is set to "ModulatedChillerPLR", "ModulatedLoopPLR" or
        \note "ModulatedDeltaTemperature".
+       \minimum 0.0
+       \maximum 1
+       \default 0.2
   A19, \field Thermosiphon Capacity Fraction Curve Name
        \type object-list
        \object-list UnivariateFunctions
@@ -43754,7 +43783,7 @@ Chiller:Electric:ReformulatedEIR,
        \minimum 0.0
        \default 0.0
        \note Thermosiphon model is disabled below this minimum limit and
-       \note when the load is greater than calculated using the prevoius field.
+       \note when the load is greater than calculated using the previous field.
 
 Chiller:Electric,
     \min-fields 27
@@ -43915,7 +43944,7 @@ Chiller:Electric,
        \minimum 0.0
        \default 0.0
        \note Thermosiphon model is disabled below this minimum limit and
-       \note when the load is greater than calculated using the prevoius field.
+       \note when the load is greater than calculated using the previous field.
 
 Chiller:Absorption:Indirect,
    \min-fields 17
@@ -44305,7 +44334,7 @@ Chiller:ConstantCOP,
        \minimum 0.0
        \default 0.0
        \note Thermosiphon model is disabled below this minimum limit and
-       \note when the load is greater than calculated using the prevoius field.
+       \note when the load is greater than calculated using the previous field.
 
 Chiller:EngineDriven,
    \min-fields 43
@@ -45272,7 +45301,7 @@ HeatPump:PlantLoop:EIR:Cooling,
         \minimum 0.0
         \default 0.0
         \note Thermosiphon model is disabled below this minimum limit and
-        \note when the load is greater than calculated using the prevoius field.
+        \note when the load is greater than calculated using the previous field.
 
 HeatPump:PlantLoop:EIR:Heating,
         \memo An EIR formulated water to water heat pump model, heating operation
@@ -63103,6 +63132,18 @@ OutputControl:ReportingTolerances,
        \default .2
        \minimum 0
        \maximum 10
+
+OutputControl:ResilienceSummaries,
+       \memo Specifies methods for resilience reporting variables
+       \unique-object
+  A1 ; \field Heat Index Algorithm
+       \note Whether the simplified or the extended method should be used for heat index
+       \note Simplified: based on regression analysis carried out by Lans P. Rothfusz
+       \note Extended: Based on paper by Lu & Romps
+       \type choice
+       \key Simplified
+       \key Extended
+       \default Simplified
 
 Output:Variable,
        \memo each Output:Variable command picks variables to be put onto the standard output file (.eso)

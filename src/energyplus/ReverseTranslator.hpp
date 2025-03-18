@@ -225,6 +225,8 @@ namespace energyplus {
 
     boost::optional<model::ModelObject> translateOutputControlReportingTolerances(const WorkspaceObject& workspaceObject);
 
+    boost::optional<model::ModelObject> translateOutputControlResilienceSummaries(const WorkspaceObject& workspaceObject);
+
     boost::optional<model::ModelObject> translateOutputControlTableStyle(const WorkspaceObject& workspaceObject);
 
     boost::optional<model::ModelObject> translateOutputControlTimestamp(const WorkspaceObject& workspaceObject);

@@ -295,6 +295,7 @@ namespace model {
   class OutsideSurfaceConvectionAlgorithm;
   class OutputControlFiles;
   class OutputControlReportingTolerances;
+  class OutputControlResilienceSummaries;
   class OutputControlTableStyle;
   class OutputControlTimestamp;
   class OutputDebuggingData;
@@ -506,7 +507,7 @@ namespace energyplus {
     struct ForwardTranslatorInitializer;
   };
 
-#define ENERGYPLUS_VERSION "24.2"
+#define ENERGYPLUS_VERSION "25.1"
 
   class ENERGYPLUS_API ForwardTranslator
   {
@@ -1172,6 +1173,8 @@ namespace energyplus {
     boost::optional<IdfObject> translateOutputControlFiles(model::OutputControlFiles& modelObject);
 
     boost::optional<IdfObject> translateOutputControlReportingTolerances(model::OutputControlReportingTolerances& modelObject);
+
+    boost::optional<IdfObject> translateOutputControlResilienceSummaries(model::OutputControlResilienceSummaries& modelObject);
 
     boost::optional<IdfObject> translateOutputControlTableStyle(model::OutputControlTableStyle& modelObject);
 
