@@ -192,6 +192,7 @@ OPENSTUDIO_ENUM(EndUseType,
   ((Baseboard))
   ((HeatRecoveryForCooling))
   ((HeatRecoveryForHeating))
+  ((Chillers))
 );
  *  \endcode */
 OPENSTUDIO_ENUM(EndUseType,
@@ -215,6 +216,7 @@ OPENSTUDIO_ENUM(EndUseType,
   ((Baseboard))
   ((HeatRecoveryForCooling))
   ((HeatRecoveryForHeating))
+  ((Chillers))
 );
 
 /** \class BuildingSector
