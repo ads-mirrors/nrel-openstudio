@@ -6,6 +6,9 @@
 #include "EnergyManagementSystemSubroutine.hpp"
 #include "EnergyManagementSystemSubroutine_Impl.hpp"
 
+#include "EnergyManagementSystemMeteredOutputVariable.hpp"
+#include "EnergyManagementSystemMeteredOutputVariable_Impl.hpp"
+
 #include <utilities/idd/IddEnums.hxx>
 #include <utilities/idd/OS_EnergyManagementSystem_Subroutine_FieldEnums.hxx>
 
@@ -336,6 +339,12 @@ namespace model {
       }
       return result;
     }
+
+    std::vector<EnergyManagementSystemMeteredOutputVariable>
+      EnergyManagementSystemSubroutine_Impl::energyManagementSystemMeteredOutputVariables() const {
+      return getObject<ModelObject>().getModelObjectSources<EnergyManagementSystemMeteredOutputVariable>(
+        EnergyManagementSystemMeteredOutputVariable::iddObjectType());
+    }
   }  // namespace detail
 
   EnergyManagementSystemSubroutine::EnergyManagementSystemSubroutine(const Model& model)
@@ -377,6 +386,10 @@ namespace model {
 
   std::vector<std::string> EnergyManagementSystemSubroutine::invalidReferencedObjects() const {
     return getImpl<detail::EnergyManagementSystemSubroutine_Impl>()->invalidReferencedObjects();
+  }
+
+  std::vector<EnergyManagementSystemMeteredOutputVariable> EnergyManagementSystemSubroutine::energyManagementSystemMeteredOutputVariables() const {
+    return getImpl<detail::EnergyManagementSystemSubroutine_Impl>()->energyManagementSystemMeteredOutputVariables();
   }
 
   /// @cond

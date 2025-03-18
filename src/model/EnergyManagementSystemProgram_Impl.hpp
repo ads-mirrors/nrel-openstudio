@@ -12,6 +12,8 @@
 namespace openstudio {
 namespace model {
 
+  class EnergyManagementSystemMeteredOutputVariable;
+
   namespace detail {
 
     /** EnergyManagementSystemProgram_Impl is a ModelObject_Impl that is the implementation class for EnergyManagementSystemProgram.*/
@@ -64,6 +66,8 @@ namespace model {
       //@}
       /** @name Other */
       //@{
+
+      std::vector<EnergyManagementSystemMeteredOutputVariable> energyManagementSystemMeteredOutputVariables() const;
 
       //@}
      protected:
