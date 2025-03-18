@@ -29,6 +29,7 @@
 #include <utilities/idd/BranchList_FieldEnums.hxx>
 #include <utilities/idd/Branch_FieldEnums.hxx>
 #include <utilities/idd/AirLoopHVAC_UnitarySystem_FieldEnums.hxx>
+#include <utilities/idd/Controller_WaterCoil_FieldEnums.hxx>
 #include <utilities/idd/IddEnums.hxx>
 
 using namespace openstudio::energyplus;
@@ -98,6 +99,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilCoolingWater_Unitary) {
   EXPECT_EQ("CrossFlow", idfCoil.getString(Coil_Cooling_WaterFields::HeatExchangerConfiguration).get());
   EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
   EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::DesignWaterTemperatureDifference));
+
+  // Check Controller:WaterCoil created by coil.addToNode
+  EXPECT_EQ(0, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
 }
 
 TEST_F(EnergyPlusFixture, ForwardTranslator_CoilCoolingWater_AirLoopHVAC) {
@@ -164,4 +168,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilCoolingWater_AirLoopHVAC) {
   EXPECT_TRUE(idf_coilSystem.isEmpty(CoilSystem_Cooling_WaterFields::EconomizerLockout));
   EXPECT_TRUE(idf_coilSystem.isEmpty(CoilSystem_Cooling_WaterFields::MinimumWaterLoopTemperatureForHeatRecovery));
   EXPECT_TRUE(idf_coilSystem.isEmpty(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery));
+
+  // Check Controller:WaterCoil created by coil.addToNode
+  EXPECT_EQ(1, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
 }

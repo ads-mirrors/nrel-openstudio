@@ -34,6 +34,7 @@
 #include <utilities/idd/BranchList_FieldEnums.hxx>
 #include <utilities/idd/Branch_FieldEnums.hxx>
 #include <utilities/idd/AirLoopHVAC_UnitarySystem_FieldEnums.hxx>
+#include <utilities/idd/Controller_WaterCoil_FieldEnums.hxx>
 #include <utilities/idd/IddEnums.hxx>
 
 using namespace openstudio::energyplus;
@@ -95,6 +96,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerA
   EXPECT_EQ(coil.heatExchanger().nameString(), idfCoil.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::HeatExchangerName).get());
   EXPECT_EQ("Coil:Cooling:Water", idfCoil.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::CoolingCoilObjectType).get());
   EXPECT_EQ(coil.coolingCoil().nameString(), idfCoil.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::CoolingCoilName).get());
+
+  // Check Controller:WaterCoil created by coil.addToNode
+  EXPECT_EQ(0, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
 }
 
 TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerAssisted_AirLoopHVAC) {
@@ -156,4 +160,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerA
   EXPECT_TRUE(idf_coilSystem.isEmpty(CoilSystem_Cooling_WaterFields::EconomizerLockout));
   EXPECT_TRUE(idf_coilSystem.isEmpty(CoilSystem_Cooling_WaterFields::MinimumWaterLoopTemperatureForHeatRecovery));
   EXPECT_TRUE(idf_coilSystem.isEmpty(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery));
+
+  // Check Controller:WaterCoil created by coil.addToNode
+  EXPECT_EQ(1, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
 }
