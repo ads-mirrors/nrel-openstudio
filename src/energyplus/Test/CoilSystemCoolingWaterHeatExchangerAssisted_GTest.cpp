@@ -98,7 +98,13 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerA
   EXPECT_EQ(coil.coolingCoil().nameString(), idfCoil.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::CoolingCoilName).get());
 
   // Check Controller:WaterCoil created by coil.addToNode
-  EXPECT_EQ(0, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
+  EXPECT_EQ(1, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());  // why is this 1?
+
+  WorkspaceObjectVector idfControllers(w.getObjectsByType(IddObjectType::Controller_WaterCoil));
+  ASSERT_EQ(1u, idfControllers.size());
+  WorkspaceObject idfController(idfControllers[0]);
+
+  EXPECT_EQ("", idfController.getString(Controller_WaterCoilFields::Name).get());
 }
 
 TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerAssisted_AirLoopHVAC) {
