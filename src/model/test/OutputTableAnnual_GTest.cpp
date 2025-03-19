@@ -10,6 +10,7 @@
 
 #include "../Schedule.hpp"
 #include "../ScheduleConstant.hpp"
+#include "../ScheduleTypeLimits.hpp"
 
 using namespace openstudio;
 using namespace openstudio::model;
@@ -31,9 +32,23 @@ TEST_F(ModelFixture, OutputTableAnnual_GettersSetters) {
   // Schedule Name: Optional Object
   EXPECT_FALSE(outputTableAnnual.schedule());
   ScheduleConstant sch(m);
+  EXPECT_FALSE(sch.scheduleTypeLimits());
   EXPECT_TRUE(outputTableAnnual.setSchedule(sch));
   ASSERT_TRUE(outputTableAnnual.schedule());
   EXPECT_EQ(sch, outputTableAnnual.schedule().get());
+
+  // The Schedule Type Registry should have done it's thing and assigned a scheduleTypeLimits
+  ASSERT_TRUE(sch.scheduleTypeLimits());
+  auto sch_type_lim = sch.scheduleTypeLimits().get();
+  EXPECT_EQ("OnOff", sch_type_lim.nameString());
+  ASSERT_TRUE(sch_type_lim.lowerLimitValue());
+  EXPECT_EQ(0.0, sch_type_lim.lowerLimitValue().get());
+  ASSERT_TRUE(sch_type_lim.upperLimitValue());
+  EXPECT_EQ(1.0, sch_type_lim.upperLimitValue().get());
+  ASSERT_TRUE(sch_type_lim.numericType());
+  EXPECT_EQ("Discrete", sch_type_lim.numericType().get());
+  EXPECT_EQ("Availability", sch_type_lim.unitType());
+
   outputTableAnnual.resetSchedule();
   EXPECT_FALSE(outputTableAnnual.schedule());
 }
