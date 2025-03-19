@@ -38451,6 +38451,109 @@ OS:Output:Table:SummaryReports,
        \key CO2ResilienceSummary
        \key VisualResilienceSummary
 
+OS:Output:Table:Monthly,
+       \memo Provides a generic method of setting up tables of monthly results. The report
+       \memo has multiple columns that are each defined using a repeated group of fields for any
+       \memo number of columns. A single Output:Table:Monthly object often produces multiple
+       \memo tables in the output. A table is produced for every instance of a particular output
+       \memo variable. For example, a table defined with zone variables will be produced once for
+       \memo every zone.
+       \extensible:2
+       \min-fields 5
+   A1, \field Handle
+       \type handle
+       \required-field
+   A2, \field Name
+       \required-field
+       \type alpha
+   N1, \field Digits After Decimal
+       \type integer
+       \required-field
+       \minimum 0
+       \maximum 10
+   A3, \field Variable or Meter 1 Name
+       \begin-extensible
+       \required-field
+       \type alpha
+       \memo type external-list
+       \memo external-list autoRDDvariableMeter
+       \note The name of an output variable or  meter that is available in the RDD file.
+   A4; \field Aggregation Type for Variable or Meter 1
+       \type choice
+       \required-field
+       \key SumOrAverage
+       \key Maximum
+       \key Minimum
+       \key ValueWhenMaximumOrMinimum
+       \key HoursNonZero
+       \key HoursZero
+       \key HoursPositive
+       \key HoursNonPositive
+       \key HoursNegative
+       \key HoursNonNegative
+       \key SumOrAverageDuringHoursShown
+       \key MaximumDuringHoursShown
+       \key MinimumDuringHoursShown
+       \note The method of aggregation for the selected variable or meter.
+
+OS:Output:Table:Annual,
+       \memo Provides a generic method of setting up tables of annual results with one row per object.
+       \memo The report has multiple columns that are each defined using a repeated group of fields
+       \memo for any number of columns. A single Output:Table:Annual produces a single table in the
+       \memo output.
+       \extensible:3
+       \min-fields 7
+   A1, \field Handle
+       \type handle
+       \required-field
+   A2, \field Name
+       \required-field
+       \type alpha
+   A3, \field Filter
+       \type alpha
+       \note An optional text string that is compared to the names of the objects referenced by the
+       \note variables and if they match are included in the table. A footnote will appear that indicates
+       \note that the objects shown may not be all the objects that of that type that occur in the file.
+   A4, \field Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+       \note Optional schedule name. If left blank, aggregation is performed for all hours simulated. If
+       \note a schedule is specified, aggregation is performed for non-zero hours in the schedule.
+   A5, \field Variable or Meter or EMS Variable or Field 1 Name
+       \begin-extensible
+       \type alpha
+       \required-field
+       \memo type external-list
+       \memo external-list autoRDDvariableMeter
+       \note contain the name of a variable (see Output:Variable and eplusout.rdd), meter (see Output:Meter
+       \note and eplusout.mdd), or EMS Internal Variable Name or IDF Object Field name. This value is shown
+       \note using the aggregation method specified.
+   A6, \field Aggregation Type for Variable or Meter 1
+       \type choice
+       \required-field
+       \key SumOrAverage
+       \key Maximum
+       \key Minimum
+       \key ValueWhenMaximumOrMinimum
+       \key HoursNonZero
+       \key HoursZero
+       \key HoursPositive
+       \key HoursNonPositive
+       \key HoursNegative
+       \key HoursNonNegative
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
+       \key SumOrAverageDuringHoursShown
+       \key MaximumDuringHoursShown
+       \key MinimumDuringHoursShown
+       \note The method of aggregation for the selected variable or meter.
+   N1; \field Digits After Decimal 1
+       \type integer
+       \required-field
+       \minimum 0
+       \maximum 10
+
 \group Energy Management System (EMS)
 
 OS:EnergyManagementSystem:Sensor,

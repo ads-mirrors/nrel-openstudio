@@ -1117,6 +1117,12 @@ set(${target_name}_src
   OutputTableSummaryReports.hpp
   OutputTableSummaryReports_Impl.hpp
   OutputTableSummaryReports.cpp
+  OutputTableAnnual.hpp
+  OutputTableAnnual_Impl.hpp
+  OutputTableAnnual.cpp
+  OutputTableMonthly.hpp
+  OutputTableMonthly_Impl.hpp
+  OutputTableMonthly.cpp
   OutputSchedules.hpp
   OutputSchedules_Impl.hpp
   OutputSchedules.cpp
@@ -2206,6 +2212,8 @@ set(${target_name}_test_src
   test/OutputMeter_GTest.cpp
   test/OutputVariable_GTest.cpp
   test/OutputTableSummaryReports_GTest.cpp
+  test/OutputTableAnnual_GTest.cpp
+  test/OutputTableMonthly_GTest.cpp
   test/OutputSchedules_GTest.cpp
   test/OutputConstructions_GTest.cpp
   test/ParentObject_GTest.cpp

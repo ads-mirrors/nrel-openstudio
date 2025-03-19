@@ -54,7 +54,7 @@ void OSWorkflow::runReportingMeasures() {
   }
 
   LOG(Info, "Beginning to execute Reporting Measures.");
-  applyMeasures(MeasureType::ReportingMeasure, false);
+  applyMeasures(MeasureType::ReportingMeasure, ApplyMeasureType::Regular);
   LOG(Info, "Finished applying Reporting Measures.");
 
   communicateMeasureAttributes();

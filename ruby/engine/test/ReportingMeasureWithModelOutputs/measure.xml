@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<measure>
+  <schema_version>3.1</schema_version>
+  <name>reporting_measure_with_model_outputs</name>
+  <uid>3bfd478b-0575-4a4e-b347-ea3d82f66c21</uid>
+  <version_id>95038fac-6565-4c3a-be46-fd14ac12bcee</version_id>
+  <version_modified>2025-03-14T13:14:52Z</version_modified>
+  <xml_checksum>58F01CAA</xml_checksum>
+  <class_name>ReportingMeasureWithModelOutputs</class_name>
+  <display_name>ReportingMeasureWithModelOutputs</display_name>
+  <description>DESCRIPTION_TEXT</description>
+  <modeler_description>MODELER_DESCRIPTION_TEXT</modeler_description>
+  <arguments />
+  <outputs />
+  <provenances />
+  <tags>
+    <tag>Reporting.QAQC</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ReportingMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Measure Language</name>
+      <value>Ruby</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.9.0</identifier>
+        <min_compatible>3.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>811D6B05</checksum>
+    </file>
+  </files>
+</measure>

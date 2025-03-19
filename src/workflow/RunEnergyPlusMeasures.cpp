@@ -19,7 +19,7 @@ void OSWorkflow::runEnergyPlusMeasures() {
   // Weather file is handled in runInitialization
 
   LOG(Info, "Beginning to execute EnergyPlus Measures.");
-  applyMeasures(MeasureType::EnergyPlusMeasure, false);
+  applyMeasures(MeasureType::EnergyPlusMeasure, ApplyMeasureType::Regular);
   LOG(Info, "Finished applying EnergyPlus Measures.");
 
   communicateMeasureAttributes();

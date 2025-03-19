@@ -12,8 +12,9 @@ import pytest
 CURRENT_DIR_PATH = Path(__file__).parent.absolute()
 sys.path.insert(0, str(CURRENT_DIR_PATH.parent))
 from measure import ReportingMeasureName
+
 sys.path.pop(0)
-del sys.modules['measure']
+del sys.modules["measure"]
 
 
 MODEL_IN_PATH_DEFAULT = CURRENT_DIR_PATH / "example_model.osm"
@@ -103,8 +104,14 @@ class TestReportingMeasureName:
 
         # get arguments and test that they are what we are expecting
         arguments = measure.arguments(model)
-        assert arguments.size() == 1
+        assert arguments.size() == 2
         assert arguments[0].name() == "report_drybulb_temp"
+        assert arguments[0].hasDefaultValue()
+        assert arguments[0].defaultValueAsBool()
+
+        assert arguments[1].name() == "add_output_json"
+        assert arguments[1].hasDefaultValue()
+        assert arguments[1].defaultValueAsBool()
 
     def test_with_drybulb_temp(self):
         """Test running the measure with appropriate arguments, with db temp."""
@@ -123,11 +130,6 @@ class TestReportingMeasureName:
         # get arguments
         arguments = measure.arguments(model)
         argument_map = openstudio.measure.convertOSArgumentVectorToMap(arguments)
-
-        # set argument values to bad value
-        report_drybulb_temp = arguments[0].clone()
-        assert report_drybulb_temp.setValue(True)
-        argument_map["report_drybulb_temp"] = report_drybulb_temp
 
         # temp set path so idf_output_requests work
         runner.setLastOpenStudioModelPath(MODEL_IN_PATH_DEFAULT)
@@ -199,10 +201,18 @@ class TestReportingMeasureName:
         arguments = measure.arguments(model)
         argument_map = openstudio.measure.convertOSArgumentVectorToMap(arguments)
 
-        # set argument values to bad value
-        report_drybulb_temp = arguments[0].clone()
-        assert report_drybulb_temp.setValue(False)
-        argument_map["report_drybulb_temp"] = report_drybulb_temp
+        # create hash of argument values.
+        # If the argument has a default that you want to use,
+        # you don't need it in the dict
+        args_dict = {}
+        args_dict["report_drybulb_temp"] = False
+
+        # populate argument with specified hash value if specified
+        for arg in arguments:
+            temp_arg_var = arg.clone()
+            if arg.name() in args_dict:
+                assert temp_arg_var.setValue(args_dict[arg.name()])
+                argument_map[arg.name()] = temp_arg_var
 
         # temp set path so idf_output_requests work
         runner.setLastOpenStudioModelPath(MODEL_IN_PATH_DEFAULT)
@@ -256,10 +266,82 @@ class TestReportingMeasureName:
         # make sure the report file exists
         assert report_path.exists()
 
+    def test_model_output_requests_with_output_json(self):
+        """Test running the modelOutputRequests with output_json."""
+        # create an instance of the measure
+        measure = ReportingMeasureName()
+
+        # create runner with empty OSW
+        osw = openstudio.WorkflowJSON()
+        runner = openstudio.measure.OSRunner(osw)
+
+        # make an empty model
+        model = openstudio.model.Model()
+
+        # get arguments
+        arguments = measure.arguments(model)
+        argument_map = openstudio.measure.convertOSArgumentVectorToMap(arguments)
+
+        # create hash of argument values.
+        args_dict = {}
+        args_dict["add_output_json"] = True
+
+        # populate argument with specified hash value if specified
+        for arg in arguments:
+            temp_arg_var = arg.clone()
+            if arg.name() in args_dict:
+                assert temp_arg_var.setValue(args_dict[arg.name()])
+                argument_map[arg.name()] = temp_arg_var
+
+        assert not model.outputJSON().is_initialized()
+
+        assert measure.modelOutputRequests(model, runner, argument_map)
+
+        assert model.outputJSON().is_initialized()
+        output_json = model.getOutputJSON()
+        assert output_json.optionType() == "TimeSeriesAndTabular"
+        assert output_json.outputJSON()
+        assert not output_json.outputCBOR()
+        assert not output_json.outputMessagePack()
+
+    def test_model_output_requests_without_output_json(self):
+        """Test running the modelOutputRequests without output_json."""
+        # create an instance of the measure
+        measure = ReportingMeasureName()
+
+        # create runner with empty OSW
+        osw = openstudio.WorkflowJSON()
+        runner = openstudio.measure.OSRunner(osw)
+
+        # make an empty model
+        model = openstudio.model.Model()
+
+        # get arguments
+        arguments = measure.arguments(model)
+        argument_map = openstudio.measure.convertOSArgumentVectorToMap(arguments)
+
+        # create hash of argument values.
+        args_dict = {}
+        args_dict["add_output_json"] = False
+
+        # populate argument with specified hash value if specified
+        for arg in arguments:
+            temp_arg_var = arg.clone()
+            if arg.name() in args_dict:
+                assert temp_arg_var.setValue(args_dict[arg.name()])
+                argument_map[arg.name()] = temp_arg_var
+
+        assert not model.outputJSON().is_initialized()
+
+        assert measure.modelOutputRequests(model, runner, argument_map)
+
+        assert not model.outputJSON().is_initialized()
+
 
 # This allows running openstudio CLI on this file (`openstudio test_measure.py`, maybe with extra args)
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) > 1:
         pytest.main([__file__] + sys.argv[1:])
     else:

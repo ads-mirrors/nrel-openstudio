@@ -43,10 +43,9 @@ void OSWorkflow::runPreProcess() {
   }
 
   // Add any EnergyPlus Output Requests from Reporting Measures
-  LOG(Info, "Beginning to collect output requests from Reporting measures.");
-  const bool energyplus_output_requests = true;
-  applyMeasures(MeasureType::ReportingMeasure, energyplus_output_requests);
-  LOG(Info, "Finished collecting output requests from Reporting measures.");
+  LOG(Info, "Beginning to collect EnergyPlus output requests from Reporting measures.");
+  applyMeasures(MeasureType::ReportingMeasure, ApplyMeasureType::EnergyPlusOutputRequest);
+  LOG(Info, "Finished collecting EnergyPlus output requests from Reporting measures.");
 
   // Skip the pre-processor if halted
   if (runner.halted()) {

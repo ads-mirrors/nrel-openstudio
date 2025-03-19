@@ -326,6 +326,7 @@ namespace model {
       {"Lights", "Lighting", "schedule", true, "", 0.0, 1.0},
       {"Luminaire", "Luminaire", "schedule", true, "", 0.0, 1.0},
       {"OtherEquipment", "Other Equipment", "schedule", true, "", OptionalDouble(), OptionalDouble()},
+      {"OutputTableAnnual", "Output Table Annual", "schedule", false, "Availability", 0.0, 1.0},
       {"OutputVariable", "Active Hours", "schedule", false, "Availability", 0.0, 1.0},
       {"People", "Number of People", "numberofPeopleSchedule", true, "", 0.0, 1.0},
       {"People", "Activity Level", "activityLevelSchedule", true, "ActivityLevel", 0.0, OptionalDouble()},
