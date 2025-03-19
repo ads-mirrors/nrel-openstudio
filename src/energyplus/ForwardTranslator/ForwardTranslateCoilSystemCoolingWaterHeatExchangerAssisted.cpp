@@ -27,7 +27,6 @@
 
 #include "../../model/Model.hpp"
 #include "../../utilities/core/Assert.hpp"
-#include <utilities/idd/CoilSystem_Cooling_Water_FieldEnums.hxx>
 #include <utilities/idd/CoilSystem_Cooling_Water_HeatExchangerAssisted_FieldEnums.hxx>
 #include <utilities/idd/HeatExchanger_AirToAir_SensibleAndLatent_FieldEnums.hxx>
 #include <utilities/idd/Coil_Cooling_Water_FieldEnums.hxx>
@@ -42,8 +41,8 @@ namespace openstudio {
 
 namespace energyplus {
 
-  boost::optional<IdfObject> ForwardTranslator::translateCoilSystemCoolingWaterHeatExchangerAssistedWithoutUnitary(
-    model::CoilSystemCoolingWaterHeatExchangerAssisted& modelObject) {
+  boost::optional<IdfObject>
+    ForwardTranslator::translateCoilSystemCoolingWaterHeatExchangerAssisted(CoilSystemCoolingWaterHeatExchangerAssisted& modelObject) {
 
     IdfObject idfObject = createRegisterAndNameIdfObject(openstudio::IddObjectType::CoilSystem_Cooling_Water_HeatExchangerAssisted, modelObject);
 
@@ -156,52 +155,6 @@ namespace energyplus {
     }
 
     return idfObject;
-  }
-
-  boost::optional<IdfObject>
-    ForwardTranslator::translateCoilSystemCoolingWaterHeatExchangerAssisted(CoilSystemCoolingWaterHeatExchangerAssisted& modelObject) {
-    IdfObject coilSystemCoolingWaterIdf(IddObjectType::CoilSystem_Cooling_Water);
-
-    m_idfObjects.push_back(coilSystemCoolingWaterIdf);
-
-    boost::optional<IdfObject> oIdfObject = translateCoilSystemCoolingWaterHeatExchangerAssistedWithoutUnitary(modelObject);
-
-    if (!oIdfObject) {
-      return boost::none;
-    }
-
-    IdfObject idfObject = oIdfObject.get();
-
-    OptionalString s;
-
-    s = modelObject.name();
-    if (s) {
-      coilSystemCoolingWaterIdf.setString(CoilSystem_Cooling_WaterFields::CoolingCoilObjectType, idfObject.iddObject().name());
-
-      coilSystemCoolingWaterIdf.setString(CoilSystem_Cooling_WaterFields::CoolingCoilName, *s);
-
-      coilSystemCoolingWaterIdf.setName(*s + " CoilSystem");
-    }
-
-    OptionalModelObject omo = modelObject.inletModelObject();
-    if (omo) {
-      translateAndMapModelObject(*omo);
-      s = omo->name();
-      if (s) {
-        coilSystemCoolingWaterIdf.setString(CoilSystem_Cooling_WaterFields::AirInletNodeName, *s);
-      }
-    }
-
-    omo = modelObject.outletModelObject();
-    if (omo) {
-      translateAndMapModelObject(*omo);
-      s = omo->name();
-      if (s) {
-        coilSystemCoolingWaterIdf.setString(CoilSystem_Cooling_WaterFields::AirOutletNodeName, *s);
-      }
-    }
-
-    return coilSystemCoolingWaterIdf;
   }
 
 }  // namespace energyplus

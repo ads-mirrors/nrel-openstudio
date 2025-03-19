@@ -1072,11 +1072,7 @@ namespace energyplus {
       }
       case openstudio::IddObjectType::OS_Coil_Cooling_Water: {
         auto coil = modelObject.cast<CoilCoolingWater>();
-        if (isHVACComponentWithinUnitary(coil)) {
-          retVal = translateCoilCoolingWaterWithoutUnitary(coil);
-        } else {
-          retVal = translateCoilCoolingWater(coil);
-        }
+        retVal = translateCoilCoolingWater(coil);
         break;
       }
       case openstudio::IddObjectType::OS_Coil_Cooling_Water_Panel_Radiant: {
@@ -1211,13 +1207,14 @@ namespace energyplus {
         retVal = translateCoilPerformanceDXCooling(mo);
         break;
       }
+      case openstudio::IddObjectType::OS_CoilSystem_Cooling_Water: {
+        auto mo = modelObject.cast<CoilSystemCoolingWater>();
+        retVal = translateCoilSystemCoolingWater(mo);
+        break;
+      }
       case openstudio::IddObjectType::OS_CoilSystem_Cooling_Water_HeatExchangerAssisted: {
-        auto coil = modelObject.cast<CoilSystemCoolingWaterHeatExchangerAssisted>();
-        if (isHVACComponentWithinUnitary(coil)) {
-          retVal = translateCoilSystemCoolingWaterHeatExchangerAssistedWithoutUnitary(coil);
-        } else {
-          retVal = translateCoilSystemCoolingWaterHeatExchangerAssisted(coil);
-        }
+        auto mo = modelObject.cast<CoilSystemCoolingWaterHeatExchangerAssisted>();
+        retVal = translateCoilSystemCoolingWaterHeatExchangerAssisted(mo);
         break;
       }
       case openstudio::IddObjectType::OS_CoilSystem_Cooling_DX_HeatExchangerAssisted: {

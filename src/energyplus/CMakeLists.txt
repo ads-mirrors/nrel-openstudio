@@ -98,6 +98,7 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslateCoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.cpp
   ForwardTranslator/ForwardTranslateCoilPerformanceDXCooling.cpp
   ForwardTranslator/ForwardTranslateCoilSystemCoolingDXHeatExchangerAssisted.cpp
+  ForwardTranslator/ForwardTranslateCoilSystemCoolingWater.cpp
   ForwardTranslator/ForwardTranslateCoilSystemCoolingWaterHeatExchangerAssisted.cpp
   ForwardTranslator/ForwardTranslateCoilSystemIntegratedHeatPumpAirSource.cpp
   ForwardTranslator/ForwardTranslateCoilUserDefined.cpp
@@ -721,6 +722,7 @@ set(${target_name}_test_src
   Test/CoilHeatingGasMultiStage_GTest.cpp
   Test/CoilHeatingWaterToAirHeatPumpEquationFit_GTest.cpp
   Test/CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit_GTest.cpp
+  Test/CoilSystemCoolingWater_GTest.cpp
   Test/CoilSystemCoolingWaterHeatExchangerAssisted_GTest.cpp
   Test/CoilSystemIntegratedHeatPumpAirSource_GTest.cpp
   Test/CoilUserDefined_GTest.cpp
