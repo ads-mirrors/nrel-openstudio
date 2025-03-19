@@ -310,7 +310,8 @@ namespace model {
     }
 
     ComponentType EnergyManagementSystemMeteredOutputVariable_Impl::componentType() const {
-      // endUseCategoryValues: contains all EndUseType but also "OnSiteGeneration", and I can't
+      // endUseCategoryValues: contains all EndUseType but also "OnSiteGeneration", EndUseType already has `((Cogeneration)(Generators))` and
+      // there can't be more than 2 aliases, so handle it manually
       auto const end_use_cat_str = this->endUseCategory();
       EndUseType end_use_type;
       try {
