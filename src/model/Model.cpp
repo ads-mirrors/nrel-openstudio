@@ -4242,6 +4242,8 @@ namespace model {
     REGISTER_CONSTRUCTOR(FuelFactors);
     REGISTER_CONSTRUCTOR(OutputMeter);
     REGISTER_CONSTRUCTOR(OutputVariable);
+    REGISTER_CONSTRUCTOR(OutputTableAnnual);
+    REGISTER_CONSTRUCTOR(OutputTableMonthly);
     REGISTER_CONSTRUCTOR(OutputTableSummaryReports);
     REGISTER_CONSTRUCTOR(OutsideSurfaceConvectionAlgorithm);
     REGISTER_CONSTRUCTOR(People);
@@ -4818,6 +4820,8 @@ namespace model {
     REGISTER_COPYCONSTRUCTORS(FuelFactors);
     REGISTER_COPYCONSTRUCTORS(OutputMeter);
     REGISTER_COPYCONSTRUCTORS(OutputVariable);
+    REGISTER_COPYCONSTRUCTORS(OutputTableAnnual);
+    REGISTER_COPYCONSTRUCTORS(OutputTableMonthly);
     REGISTER_COPYCONSTRUCTORS(OutputTableSummaryReports);
     REGISTER_COPYCONSTRUCTORS(OutsideSurfaceConvectionAlgorithm);
     REGISTER_COPYCONSTRUCTORS(People);
