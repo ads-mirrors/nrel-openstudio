@@ -19,8 +19,12 @@ void OSWorkflow::runOpenStudioMeasures() {
   // Weather file is handled in runInitialization
 
   LOG(Info, "Beginning to execute OpenStudio Measures");
-  applyMeasures(MeasureType::ModelMeasure, false);
+  applyMeasures(MeasureType::ModelMeasure, ApplyMeasureType::Regular);
   LOG(Info, "Finished applying OpenStudio Measures.");
+
+  LOG(Info, "Beginning to execute Reporting Measures's Model Output Requests");
+  applyMeasures(MeasureType::ReportingMeasure, ApplyMeasureType::ModelOutputRequests);
+  LOG(Info, "Finished applying Reporting Measures's Model Output Requests.")
 
   // Save final OSM
   if (!workflowJSON.runOptions()->fast()) {

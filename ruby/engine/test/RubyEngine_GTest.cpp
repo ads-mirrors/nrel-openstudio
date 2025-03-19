@@ -176,3 +176,22 @@ Traceback (most recent call last):
     },
     "stack level too deep");
 }
+
+TEST_F(RubyEngineFixture, hasMethod) {
+  {
+    const std::string classAndDirName = "ReportingMeasureWithoutModelOutputs";
+    const auto scriptPath = getScriptPath(classAndDirName);
+    auto measureScriptObject = (*thisEngine)->loadMeasure(scriptPath, classAndDirName);
+    EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "doesNotExists"));
+    EXPECT_TRUE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests", false));  // overriden_only = false
+    EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests"));
+  }
+  {
+    const std::string classAndDirName = "ReportingMeasureWithModelOutputs";
+    const auto scriptPath = getScriptPath(classAndDirName);
+    auto measureScriptObject = (*thisEngine)->loadMeasure(scriptPath, classAndDirName);
+    EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "doesNotExists"));
+    EXPECT_TRUE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests", false));  // overriden_only = false
+    EXPECT_TRUE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests"));
+  }
+}

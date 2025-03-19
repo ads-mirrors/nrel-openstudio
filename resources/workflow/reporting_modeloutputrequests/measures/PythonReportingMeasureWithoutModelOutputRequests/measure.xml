@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<measure>
+  <schema_version>3.1</schema_version>
+  <name>python_reporting_measure_without_model_output_requests</name>
+  <uid>f1cbb7b8-e068-417e-8b2f-505f8441ab14</uid>
+  <version_id>26cc30f8-03b9-4f32-a48c-6106c078e625</version_id>
+  <version_modified>2025-03-14T16:42:43Z</version_modified>
+  <xml_checksum>1DA817AF</xml_checksum>
+  <class_name>PythonReportingMeasureWithoutModelOutputRequests</class_name>
+  <display_name>Reporting Measure without Model Output Requests</display_name>
+  <description>An older reporting measure that does not have modelOutputRequests</description>
+  <modeler_description>This is a measure that was added before 3.10.0</modeler_description>
+  <arguments>
+    <argument>
+      <name>report_drybulb_temp</name>
+      <display_name>Add output variables for Drybulb Temperature</display_name>
+      <description>Will add drybulb temp and report min/max values in html.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+  </arguments>
+  <outputs />
+  <provenances />
+  <tags>
+    <tag>Reporting.QAQC</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ReportingMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Measure Language</name>
+      <value>Python</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.9.0</identifier>
+        <min_compatible>3.9.0</min_compatible>
+      </version>
+      <filename>measure.py</filename>
+      <filetype>py</filetype>
+      <usage_type>script</usage_type>
+      <checksum>9AA7CFE7</checksum>
+    </file>
+  </files>
+</measure>

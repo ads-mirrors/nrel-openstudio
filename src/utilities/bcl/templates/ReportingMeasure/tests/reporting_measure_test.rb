@@ -84,7 +84,6 @@ class ReportingMeasureNameTest < Minitest::Test
     cmd = "\"#{cli_path}\" run -w \"#{osw_path}\""
     puts cmd
     system(cmd)
-
   end
 
   def test_number_of_arguments_and_argument_names
@@ -96,7 +95,14 @@ class ReportingMeasureNameTest < Minitest::Test
 
     # get arguments and test that they are what we are expecting
     arguments = measure.arguments(model)
-    assert_equal(1, arguments.size)
+    assert_equal(2, arguments.size)
+    assert_equal("report_drybulb_temp", arguments[0].name)
+    assert(arguments[0].hasDefaultValue)
+    assert(arguments[0].defaultValueAsBool)
+
+    assert_equal("add_output_json", arguments[1].name)
+    assert(arguments[1].hasDefaultValue)
+    assert(arguments[1].defaultValueAsBool)
   end
 
   def test_with_drybulb_temp
@@ -181,10 +187,19 @@ class ReportingMeasureNameTest < Minitest::Test
     arguments = measure.arguments(model)
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
+    # create hash of argument values
     # set non-default measure argument
-    report_drybulb_temp = arguments[0].clone
-    assert(report_drybulb_temp.setValue(false))
-    argument_map['report_drybulb_temp'] = report_drybulb_temp
+    args_hash = {}
+    args_hash['report_drybulb_temp'] = false
+
+    # populate argument with specified hash value if specified
+    arguments.each do |arg|
+      temp_arg_var = arg.clone
+      if args_hash.key?(arg.name)
+        assert(temp_arg_var.setValue(args_hash[arg.name]))
+      end
+      argument_map[arg.name] = temp_arg_var
+    end
 
     # temp set path so idf_output_requests work
     runner.setLastOpenStudioModelPath(model_in_path_default)
@@ -234,6 +249,68 @@ class ReportingMeasureNameTest < Minitest::Test
 
     # make sure the report file exists
     assert_path_exists(report_path(test_name))
+  end
+
+  def test_model_output_requests_with_output_json
+    # create an instance of the measure
+    measure = ReportingMeasureName.new
+
+    # create runner with empty OSW
+    osw = OpenStudio::WorkflowJSON.new
+    runner = OpenStudio::Measure::OSRunner.new(osw)
+
+    # Make an empty model
+    model = OpenStudio::Model::Model.new
+
+    # get arguments
+    arguments = measure.arguments(model)
+    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+
+    assert_empty(model.outputJSON)
+
+    assert(measure.modelOutputRequests(model, runner, argument_map))
+
+    refute_empty(model.outputJSON)
+    output_json = model.getOutputJSON
+    assert_equal('TimeSeriesAndTabular', output_json.optionType)
+    assert(output_json.outputJSON)
+    refute(output_json.outputCBOR)
+    refute(output_json.outputMessagePack)
+  end
+
+  def test_model_output_requests_without_output_json
+    # create an instance of the measure
+    measure = ReportingMeasureName.new
+
+    # create runner with empty OSW
+    osw = OpenStudio::WorkflowJSON.new
+    runner = OpenStudio::Measure::OSRunner.new(osw)
+
+    # Make an empty model
+    model = OpenStudio::Model::Model.new
+
+    # get arguments
+    arguments = measure.arguments(model)
+    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+
+    # create hash of argument values
+    args_hash = {}
+    args_hash['add_output_json'] = false
+
+    # populate argument with specified hash value if specified
+    arguments.each do |arg|
+      temp_arg_var = arg.clone
+      if args_hash.key?(arg.name)
+        assert(temp_arg_var.setValue(args_hash[arg.name]))
+      end
+      argument_map[arg.name] = temp_arg_var
+    end
+
+    assert_empty(model.outputJSON)
+
+    assert(measure.modelOutputRequests(model, runner, argument_map))
+
+    assert_empty(model.outputJSON)
   end
 end
 
