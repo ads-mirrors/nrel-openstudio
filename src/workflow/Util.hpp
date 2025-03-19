@@ -19,7 +19,7 @@ class IdfObject;
 class Workspace;
 class WorkflowStepResult;
 class BCLMeasure;
-class IddObjectType;
+struct IddObjectType;
 
 namespace workflow {
 
