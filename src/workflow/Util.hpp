@@ -7,6 +7,8 @@
 #define WORKFLOW_UTIL_HPP
 
 #include "../utilities/core/Filesystem.hpp"
+#include <array>
+#include <string_view>
 
 namespace openstudio {
 
@@ -17,6 +19,7 @@ class IdfObject;
 class Workspace;
 class WorkflowStepResult;
 class BCLMeasure;
+class IddObjectType;
 
 namespace workflow {
 
@@ -34,6 +37,16 @@ namespace workflow {
 
     bool mergeOutputTableSummaryReports(IdfObject& existingObject, const IdfObject& newObject);
     bool addEnergyPlusOutputRequest(Workspace& workspace, IdfObject& idfObject);
+
+    // Schedule can be used onto a meter/variable, the EMS/PythonPlugin **could** be used for custom reporting
+    // Also adding some cost/utility related objects, the goal is to be not too restrictive here
+    static constexpr std::array<std::string_view, 11> safe_idd_prefixes{
+      "Output",     "Meter",    "PythonPlugin", "EnergyManagementSystem", "Schedule", "LifeCycleCost", "UtilityCost", "ComponentCost",
+      "Compliance", "Currency", "FuelFactors",
+    };
+
+    // If the IddObjectType.valueName doesn't start with one of the allowed prefixes (see `safe_idd_prefixes`), it returns true.
+    bool isEnergyPlusOutputRequestPotentiallyUnsafe(const IddObjectType& iddObjectType);
 
     void zipResults(const openstudio::path& dirPath);
 

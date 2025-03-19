@@ -171,10 +171,24 @@ bool mergeOutputTableSummaryReports(IdfObject& existingObject, const IdfObject& 
   return added;
 }
 
+bool isEnergyPlusOutputRequestPotentiallyUnsafe(const IddObjectType& iddObjectType) {
+  std::string const valueName = iddObjectType.valueName();
+  return std::none_of(util::safe_idd_prefixes.cbegin(), util::safe_idd_prefixes.cend(),
+                      [&valueName](std::string_view s) { return valueName.starts_with(s); });
+}
+
 bool addEnergyPlusOutputRequest(Workspace& workspace, IdfObject& idfObject) {
   const auto iddObject = idfObject.iddObject();
   const bool is_unique = iddObject.properties().unique;
   const auto iddObjectType = iddObject.type();
+
+  // If not marked safe, we Warn, but we let you do it anyways
+  if (isEnergyPlusOutputRequestPotentiallyUnsafe(iddObjectType)) {
+    LOG_FREE(Warn, "openstudio.worklow.Util",
+             "Requested to add an EnergyPlus Output Request of type '"
+               << iddObjectType.valueName() << "' which is not marked as safe: make sure you aren't going to modify the energy usage of the model.");
+  }
+
   if (!is_unique) {
 
     // If already present, don't do it

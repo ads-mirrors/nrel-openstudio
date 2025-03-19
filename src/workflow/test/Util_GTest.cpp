@@ -195,3 +195,26 @@ TEST_F(WorkflowFixture, Util_addEnergyPlusOutputRequest) {
     }
   }
 }
+
+TEST_F(WorkflowFixture, Util_isEnergyPlusOutputRequestPotentiallyUnsafe) {
+
+  std::vector<IddObjectType> should_be_allowed{
+    IddObjectType::Output_Table_Annual,
+    IddObjectType::Meter_Custom,
+    IddObjectType::Schedule_Compact,
+    IddObjectType::Output_Diagnostics,
+    IddObjectType::Output_Variable,
+    IddObjectType::EnergyManagementSystem_OutputVariable,
+    IddObjectType::PythonPlugin_OutputVariable,
+    IddObjectType::LifeCycleCost_Parameters,
+    IddObjectType::UtilityCost_Tariff,
+    IddObjectType::ComponentCost_Adjustments,
+    IddObjectType::Compliance_Building,
+    IddObjectType::CurrencyType,
+  };
+  for (const auto& iddObjectType : should_be_allowed) {
+    EXPECT_FALSE(openstudio::workflow::util::isEnergyPlusOutputRequestPotentiallyUnsafe(iddObjectType)) << "Failed for " << iddObjectType;
+  }
+
+  EXPECT_TRUE(openstudio::workflow::util::isEnergyPlusOutputRequestPotentiallyUnsafe(IddObjectType::People));
+}
