@@ -14,12 +14,9 @@
 #include "../Node_Impl.hpp"
 #include "../AirLoopHVACZoneSplitter.hpp"
 #include "../EnergyManagementSystemProgramCallingManager.hpp"
+#include "../EnergyManagementSystemProgram.hpp"
 #include "../EnergyManagementSystemActuator.hpp"
 #include "../EnergyManagementSystemMeteredOutputVariable.hpp"
-
-#include "../../utilities/core/Path.hpp"
-#include "../../utilities/idf/IdfFile.hpp"
-#include "../../utilities/idf/IdfObject.hpp"
 
 //using namespace openstudio::model;
 using namespace openstudio::energyplus;
@@ -220,60 +217,111 @@ TEST_F(ModelFixture, PlantComponentUserDefined_EMSProgram_emsMeteredOutputVariab
   plant_comp.setPlantLoadingMode("MeetsLoadWithNominalCapacityHiOutLimit");
   plant_comp.setPlantLoopFlowRequestMode("NeedsFlowIfLoopIsOn");
 
+  //PlantComponentUserDefined has CompType::None until it has EMS MeteredOutputVariables
   EXPECT_EQ(ComponentType(ComponentType::None), plant_comp.componentType());
-  testFuelTypeEquality({}, plant_comp.coolingFuelTypes());
-  testFuelTypeEquality({}, plant_comp.heatingFuelTypes());
-  testAppGFuelTypeEquality({}, plant_comp.appGHeatingFuelTypes());
+  EXPECT_TRUE(testFuelTypeEquality({}, plant_comp.coolingFuelTypes()));
+  EXPECT_TRUE(testFuelTypeEquality({}, plant_comp.heatingFuelTypes()));
+  EXPECT_TRUE(testAppGFuelTypeEquality({}, plant_comp.appGHeatingFuelTypes()));
 
   EXPECT_EQ(0, plant_comp.energyManagementSystemMeteredOutputVariables().size());
+
+  // I create an EMSMeteredOutputVar of type "Heating" and "Electricity" into the plantSimulationProgram,
+  // and check that the PlantComponentUserDefined has the right fuel types
   auto sim_pgrm = plant_comp.plantSimulationProgram().get();
   sim_pgrm.setName("Sim_Pgrm");
   sim_pgrm.setBody("SET Elec_Htg_Cons = 0");
-  EnergyManagementSystemMeteredOutputVariable meteredoutvar(m, "Plant Heating Comp Electricity Consumption");
-  EXPECT_TRUE(meteredoutvar.setEMSVariableName("Elec_Htg_Cons"));
-  EXPECT_TRUE(meteredoutvar.setUpdateFrequency("SystemTimestep"));
-  EXPECT_TRUE(meteredoutvar.setEMSProgramOrSubroutineName(sim_pgrm));
-  EXPECT_TRUE(meteredoutvar.setResourceType("Electricity"));
-  EXPECT_TRUE(meteredoutvar.setGroupType("HVAC"));
-  EXPECT_TRUE(meteredoutvar.setEndUseCategory("Heating"));
-  EXPECT_TRUE(meteredoutvar.setEndUseSubcategory(""));
-  EXPECT_TRUE(meteredoutvar.setUnits("J"));
+  {
+    EnergyManagementSystemMeteredOutputVariable meteredoutvar(m, "Plant Heating Comp Electricity Consumption");
+    EXPECT_TRUE(meteredoutvar.setEMSVariableName("Elec_Htg_Cons"));
+    EXPECT_TRUE(meteredoutvar.setUpdateFrequency("SystemTimestep"));
+    EXPECT_TRUE(meteredoutvar.setEMSProgramOrSubroutineName(sim_pgrm));
+    EXPECT_TRUE(meteredoutvar.setResourceType("Electricity"));
+    EXPECT_TRUE(meteredoutvar.setGroupType("HVAC"));
+    EXPECT_TRUE(meteredoutvar.setEndUseCategory("Heating"));
+    EXPECT_TRUE(meteredoutvar.setEndUseSubcategory(""));
+    EXPECT_TRUE(meteredoutvar.setUnits("J"));
+    EXPECT_EQ(ComponentType(ComponentType::Heating), meteredoutvar.componentType());
+    EXPECT_TRUE(testFuelTypeEquality({}, meteredoutvar.coolingFuelTypes()));
+    EXPECT_TRUE(testFuelTypeEquality({FuelType::Electricity}, meteredoutvar.heatingFuelTypes()));
+    EXPECT_TRUE(testAppGFuelTypeEquality({AppGFuelType::Electric}, meteredoutvar.appGHeatingFuelTypes()));
+  }
+
   EXPECT_EQ(1, plant_comp.energyManagementSystemMeteredOutputVariables().size());
   EXPECT_EQ(ComponentType(ComponentType::Heating), plant_comp.componentType());
-  testFuelTypeEquality({}, plant_comp.coolingFuelTypes());
-  testFuelTypeEquality({FuelType::Electricity}, plant_comp.heatingFuelTypes());
-  testAppGFuelTypeEquality({AppGFuelType::Electric}, meteredoutvar.appGHeatingFuelTypes());
+  EXPECT_TRUE(testFuelTypeEquality({}, plant_comp.coolingFuelTypes()));
+  EXPECT_TRUE(testFuelTypeEquality({FuelType::Electricity}, plant_comp.heatingFuelTypes()));
+  EXPECT_TRUE(testAppGFuelTypeEquality({AppGFuelType::Electric}, plant_comp.appGHeatingFuelTypes()));
 
+  // Plant inherits it correctly AFTER I assign the PlantComponentUserDefined on the supply side
   PlantLoop plant(m);
   EXPECT_EQ(ComponentType(ComponentType::None), plant.componentType());
-  testFuelTypeEquality({}, plant.coolingFuelTypes());
-  testFuelTypeEquality({}, plant.heatingFuelTypes());
-  testAppGFuelTypeEquality({}, plant.appGHeatingFuelTypes());
+  EXPECT_TRUE(testFuelTypeEquality({}, plant.coolingFuelTypes()));
+  EXPECT_TRUE(testFuelTypeEquality({}, plant.heatingFuelTypes()));
+  EXPECT_TRUE(testAppGFuelTypeEquality({}, plant.appGHeatingFuelTypes()));
 
   EXPECT_TRUE(plant.addSupplyBranchForComponent(plant_comp));
   EXPECT_EQ(ComponentType(ComponentType::Heating), plant.componentType());
-  testFuelTypeEquality({}, plant.coolingFuelTypes());
-  testFuelTypeEquality({FuelType::Electricity}, plant.heatingFuelTypes());
-  testAppGFuelTypeEquality({AppGFuelType::Electric}, plant.appGHeatingFuelTypes());
+  EXPECT_TRUE(testFuelTypeEquality({}, plant.coolingFuelTypes()));
+  EXPECT_TRUE(testFuelTypeEquality({FuelType::Electricity}, plant.heatingFuelTypes()));
+  EXPECT_TRUE(testAppGFuelTypeEquality({AppGFuelType::Electric}, plant.appGHeatingFuelTypes()));
 
+  // Test with a second variable, this type "Chillers" with "Natural Gas"
   sim_pgrm.setBody("SET Elec_Htg_Cons = 0\nSET Elec_Clg_Cons = 0");
-  EnergyManagementSystemMeteredOutputVariable meteredoutvar2(m, "Plant Cooling Comp Electricity Consumption");
-  EXPECT_TRUE(meteredoutvar2.setEMSVariableName("Elec_Htg_Cons"));
-  EXPECT_TRUE(meteredoutvar2.setUpdateFrequency("SystemTimestep"));
-  EXPECT_TRUE(meteredoutvar2.setEMSProgramOrSubroutineName(sim_pgrm));
-  EXPECT_TRUE(meteredoutvar2.setResourceType("NaturalGas"));
-  EXPECT_TRUE(meteredoutvar2.setGroupType("HVAC"));
-  EXPECT_TRUE(meteredoutvar2.setEndUseCategory("Chillers"));
-  EXPECT_TRUE(meteredoutvar2.setEndUseSubcategory(""));
-  EXPECT_TRUE(meteredoutvar2.setUnits("J"));
+  {
+    EnergyManagementSystemMeteredOutputVariable meteredoutvar2(m, "Plant Cooling Comp Electricity Consumption");
+    EXPECT_TRUE(meteredoutvar2.setEMSVariableName("Elec_Htg_Cons"));
+    EXPECT_TRUE(meteredoutvar2.setUpdateFrequency("SystemTimestep"));
+    EXPECT_TRUE(meteredoutvar2.setEMSProgramOrSubroutineName(sim_pgrm));
+    EXPECT_TRUE(meteredoutvar2.setResourceType("NaturalGas"));
+    EXPECT_TRUE(meteredoutvar2.setGroupType("HVAC"));
+    EXPECT_TRUE(meteredoutvar2.setEndUseCategory("Chillers"));
+    EXPECT_TRUE(meteredoutvar2.setEndUseSubcategory(""));
+    EXPECT_TRUE(meteredoutvar2.setUnits("J"));
+    EXPECT_EQ(ComponentType(ComponentType::Cooling), meteredoutvar2.componentType());
+    EXPECT_TRUE(testFuelTypeEquality({FuelType::Gas}, meteredoutvar2.coolingFuelTypes()));
+    EXPECT_TRUE(testFuelTypeEquality({}, meteredoutvar2.heatingFuelTypes()));
+    EXPECT_TRUE(testAppGFuelTypeEquality({}, meteredoutvar2.appGHeatingFuelTypes()));
+  }
+
   EXPECT_EQ(2, plant_comp.energyManagementSystemMeteredOutputVariables().size());
   EXPECT_EQ(ComponentType(ComponentType::Both), plant_comp.componentType());
   EXPECT_TRUE(testFuelTypeEquality({FuelType::Gas}, plant_comp.coolingFuelTypes()));
   EXPECT_TRUE(testFuelTypeEquality({FuelType::Electricity}, plant_comp.heatingFuelTypes()));
-  EXPECT_TRUE(testAppGFuelTypeEquality({}, meteredoutvar2.appGHeatingFuelTypes()));
+  EXPECT_TRUE(testAppGFuelTypeEquality({AppGFuelType::Electric}, plant_comp.appGHeatingFuelTypes()));
 
   EXPECT_EQ(ComponentType(ComponentType::Both), plant.componentType());
   EXPECT_TRUE(testFuelTypeEquality({FuelType::Gas}, plant.coolingFuelTypes()));
   EXPECT_TRUE(testFuelTypeEquality({FuelType::Electricity}, plant.heatingFuelTypes()));
   EXPECT_TRUE(testAppGFuelTypeEquality({AppGFuelType::Electric}, plant.appGHeatingFuelTypes()));
+
+  // Test with a third varaible, this time in the mainModelProgram, "OnSiteGeneration" (Cogeneration) with Diesel
+  EnergyManagementSystemProgram main_pgrm(m);
+  main_pgrm.setBody("SET Cogen_Cons = 0");
+  EXPECT_TRUE(plant_comp.setMainModelProgram(main_pgrm));
+  {
+    EnergyManagementSystemMeteredOutputVariable meteredoutvar3(m, "Plant Cogen Comp Diesel Consumption");
+    EXPECT_TRUE(meteredoutvar3.setEMSVariableName("Cogen_Cons"));
+    EXPECT_TRUE(meteredoutvar3.setUpdateFrequency("SystemTimestep"));
+    EXPECT_TRUE(meteredoutvar3.setEMSProgramOrSubroutineName(main_pgrm));
+    EXPECT_TRUE(meteredoutvar3.setResourceType("Diesel"));
+    EXPECT_TRUE(meteredoutvar3.setGroupType("HVAC"));
+    EXPECT_TRUE(meteredoutvar3.setEndUseCategory("OnSiteGeneration"));
+    EXPECT_TRUE(meteredoutvar3.setEndUseSubcategory(""));
+    EXPECT_TRUE(meteredoutvar3.setUnits("J"));
+    EXPECT_EQ(ComponentType(ComponentType::Heating), meteredoutvar3.componentType());
+    EXPECT_TRUE(testFuelTypeEquality({}, meteredoutvar3.coolingFuelTypes()));
+    EXPECT_TRUE(testFuelTypeEquality({FuelType::Diesel}, meteredoutvar3.heatingFuelTypes()));
+    EXPECT_TRUE(testAppGFuelTypeEquality({AppGFuelType::Fuel}, meteredoutvar3.appGHeatingFuelTypes()));
+  }
+
+  EXPECT_EQ(3, plant_comp.energyManagementSystemMeteredOutputVariables().size());
+  EXPECT_EQ(ComponentType(ComponentType::Both), plant_comp.componentType());
+  EXPECT_TRUE(testFuelTypeEquality({FuelType::Gas}, plant_comp.coolingFuelTypes()));
+  EXPECT_TRUE(testFuelTypeEquality({FuelType::Electricity, FuelType::Diesel}, plant_comp.heatingFuelTypes()));
+  EXPECT_TRUE(testAppGFuelTypeEquality({AppGFuelType::Electric, AppGFuelType::Fuel}, plant_comp.appGHeatingFuelTypes()));
+
+  EXPECT_EQ(ComponentType(ComponentType::Both), plant.componentType());
+  EXPECT_TRUE(testFuelTypeEquality({FuelType::Gas}, plant.coolingFuelTypes()));
+  EXPECT_TRUE(testFuelTypeEquality({FuelType::Electricity, FuelType::Diesel}, plant.heatingFuelTypes()));
+  EXPECT_TRUE(testAppGFuelTypeEquality({AppGFuelType::Electric, AppGFuelType::Fuel}, plant.appGHeatingFuelTypes()));
 }
