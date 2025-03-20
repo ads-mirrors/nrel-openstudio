@@ -25,6 +25,7 @@
 #include "../CurveQuadratic_Impl.hpp"
 #include "../CurveExponent.hpp"
 #include "../CurveExponent_Impl.hpp"
+#include "../TableLookup.hpp"
 #include "../ModelObjectList.hpp"
 #include "../ModelObjectList_Impl.hpp"
 #include "../FanOnOff.hpp"
@@ -383,5 +384,31 @@ TEST_F(ModelFixture, AirConditionerVariableRefrigerantFlow_MatchingCoilTypes) {
     EXPECT_EQ(1, vrf.terminals().size());
     EXPECT_FALSE(vrf.addTerminal(vrfTerminal));
     EXPECT_EQ(1, vrf.terminals().size());
+  }
+}
+
+TEST_F(ModelFixture, AirConditionerVariableRefrigerantFlow_RemoveCurves) {
+  // Test for #5307
+  {
+    Model model;
+    AirConditionerVariableRefrigerantFlow vrf(model);
+    const size_t expected_size = model.getModelObjects<Curve>().size();
+    EXPECT_FALSE(vrf.defrostEnergyInputRatioModifierFunctionofTemperatureCurve());
+    CurveBiquadratic defrostCurve(model);
+    EXPECT_TRUE(vrf.setDefrostEnergyInputRatioModifierFunctionofTemperatureCurve(defrostCurve));
+    EXPECT_EQ(expected_size + 1, model.getModelObjects<Curve>().size());
+    vrf.remove();
+    EXPECT_EQ(0, model.getModelObjects<Curve>().size());
+  }
+  {
+    Model model;
+    AirConditionerVariableRefrigerantFlow vrf(model);
+    const size_t expected_size = model.getModelObjects<Curve>().size();
+    EXPECT_FALSE(vrf.defrostEnergyInputRatioModifierFunctionofTemperatureCurve());
+    TableLookup defrostCurve(model);
+    EXPECT_TRUE(vrf.setDefrostEnergyInputRatioModifierFunctionofTemperatureCurve(defrostCurve));
+    EXPECT_EQ(expected_size + 1, model.getModelObjects<Curve>().size());
+    vrf.remove();
+    EXPECT_EQ(0, model.getModelObjects<Curve>().size());
   }
 }
