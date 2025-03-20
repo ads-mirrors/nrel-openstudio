@@ -1593,6 +1593,11 @@ namespace model {
         result.push_back(curve.get());
       }
 
+      curve = defrostEnergyInputRatioModifierFunctionofTemperatureCurve();
+      if (curve) {
+        result.push_back(curve.get());
+      }
+
       curve = heatRecoveryCoolingCapacityModifierCurve();
       if (curve) {
         result.push_back(curve.get());
