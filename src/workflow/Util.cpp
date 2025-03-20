@@ -22,6 +22,7 @@
 #include "../utilities/bcl/BCLMeasure.hpp"
 #include "../utilities/time/DateTime.hpp"
 
+#include <algorithm>
 #include <boost/filesystem/operations.hpp>
 #include <utilities/idd/IddEnums.hxx>
 
@@ -161,7 +162,7 @@ bool mergeOutputTableSummaryReports(IdfObject& existingObject, const IdfObject& 
   }
 
   for (const auto& newReport : reportsToAdd) {
-    if (std::find(reports.cbegin(), reports.cend(), newReport) != reports.cend()) {
+    if (std::find(reports.cbegin(), reports.cend(), newReport) == reports.cend()) {
       existingObject.pushExtensibleGroup({newReport});
       added = true;
     }
@@ -170,28 +171,25 @@ bool mergeOutputTableSummaryReports(IdfObject& existingObject, const IdfObject& 
   return added;
 }
 
+bool isEnergyPlusOutputRequestPotentiallyUnsafe(const IddObjectType& iddObjectType) {
+  std::string const valueName = iddObjectType.valueName();
+  return std::none_of(util::safe_idd_prefixes.cbegin(), util::safe_idd_prefixes.cend(),
+                      [&valueName](std::string_view s) { return valueName.starts_with(s); });
+}
+
 bool addEnergyPlusOutputRequest(Workspace& workspace, IdfObject& idfObject) {
+  const auto iddObject = idfObject.iddObject();
+  const bool is_unique = iddObject.properties().unique;
+  const auto iddObjectType = iddObject.type();
 
-  static const std::vector<IddObjectType> allowedObjects{
-    IddObjectType::Output_Surfaces_List,
-    IddObjectType::Output_Surfaces_Drawing,
-    IddObjectType::Output_Schedules,
-    IddObjectType::Output_Constructions,
-    IddObjectType::Output_Table_TimeBins,
-    IddObjectType::Output_Table_Monthly,
-    IddObjectType::Output_Variable,
-    IddObjectType::Output_Meter,
-    IddObjectType::Output_Meter_MeterFileOnly,
-    IddObjectType::Output_Meter_Cumulative,
-    IddObjectType::Output_Meter_Cumulative_MeterFileOnly,
-    IddObjectType::Meter_Custom,
-    IddObjectType::Meter_CustomDecrement,
-    IddObjectType::EnergyManagementSystem_OutputVariable,
-  };
+  // If not marked safe, we Warn, but we let you do it anyways
+  if (isEnergyPlusOutputRequestPotentiallyUnsafe(iddObjectType)) {
+    LOG_FREE(Warn, "openstudio.worklow.Util",
+             "Requested to add an EnergyPlus Output Request of type '"
+               << iddObjectType.valueName() << "' which is not marked as safe: make sure you aren't going to modify the energy usage of the model.");
+  }
 
-  auto iddObjectType = idfObject.iddObject().type();
-
-  if (std::find(allowedObjects.cbegin(), allowedObjects.end(), iddObjectType) != allowedObjects.end()) {
+  if (!is_unique) {
 
     // If already present, don't do it
     for (const auto& wo : workspace.getObjectsByType(iddObjectType)) {
@@ -203,30 +201,29 @@ bool addEnergyPlusOutputRequest(Workspace& workspace, IdfObject& idfObject) {
     workspace.addObject(idfObject);
 
     return true;
-  }
-
-  //  static const std::vector<IddObjectType> allowedUniqueObjects{
-  //    // IddObjectType::Output_EnergyManagementSystem, // TODO: have to merge
-  //    // IddObjectType::OutputControl_SurfaceColorScheme, // TODO: have to merge
-  //    IddObjectType::Output_Table_SummaryReports,  // TODO: have to merge
-  //
-  //    // Not allowed
-  //    // IddObjectType::OutputControl_Table_Style,
-  //    // IddObjectType::OutputControl_ReportingTolerances,
-  //    // IddObjectType::Output_SQLite,
-  //  };
-
-  if (iddObjectType == IddObjectType::Output_Table_SummaryReports) {
+  } else if (iddObjectType == IddObjectType::Output_Table_SummaryReports) {
     auto summaryReports = workspace.getObjectsByType(iddObjectType);
     if (summaryReports.empty()) {
       workspace.addObject(idfObject);
       return true;
     } else {
-      mergeOutputTableSummaryReports(summaryReports.front(), idfObject);
+      return mergeOutputTableSummaryReports(summaryReports.front(), idfObject);
     }
+  } else {
+    // It's a unique one, for which we didn't write a merge, so remove it first
+    auto existingUniqueObjects = workspace.getObjectsByType(iddObjectType);
+    if (!existingUniqueObjects.empty()) {
+      // Technically it should be size == 1
+      if (std::ranges::any_of(existingUniqueObjects, [&idfObject](const auto& wo) { return idfObject.dataFieldsEqual(wo); })) {
+        return false;
+      }
+      for (auto& wo : existingUniqueObjects) {
+        wo.remove();
+      }
+    }
+    workspace.addObject(idfObject);
+    return true;
   }
-
-  return false;
 }
 
 /*****************************************************************************************************************************************************
