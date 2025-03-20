@@ -514,7 +514,7 @@ namespace osversion {
         return;
       }
       IdfFile idfFile = *oIdfFile;
-      if (m_isComponent) {
+      if (m_isComponent && lastVersion > VersionString(0, 7, 4)) {
         updateComponentData(idfFile);
       }
       m_map[oIdfFile->version()] = idfFile;
