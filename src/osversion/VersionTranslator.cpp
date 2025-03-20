@@ -480,6 +480,8 @@ namespace osversion {
     auto start = m_map.find(startVersion);
     if (start != m_map.end()) {
 
+      bool is_component_update_needed = false;  // To avoid constantly comparing VersionString
+
       std::string translatedIdf;
       VersionString lastVersion("0.0.0");
       boost::optional<IddFileAndFactoryWrapper> oIddFile;
@@ -514,7 +516,8 @@ namespace osversion {
         return;
       }
       IdfFile idfFile = *oIdfFile;
-      if (m_isComponent && lastVersion > VersionString(0, 7, 4)) {
+      if (m_isComponent && (is_component_update_needed || (lastVersion > VersionString(0, 7, 4)))) {
+        is_component_update_needed = true;
         updateComponentData(idfFile);
       }
       m_map[oIdfFile->version()] = idfFile;
