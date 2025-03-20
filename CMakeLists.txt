@@ -196,13 +196,13 @@ set(ENERGYPLUS_VERSION_MINOR 1)
 set(ENERGYPLUS_VERSION_PATCH 0)
 set(ENERGYPLUS_VERSION "${ENERGYPLUS_VERSION_MAJOR}.${ENERGYPLUS_VERSION_MINOR}.${ENERGYPLUS_VERSION_PATCH}")
 # Build SHA is not required to have a value, but if it does OpenStudio will require this build.
-set(ENERGYPLUS_BUILD_SHA "ab8eee336c")
+set(ENERGYPLUS_BUILD_SHA "9d11d2b3c2")
 
 # ENERGYPLUS_RELEASE_NAME is used to locate the E+ download
 # from the github releases
-set(ENERGYPLUS_RELEASE_NAME "v25.1.0-IOFreeze-Ubuntu-arm64-macfixup")
+set(ENERGYPLUS_RELEASE_NAME "v25.1.0-RC1")
 
-set(ENERGYPLUS_REPO "jmarrec")
+set(ENERGYPLUS_REPO "NREL")
 
 # Radiance
 set(RADIANCE_VERSION "5.0.a.12")
@@ -651,15 +651,15 @@ if(UNIX)
   else()
     if(LSB_RELEASE_VERSION_SHORT MATCHES "24.04")
       if (ARCH MATCHES "arm64")
-        set(ENERGYPLUS_EXPECTED_HASH 3a5232f304a1370c460c9b083988dc97)
+        set(ENERGYPLUS_EXPECTED_HASH f7fb90b568b1ed07274f4cc5ec241807)
       else()
-        set(ENERGYPLUS_EXPECTED_HASH abade7e9c11ea9da9dfe976459b8ea5a)
+        set(ENERGYPLUS_EXPECTED_HASH ae759290dfe2bb732b786ad1e254cd6e)
       endif()
     elseif(LSB_RELEASE_VERSION_SHORT MATCHES "22.04")
       if (ARCH MATCHES "arm64")
-        set(ENERGYPLUS_EXPECTED_HASH 6ed5ec3639255edac220635f1581c81b)
+        set(ENERGYPLUS_EXPECTED_HASH c947714bd57f091c6a8e456be44b86dc)
       else()
-        set(ENERGYPLUS_EXPECTED_HASH 15c0bf1a745af0269c2c41d416f05b03)
+        set(ENERGYPLUS_EXPECTED_HASH 9fddecf3bcf06ff74d2edd75f1009d9f)
       endif()
     else() # e.g., 18.04, 20.04
       message(FATAL_ERROR "EnergyPlus no longer provides packages for Ubuntu < 22.04")
@@ -696,7 +696,7 @@ elseif(WIN32)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8) # 64 bit
     set(ENERGYPLUS_PATH "EnergyPlus-${ENERGYPLUS_VERSION}-${ENERGYPLUS_BUILD_SHA}-Windows-x86_64")
     set(ENERGYPLUS_ARCH 64)
-    set(ENERGYPLUS_EXPECTED_HASH 6ec4d3140a26d29bc9fe5b3f6791623f)
+    set(ENERGYPLUS_EXPECTED_HASH eb7385b46d6ca418b9c16c9242cb2843)
   else()
     set(ENERGYPLUS_PATH "EnergyPlus-${ENERGYPLUS_VERSION}-${ENERGYPLUS_BUILD_SHA}-Windows-i386")
     set(ENERGYPLUS_ARCH 32)
