@@ -6,6 +6,7 @@
 #include "ThreeJSForwardTranslator.hpp"
 
 #include "RenderingColor.hpp"
+#include "RenderingColor_Impl.hpp"
 #include "ConstructionBase.hpp"
 #include "ConstructionBase_Impl.hpp"
 #include "ConstructionAirBoundary.hpp"
@@ -131,7 +132,12 @@ namespace model {
     // make air loop HVAC materials
     for (auto& airLoopHVAC : model.getConcreteModelObjects<AirLoopHVAC>()) {
       std::string name = getObjectThreeMaterialName(airLoopHVAC);
-      boost::optional<RenderingColor> color = RenderingColor(model);
+      // AirLoopHVAC does not have a renderingColor method
+      boost::optional<RenderingColor> color = model.getConcreteModelObjectByName<RenderingColor>(name);
+      if (!color) {
+        color = RenderingColor(model);
+        color->setName(name);
+      }
       addThreeMaterial(materials, materialMap,
                        makeThreeMaterial(name, toThreeColor(color->renderingRedValue(), color->renderingBlueValue(), color->renderingGreenValue()), 1,
                                          ThreeSide::DoubleSide));
