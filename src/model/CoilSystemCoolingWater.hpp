@@ -13,10 +13,8 @@ namespace openstudio {
 
 namespace model {
 
-  // TODO: Check the following class names against object getters and setters.
-  class Connection;
   class Schedule;
-  class CoolingCoilsWater;
+  class WaterToAirComponent;
 
   namespace detail {
 
@@ -32,6 +30,8 @@ namespace model {
     //@{
 
     explicit CoilSystemCoolingWater(const Model& model);
+
+    explicit CoilSystemCoolingWater(const Model& model, const WaterToAirComponent& coolingCoil);
 
     virtual ~CoilSystemCoolingWater() = default;
     // Default the copy and move operators because the virtual dtor is explicit
@@ -49,17 +49,9 @@ namespace model {
     /** @name Getters */
     //@{
 
-    // TODO: Check return type. From object lists, some candidates are: Connection.
-    Connection airInletNode() const;
-
-    // TODO: Check return type. From object lists, some candidates are: Connection.
-    Connection airOutletNode() const;
-
-    // TODO: Check return type. From object lists, some candidates are: Schedule.
     Schedule availabilitySchedule() const;
 
-    // TODO: Check return type. From object lists, some candidates are: CoolingCoilsWater.
-    CoolingCoilsWater coolingCoil() const;
+    WaterToAirComponent coolingCoil() const;
 
     std::string dehumidificationControlType() const;
 
@@ -73,25 +65,15 @@ namespace model {
 
     double minimumWaterLoopTemperatureForHeatRecovery() const;
 
-    // TODO: Check return type. From object lists, some candidates are: CoolingCoilsWater.
-    boost::optional<CoolingCoilsWater> companionCoilUsedForHeatRecovery() const;
+    boost::optional<WaterToAirComponent> companionCoilUsedForHeatRecovery() const;
 
     //@}
     /** @name Setters */
     //@{
 
-    // TODO: Check argument type. From object lists, some candidates are: Connection.
-    bool setAirInletNode(const Connection& connection);
-
-    // TODO: Check argument type. From object lists, some candidates are: Connection.
-    bool setAirOutletNode(const Connection& connection);
-
-    // TODO: Check argument type. From object lists, some candidates are: Schedule.
-    // Note Schedules are passed by reference, not const reference.
     bool setAvailabilitySchedule(Schedule& schedule);
 
-    // TODO: Check argument type. From object lists, some candidates are: CoolingCoilsWater.
-    bool setCoolingCoil(const CoolingCoilsWater& coolingCoilsWater);
+    bool setCoolingCoil(const WaterToAirComponent& coolingCoil);
 
     bool setDehumidificationControlType(const std::string& dehumidificationControlType);
 
@@ -105,8 +87,7 @@ namespace model {
 
     bool setMinimumWaterLoopTemperatureForHeatRecovery(double minimumWaterLoopTemperatureForHeatRecovery);
 
-    // TODO: Check argument type. From object lists, some candidates are: CoolingCoilsWater.
-    bool setCompanionCoilUsedForHeatRecovery(const CoolingCoilsWater& coolingCoilsWater);
+    bool setCompanionCoilUsedForHeatRecovery(const WaterToAirComponent& companionCoilUsedForHeatRecovery);
 
     void resetCompanionCoilUsedForHeatRecovery();
 

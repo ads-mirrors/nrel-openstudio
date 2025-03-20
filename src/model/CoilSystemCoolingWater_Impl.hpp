@@ -12,10 +12,8 @@
 namespace openstudio {
 namespace model {
 
-  // TODO: Check the following class names against object getters and setters.
-  class Connection;
   class Schedule;
-  class CoolingCoilsWater;
+  class WaterToAirComponent;
 
   namespace detail {
 
@@ -44,6 +42,23 @@ namespace model {
 
       virtual std::vector<ScheduleTypeKey> getScheduleTypeKeys(const Schedule& schedule) const override;
 
+      virtual unsigned inletPort() const override;
+
+      virtual unsigned outletPort() const override;
+
+      // will return the coolingCoil and companionCoilUsedForHeatRecovery
+      virtual std::vector<ModelObject> children() const override;
+
+      // Will also clone the coolingCoil and companionCoilUsedForHeatRecovery
+      virtual ModelObject clone(Model model) const override;
+
+      // This function will connect the underlying Coil:Cooling:Water object
+      virtual bool addToNode(Node& node) override;
+
+      virtual boost::optional<HVACComponent> containingHVACComponent() const override;
+
+      virtual boost::optional<ZoneHVACComponent> containingZoneHVACComponent() const override;
+
       virtual ComponentType componentType() const override;
       virtual std::vector<FuelType> coolingFuelTypes() const override;
       virtual std::vector<FuelType> heatingFuelTypes() const override;
@@ -53,17 +68,7 @@ namespace model {
       /** @name Getters */
       //@{
 
-      // TODO: Check return type. From object lists, some candidates are: Connection.
-      Connection airInletNode() const;
-
-      // TODO: Check return type. From object lists, some candidates are: Connection.
-      Connection airOutletNode() const;
-
-      // TODO: Check return type. From object lists, some candidates are: Schedule.
-      Schedule availabilitySchedule() const;
-
-      // TODO: Check return type. From object lists, some candidates are: CoolingCoilsWater.
-      CoolingCoilsWater coolingCoil() const;
+      WaterToAirComponent coolingCoil() const;
 
       std::string dehumidificationControlType() const;
 
@@ -77,25 +82,15 @@ namespace model {
 
       double minimumWaterLoopTemperatureForHeatRecovery() const;
 
-      // TODO: Check return type. From object lists, some candidates are: CoolingCoilsWater.
-      boost::optional<CoolingCoilsWater> companionCoilUsedForHeatRecovery() const;
+      boost::optional<WaterToAirComponent> companionCoilUsedForHeatRecovery() const;
 
       //@}
       /** @name Setters */
       //@{
 
-      // TODO: Check argument type. From object lists, some candidates are: Connection.
-      bool setAirInletNode(const Connection& connection);
-
-      // TODO: Check argument type. From object lists, some candidates are: Connection.
-      bool setAirOutletNode(const Connection& connection);
-
-      // TODO: Check argument type. From object lists, some candidates are: Schedule.
-      // Note Schedules are passed by reference, not const reference.
       bool setAvailabilitySchedule(Schedule& schedule);
 
-      // TODO: Check argument type. From object lists, some candidates are: CoolingCoilsWater.
-      bool setCoolingCoil(const CoolingCoilsWater& coolingCoilsWater);
+      bool setCoolingCoil(const WaterToAirComponent& coolingCoil);
 
       bool setDehumidificationControlType(const std::string& dehumidificationControlType);
 
@@ -109,8 +104,7 @@ namespace model {
 
       bool setMinimumWaterLoopTemperatureForHeatRecovery(double minimumWaterLoopTemperatureForHeatRecovery);
 
-      // TODO: Check argument type. From object lists, some candidates are: CoolingCoilsWater.
-      bool setCompanionCoilUsedForHeatRecovery(const CoolingCoilsWater& coolingCoilsWater);
+      bool setCompanionCoilUsedForHeatRecovery(const WaterToAirComponent& companionCoilUsedForHeatRecovery);
 
       void resetCompanionCoilUsedForHeatRecovery();
 
@@ -123,14 +117,9 @@ namespace model {
      private:
       REGISTER_LOGGER("openstudio.model.CoilSystemCoolingWater");
 
-      // TODO: Check the return types of these methods.
-      // Optional getters for use by methods like children() so can remove() if the constructor fails.
-      // There are other ways for the public versions of these getters to fail--perhaps all required
-      // objects should be returned as boost::optionals
-      boost::optional<Connection> optionalAirInletNode() const;
-      boost::optional<Connection> optionalAirOutletNode() const;
       boost::optional<Schedule> optionalAvailabilitySchedule() const;
-      boost::optional<CoolingCoilsWater> optionalCoolingCoil() const;
+      boost::optional<WaterToAirComponent> optionalCoolingCoil() const;
+      boost::optional<WaterToAirComponent> optionalCompanionCoilUsedForHeatRecovery() const;
     };
 
   }  // namespace detail

@@ -5,18 +5,26 @@
 
 #include "../ForwardTranslator.hpp"
 #include "../../model/Model.hpp"
-
 #include "../../model/CoilSystemCoolingWater.hpp"
-
-// TODO: Check the following class names against object getters and setters.
+#include "../../model/CoilSystemCoolingWater_Impl.hpp"
 #include "../../model/Node.hpp"
 #include "../../model/Node_Impl.hpp"
-
 #include "../../model/Schedule.hpp"
 #include "../../model/Schedule_Impl.hpp"
+#include "../../model/CoilCoolingWater.hpp"
+#include "../../model/CoilCoolingWater_Impl.hpp"
+#include "../../model/ControllerWaterCoil.hpp"
+#include "../../model/ControllerWaterCoil_Impl.hpp"
 
-#include "../../model/CoolingCoilsWater.hpp"
-#include "../../model/CoolingCoilsWater_Impl.hpp"
+#include "../../model/AirLoopHVAC.hpp"
+#include "../../model/FanVariableVolume.hpp"
+#include "../../model/FanVariableVolume_Impl.hpp"
+#include "../../model/FanConstantVolume.hpp"
+#include "../../model/FanConstantVolume_Impl.hpp"
+#include "../../model/FanOnOff.hpp"
+#include "../../model/FanOnOff_Impl.hpp"
+#include "../../model/FanSystemModel.hpp"
+#include "../../model/FanSystemModel_Impl.hpp"
 
 #include <utilities/idd/CoilSystem_Cooling_Water_FieldEnums.hxx>
 #include <utilities/idd/IddEnums.hxx>
@@ -29,31 +37,82 @@ namespace energyplus {
 
   boost::optional<IdfObject> ForwardTranslator::translateCoilSystemCoolingWater(model::CoilSystemCoolingWater& modelObject) {
 
-    // Instantiate an IdfObject of the class to store the values
     IdfObject idfObject = createRegisterAndNameIdfObject(openstudio::IddObjectType::CoilSystem_Cooling_Water, modelObject);
-    // If it doesn't have a name, or if you aren't sure you are going to want to return it
-    // IdfObject idfObject(openstudio::IddObjectType::CoilSystem_Cooling_Water);
-    // m_idfObjects.push_back(idfObject);
 
-    // TODO: Note JM 2018-10-17
-    // You are responsible for implementing any additional logic based on choice fields, etc.
-    // The ForwardTranslator generator script is meant to facilitate your work, not get you 100% of the way
+    std::string airInletNodeName = modelObject.nameString() + " Cooling Inlet Node";
+    std::string airOutletNodeName = modelObject.nameString() + " Cooling Outlet Node";
 
-    // TODO: If you keep createRegisterAndNameIdfObject above, you don't need this.
-    // But in some cases, you'll want to handle failure without pushing to the map
-    // Name
-    idfObject.setName(modelObject.nameString());
+    // CoolingCoilObjectType
+    // CoolingCoilName
+    {
+      auto coolingCoil = modelObject.coolingCoil();
+      if (auto idf = translateAndMapModelObject(coolingCoil)) {
+        idfObject.setString(CoilSystem_Cooling_WaterFields::CoolingCoilObjectType, idf->iddObject().name());
+        idfObject.setString(CoilSystem_Cooling_WaterFields::CoolingCoilName, idf->nameString());
+        if (idf->iddObject().type() == IddObjectType::Coil_Cooling_Water) {
+          idf->setString(Coil_Cooling_WaterFields::AirInletNodeName, airInletNodeName);
+          idf->setString(Coil_Cooling_WaterFields::AirOutletNodeName, airOutletNodeName);
+          // Add IddObjectType::Coil_Cooling_Water_DetailedGeometry if implemented
+        } else {
+          // Shouldn't happen, accepts only Coil:Cooling:Water or Coil:Cooling:Water:DetailedGeometry
+          // Shouldn't happen, accepts only Coil:Cooling:DX:SingleSpeed or Coil:Cooling:DX:VariableSpeed
+          LOG(Fatal, modelObject.briefDescription()
+                       << " appears to have a cooling coil that shouldn't have been accepted: " << coolingCoil.briefDescription());
+          OS_ASSERT(false);
+        }
+      }
+      if (auto coilCoolingWater = coolingCoil.optionalCast<CoilCoolingWater>()) {
+        if (auto controller = coilCoolingWater->controllerWaterCoil()) {
+          if (auto idf = translateAndMapModelObject(controller.get())) {
+            idf->setString(Controller_WaterCoilFields::SensorNodeName, airOutletNodeName);
+          }
+        }
+      }
 
-    // Air Inlet Node Name: Required Node
-    Node airInletNodeName = modelObject.airInletNodeName();
-    if (boost::optional<IdfObject> wo_ = translateAndMapModelObject(airInletNodeName)) {
-      idfObject.setString(CoilSystem_Cooling_WaterFields::AirInletNodeName, wo_->nameString());
-    }
+      // Need a SPM:MixedAir on the Coil:Cooling:Water outlet node (that we **created** just above in IDF directly, so it won't get picked up by the
+      // ForwardTranslateAirLoopHVAC method)
+      if (boost::optional<AirLoopHVAC> airLoop_ = modelObject.airLoopHVAC()) {
+        std::vector<StraightComponent> fans;
+        std::vector<ModelObject> supplyComponents = airLoop_->supplyComponents();
 
-    // Air Outlet Node Name: Required Node
-    Node airOutletNodeName = modelObject.airOutletNodeName();
-    if (boost::optional<IdfObject> wo_ = translateAndMapModelObject(airOutletNodeName)) {
-      idfObject.setString(CoilSystem_Cooling_WaterFields::AirOutletNodeName, wo_->nameString());
+        for (auto it = supplyComponents.begin(); it != supplyComponents.end(); ++it) {
+          if (auto fan_ = it->optionalCast<FanVariableVolume>()) {
+            fans.insert(fans.begin(), std::move(*fan_));
+          } else if (auto fan_ = it->optionalCast<FanConstantVolume>()) {
+            fans.insert(fans.begin(), std::move(*fan_));
+          } else if (auto fan_ = it->optionalCast<FanSystemModel>()) {
+            fans.insert(fans.begin(), std::move(*fan_));
+          } else if (auto fan_ = it->optionalCast<FanOnOff>()) {
+            fans.insert(fans.begin(), std::move(*fan_));
+          }
+        }
+
+        if (!fans.empty()) {
+          // Fan closest to the supply outlet node
+          StraightComponent fan = fans.front();
+          OptionalNode inletNode = fan.inletModelObject()->optionalCast<Node>();
+          OptionalNode outletNode = fan.outletModelObject()->optionalCast<Node>();
+
+          // No reason this wouldn't be ok at this point really...
+          // TODO: change to OS_ASSERT?
+          if (inletNode && outletNode) {
+
+            IdfObject idf_spm(IddObjectType::SetpointManager_MixedAir);
+            idf_spm.setString(SetpointManager_MixedAirFields::Name, airOutletNodeName + " OS Default SPM");
+            idf_spm.setString(SetpointManager_MixedAirFields::ControlVariable, "Temperature");
+
+            Node supplyOutletNode = airLoop_->supplyOutletNode();
+            idf_spm.setString(SetpointManager_MixedAirFields::ReferenceSetpointNodeName, supplyOutletNode.nameString());
+
+            idf_spm.setString(SetpointManager_MixedAirFields::FanInletNodeName, inletNode->nameString());
+            idf_spm.setString(SetpointManager_MixedAirFields::FanOutletNodeName, outletNode->nameString());
+
+            idf_spm.setString(SetpointManager_MixedAirFields::SetpointNodeorNodeListName, airOutletNodeName);
+
+            m_idfObjects.push_back(idf_spm);
+          }
+        }
+      }
     }
 
     // Availability Schedule Name: Optional Object
@@ -61,16 +120,6 @@ namespace energyplus {
       if (boost::optional<IdfObject> wo_ = translateAndMapModelObject(availabilitySchedule_.get())) {
         idfObject.setString(CoilSystem_Cooling_WaterFields::AvailabilityScheduleName, wo_->nameString());
       }
-    }
-
-    // Cooling Coil Object Type: Required String
-    const std::string coolingCoilObjectType = modelObject.coolingCoilObjectType();
-    idfObject.setString(CoilSystem_Cooling_WaterFields::CoolingCoilObjectType, coolingCoilObjectType);
-
-    // Cooling Coil Name: Required Object
-    CoolingCoilsWater coolingCoil = modelObject.coolingCoil();
-    if (boost::optional<IdfObject> wo_ = translateAndMapModelObject(coolingCoil)) {
-      idfObject.setString(CoilSystem_Cooling_WaterFields::CoolingCoilName, wo_->nameString());
     }
 
     // Dehumidification Control Type: Optional String
@@ -107,7 +156,7 @@ namespace energyplus {
     idfObject.setDouble(CoilSystem_Cooling_WaterFields::MinimumWaterLoopTemperatureForHeatRecovery, minimumWaterLoopTemperatureForHeatRecovery);
 
     // Companion Coil Used For Heat Recovery: Optional Object
-    if (boost::optional<CoolingCoilsWater> companionCoilUsedForHeatRecovery_ = modelObject.companionCoilUsedForHeatRecovery()) {
+    if (boost::optional<WaterToAirComponent> companionCoilUsedForHeatRecovery_ = modelObject.companionCoilUsedForHeatRecovery()) {
       if (boost::optional<IdfObject> wo_ = translateAndMapModelObject(companionCoilUsedForHeatRecovery_.get())) {
         idfObject.setString(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery, wo_->nameString());
       }
