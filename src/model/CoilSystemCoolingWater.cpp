@@ -10,10 +10,28 @@
 #include "Schedule_Impl.hpp"
 #include "WaterToAirComponent.hpp"
 #include "WaterToAirComponent_Impl.hpp"
+#include "CoilCoolingWater.hpp"
+#include "CoilCoolingWater_Impl.hpp"
 #include "Model.hpp"
 #include "Model_Impl.hpp"
 #include "Node.hpp"
 #include "Node_Impl.hpp"
+#include "AirLoopHVAC.hpp"
+#include "AirLoopHVAC_Impl.hpp"
+#include "ControllerWaterCoil.hpp"
+#include "ControllerWaterCoil_Impl.hpp"
+
+#include "AirLoopHVACUnitarySystem.hpp"
+#include "AirLoopHVACUnitarySystem_Impl.hpp"
+#include "ZoneHVACFourPipeFanCoil.hpp"
+#include "ZoneHVACFourPipeFanCoil_Impl.hpp"
+#include "ZoneHVACUnitVentilator.hpp"
+#include "ZoneHVACUnitVentilator_Impl.hpp"
+
+#include "AirLoopHVACOutdoorAirSystem.hpp"
+#include "AirLoopHVACOutdoorAirSystem_Impl.hpp"
+#include "AirLoopHVACDedicatedOutdoorAirSystem.hpp"
+#include "AirLoopHVACDedicatedOutdoorAirSystem_Impl.hpp"
 
 #include "../utilities/core/Assert.hpp"
 #include "../utilities/data/DataEnums.hpp"
@@ -85,10 +103,10 @@ namespace model {
       auto coilSystemClone = StraightComponent_Impl::clone(model).cast<CoilSystemCoolingWater>();
 
       if (OptionalWaterToAirComponent intermediate = optionalCoolingCoil()) {
-        coilSystemClone.setSupplyAirFan(intermediate->clone(model).cast<HVACComponent>());
+        coilSystemClone.setCoolingCoil(intermediate->clone(model).cast<HVACComponent>());
       }
       if (OptionalWaterToAirComponent intermediate = optionalCompanionCoilUsedForHeatRecovery()) {
-        coilSystemClone.setSupplyAirFan(intermediate->clone(model).cast<HVACComponent>());
+        coilSystemClone.setCompanionCoilUsedForHeatRecovery(intermediate->clone(model).cast<HVACComponent>());
       }
 
       return std::move(coilSystemClone);

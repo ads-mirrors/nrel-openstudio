@@ -7,46 +7,28 @@
 
 #include "../CoilSystemCoolingWater.hpp"
 #include "../CoilSystemCoolingWater_Impl.hpp"
-
-// TODO: Check the following class names against object getters and setters.
-#include "../Connection.hpp"
-#include "../Connection_Impl.hpp"
-
 #include "../Schedule.hpp"
 #include "../Schedule_Impl.hpp"
-
-#include "../CoolingCoilsWater.hpp"
-#include "../CoolingCoilsWater_Impl.hpp"
+#include "../CoilCoolingWater.hpp"
+#include "../CoilCoolingWater_Impl.hpp"
 
 using namespace openstudio;
 using namespace openstudio::model;
 
 TEST_F(ModelFixture, CoilSystemCoolingWater_GettersSetters) {
   Model m;
-  // TODO: Check regular Ctor arguments
+
   CoilSystemCoolingWater coilSystemCoolingWater(m);
-  // TODO: Or if a UniqueModelObject (and make sure _Impl is included)
-  // CoilSystemCoolingWater coilSystemCoolingWater = m.getUniqueModelObject<CoilSystemCoolingWater>();
 
   coilSystemCoolingWater.setName("My CoilSystemCoolingWater");
 
-  // Air Inlet Node Name: Required Object
-  Connection airInletNode(m);
-  EXPECT_TRUE(coilSystemCoolingWater.setAirInletNode(airInletNode));
-  EXPECT_EQ(airInletNode, coilSystemCoolingWater.airInletNode());
-
-  // Air Outlet Node Name: Required Object
-  Connection airOutletNode(m);
-  EXPECT_TRUE(coilSystemCoolingWater.setAirOutletNode(airOutletNode));
-  EXPECT_EQ(airOutletNode, coilSystemCoolingWater.airOutletNode());
-
   // Availability Schedule Name: Required Object
-  Schedule availabilitySchedule(m);
+  Schedule availabilitySchedule = m.alwaysOnDiscreteSchedule();
   EXPECT_TRUE(coilSystemCoolingWater.setAvailabilitySchedule(availabilitySchedule));
   EXPECT_EQ(availabilitySchedule, coilSystemCoolingWater.availabilitySchedule());
 
   // Cooling Coil: Required Object
-  CoolingCoilsWater coolingCoil(m);
+  CoilCoolingWater coolingCoil(m);
   EXPECT_TRUE(coilSystemCoolingWater.setCoolingCoil(coolingCoil));
   EXPECT_EQ(coolingCoil, coilSystemCoolingWater.coolingCoil());
 
@@ -87,20 +69,31 @@ TEST_F(ModelFixture, CoilSystemCoolingWater_GettersSetters) {
   EXPECT_EQ(1.2, coilSystemCoolingWater.minimumWaterLoopTemperatureForHeatRecovery());
 
   // Companion Coil Used For Heat Recovery: Optional Object
-  boost::optional<CoolingCoilsWater> companionCoilUsedForHeatRecovery(m);
+  boost::optional<CoilCoolingWater> companionCoilUsedForHeatRecovery(m);
   EXPECT_TRUE(coilSystemCoolingWater.setCompanionCoilUsedForHeatRecovery(companionCoilUsedForHeatRecovery));
   ASSERT_TRUE(coilSystemCoolingWater.companionCoilUsedForHeatRecovery());
   EXPECT_EQ(companionCoilUsedForHeatRecovery, coilSystemCoolingWater.companionCoilUsedForHeatRecovery().get());
 }
+
 TEST_F(ModelFixture, CoilSystemCoolingWater_HeatCoolFuelTypes) {
   Model m;
-  // TODO: Check regular Ctor arguments
-  CoilSystemCoolingWater coilSystemCoolingWater(m);
-  // TODO: Or if a UniqueModelObject (and make sure _Impl is included)
-  // CoilSystemCoolingWater coilSystemCoolingWater = m.getUniqueModelObject<CoilSystemCoolingWater>();
 
-  EXPECT_EQ(ComponentType(ComponentType::Both), coilSystemCoolingWater.componentType());
+  CoilSystemCoolingWater coilSystemCoolingWater(m);
+
+  EXPECT_EQ(ComponentType(ComponentType::Cooling), coilSystemCoolingWater.componentType());
   testFuelTypeEquality({FuelType::Electricity}, coilSystemCoolingWater.coolingFuelTypes());
-  testFuelTypeEquality({FuelType::Electricity, FuelType::Propane}, coilSystemCoolingWater.heatingFuelTypes());
-  testAppGFuelTypeEquality({AppGFuelType::Fuel, AppGFuelType::HeatPump}, coilSystemCoolingWater.appGHeatingFuelTypes());
+  testFuelTypeEquality({}, coilSystemCoolingWater.heatingFuelTypes());
+  testAppGFuelTypeEquality({}, coilSystemCoolingWater.appGHeatingFuelTypes());
+}
+
+TEST_F(ModelFixture, CoilSystemCoolingWater_clone) {
+  
+}
+
+TEST_F(ModelFixture, CoilSystemCoolingWater_remove) {
+  
+}
+
+TEST_F(ModelFixture, CoilSystemCoolingWater_addToNode) {
+  
 }

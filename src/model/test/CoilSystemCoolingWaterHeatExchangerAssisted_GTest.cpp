@@ -21,7 +21,6 @@
 #include "../ZoneHVACFourPipeFanCoil.hpp"
 #include "../FanConstantVolume.hpp"
 #include "../CoilHeatingWater.hpp"
-#include "../CoilCoolingWater.hpp"
 #include "../Schedule.hpp"
 
 using namespace openstudio;
