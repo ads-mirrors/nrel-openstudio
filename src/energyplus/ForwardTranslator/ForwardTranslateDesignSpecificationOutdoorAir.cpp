@@ -126,6 +126,8 @@ namespace energyplus {
 
     if (result) {
       m_zoneDSOAsMap.emplace(z.handle(), result);
+    } else {
+      m_zoneDSOAsMap.emplace(z.handle(), boost::none);
     }
 
     return result;
