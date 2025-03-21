@@ -26,6 +26,7 @@
 #include <resources.hxx>
 
 #include <boost/lexical_cast.hpp>
+#include <nano/nano_signal_slot.hpp>
 
 #include <limits>
 #include <type_traits>
@@ -881,8 +882,40 @@ TEST_F(IdfFixture, IdfObject_SpecialMembers) {
 
 TEST_F(IdfFixture, IdfObject_initializeFields) {
   // I'm picking ShadowCalculation because because everything has a default, and minFields is 2
+
+  struct NanoIntercepter
+  {
+    size_t numOnChange = 0;
+    size_t numOnDataChange = 0;
+
+    void onChange() {
+      ++numOnChange;
+    }
+    void onDataChange() {
+      ++numOnDataChange;
+    };
+    void onNameChange() {  // NOLINT(readability-convert-member-functions-to-static)
+      FAIL() << "Name Change is not expected";
+    };
+
+    void resetCounts() {
+      numOnChange = 0;
+      numOnDataChange = 0;
+    }
+
+    void linkIdfObject(const IdfObject& idfObject) {
+      resetCounts();
+      idfObject.getImpl<openstudio::detail::IdfObject_Impl>()->onChange.connect<NanoIntercepter, &NanoIntercepter::onChange>(this);
+      idfObject.getImpl<openstudio::detail::IdfObject_Impl>()->onDataChange.connect<NanoIntercepter, &NanoIntercepter::onDataChange>(this);
+      idfObject.getImpl<openstudio::detail::IdfObject_Impl>()->onNameChange.connect<NanoIntercepter, &NanoIntercepter::onNameChange>(this);
+    }
+  };
+  NanoIntercepter intercepter;
+
   {
     IdfObject idfObject(IddObjectType::ShadowCalculation);
+    intercepter.linkIdfObject(idfObject);
+
     auto iddObject = idfObject.iddObject();
 
     const std::vector<IddField>& iddFields = iddObject.nonextensibleFields();
@@ -900,13 +933,19 @@ TEST_F(IdfFixture, IdfObject_initializeFields) {
 
     bool fill_default = false;
     idfObject.initializeFields(fill_default);
+    EXPECT_EQ(1, intercepter.numOnChange);
+    EXPECT_EQ(0, intercepter.numOnDataChange);
     EXPECT_EQ(nIdd, idfObject.numFields());
     for (unsigned i = 0; i < nIdd; ++i) {
       EXPECT_TRUE(idfObject.isEmpty(i)) << "Expected field " << i << " to be empty";
     }
 
+    intercepter.resetCounts();
     fill_default = true;
     idfObject.initializeFields(fill_default);
+    EXPECT_EQ(1, intercepter.numOnChange);
+    EXPECT_EQ(1, intercepter.numOnDataChange);
+    EXPECT_EQ(nIdd, idfObject.numFields());
     for (unsigned i = 0; i < nIdd; ++i) {
       EXPECT_FALSE(idfObject.isEmpty(i)) << "Expected field " << i << " to NOT be empty";
     }
@@ -914,6 +953,8 @@ TEST_F(IdfFixture, IdfObject_initializeFields) {
   // Now start again in one go: resize + fill + preserve existing values!
   {
     IdfObject idfObject(IddObjectType::ShadowCalculation);
+    intercepter.linkIdfObject(idfObject);
+
     auto iddObject = idfObject.iddObject();
 
     const std::vector<IddField>& iddFields = iddObject.nonextensibleFields();
@@ -931,9 +972,15 @@ TEST_F(IdfFixture, IdfObject_initializeFields) {
 
     const unsigned shadingCalcMethodIndex = 0;
     EXPECT_TRUE(idfObject.setString(shadingCalcMethodIndex, "PixelCounting"));
+    EXPECT_EQ(1, intercepter.numOnChange);
+    EXPECT_EQ(1, intercepter.numOnDataChange);
+    intercepter.resetCounts();
 
     bool fill_default = true;
     idfObject.initializeFields(fill_default);
+    EXPECT_EQ(1, intercepter.numOnChange);
+    EXPECT_EQ(1, intercepter.numOnDataChange);
+
     EXPECT_EQ(nIdd, idfObject.numFields());
     for (unsigned i = 0; i < nIdd; ++i) {
       EXPECT_FALSE(idfObject.isEmpty(i)) << "Expected field " << i << " to NOT be empty";
@@ -944,17 +991,30 @@ TEST_F(IdfFixture, IdfObject_initializeFields) {
   // Now Try with an object that has a default in the extensible group
   {
     IdfObject idfObject(IddObjectType::Output_Table_Annual);
+    intercepter.linkIdfObject(idfObject);
+
     auto iddObject = idfObject.iddObject();
     idfObject.pushExtensibleGroup();
+    EXPECT_EQ(1, intercepter.numOnChange);
+    EXPECT_EQ(1, intercepter.numOnDataChange);
+
     auto lastIndex = idfObject.numFields() - 1;  // Should be 6 fields, so 5
     auto field = iddObject.getField(lastIndex).get();
     ASSERT_TRUE(iddObject.getField(lastIndex).get().properties().numericDefault);
     EXPECT_GT(iddObject.getField(lastIndex).get().properties().numericDefault.get(), 0.0);
     EXPECT_TRUE(idfObject.isEmpty(lastIndex));
 
+    intercepter.resetCounts();
     const bool fill_default = true;
     idfObject.initializeFields(fill_default);
+    EXPECT_EQ(1, intercepter.numOnChange);
+    EXPECT_EQ(1, intercepter.numOnDataChange);
     ASSERT_FALSE(idfObject.isEmpty(lastIndex));
     EXPECT_EQ(iddObject.getField(lastIndex).get().properties().stringDefault.get(), idfObject.getString(lastIndex).get());
+
+    intercepter.resetCounts();
+    idfObject.initializeFields(fill_default);
+    EXPECT_EQ(0, intercepter.numOnChange);
+    EXPECT_EQ(0, intercepter.numOnDataChange);
   }
 }
