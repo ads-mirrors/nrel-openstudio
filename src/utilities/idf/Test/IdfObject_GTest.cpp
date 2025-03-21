@@ -878,3 +878,83 @@ TEST_F(IdfFixture, IdfObject_SpecialMembers) {
   static_assert(std::is_swappable<IdfObject>{});
   static_assert(std::is_nothrow_swappable<IdfObject>{});
 }
+
+TEST_F(IdfFixture, IdfObject_initializeFields) {
+  // I'm picking ShadowCalculation because because everything has a default, and minFields is 2
+  {
+    IdfObject idfObject(IddObjectType::ShadowCalculation);
+    auto iddObject = idfObject.iddObject();
+
+    const std::vector<IddField>& iddFields = iddObject.nonextensibleFields();
+    EXPECT_TRUE(std::all_of(iddFields.cbegin(), iddFields.cend(), [](const auto& f) { return f.properties().stringDefault.is_initialized(); }));
+
+    auto nIni = idfObject.numFields();
+    EXPECT_EQ(idfObject.minFields(), nIni);
+    EXPECT_EQ(iddObject.numFieldsInDefaultObject(), nIni);
+    for (unsigned i = 0; i < nIni; ++i) {
+      EXPECT_TRUE(idfObject.isEmpty(i)) << "Expected field " << i << " to be empty";
+    }
+
+    auto nIdd = iddObject.numFields();
+    EXPECT_GT(nIdd, idfObject.numFields());
+
+    bool fill_default = false;
+    idfObject.initializeFields(fill_default);
+    EXPECT_EQ(nIdd, idfObject.numFields());
+    for (unsigned i = 0; i < nIdd; ++i) {
+      EXPECT_TRUE(idfObject.isEmpty(i)) << "Expected field " << i << " to be empty";
+    }
+
+    fill_default = true;
+    idfObject.initializeFields(fill_default);
+    for (unsigned i = 0; i < nIdd; ++i) {
+      EXPECT_FALSE(idfObject.isEmpty(i)) << "Expected field " << i << " to NOT be empty";
+    }
+  }
+  // Now start again in one go: resize + fill + preserve existing values!
+  {
+    IdfObject idfObject(IddObjectType::ShadowCalculation);
+    auto iddObject = idfObject.iddObject();
+
+    const std::vector<IddField>& iddFields = iddObject.nonextensibleFields();
+    EXPECT_TRUE(std::all_of(iddFields.cbegin(), iddFields.cend(), [](const auto& f) { return f.properties().stringDefault.is_initialized(); }));
+
+    auto nIni = idfObject.numFields();
+    EXPECT_EQ(idfObject.minFields(), nIni);
+    EXPECT_EQ(iddObject.numFieldsInDefaultObject(), nIni);
+    for (unsigned i = 0; i < nIni; ++i) {
+      EXPECT_TRUE(idfObject.isEmpty(i)) << "Expected field " << i << " to be empty";
+    }
+
+    auto nIdd = iddObject.numFields();
+    EXPECT_GT(nIdd, idfObject.numFields());
+
+    const unsigned shadingCalcMethodIndex = 0;
+    EXPECT_TRUE(idfObject.setString(shadingCalcMethodIndex, "PixelCounting"));
+
+    bool fill_default = true;
+    idfObject.initializeFields(fill_default);
+    EXPECT_EQ(nIdd, idfObject.numFields());
+    for (unsigned i = 0; i < nIdd; ++i) {
+      EXPECT_FALSE(idfObject.isEmpty(i)) << "Expected field " << i << " to NOT be empty";
+    }
+    EXPECT_EQ("PixelCounting", idfObject.getString(shadingCalcMethodIndex).get());
+  }
+
+  // Now Try with an object that has a default in the extensible group
+  {
+    IdfObject idfObject(IddObjectType::Output_Table_Annual);
+    auto iddObject = idfObject.iddObject();
+    idfObject.pushExtensibleGroup();
+    auto lastIndex = idfObject.numFields() - 1;  // Should be 6 fields, so 5
+    auto field = iddObject.getField(lastIndex).get();
+    ASSERT_TRUE(iddObject.getField(lastIndex).get().properties().numericDefault);
+    EXPECT_GT(iddObject.getField(lastIndex).get().properties().numericDefault.get(), 0.0);
+    EXPECT_TRUE(idfObject.isEmpty(lastIndex));
+
+    const bool fill_default = true;
+    idfObject.initializeFields(fill_default);
+    ASSERT_FALSE(idfObject.isEmpty(lastIndex));
+    EXPECT_EQ(iddObject.getField(lastIndex).get().properties().stringDefault.get(), idfObject.getString(lastIndex).get());
+  }
+}

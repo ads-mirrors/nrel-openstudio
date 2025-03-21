@@ -924,6 +924,44 @@ namespace detail {
     return rollbackValues;
   }
 
+  void IdfObject_Impl::initializeFields(bool fill_default) {
+    const unsigned n = numFields();
+    const unsigned iddN = m_iddObject.numFields();
+    bool resized = false;
+    if (n < iddN) {
+      resized = true;
+      m_fields.resize(iddN);
+    }
+    if (!fill_default) {
+      if (resized) {
+        this->onChange.nano_emit();
+      }
+      return;
+    }
+
+    // Instead of allocating m_diffs, then calling emitChangeSignals which will try to see if there's a name change,
+    // I know there isn't going to be **any** name changes here, so let's be quicker
+    bool dataChange = false;
+
+    for (unsigned int index = 0; index < std::max(n, iddN); ++index) {
+      if (m_fields[index].empty()) {
+        OptionalIddField iddField = m_iddObject.getField(index);
+        if (iddField && iddField->properties().stringDefault) {
+          m_fields[index] = *(iddField->properties().stringDefault);
+          dataChange = true;
+          // m_diffs.push_back(IdfObjectDiff(index, boost::none, m_fields[index] ));
+        }
+      }
+    }
+
+    if (dataChange) {
+      this->onDataChange.nano_emit();
+      this->onChange.nano_emit();
+    } else if (resized) {
+      this->onChange.nano_emit();
+    }
+  }
+
   // QUERIES
 
   unsigned IdfObject_Impl::numFields() const {
@@ -2154,6 +2192,10 @@ std::vector<std::string> IdfObject::eraseExtensibleGroup(unsigned groupIndex) {
 
 std::vector<std::vector<std::string>> IdfObject::clearExtensibleGroups() {
   return m_impl->clearExtensibleGroups();
+}
+
+void IdfObject::initializeFields(bool fill_default) {
+  return m_impl->initializeFields(fill_default);
 }
 
 // QUERIES

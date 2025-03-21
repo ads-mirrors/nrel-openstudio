@@ -263,6 +263,9 @@ class UTILITIES_API IdfObject
    *  Returns popped data if successful. Otherwise, the returned vector will be empty. */
   std::vector<std::vector<std::string>> clearExtensibleGroups();
 
+  // Helper to initialize all fields (if the object currently displays less than numFields), optionally filling the default for a given object
+  void initializeFields(bool fill_default = false);
+
   //@}
   /** @name Queries */
   //@{
