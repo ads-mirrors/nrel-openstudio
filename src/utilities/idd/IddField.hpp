@@ -138,6 +138,9 @@ using IddFieldVector = std::vector<IddField>;
 /** \relates IddField */
 using OptionalIddField = boost::optional<IddField>;
 
+/** \relates IddField */
+UTILITIES_API std::ostream& operator<<(std::ostream& os, const IddField& iddField);
+
 /** Returns true if the reference lists of field1 and field2 match exactly (case insensitive).
  *  \relates IddField */
 UTILITIES_API bool referencesEqual(const IddField& field1, const IddField& field2);

@@ -93,6 +93,14 @@
   }
 };
 
+%extend openstudio::IddField {
+  std::string __str__() const {
+    std::ostringstream os;
+    os << *self;
+    return os.str();
+  }
+};
+
 %extend openstudio::IddFile{
   std::string __str__() const{
     std::ostringstream os;

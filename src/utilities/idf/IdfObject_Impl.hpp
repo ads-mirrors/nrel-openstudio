@@ -235,6 +235,9 @@ namespace detail {
     std::vector<std::vector<std::string>> clearExtensibleGroups();
     std::vector<std::vector<std::string>> clearExtensibleGroups(bool checkValidity);
 
+    // Helper to initialize all fields (if the object currently displays less than numFields), optionally filling the default for a given object
+    void initializeFields(bool fill_default = false);
+
     //@}
     /** @name Queries */
     //@{
