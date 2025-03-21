@@ -4029,6 +4029,8 @@ namespace energyplus {
 
     m_map.clear();
 
+    m_zoneDSOAsMap.clear();
+
     m_anyNumberScheduleTypeLimits.reset();
 
     m_interiorPartitionSurfaceConstruction.reset();
