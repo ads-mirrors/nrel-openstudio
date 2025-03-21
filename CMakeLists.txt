@@ -59,6 +59,9 @@ endif()
 if(POLICY CMP0077)
   cmake_policy(SET CMP0077 NEW)
 endif()
+if(POLICY CMP0177)
+  cmake_policy(SET CMP0177 NEW) # ``install()`` ``DESTINATION`` paths are normalized.
+endif()
 
 ###############################################################################
 #                                  N I N J A                                  #
