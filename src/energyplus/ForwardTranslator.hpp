@@ -938,6 +938,16 @@ namespace energyplus {
 
     boost::optional<IdfObject> translateDesignDay(model::DesignDay& modelObject);
 
+    // Construct (or fetch if already created) a DesignSpecificationOutdoorAir (DSOA) or DSOA:SpaceList
+    // * if there are no spaces with a DSOA assigned: return empty
+    // * otherwise:
+    // * otherwise:
+    //      * if we translated to E+ with spaces: create a DSOA:SpaceList
+    //      * if we do not: create DSOA
+    boost::optional<IdfObject> getOrCreateThermalZoneDSOA(const model::ThermalZone& z);
+
+    // NOTE: DO NOT CALL THIS ONE
+    // TODO: hide it
     boost::optional<IdfObject> translateDesignSpecificationOutdoorAir(model::DesignSpecificationOutdoorAir& modelObject);
 
     boost::optional<IdfObject> translateDistrictCooling(model::DistrictCooling& modelObject);
@@ -1697,6 +1707,9 @@ namespace energyplus {
     FluidPropertiesMap m_fluidPropertiesMap;
 
     ModelObjectMap m_map;
+
+    using ZoneToMaybeDSOA = std::map<const openstudio::Handle, const boost::optional<IdfObject>>;
+    ZoneToMaybeDSOA m_zoneDSOAsMap;
 
     std::vector<IdfObject> m_idfObjects;
 
