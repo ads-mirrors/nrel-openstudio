@@ -69,7 +69,7 @@ TEST_F(ModelFixture, CoilSystemCoolingWater_GettersSetters) {
   EXPECT_EQ(1.2, coilSystemCoolingWater.minimumWaterLoopTemperatureForHeatRecovery());
 
   // Companion Coil Used For Heat Recovery: Optional Object
-  boost::optional<CoilCoolingWater> companionCoilUsedForHeatRecovery(m);
+  CoilCoolingWater companionCoilUsedForHeatRecovery(m);
   EXPECT_TRUE(coilSystemCoolingWater.setCompanionCoilUsedForHeatRecovery(companionCoilUsedForHeatRecovery));
   ASSERT_TRUE(coilSystemCoolingWater.companionCoilUsedForHeatRecovery());
   EXPECT_EQ(companionCoilUsedForHeatRecovery, coilSystemCoolingWater.companionCoilUsedForHeatRecovery().get());
@@ -81,19 +81,13 @@ TEST_F(ModelFixture, CoilSystemCoolingWater_HeatCoolFuelTypes) {
   CoilSystemCoolingWater coilSystemCoolingWater(m);
 
   EXPECT_EQ(ComponentType(ComponentType::Cooling), coilSystemCoolingWater.componentType());
-  testFuelTypeEquality({FuelType::Electricity}, coilSystemCoolingWater.coolingFuelTypes());
+  testFuelTypeEquality({}, coilSystemCoolingWater.coolingFuelTypes());
   testFuelTypeEquality({}, coilSystemCoolingWater.heatingFuelTypes());
   testAppGFuelTypeEquality({}, coilSystemCoolingWater.appGHeatingFuelTypes());
 }
 
-TEST_F(ModelFixture, CoilSystemCoolingWater_clone) {
-  
-}
+TEST_F(ModelFixture, CoilSystemCoolingWater_clone) {}
 
-TEST_F(ModelFixture, CoilSystemCoolingWater_remove) {
-  
-}
+TEST_F(ModelFixture, CoilSystemCoolingWater_remove) {}
 
-TEST_F(ModelFixture, CoilSystemCoolingWater_addToNode) {
-  
-}
+TEST_F(ModelFixture, CoilSystemCoolingWater_addToNode) {}

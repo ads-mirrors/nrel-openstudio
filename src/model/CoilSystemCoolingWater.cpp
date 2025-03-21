@@ -103,10 +103,10 @@ namespace model {
       auto coilSystemClone = StraightComponent_Impl::clone(model).cast<CoilSystemCoolingWater>();
 
       if (OptionalWaterToAirComponent intermediate = optionalCoolingCoil()) {
-        coilSystemClone.setCoolingCoil(intermediate->clone(model).cast<HVACComponent>());
+        coilSystemClone.setCoolingCoil(intermediate->clone(model).cast<WaterToAirComponent>());
       }
       if (OptionalWaterToAirComponent intermediate = optionalCompanionCoilUsedForHeatRecovery()) {
-        coilSystemClone.setCompanionCoilUsedForHeatRecovery(intermediate->clone(model).cast<HVACComponent>());
+        coilSystemClone.setCompanionCoilUsedForHeatRecovery(intermediate->clone(model).cast<WaterToAirComponent>());
       }
 
       return std::move(coilSystemClone);
@@ -129,7 +129,7 @@ namespace model {
                 }
               }
 
-              auto t_model = model();
+              /*               auto t_model = model();
               ControllerWaterCoil controller(t_model);
 
               auto coilWaterInletNode = waterInletModelObject->optionalCast<Node>();
@@ -137,7 +137,7 @@ namespace model {
               controller.setActuatorNode(coilWaterInletNode.get());
               // sensor node will be established in translator since that node does not yet exist
 
-              controller.setAction("Reverse");
+              controller.setAction("Reverse"); */
             }
           }
         }

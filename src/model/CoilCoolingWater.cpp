@@ -7,6 +7,8 @@
 #include "CoilCoolingWater_Impl.hpp"
 #include "ControllerWaterCoil.hpp"
 #include "ControllerWaterCoil_Impl.hpp"
+#include "CoilSystemCoolingWater.hpp"
+#include "CoilSystemCoolingWater_Impl.hpp"
 #include "CoilSystemCoolingWaterHeatExchangerAssisted.hpp"
 #include "CoilSystemCoolingWaterHeatExchangerAssisted_Impl.hpp"
 #include "Node.hpp"
@@ -370,6 +372,16 @@ namespace model {
         if (boost::optional<HVACComponent> coolingCoil = airLoopHVACUnitarySystem.coolingCoil()) {
           if (coolingCoil->handle() == this->handle()) {
             return airLoopHVACUnitarySystem;
+          }
+        }
+      }
+
+      // CoilSystemCoolingWater
+      {
+        auto coilSystems = model().getConcreteModelObjects<CoilSystemCoolingWater>();
+        for (const auto& coilSystem : coilSystems) {
+          if (coilSystem.coolingCoil().handle() == handle()) {
+            return coilSystem;
           }
         }
       }

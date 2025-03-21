@@ -27,6 +27,9 @@
 #include "../../model/FanSystemModel_Impl.hpp"
 
 #include <utilities/idd/CoilSystem_Cooling_Water_FieldEnums.hxx>
+#include <utilities/idd/Coil_Cooling_Water_FieldEnums.hxx>
+#include <utilities/idd/Controller_WaterCoil_FieldEnums.hxx>
+#include <utilities/idd/SetpointManager_MixedAir_FieldEnums.hxx>
 #include <utilities/idd/IddEnums.hxx>
 
 using namespace openstudio::model;
@@ -39,8 +42,24 @@ namespace energyplus {
 
     IdfObject idfObject = createRegisterAndNameIdfObject(openstudio::IddObjectType::CoilSystem_Cooling_Water, modelObject);
 
-    std::string airInletNodeName = modelObject.nameString() + " Cooling Inlet Node";
-    std::string airOutletNodeName = modelObject.nameString() + " Cooling Outlet Node";
+    std::string airInletNodeName;
+    // InletNodeName
+    if (auto mo = modelObject.inletModelObject()) {
+      if (auto node = mo->optionalCast<Node>()) {
+        airInletNodeName = node->nameString();
+      }
+    }
+
+    std::string airOutletNodeName;
+    // OutletNodeName
+    if (auto mo = modelObject.outletModelObject()) {
+      if (auto node = mo->optionalCast<Node>()) {
+        airOutletNodeName = node->nameString();
+      }
+    }
+
+    idfObject.setString(CoilSystem_Cooling_WaterFields::AirInletNodeName, airInletNodeName);
+    idfObject.setString(CoilSystem_Cooling_WaterFields::AirOutletNodeName, airOutletNodeName);
 
     // CoolingCoilObjectType
     // CoolingCoilName
@@ -159,6 +178,17 @@ namespace energyplus {
     if (boost::optional<WaterToAirComponent> companionCoilUsedForHeatRecovery_ = modelObject.companionCoilUsedForHeatRecovery()) {
       if (boost::optional<IdfObject> wo_ = translateAndMapModelObject(companionCoilUsedForHeatRecovery_.get())) {
         idfObject.setString(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery, wo_->nameString());
+        if (wo_->iddObject().type() == IddObjectType::Coil_Cooling_Water) {
+          wo_->setString(Coil_Cooling_WaterFields::AirInletNodeName, "");   // FIXME
+          wo_->setString(Coil_Cooling_WaterFields::AirOutletNodeName, "");  // FIXME
+          // Add IddObjectType::Coil_Cooling_Water_DetailedGeometry if implemented
+        } else {
+          // Shouldn't happen, accepts only Coil:Cooling:Water or Coil:Cooling:Water:DetailedGeometry
+          // Shouldn't happen, accepts only Coil:Cooling:DX:SingleSpeed or Coil:Cooling:DX:VariableSpeed
+          LOG(Fatal, modelObject.briefDescription() << " appears to have a companion coil used for heat recovery that shouldn't have been accepted: "
+                                                    << companionCoilUsedForHeatRecovery_.get().briefDescription());
+          OS_ASSERT(false);
+        }
       }
     }
 

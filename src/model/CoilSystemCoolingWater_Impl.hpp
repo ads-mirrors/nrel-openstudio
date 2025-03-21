@@ -68,6 +68,8 @@ namespace model {
       /** @name Getters */
       //@{
 
+      Schedule availabilitySchedule() const;
+
       WaterToAirComponent coolingCoil() const;
 
       std::string dehumidificationControlType() const;

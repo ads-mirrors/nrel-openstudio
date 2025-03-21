@@ -20,6 +20,7 @@ namespace model {
     class ControllerWaterCoil_Impl;
     class CoilCoolingWater_Impl;
     class CoilHeatingWater_Impl;
+    class CoilSystemCoolingWater_Impl;
     class CoilSystemCoolingWaterHeatExchangerAssisted_Impl;
 
   }  // namespace detail
@@ -141,6 +142,7 @@ namespace model {
     // Classes that need to instantiate it
     friend class openstudio::model::detail::CoilCoolingWater_Impl;
     friend class openstudio::model::detail::CoilHeatingWater_Impl;
+    friend class openstudio::model::detail::CoilSystemCoolingWater_Impl;
     friend class openstudio::model::detail::CoilSystemCoolingWaterHeatExchangerAssisted_Impl;
 
     explicit ControllerWaterCoil(const Model& model);
