@@ -507,7 +507,11 @@ namespace energyplus {
 
   namespace detail {
     struct ForwardTranslatorInitializer;
-  };
+
+    // TODO: I have to put this back because of AirTerminalDualDuctVAV which should be using Control for Outdoor Air
+    // I'm setting it up as a free function in detail:: though, so you know you shouldn't call it!
+    boost::optional<IdfObject> translateDesignSpecificationOutdoorAir(model::DesignSpecificationOutdoorAir& modelObject);
+  };  // namespace detail
 
 #define ENERGYPLUS_VERSION "25.1"
 
