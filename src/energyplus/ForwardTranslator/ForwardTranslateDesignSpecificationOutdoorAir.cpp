@@ -29,43 +29,45 @@ namespace openstudio {
 
 namespace energyplus {
 
-  boost::optional<IdfObject> translateDesignSpecificationOutdoorAir(DesignSpecificationOutdoorAir& modelObject) {
-    boost::optional<std::string> s;
-    boost::optional<double> value;
+  namespace detail {
+    boost::optional<IdfObject> translateDesignSpecificationOutdoorAir(DesignSpecificationOutdoorAir& modelObject) {
+      boost::optional<std::string> s;
+      boost::optional<double> value;
 
-    IdfObject idfObject(IddObjectType::DesignSpecification_OutdoorAir);
+      IdfObject idfObject(IddObjectType::DesignSpecification_OutdoorAir);
 
-    idfObject.setString(DesignSpecification_OutdoorAirFields::Name, modelObject.name().get());
+      idfObject.setString(DesignSpecification_OutdoorAirFields::Name, modelObject.name().get());
 
-    std::string outdoorAirMethod = modelObject.outdoorAirMethod();
-    idfObject.setString(DesignSpecification_OutdoorAirFields::OutdoorAirMethod, outdoorAirMethod);
+      std::string outdoorAirMethod = modelObject.outdoorAirMethod();
+      idfObject.setString(DesignSpecification_OutdoorAirFields::OutdoorAirMethod, outdoorAirMethod);
 
-    double flowPerPerson = modelObject.outdoorAirFlowperPerson();
-    double flowPerArea = modelObject.outdoorAirFlowperFloorArea();
-    double flowPerZone = modelObject.outdoorAirFlowRate();
-    double ach = modelObject.outdoorAirFlowAirChangesperHour();
+      double flowPerPerson = modelObject.outdoorAirFlowperPerson();
+      double flowPerArea = modelObject.outdoorAirFlowperFloorArea();
+      double flowPerZone = modelObject.outdoorAirFlowRate();
+      double ach = modelObject.outdoorAirFlowAirChangesperHour();
 
-    if (istringEqual(outdoorAirMethod, "Sum") || istringEqual(outdoorAirMethod, "Maximum")) {
+      if (istringEqual(outdoorAirMethod, "Sum") || istringEqual(outdoorAirMethod, "Maximum")) {
 
-      idfObject.setDouble(DesignSpecification_OutdoorAirFields::OutdoorAirFlowperPerson, flowPerPerson);
-      idfObject.setDouble(DesignSpecification_OutdoorAirFields::OutdoorAirFlowperZoneFloorArea, flowPerArea);
-      idfObject.setDouble(DesignSpecification_OutdoorAirFields::OutdoorAirFlowperZone, flowPerZone);
-      idfObject.setDouble(DesignSpecification_OutdoorAirFields::OutdoorAirFlowAirChangesperHour, ach);
+        idfObject.setDouble(DesignSpecification_OutdoorAirFields::OutdoorAirFlowperPerson, flowPerPerson);
+        idfObject.setDouble(DesignSpecification_OutdoorAirFields::OutdoorAirFlowperZoneFloorArea, flowPerArea);
+        idfObject.setDouble(DesignSpecification_OutdoorAirFields::OutdoorAirFlowperZone, flowPerZone);
+        idfObject.setDouble(DesignSpecification_OutdoorAirFields::OutdoorAirFlowAirChangesperHour, ach);
 
-    } else {
-      LOG_FREE(Error, "openstudio.energyplus.ForwardTranslator",
-               "Unknown OutdoorAirMethod '" << outdoorAirMethod << "' specified for OS:DesignSpecification:OutdoorAir named '"
-                                            << modelObject.name().get() << "'");
-      return boost::none;
+      } else {
+        LOG_FREE(Error, "openstudio.energyplus.ForwardTranslator",
+                 "Unknown OutdoorAirMethod '" << outdoorAirMethod << "' specified for OS:DesignSpecification:OutdoorAir named '"
+                                              << modelObject.name().get() << "'");
+        return boost::none;
+      }
+
+      boost::optional<Schedule> schedule = modelObject.outdoorAirFlowRateFractionSchedule();
+      if (schedule) {
+        idfObject.setString(DesignSpecification_OutdoorAirFields::OutdoorAirScheduleName, schedule->name().get());
+      }
+
+      return idfObject;
     }
-
-    boost::optional<Schedule> schedule = modelObject.outdoorAirFlowRateFractionSchedule();
-    if (schedule) {
-      idfObject.setString(DesignSpecification_OutdoorAirFields::OutdoorAirScheduleName, schedule->name().get());
-    }
-
-    return idfObject;
-  }
+  }  // namespace detail
 
   boost::optional<IdfObject> ForwardTranslator::getOrCreateThermalZoneDSOA(const model::ThermalZone& z) {
 
@@ -80,7 +82,7 @@ namespace energyplus {
         return objInMapIt->second;
       }
 
-      auto idf_dsoa_ = translateDesignSpecificationOutdoorAir(dsoa);
+      auto idf_dsoa_ = detail::translateDesignSpecificationOutdoorAir(dsoa);
 
       if (idf_dsoa_) {
         m_idfObjects.push_back(*idf_dsoa_);
