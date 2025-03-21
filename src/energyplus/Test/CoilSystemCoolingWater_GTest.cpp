@@ -87,7 +87,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_Unitary) {
 
   const auto idfUnitarys = w.getObjectsByType(IddObjectType::AirLoopHVAC_UnitarySystem);
   ASSERT_EQ(1u, idfUnitarys.size());
-  const auto& idfUnitary = idfUnitarys.front();
 
   const auto idfCoilSystems = w.getObjectsByType(IddObjectType::CoilSystem_Cooling_Water);
   ASSERT_EQ(0u, idfCoilSystems.size());
