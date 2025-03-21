@@ -15,8 +15,6 @@
 #include "../../model/ControllerMechanicalVentilation_Impl.hpp"
 #include "../../model/ControllerOutdoorAir.hpp"
 #include "../../model/ControllerOutdoorAir_Impl.hpp"
-#include "../../model/DesignSpecificationOutdoorAir.hpp"
-#include "../../model/DesignSpecificationOutdoorAir_Impl.hpp"
 #include "../../model/ThermalZone.hpp"
 #include "../../model/ThermalZone_Impl.hpp"
 #include "../../model/Schedule.hpp"
@@ -251,25 +249,9 @@ namespace energyplus {
         model::ControllerOutdoorAir controllerOutdoorAir = oaSystem->getControllerOutdoorAir();
         model::ControllerMechanicalVentilation controllerMechanicalVentilation = controllerOutdoorAir.controllerMechanicalVentilation();
         if (boost::optional<IdfObject> _controllerMechanicalVentilation = translateAndMapModelObject(controllerMechanicalVentilation)) {
-          IdfExtensibleGroup eg = _controllerMechanicalVentilation->pushExtensibleGroup();
-
-          // Thermal Zone Name
-          eg.setString(Controller_MechanicalVentilationExtensibleFields::ZoneorZoneListName, name);
-
-          // DesignSpecificationOutdoorAir
-          std::vector<model::Space> spaces = thermalZone.spaces();
-
-          if (!spaces.empty()) {
-            if (boost::optional<model::DesignSpecificationOutdoorAir> designOASpec = spaces.front().designSpecificationOutdoorAir()) {
-              if (boost::optional<IdfObject> _designOASpec = translateAndMapModelObject(designOASpec.get())) {
-                eg.setString(Controller_MechanicalVentilationExtensibleFields::DesignSpecificationOutdoorAirObjectName, _designOASpec->name().get());
-              }
-            }
-          }
-
-          // DesignSpecificationZoneAirDistributionObjectName
-          if (isDSZADTranslated) {
-            eg.setString(Controller_MechanicalVentilationExtensibleFields::DesignSpecificationZoneAirDistributionObjectName, dSZADName);
+          if (auto dsoaOrList_ = getOrCreateThermalZoneDSOA(thermalZone)) {
+            IdfExtensibleGroup eg =
+              _controllerMechanicalVentilation->pushExtensibleGroup({name, dsoaOrList_->nameString(), isDSZADTranslated ? dSZADName : ""});
           }
         }
       }
