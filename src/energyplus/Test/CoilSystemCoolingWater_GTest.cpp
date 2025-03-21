@@ -18,6 +18,13 @@
 #include "../../model/AirLoopHVAC.hpp"
 #include "../../model/AirLoopHVACUnitarySystem.hpp"
 #include "../../model/Node.hpp"
+#include "../../model/Node_Impl.hpp"
+#include "../../model/AirLoopHVACOutdoorAirSystem.hpp"
+#include "../../model/AirLoopHVACOutdoorAirSystem_Impl.hpp"
+#include "../../model/ControllerOutdoorAir.hpp"
+#include "../../model/ControllerOutdoorAir_Impl.hpp"
+#include "../../model/PipeAdiabatic.hpp"
+#include "../../model/PipeAdiabatic_Impl.hpp"
 
 #include "../../utilities/idf/Workspace.hpp"
 #include "../../utilities/idf/IdfObject.hpp"
@@ -35,6 +42,7 @@
 #include <utilities/idd/Branch_FieldEnums.hxx>
 #include <utilities/idd/AirLoopHVAC_UnitarySystem_FieldEnums.hxx>
 #include <utilities/idd/Controller_WaterCoil_FieldEnums.hxx>
+#include <utilities/idd/Controller_OutdoorAir_FieldEnums.hxx>
 
 using namespace openstudio::energyplus;
 using namespace openstudio::model;
@@ -60,9 +68,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_Unitary) {
   CoilCoolingWater companionCoilUsedForHeatRecovery(m);
   EXPECT_TRUE(coilSystemCoolingWater.setCompanionCoilUsedForHeatRecovery(companionCoilUsedForHeatRecovery));
 
-  // put it inside a Unitary, and put Unitary on an AirLoopHVAC so it gets translated
+  // put it inside a Unitary, and put Unitary on an AirLoopHVAC
   AirLoopHVACUnitarySystem unitary(m);
-  unitary.setCoolingCoil(coilSystemCoolingWater);
+  EXPECT_FALSE(unitary.setCoolingCoil(coilSystemCoolingWater));
   AirLoopHVAC airLoop(m);
   Node supplyOutletNode = airLoop.supplyOutletNode();
   unitary.addToNode(supplyOutletNode);
@@ -82,55 +90,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_Unitary) {
   const auto& idfUnitary = idfUnitarys.front();
 
   const auto idfCoilSystems = w.getObjectsByType(IddObjectType::CoilSystem_Cooling_Water);
-  ASSERT_EQ(1u, idfCoilSystems.size());  // FIXME: should unitary here be allowed? if so, we need to update those FT files?
-  const auto& idfCoilSystem = idfCoilSystems.front();
-
-  WorkspaceObjectVector idfCoils(w.getObjectsByType(IddObjectType::Coil_Cooling_Water));
-  ASSERT_EQ(1u, idfCoils.size());
-  WorkspaceObject idfCoil(idfCoils[0]);
-
-  // Check that the Unitary ends up with the CoilSystemCoolingWater
-  EXPECT_EQ("CoilSystem:Cooling:Water", idfUnitary.getString(AirLoopHVAC_UnitarySystemFields::CoolingCoilObjectType).get());
-  EXPECT_EQ(idfCoilSystem.nameString(), idfUnitary.getString(AirLoopHVAC_UnitarySystemFields::CoolingCoilName).get());
-
-  EXPECT_EQ(coilSystemCoolingWater.inletModelObject().get().nameString(),
-            idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::AirInletNodeName).get());
-  EXPECT_EQ(coilSystemCoolingWater.outletModelObject().get().nameString(),
-            idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::AirOutletNodeName).get());
-  EXPECT_EQ(availabilitySchedule.nameString(), idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::AvailabilityScheduleName).get());
-  EXPECT_EQ("Coil:Cooling:Water", idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::CoolingCoilObjectType).get());
-  EXPECT_EQ(coilSystemCoolingWater.coolingCoil().nameString(), idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::CoolingCoilName).get());
-  EXPECT_EQ("CoolReheat", idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::DehumidificationControlType).get());
-  EXPECT_EQ("No", idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::RunonSensibleLoad).get());
-  EXPECT_EQ("Yes", idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::RunonLatentLoad).get());
-  EXPECT_EQ(1.0, idfCoilSystem.getDouble(CoilSystem_Cooling_WaterFields::MinimumAirToWaterTemperatureOffset).get());
-  EXPECT_EQ("No", idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::EconomizerLockout).get());
-  EXPECT_EQ(1.2, idfCoilSystem.getDouble(CoilSystem_Cooling_WaterFields::MinimumWaterLoopTemperatureForHeatRecovery).get());
-  EXPECT_EQ(companionCoilUsedForHeatRecovery.nameString(),
-            idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery).get());
-
-  EXPECT_EQ(0, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
-
-  EXPECT_EQ(coilSystemCoolingWater.coolingCoil().nameString(), idfCoil.getString(Coil_Cooling_WaterFields::Name).get());
-  EXPECT_EQ("Always On Discrete", idfCoil.getString(Coil_Cooling_WaterFields::AvailabilityScheduleName).get());
-  EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignWaterFlowRate).get());
-  EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignAirFlowRate).get());
-  EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignInletWaterTemperature).get());
-  EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignInletAirTemperature).get());
-  EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignInletAirHumidityRatio).get());
-  EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignOutletAirHumidityRatio).get());
-  EXPECT_EQ(coilSystemCoolingWater.coolingCoil().waterInletModelObject().get().nameString(),
-            idfCoil.getString(Coil_Cooling_WaterFields::WaterInletNodeName).get());
-  EXPECT_EQ(coilSystemCoolingWater.coolingCoil().waterOutletModelObject().get().nameString(),
-            idfCoil.getString(Coil_Cooling_WaterFields::WaterOutletNodeName).get());
-  EXPECT_EQ(idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::AirInletNodeName).get(),
-            idfCoil.getString(Coil_Cooling_WaterFields::AirInletNodeName).get());
-  EXPECT_EQ(idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::AirOutletNodeName).get(),
-            idfCoil.getString(Coil_Cooling_WaterFields::AirOutletNodeName).get());
-  EXPECT_EQ("SimpleAnalysis", idfCoil.getString(Coil_Cooling_WaterFields::TypeofAnalysis).get());
-  EXPECT_EQ("CrossFlow", idfCoil.getString(Coil_Cooling_WaterFields::HeatExchangerConfiguration).get());
-  EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
-  EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::DesignWaterTemperatureDifference));
+  ASSERT_EQ(0u, idfCoilSystems.size());
 }
 
 TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_AirLoopHVAC) {
@@ -206,9 +166,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_AirLoopHVAC) 
     EXPECT_EQ(1.2, idfCoilSystem.getDouble(CoilSystem_Cooling_WaterFields::MinimumWaterLoopTemperatureForHeatRecovery).get());
     EXPECT_TRUE(idfCoilSystem.isEmpty(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery));
 
-    EXPECT_EQ(0, w.getObjectsByType(IddObjectType::Controller_WaterCoil)
-                   .size());  // FIXME: what's creating this if i have it commented out in the addToNode method?
-
     EXPECT_EQ(coilSystemCoolingWater.coolingCoil().nameString(), idfCoil.getString(Coil_Cooling_WaterFields::Name).get());
     EXPECT_EQ("Always On Discrete", idfCoil.getString(Coil_Cooling_WaterFields::AvailabilityScheduleName).get());
     EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignWaterFlowRate).get());
@@ -229,6 +186,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_AirLoopHVAC) 
     EXPECT_EQ("CrossFlow", idfCoil.getString(Coil_Cooling_WaterFields::HeatExchangerConfiguration).get());
     EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
     EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::DesignWaterTemperatureDifference));
+
+    // FIXME: what's creating this if i have it commented out in the addToNode method?
+    EXPECT_EQ(0, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
   }
 
   // with companion
@@ -254,11 +214,22 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_AirLoopHVAC) 
     // put it inside a Unitary, and put Unitary on an AirLoopHVAC so it gets translated
     AirLoopHVAC airLoop(m);
     Node supplyOutletNode = airLoop.supplyOutletNode();
-    EXPECT_TRUE(coilSystemCoolingWater.addToNode(supplyOutletNode));
+    ControllerOutdoorAir controller1(m);
+    AirLoopHVACOutdoorAirSystem oaSystem(m, controller1);
+    EXPECT_TRUE(oaSystem.addToNode(supplyOutletNode));
+    Node oaNode = oaSystem.outboardOANode().get();
+    EXPECT_TRUE(coilSystemCoolingWater.addToNode(oaNode));
+    Node reliefNode = oaSystem.reliefAirModelObject()->cast<Node>();
+    EXPECT_TRUE(companionCoilUsedForHeatRecovery.addToNode(reliefNode));
 
     // They must be connected to a PlantLoop too
     PlantLoop chw_p(m);
     chw_p.addDemandBranchForComponent(coilSystemCoolingWater.coolingCoil());
+    PipeAdiabatic pipe(m);
+    Node coolingOutlet = coilSystemCoolingWater.coolingCoil().waterOutletModelObject()->cast<Node>();
+    EXPECT_TRUE(pipe.addToNode(coolingOutlet));
+    Node pipeOutlet = pipe.outletModelObject()->cast<Node>();
+    EXPECT_TRUE(companionCoilUsedForHeatRecovery.addToNode(pipeOutlet));
 
     const Workspace w = ft.translateModel(m);
 
@@ -268,7 +239,10 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_AirLoopHVAC) 
 
     WorkspaceObjectVector idfCoils(w.getObjectsByType(IddObjectType::Coil_Cooling_Water));
     ASSERT_EQ(2u, idfCoils.size());
-    WorkspaceObject idfCoil(idfCoils[0]);  // FIXME: get these some other way
+
+    WorkspaceObjectVector idfControllers(w.getObjectsByType(IddObjectType::Controller_OutdoorAir));
+    ASSERT_EQ(1u, idfControllers.size());
+    const auto& idfController = idfControllers.front();
 
     // Go from AirLoopHVAC to BranchList to Branch
     WorkspaceObjectVector idf_airloops = w.getObjectsByType(IddObjectType::AirLoopHVAC);
@@ -286,9 +260,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_AirLoopHVAC) 
     ASSERT_EQ(1u, idf_branch.extensibleGroups().size());
     auto w_eg2 = idf_branch.extensibleGroups()[0].cast<WorkspaceExtensibleGroup>();
 
-    EXPECT_EQ(w_eg2.getString(BranchExtensibleFields::ComponentInletNodeName).get(), coilSystemCoolingWater.inletModelObject().get().nameString());
-    EXPECT_EQ(w_eg2.getString(BranchExtensibleFields::ComponentOutletNodeName).get(), coilSystemCoolingWater.outletModelObject().get().nameString());
-    EXPECT_EQ("CoilSystem:Cooling:Water", w_eg2.getString(BranchExtensibleFields::ComponentObjectType).get());
+    /* EXPECT_EQ(w_eg2.getString(BranchExtensibleFields::ComponentInletNodeName).get(), coilSystemCoolingWater.inletModelObject().get().nameString());
+    EXPECT_EQ(w_eg2.getString(BranchExtensibleFields::ComponentOutletNodeName).get(), coilSystemCoolingWater.outletModelObject().get().nameString()); */
+    EXPECT_EQ("AirLoopHVAC:OutdoorAirSystem", w_eg2.getString(BranchExtensibleFields::ComponentObjectType).get());
 
     EXPECT_EQ(coilSystemCoolingWater.inletModelObject().get().nameString(),
               idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::AirInletNodeName).get());
@@ -306,28 +280,52 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_AirLoopHVAC) 
     EXPECT_EQ(companionCoilUsedForHeatRecovery.nameString(),
               idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery).get());
 
-    EXPECT_EQ(0, w.getObjectsByType(IddObjectType::Controller_WaterCoil)
-                   .size());  // FIXME: what's creating this if i have it commented out in the addToNode method?
+    WorkspaceObject idf_coolingCoil = idfCoilSystem.getTarget(CoilSystem_Cooling_WaterFields::CoolingCoilName).get();
+    WorkspaceObject idf_companionCoil = idfCoilSystem.getTarget(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery).get();
 
-    EXPECT_EQ(coilSystemCoolingWater.coolingCoil().nameString(), idfCoil.getString(Coil_Cooling_WaterFields::Name).get());
-    EXPECT_EQ("Always On Discrete", idfCoil.getString(Coil_Cooling_WaterFields::AvailabilityScheduleName).get());
-    EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignWaterFlowRate).get());
-    EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignAirFlowRate).get());
-    EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignInletWaterTemperature).get());
-    EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignInletAirTemperature).get());
-    EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignInletAirHumidityRatio).get());
-    EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignOutletAirHumidityRatio).get());
+    EXPECT_EQ(coilSystemCoolingWater.coolingCoil().nameString(), idf_coolingCoil.getString(Coil_Cooling_WaterFields::Name).get());
+    EXPECT_EQ("Always On Discrete", idf_coolingCoil.getString(Coil_Cooling_WaterFields::AvailabilityScheduleName).get());
+    EXPECT_EQ("Autosize", idf_coolingCoil.getString(Coil_Cooling_WaterFields::DesignWaterFlowRate).get());
+    EXPECT_EQ("Autosize", idf_coolingCoil.getString(Coil_Cooling_WaterFields::DesignAirFlowRate).get());
+    EXPECT_EQ("Autosize", idf_coolingCoil.getString(Coil_Cooling_WaterFields::DesignInletWaterTemperature).get());
+    EXPECT_EQ("Autosize", idf_coolingCoil.getString(Coil_Cooling_WaterFields::DesignInletAirTemperature).get());
+    EXPECT_EQ("Autosize", idf_coolingCoil.getString(Coil_Cooling_WaterFields::DesignInletAirHumidityRatio).get());
+    EXPECT_EQ("Autosize", idf_coolingCoil.getString(Coil_Cooling_WaterFields::DesignOutletAirHumidityRatio).get());
     EXPECT_EQ(coilSystemCoolingWater.coolingCoil().waterInletModelObject().get().nameString(),
-              idfCoil.getString(Coil_Cooling_WaterFields::WaterInletNodeName).get());
+              idf_coolingCoil.getString(Coil_Cooling_WaterFields::WaterInletNodeName).get());
     EXPECT_EQ(coilSystemCoolingWater.coolingCoil().waterOutletModelObject().get().nameString(),
-              idfCoil.getString(Coil_Cooling_WaterFields::WaterOutletNodeName).get());
+              idf_coolingCoil.getString(Coil_Cooling_WaterFields::WaterOutletNodeName).get());
     EXPECT_EQ(idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::AirInletNodeName).get(),
-              idfCoil.getString(Coil_Cooling_WaterFields::AirInletNodeName).get());
+              idf_coolingCoil.getString(Coil_Cooling_WaterFields::AirInletNodeName).get());
     EXPECT_EQ(idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::AirOutletNodeName).get(),
-              idfCoil.getString(Coil_Cooling_WaterFields::AirOutletNodeName).get());
-    EXPECT_EQ("SimpleAnalysis", idfCoil.getString(Coil_Cooling_WaterFields::TypeofAnalysis).get());
-    EXPECT_EQ("CrossFlow", idfCoil.getString(Coil_Cooling_WaterFields::HeatExchangerConfiguration).get());
-    EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
-    EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::DesignWaterTemperatureDifference));
+              idf_coolingCoil.getString(Coil_Cooling_WaterFields::AirOutletNodeName).get());
+    EXPECT_EQ("SimpleAnalysis", idf_coolingCoil.getString(Coil_Cooling_WaterFields::TypeofAnalysis).get());
+    EXPECT_EQ("CrossFlow", idf_coolingCoil.getString(Coil_Cooling_WaterFields::HeatExchangerConfiguration).get());
+    EXPECT_TRUE(idf_coolingCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
+    EXPECT_TRUE(idf_coolingCoil.isEmpty(Coil_Cooling_WaterFields::DesignWaterTemperatureDifference));
+
+    EXPECT_EQ(coilSystemCoolingWater.companionCoilUsedForHeatRecovery().get().nameString(),
+              idf_companionCoil.getString(Coil_Cooling_WaterFields::Name).get());
+    EXPECT_EQ("Always On Discrete", idf_companionCoil.getString(Coil_Cooling_WaterFields::AvailabilityScheduleName).get());
+    EXPECT_EQ("Autosize", idf_companionCoil.getString(Coil_Cooling_WaterFields::DesignWaterFlowRate).get());
+    EXPECT_EQ("Autosize", idf_companionCoil.getString(Coil_Cooling_WaterFields::DesignAirFlowRate).get());
+    EXPECT_EQ("Autosize", idf_companionCoil.getString(Coil_Cooling_WaterFields::DesignInletWaterTemperature).get());
+    EXPECT_EQ("Autosize", idf_companionCoil.getString(Coil_Cooling_WaterFields::DesignInletAirTemperature).get());
+    EXPECT_EQ("Autosize", idf_companionCoil.getString(Coil_Cooling_WaterFields::DesignInletAirHumidityRatio).get());
+    EXPECT_EQ("Autosize", idf_companionCoil.getString(Coil_Cooling_WaterFields::DesignOutletAirHumidityRatio).get());
+    EXPECT_EQ(coilSystemCoolingWater.companionCoilUsedForHeatRecovery().get().waterInletModelObject().get().nameString(),
+              idf_companionCoil.getString(Coil_Cooling_WaterFields::WaterInletNodeName).get());
+    EXPECT_EQ(coilSystemCoolingWater.companionCoilUsedForHeatRecovery().get().waterOutletModelObject().get().nameString(),
+              idf_companionCoil.getString(Coil_Cooling_WaterFields::WaterOutletNodeName).get());
+    EXPECT_EQ(idfController.getString(Controller_OutdoorAirFields::ReliefAirOutletNodeName).get(),
+              idf_companionCoil.getString(Coil_Cooling_WaterFields::AirInletNodeName).get());
+    EXPECT_EQ("", idf_companionCoil.getString(Coil_Cooling_WaterFields::AirOutletNodeName).get());  // FIXME
+    EXPECT_EQ("SimpleAnalysis", idf_companionCoil.getString(Coil_Cooling_WaterFields::TypeofAnalysis).get());
+    EXPECT_EQ("CrossFlow", idf_companionCoil.getString(Coil_Cooling_WaterFields::HeatExchangerConfiguration).get());
+    EXPECT_TRUE(idf_companionCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
+    EXPECT_TRUE(idf_companionCoil.isEmpty(Coil_Cooling_WaterFields::DesignWaterTemperatureDifference));
+
+    // FIXME: what's creating this if i have it commented out in the addToNode method?
+    EXPECT_EQ(0, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
   }
 }

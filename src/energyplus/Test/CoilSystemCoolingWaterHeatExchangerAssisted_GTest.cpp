@@ -131,15 +131,18 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerA
   {
     Model m;
     CoilSystemCoolingWaterHeatExchangerAssisted coil(m);
+    EXPECT_FALSE(coil.coolingCoil().waterInletModelObject());
 
     // put it on an AirLoopHVAC
     AirLoopHVAC airLoop(m);
     Node supplyOutletNode = airLoop.supplyOutletNode();
     EXPECT_TRUE(coil.addToNode(supplyOutletNode));
+    EXPECT_FALSE(coil.coolingCoil().waterInletModelObject());
 
     // They must be connected to a PlantLoop too
     PlantLoop chw_p(m);
     chw_p.addDemandBranchForComponent(coil.coolingCoil());
+    EXPECT_TRUE(coil.coolingCoil().waterInletModelObject());
 
     ForwardTranslator ft;
     Workspace w = ft.translateModel(m);
@@ -184,9 +187,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerA
     EXPECT_EQ("Coil:Cooling:Water", idfCoilSystem.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::CoolingCoilObjectType).get());
     EXPECT_EQ(coil.coolingCoil().nameString(), idfCoilSystem.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::CoolingCoilName).get());
 
-    // Check Controller:WaterCoil created by coil.addToNode
-    EXPECT_EQ(1, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
-
     EXPECT_EQ(coil.coolingCoil().nameString(), idfCoil.getString(Coil_Cooling_WaterFields::Name).get());
     EXPECT_EQ("Always On Discrete", idfCoil.getString(Coil_Cooling_WaterFields::AvailabilityScheduleName).get());
     EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignWaterFlowRate).get());
@@ -205,21 +205,27 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerA
     EXPECT_EQ("CrossFlow", idfCoil.getString(Coil_Cooling_WaterFields::HeatExchangerConfiguration).get());
     EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
     EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::DesignWaterTemperatureDifference));
+
+    // Check Controller:WaterCoil created by coil.addToNode
+    EXPECT_EQ(1, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
   }
 
   // Test for #4895: connect coil to plant, and then connect coil system to air loop
   {
     Model m;
     CoilSystemCoolingWaterHeatExchangerAssisted coil(m);
+    EXPECT_FALSE(coil.coolingCoil().waterInletModelObject());
 
     // They must be connected to a PlantLoop too
     PlantLoop chw_p(m);
     chw_p.addDemandBranchForComponent(coil.coolingCoil());
+    EXPECT_TRUE(coil.coolingCoil().waterInletModelObject());
 
     // put it on an AirLoopHVAC
     AirLoopHVAC airLoop(m);
     Node supplyOutletNode = airLoop.supplyOutletNode();
     EXPECT_TRUE(coil.addToNode(supplyOutletNode));
+    EXPECT_TRUE(coil.coolingCoil().waterInletModelObject());
 
     ForwardTranslator ft;
     Workspace w = ft.translateModel(m);
@@ -264,9 +270,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerA
     EXPECT_EQ("Coil:Cooling:Water", idfCoilSystem.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::CoolingCoilObjectType).get());
     EXPECT_EQ(coil.coolingCoil().nameString(), idfCoilSystem.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::CoolingCoilName).get());
 
-    // Check Controller:WaterCoil created by coil.addToNode
-    EXPECT_EQ(1, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
-
     EXPECT_EQ(coil.coolingCoil().nameString(), idfCoil.getString(Coil_Cooling_WaterFields::Name).get());
     EXPECT_EQ("Always On Discrete", idfCoil.getString(Coil_Cooling_WaterFields::AvailabilityScheduleName).get());
     EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignWaterFlowRate).get());
@@ -285,5 +288,8 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerA
     EXPECT_EQ("CrossFlow", idfCoil.getString(Coil_Cooling_WaterFields::HeatExchangerConfiguration).get());
     EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
     EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::DesignWaterTemperatureDifference));
+
+    // Check Controller:WaterCoil created by coil.addToNode
+    EXPECT_EQ(1, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
   }
 }

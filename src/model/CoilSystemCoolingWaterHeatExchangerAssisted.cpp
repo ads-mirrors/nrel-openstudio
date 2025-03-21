@@ -190,29 +190,7 @@ namespace model {
 
       if (boost::optional<AirLoopHVAC> airLoop = node.airLoopHVAC()) {
         if (!airLoop->demandComponent(node.handle())) {
-          result = StraightComponent_Impl::addToNode(node);
-          if (result) {
-            auto t_coolingCoil = coolingCoil();
-            if (auto waterInletModelObject = t_coolingCoil.waterInletModelObject()) {
-
-              // TODO: why aren't we setting the water coil in this case? @kbenne thoughts please
-              if (auto coilCoolingWater = t_coolingCoil.optionalCast<CoilCoolingWater>()) {
-                if (auto oldController = coilCoolingWater->controllerWaterCoil()) {
-                  oldController->remove();
-                }
-              }
-
-              auto t_model = model();
-              ControllerWaterCoil controller(t_model);
-
-              auto coilWaterInletNode = waterInletModelObject->optionalCast<Node>();
-              OS_ASSERT(coilWaterInletNode);
-              controller.setActuatorNode(coilWaterInletNode.get());
-              // sensor node will be established in translator since that node does not yet exist
-
-              controller.setAction("Reverse");
-            }
-          }
+          return StraightComponent_Impl::addToNode(node);
         }
       } else if (boost::optional<AirLoopHVACOutdoorAirSystem> oas = node.airLoopHVACOutdoorAirSystem()) {
         if (oas->airLoopHVACDedicatedOutdoorAirSystem()) {

@@ -286,6 +286,12 @@ namespace model {
         LOG(Warn, this->briefDescription()
                     << " cannot be connected directly to an AirLoopHVAC when it's part of a parent CoilSystemCoolingWaterHeatExchangerAssisted. "
                        "Please call CoilSystemCoolingWaterHeatExchangerAssisted::addToNode instead");
+
+        /*       } else if (t_airLoop && t_containingHVACComponent && t_containingHVACComponent->optionalCast<CoilSystemCoolingWater>()) {
+        LOG(Warn, this->briefDescription()
+                    << " cannot be connected directly to an AirLoopHVAC when it's part of a parent CoilSystemCoolingWater. "
+                       "Please call CoilSystemCoolingWater::addToNode instead"); */
+
       } else {
 
         success = WaterToAirComponent_Impl::addToNode(node);
@@ -300,10 +306,14 @@ namespace model {
                       << " has an existing ControllerWaterCoil with action set to something else than 'Reverse'. Make sure this is what you want");
               }
             } else {
-              Model t_model = model();
-              ControllerWaterCoil controller(t_model);
-              controller.getImpl<ControllerWaterCoil_Impl>()->setWaterCoil(getObject<HVACComponent>());
-              controller.setAction("Reverse");
+              if (t_containingHVACComponent && t_containingHVACComponent->optionalCast<CoilSystemCoolingWater>()) {
+                // no-op
+              } else {
+                Model t_model = model();
+                ControllerWaterCoil controller(t_model);
+                controller.getImpl<ControllerWaterCoil_Impl>()->setWaterCoil(getObject<HVACComponent>());
+                controller.setAction("Reverse");
+              }
             }
           }
         }
@@ -382,6 +392,11 @@ namespace model {
         for (const auto& coilSystem : coilSystems) {
           if (coilSystem.coolingCoil().handle() == handle()) {
             return coilSystem;
+          }
+          if (boost::optional<WaterToAirComponent> companionCoilUsedForHeatRecovery = coilSystem.companionCoilUsedForHeatRecovery()) {
+            if (companionCoilUsedForHeatRecovery->handle() == this->handle()) {
+              return coilSystem;
+            }
           }
         }
       }

@@ -11,6 +11,9 @@
 #include "../Schedule_Impl.hpp"
 #include "../CoilCoolingWater.hpp"
 #include "../CoilCoolingWater_Impl.hpp"
+#include "../AirLoopHVAC.hpp"
+#include "../PlantLoop.hpp"
+#include "../Node.hpp"
 
 using namespace openstudio;
 using namespace openstudio::model;
@@ -90,4 +93,74 @@ TEST_F(ModelFixture, CoilSystemCoolingWater_clone) {}
 
 TEST_F(ModelFixture, CoilSystemCoolingWater_remove) {}
 
-TEST_F(ModelFixture, CoilSystemCoolingWater_addToNode) {}
+TEST_F(ModelFixture, CoilSystemCoolingWater_addToNode) {
+  // Water Size Economizer Model
+  {
+    Model m;
+    CoilSystemCoolingWater coilSystem(m);
+
+    AirLoopHVAC a(m);
+    Node n = a.supplyOutletNode();
+
+    auto cc = coilSystem.coolingCoil().cast<CoilCoolingWater>();
+
+    EXPECT_EQ(2u, a.supplyComponents().size());
+
+    EXPECT_TRUE(cc.addToNode(n));
+    EXPECT_EQ(3u, a.supplyComponents().size());
+
+    EXPECT_TRUE(coilSystem.addToNode(n));
+    EXPECT_EQ(5u, a.supplyComponents().size());
+
+    {
+      auto containingHVACComponent = cc.containingHVACComponent();
+      ASSERT_TRUE(containingHVACComponent);
+      EXPECT_EQ(containingHVACComponent->handle(), coilSystem.handle());
+    }
+
+    // BUT, we need to be able to connect the water side of the Coil...
+    PlantLoop p(m);
+    EXPECT_TRUE(p.addDemandBranchForComponent(cc));
+  }
+
+  // Wrap Around Water Coil Heat Recovery Mode
+  {
+    Model m;
+    CoilSystemCoolingWater coilSystem(m);
+    CoilCoolingWater companionCoil(m);
+    coilSystem.setCompanionCoilUsedForHeatRecovery(companionCoil);
+
+    AirLoopHVAC a(m);
+    Node n = a.supplyOutletNode();
+
+    auto cc = coilSystem.coolingCoil().cast<CoilCoolingWater>();
+    auto hr = coilSystem.companionCoilUsedForHeatRecovery().get().cast<CoilCoolingWater>();
+
+    EXPECT_EQ(2u, a.supplyComponents().size());
+
+    EXPECT_TRUE(cc.addToNode(n));
+    EXPECT_EQ(3u, a.supplyComponents().size());
+
+    EXPECT_TRUE(hr.addToNode(n));
+    EXPECT_EQ(5u, a.supplyComponents().size());
+
+    EXPECT_TRUE(coilSystem.addToNode(n));
+    EXPECT_EQ(7u, a.supplyComponents().size());
+
+    {
+      auto containingHVACComponent = cc.containingHVACComponent();
+      ASSERT_TRUE(containingHVACComponent);
+      EXPECT_EQ(containingHVACComponent->handle(), coilSystem.handle());
+    }
+
+    {
+      auto containingHVACComponent = hr.containingHVACComponent();
+      ASSERT_TRUE(containingHVACComponent);
+      EXPECT_EQ(containingHVACComponent->handle(), coilSystem.handle());
+    }
+
+    // BUT, we need to be able to connect the water side of the Coil...
+    PlantLoop p(m);
+    EXPECT_TRUE(p.addDemandBranchForComponent(cc));
+  }
+}

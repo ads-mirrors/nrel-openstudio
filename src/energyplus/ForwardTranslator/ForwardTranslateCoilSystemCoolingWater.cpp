@@ -25,6 +25,8 @@
 #include "../../model/FanOnOff_Impl.hpp"
 #include "../../model/FanSystemModel.hpp"
 #include "../../model/FanSystemModel_Impl.hpp"
+#include "../../model/AirLoopHVACOutdoorAirSystem.hpp"
+#include "../../model/AirLoopHVACOutdoorAirSystem_Impl.hpp"
 
 #include <utilities/idd/CoilSystem_Cooling_Water_FieldEnums.hxx>
 #include <utilities/idd/Coil_Cooling_Water_FieldEnums.hxx>
@@ -179,8 +181,9 @@ namespace energyplus {
       if (boost::optional<IdfObject> wo_ = translateAndMapModelObject(companionCoilUsedForHeatRecovery_.get())) {
         idfObject.setString(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery, wo_->nameString());
         if (wo_->iddObject().type() == IddObjectType::Coil_Cooling_Water) {
-          wo_->setString(Coil_Cooling_WaterFields::AirInletNodeName, "");   // FIXME
-          wo_->setString(Coil_Cooling_WaterFields::AirOutletNodeName, "");  // FIXME
+          wo_->setString(Coil_Cooling_WaterFields::AirInletNodeName,
+                         modelObject.airLoopHVACOutdoorAirSystem()->reliefAirModelObject()->nameString());  // FIXME
+          wo_->setString(Coil_Cooling_WaterFields::AirOutletNodeName, airOutletNodeName);                   // FIXME
           // Add IddObjectType::Coil_Cooling_Water_DetailedGeometry if implemented
         } else {
           // Shouldn't happen, accepts only Coil:Cooling:Water or Coil:Cooling:Water:DetailedGeometry
