@@ -208,22 +208,10 @@ namespace energyplus {
     // get the zone that this piece of equipment is connected to
     boost::optional<ThermalZone> zone = modelObject.thermalZone();
     if (zone) {
-      // get this zone's space
-      std::vector<Space> spaces = zone->spaces();
-      // get the space's design specification outdoor air, if one exists
-      if (!spaces.empty()) {
-        boost::optional<DesignSpecificationOutdoorAir> designSpecificationOutdoorAir;
-        designSpecificationOutdoorAir = spaces[0].designSpecificationOutdoorAir();
-        if (designSpecificationOutdoorAir) {
-          // translate the design specification outdoor air to idf
-          boost::optional<IdfObject> designSpecificationOutdoorAirIdf;
-          designSpecificationOutdoorAirIdf = translateAndMapModelObject(*designSpecificationOutdoorAir);
-          // the translation should complete successfully
-          OS_ASSERT(designSpecificationOutdoorAirIdf);
+      if (auto dsoaOrList_  = getOrCreateThermalZoneDSOA(zone->cast<ThermalZone>())) {
           // set the field to reference the design specification outdoor air
           zoneHVACIdealLoadsAirSystem.setString(ZoneHVAC_IdealLoadsAirSystemFields::DesignSpecificationOutdoorAirObjectName,
-                                                designSpecificationOutdoorAirIdf->name().get());
-        }
+                                                dsoaOrList_->nameString());
       }
     }
 
