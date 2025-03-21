@@ -939,8 +939,9 @@ namespace energyplus {
     // * if there are no spaces with a DSOA assigned: return empty
     // * otherwise:
     // * otherwise:
-    //      * if we translated to E+ with spaces: create a DSOA:SpaceList
-    //      * if we do not: create DSOA
+    //      * if we translated to E+ with spaces:
+    //          * If a single one: DSOA, otherwise create a DSOA:SpaceList
+    //      * if we do not use E+ spaces: create DSOA
     boost::optional<IdfObject> getOrCreateThermalZoneDSOA(const model::ThermalZone& z);
 
     boost::optional<IdfObject> translateDistrictCooling(model::DistrictCooling& modelObject);

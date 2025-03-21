@@ -101,7 +101,7 @@ namespace energyplus {
 
     OptionalIdfObject result;
 
-    if (m_forwardTranslatorOptions.excludeSpaceTranslation()) {
+    if (m_forwardTranslatorOptions.excludeSpaceTranslation() || spaces.size() == 1) {
       // Spaces, and therefore DSOAs have been combined already
       auto dsoa = spaces.front().designSpecificationOutdoorAir().get();
       result = translateAndMapDSOA(dsoa);
