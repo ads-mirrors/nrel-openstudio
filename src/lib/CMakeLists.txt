@@ -75,3 +75,11 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/"
         PATTERN "*.hxx"
         PATTERN "*.i"
         )
+
+set(openstudiolib_test_src
+  test/ApplicationPathHelpers_GTest.cpp
+)
+
+if(BUILD_TESTING)
+  CREATE_TEST_TARGETS(openstudiolib "${openstudiolib_test_src}" openstudiolib openstudio_model_resources openstudio_energyplus_resources)
+endif()
