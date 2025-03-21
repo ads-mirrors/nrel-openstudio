@@ -15,6 +15,7 @@
 
 #include "../../utilities/core/Logger.hpp"
 #include "../../utilities/idf/IdfExtensibleGroup.hpp"
+#include "../../utilities/plot/ProgressBar.hpp"
 
 #include <utilities/idd/DesignSpecification_OutdoorAir_FieldEnums.hxx>
 #include <utilities/idd/DesignSpecification_OutdoorAir_SpaceList_FieldEnums.hxx>
@@ -28,7 +29,7 @@ namespace openstudio {
 
 namespace energyplus {
 
-  boost::optional<IdfObject> ForwardTranslator::translateDesignSpecificationOutdoorAir(DesignSpecificationOutdoorAir& modelObject) {
+  boost::optional<IdfObject> translateDesignSpecificationOutdoorAir(DesignSpecificationOutdoorAir& modelObject) {
     boost::optional<std::string> s;
     boost::optional<double> value;
 
@@ -52,8 +53,9 @@ namespace energyplus {
       idfObject.setDouble(DesignSpecification_OutdoorAirFields::OutdoorAirFlowAirChangesperHour, ach);
 
     } else {
-      LOG(Error, "Unknown OutdoorAirMethod '" << outdoorAirMethod << "' specified for OS:DesignSpecification:OutdoorAir named '"
-                                              << modelObject.name().get() << "'");
+      LOG_FREE(Error, "openstudio.energyplus.ForwardTranslator",
+               "Unknown OutdoorAirMethod '" << outdoorAirMethod << "' specified for OS:DesignSpecification:OutdoorAir named '"
+                                            << modelObject.name().get() << "'");
       return boost::none;
     }
 
@@ -61,8 +63,6 @@ namespace energyplus {
     if (schedule) {
       idfObject.setString(DesignSpecification_OutdoorAirFields::OutdoorAirScheduleName, schedule->name().get());
     }
-
-    m_idfObjects.push_back(idfObject);
 
     return idfObject;
   }
@@ -73,6 +73,25 @@ namespace energyplus {
     if (objInMapIt != m_zoneDSOAsMap.end()) {
       return objInMapIt->second;
     }
+
+    auto translateAndMapDSOA = [this](DesignSpecificationOutdoorAir& dsoa) -> boost::optional<IdfObject> {
+      auto objInMapIt = m_map.find(dsoa.handle());
+      if (objInMapIt != m_map.end()) {
+        return objInMapIt->second;
+      }
+
+      auto idf_dsoa_ = translateDesignSpecificationOutdoorAir(dsoa);
+
+      if (idf_dsoa_) {
+        m_idfObjects.push_back(*idf_dsoa_);
+        m_map.emplace(dsoa.handle(), *idf_dsoa_);
+
+        if (m_progressBar) {
+          m_progressBar->setValue((int)m_map.size());
+        }
+      }
+      return idf_dsoa_;
+    };
 
     auto spaces = z.spacesWithDesignSpecificationOutdoorAir();
     if (spaces.empty()) {
@@ -85,7 +104,7 @@ namespace energyplus {
     if (m_forwardTranslatorOptions.excludeSpaceTranslation()) {
       // Spaces, and therefore DSOAs have been combined already
       auto dsoa = spaces.front().designSpecificationOutdoorAir().get();
-      result = translateAndMapModelObject(dsoa);
+      result = translateAndMapDSOA(dsoa);
     } else {
 
       // DSOA:SpaceList
@@ -94,7 +113,7 @@ namespace energyplus {
 
       for (const auto& s : spaces) {
         auto dsoa = *(s.designSpecificationOutdoorAir());
-        if (auto dsoa_ = translateAndMapModelObject(dsoa)) {
+        if (auto dsoa_ = translateAndMapDSOA(dsoa)) {
           dsoa_sp.pushExtensibleGroup({s.nameString(), dsoa_->nameString()});
         }
       }
