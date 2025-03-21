@@ -1497,9 +1497,8 @@ namespace energyplus {
         return retVal;
       }
       case openstudio::IddObjectType::OS_DesignSpecification_OutdoorAir: {
-        auto designSpecificationOutdoorAir = modelObject.cast<DesignSpecificationOutdoorAir>();
-        retVal = translateDesignSpecificationOutdoorAir(designSpecificationOutdoorAir);
-        break;
+        LOG_AND_THROW("Shouldn't get there");
+        return retVal;
       }
       case openstudio::IddObjectType::OS_DesignSpecification_ZoneAirDistribution: {
         // DLM: appears to be translated in SizingZone

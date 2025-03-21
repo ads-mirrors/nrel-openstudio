@@ -943,10 +943,6 @@ namespace energyplus {
     //      * if we do not: create DSOA
     boost::optional<IdfObject> getOrCreateThermalZoneDSOA(const model::ThermalZone& z);
 
-    // NOTE: DO NOT CALL THIS ONE
-    // TODO: hide it
-    boost::optional<IdfObject> translateDesignSpecificationOutdoorAir(model::DesignSpecificationOutdoorAir& modelObject);
-
     boost::optional<IdfObject> translateDistrictCooling(model::DistrictCooling& modelObject);
 
     boost::optional<IdfObject> translateDistrictHeatingWater(model::DistrictHeatingWater& modelObject);
