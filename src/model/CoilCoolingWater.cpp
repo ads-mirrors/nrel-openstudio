@@ -114,7 +114,6 @@ namespace model {
 
     bool CoilCoolingWater_Impl::setDesignWaterFlowRate(double value) {
       return setDouble(openstudio::OS_Coil_Cooling_WaterFields::DesignWaterFlowRate, value);
-      ;
     }
 
     bool CoilCoolingWater_Impl::isDesignWaterFlowRateAutosized() {
@@ -178,7 +177,6 @@ namespace model {
 
     bool CoilCoolingWater_Impl::setDesignInletAirTemperature(double value) {
       return setDouble(openstudio::OS_Coil_Cooling_WaterFields::DesignInletAirTemperature, value);
-      ;
     }
 
     bool CoilCoolingWater_Impl::isDesignInletAirTemperatureAutosized() {
@@ -200,7 +198,6 @@ namespace model {
 
     bool CoilCoolingWater_Impl::setDesignOutletAirTemperature(double value) {
       return setDouble(openstudio::OS_Coil_Cooling_WaterFields::DesignOutletAirTemperature, value);
-      ;
     }
 
     bool CoilCoolingWater_Impl::isDesignOutletAirTemperatureAutosized() {
@@ -222,7 +219,6 @@ namespace model {
 
     bool CoilCoolingWater_Impl::setDesignInletAirHumidityRatio(double value) {
       return setDouble(openstudio::OS_Coil_Cooling_WaterFields::DesignInletAirHumidityRatio, value);
-      ;
     }
 
     bool CoilCoolingWater_Impl::isDesignInletAirHumidityRatioAutosized() {

@@ -625,11 +625,19 @@ OptionalIddField IddField::load(const std::string& name, const std::string& text
   }
 }
 
+// PRIVATE
+
+IddField::IddField(const std::shared_ptr<detail::IddField_Impl>& impl) : m_impl(impl) {}
+
+// NON-MEMBER FUNCTIONS
+
 std::ostream& IddField::print(std::ostream& os, bool lastField) const {
   return m_impl->print(os, lastField);
 }
 
-IddField::IddField(const std::shared_ptr<detail::IddField_Impl>& impl) : m_impl(impl) {}
+std::ostream& operator<<(std::ostream& os, const IddField& iddField) {
+  return iddField.print(os, false);
+}
 
 bool referencesEqual(const IddField& field1, const IddField& field2) {
   bool result = false;

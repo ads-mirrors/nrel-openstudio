@@ -169,7 +169,6 @@ namespace model {
 
     bool CoilHeatingWater_Impl::setUFactorTimesAreaValue(double value) {
       return setDouble(openstudio::OS_Coil_Heating_WaterFields::UFactorTimesAreaValue, value);
-      ;
     }
 
     bool CoilHeatingWater_Impl::isUFactorTimesAreaValueAutosized() {
@@ -191,7 +190,6 @@ namespace model {
 
     bool CoilHeatingWater_Impl::setMaximumWaterFlowRate(double value) {
       return setDouble(openstudio::OS_Coil_Heating_WaterFields::MaximumWaterFlowRate, value);
-      ;
     }
 
     bool CoilHeatingWater_Impl::isMaximumWaterFlowRateAutosized() {
@@ -222,7 +220,6 @@ namespace model {
 
     bool CoilHeatingWater_Impl::setRatedCapacity(double value) {
       return setDouble(openstudio::OS_Coil_Heating_WaterFields::RatedCapacity, value);
-      ;
     }
 
     bool CoilHeatingWater_Impl::isRatedCapacityAutosized() {
@@ -253,7 +250,6 @@ namespace model {
 
     bool CoilHeatingWater_Impl::setRatedInletAirTemperature(double value) {
       return setDouble(openstudio::OS_Coil_Heating_WaterFields::RatedInletAirTemperature, value);
-      ;
     }
 
     double CoilHeatingWater_Impl::ratedOutletWaterTemperature() {
@@ -271,7 +267,6 @@ namespace model {
 
     bool CoilHeatingWater_Impl::setRatedOutletAirTemperature(double value) {
       return setDouble(openstudio::OS_Coil_Heating_WaterFields::RatedOutletAirTemperature, value);
-      ;
     }
 
     double CoilHeatingWater_Impl::ratedRatioForAirAndWaterConvection() {
@@ -280,7 +275,6 @@ namespace model {
 
     bool CoilHeatingWater_Impl::setRatedRatioForAirAndWaterConvection(double value) {
       return setDouble(openstudio::OS_Coil_Heating_WaterFields::RatedRatioforAirandWaterConvection, value);
-      ;
     }
 
     unsigned CoilHeatingWater_Impl::airInletPort() const {
