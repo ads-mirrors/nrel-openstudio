@@ -181,9 +181,8 @@ namespace energyplus {
       if (boost::optional<IdfObject> wo_ = translateAndMapModelObject(companionCoilUsedForHeatRecovery_.get())) {
         idfObject.setString(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery, wo_->nameString());
         if (wo_->iddObject().type() == IddObjectType::Coil_Cooling_Water) {
-          wo_->setString(Coil_Cooling_WaterFields::AirInletNodeName,
-                         modelObject.airLoopHVACOutdoorAirSystem()->reliefAirModelObject()->nameString());  // FIXME
-          wo_->setString(Coil_Cooling_WaterFields::AirOutletNodeName, airOutletNodeName);                   // FIXME
+          wo_->setString(Coil_Cooling_WaterFields::AirInletNodeName, modelObject.airLoopHVACOutdoorAirSystem()->reliefAirModelObject()->nameString());
+          wo_->setString(Coil_Cooling_WaterFields::AirOutletNodeName, wo_->nameString() + " Exhaust Outlet Node");  // FIXME
           // Add IddObjectType::Coil_Cooling_Water_DetailedGeometry if implemented
         } else {
           // Shouldn't happen, accepts only Coil:Cooling:Water or Coil:Cooling:Water:DetailedGeometry

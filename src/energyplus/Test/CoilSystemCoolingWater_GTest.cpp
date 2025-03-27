@@ -111,7 +111,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_AirLoopHVAC) 
     EXPECT_TRUE(coilSystemCoolingWater.setEconomizerLockout(false));  // Opposite from IDD default
     EXPECT_TRUE(coilSystemCoolingWater.setMinimumWaterLoopTemperatureForHeatRecovery(1.2));
 
-    // put it inside a Unitary, and put Unitary on an AirLoopHVAC so it gets translated
     AirLoopHVAC airLoop(m);
     Node supplyOutletNode = airLoop.supplyOutletNode();
     EXPECT_TRUE(coilSystemCoolingWater.addToNode(supplyOutletNode));
@@ -210,7 +209,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_AirLoopHVAC) 
     CoilCoolingWater companionCoilUsedForHeatRecovery(m);
     EXPECT_TRUE(coilSystemCoolingWater.setCompanionCoilUsedForHeatRecovery(companionCoilUsedForHeatRecovery));
 
-    // put it inside a Unitary, and put Unitary on an AirLoopHVAC so it gets translated
     AirLoopHVAC airLoop(m);
     Node supplyOutletNode = airLoop.supplyOutletNode();
     ControllerOutdoorAir controller1(m);
@@ -318,7 +316,8 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_AirLoopHVAC) 
               idf_companionCoil.getString(Coil_Cooling_WaterFields::WaterOutletNodeName).get());
     EXPECT_EQ(idfController.getString(Controller_OutdoorAirFields::ReliefAirOutletNodeName).get(),
               idf_companionCoil.getString(Coil_Cooling_WaterFields::AirInletNodeName).get());
-    EXPECT_EQ("", idf_companionCoil.getString(Coil_Cooling_WaterFields::AirOutletNodeName).get());  // FIXME
+    EXPECT_EQ(coilSystemCoolingWater.companionCoilUsedForHeatRecovery().get().nameString() + " Exhaust Outlet Node",
+              idf_companionCoil.getString(Coil_Cooling_WaterFields::AirOutletNodeName).get());  // FIXME
     EXPECT_EQ("SimpleAnalysis", idf_companionCoil.getString(Coil_Cooling_WaterFields::TypeofAnalysis).get());
     EXPECT_EQ("CrossFlow", idf_companionCoil.getString(Coil_Cooling_WaterFields::HeatExchangerConfiguration).get());
     EXPECT_TRUE(idf_companionCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
