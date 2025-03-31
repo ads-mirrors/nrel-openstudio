@@ -113,6 +113,8 @@ namespace energyplus {
       IdfObject dsoa_sp(IddObjectType::DesignSpecification_OutdoorAir_SpaceList);
       dsoa_sp.setName(z.nameString() + " DSOA Space List");
 
+      // sort by space name so we ensure consistency/reproducibility
+      std::sort(spaces.begin(), spaces.end(), WorkspaceObjectNameLess());
       for (const auto& s : spaces) {
         auto dsoa = *(s.designSpecificationOutdoorAir());
         if (auto dsoa_ = translateAndMapDSOA(dsoa)) {
