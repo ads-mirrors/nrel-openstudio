@@ -4604,3 +4604,27 @@ TEST_F(OSVersionFixture, update_3_9_0_to_3_10_0_SpaceInfiltrationDesignFlowRate)
   EXPECT_EQ(0.2, si.getDouble(12).get());
   EXPECT_EQ("Outdoor", si.getString(13).get());  // Density Basis
 }
+
+TEST_F(OSVersionFixture, can_still_load_older_components) {
+  // see #4994 - Old materials OSC (< 0.7.4) cannot be loaded anymore
+  openstudio::path p = resourcesPath() / toPath("osversion/0_7_0/Brick_Fired_Clay_4_in_130_lb_ft3.osc");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Component> comp_ = vt.loadComponent(p);
+  ASSERT_TRUE(comp_) << "Failed to load Component " << p;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/0_7_0/Brick_Fired_Clay_4_in_130_lb_ft3_updated.osc");
+  comp_->save(outPath, true);
+
+  auto compData = comp_->componentData();
+  EXPECT_EQ(1, compData.numComponentObjects());
+
+  Model model;
+  OptionalComponentData ocd = model.insertComponent(comp_.get());
+  ASSERT_TRUE(ocd);
+
+  std::vector<WorkspaceObject> mats = model.getObjectsByType("OS:Material");
+  ASSERT_EQ(1, mats.size());
+  EXPECT_EQ("Brick - Fired Clay - 4 in. - 130 lb/ft3", mats.front().nameString());
+  EXPECT_EQ(1, model.getObjectsByType("OS:ComponentData").size());
+  EXPECT_EQ(2, model.objects().size());
+}
