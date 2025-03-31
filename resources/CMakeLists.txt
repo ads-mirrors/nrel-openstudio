@@ -131,6 +131,7 @@ set(utilities_resources_src
   utilities/SqlFile/1ZoneEvapCooler-V23-2-0.sql
   utilities/SqlFile/1ZoneEvapCooler-V24-1-0.sql
   utilities/SqlFile/1ZoneEvapCooler-V24-2-0.sql
+  utilities/SqlFile/1ZoneEvapCooler-V25-1-0.sql
   utilities/xml/base.xml
   utilities/xml/hpxml_with_error.xml
   utilities/xml/schema/HPXML.xsd
