@@ -247,4 +247,34 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ControllerOutdoorAir_MechanicalVenti
       EXPECT_EQ(dsoaSpace3.nameString(), dsoaOrList_->nameString());
     }
   }
+
+  // We should NOT end up with zones that have no DSOAs on it
+  space3.resetDesignSpecificationOutdoorAir();
+  EXPECT_TRUE(controller_mv.hasZonesWithDesignSpecificationOutdoorAir());
+  EXPECT_EQ(2, z12.spacesWithDesignSpecificationOutdoorAir().size());
+  EXPECT_EQ(0, z3.spacesWithDesignSpecificationOutdoorAir().size());
+  {
+    Workspace w = ft.translateModel(m);
+
+    WorkspaceObjectVector idf_controller_oas(w.getObjectsByType(IddObjectType::Controller_OutdoorAir));
+    EXPECT_EQ(1, idf_controller_oas.size());
+    EXPECT_EQ(1, w.getObjectsByType(IddObjectType::AirLoopHVAC).size());
+    EXPECT_EQ(1, w.getObjectsByType(IddObjectType::AirLoopHVAC_OutdoorAirSystem).size());
+
+    // Zones with a DSOA: the Controller:MechanicalVentilation should have been written
+    auto& idf_controller_oa = idf_controller_oas.front();
+    EXPECT_EQ(1, w.getObjectsByType(IddObjectType::Controller_MechanicalVentilation).size());
+    ASSERT_TRUE(idf_controller_oa.getTarget(Controller_OutdoorAirFields::MechanicalVentilationControllerName));
+    auto idf_controller_mv = idf_controller_oa.getTarget(Controller_OutdoorAirFields::MechanicalVentilationControllerName).get();
+    ASSERT_EQ(1, idf_controller_mv.numExtensibleGroups());
+
+    {
+      auto w_eg = idf_controller_mv.extensibleGroups()[0].cast<WorkspaceExtensibleGroup>();
+      EXPECT_EQ(z12.nameString(), w_eg.getString(Controller_MechanicalVentilationExtensibleFields::ZoneorZoneListName).get());
+      auto dsoaOrList_ = w_eg.getTarget(Controller_MechanicalVentilationExtensibleFields::DesignSpecificationOutdoorAirObjectName);
+      ASSERT_TRUE(dsoaOrList_);
+      EXPECT_EQ(dsoaOrList_->iddObject().type(), IddObjectType::DesignSpecification_OutdoorAir_SpaceList);
+      EXPECT_EQ(z12.nameString() + " DSOA Space List", dsoaOrList_->nameString());
+    }
+  }
 }
