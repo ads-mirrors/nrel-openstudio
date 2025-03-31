@@ -142,6 +142,10 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ControllerOutdoorAir_MechanicalVenti
   Model m;
   ForwardTranslator ft;
 
+  // TODO: Without a DesignDay, the translateSizingZone is never called, and in turn the Controller:MechanicalVentilation does NOT receive the DSOAs
+  // This has been the case since the first ever commit of OS SDK on github, but it is wrong IMHO.
+  DesignDay d(m);
+
   ControllerOutdoorAir controller_oa(m);
   ControllerMechanicalVentilation controller_mv = controller_oa.controllerMechanicalVentilation();
 
