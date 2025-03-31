@@ -208,10 +208,9 @@ namespace energyplus {
     // get the zone that this piece of equipment is connected to
     boost::optional<ThermalZone> zone = modelObject.thermalZone();
     if (zone) {
-      if (auto dsoaOrList_  = getOrCreateThermalZoneDSOA(zone->cast<ThermalZone>())) {
-          // set the field to reference the design specification outdoor air
-          zoneHVACIdealLoadsAirSystem.setString(ZoneHVAC_IdealLoadsAirSystemFields::DesignSpecificationOutdoorAirObjectName,
-                                                dsoaOrList_->nameString());
+      if (auto dsoaOrList_ = getOrCreateThermalZoneDSOA(zone->cast<ThermalZone>())) {
+        // set the field to reference the design specification outdoor air
+        zoneHVACIdealLoadsAirSystem.setString(ZoneHVAC_IdealLoadsAirSystemFields::DesignSpecificationOutdoorAirObjectName, dsoaOrList_->nameString());
       }
     }
 
