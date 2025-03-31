@@ -98,7 +98,21 @@ namespace energyplus {
       }
     }
 
-    // Extensible Groups for DSOAs are pushed in translateSizingZone to retain order of the file
+    // Extensible Groups for DSOAs are no longer pushed in translateSizingZone to retain order of the file, because:
+    // 1) Thermal Zones are translated before AirLoopHVACs, so we guarantee proper order (unless we mess something up, like adding a new always
+    // translated object early on that will call it)
+    // 2) Doing it in translateSizingZone means that it will NOT be written if the Sizing:Zone isn't, for eg when you have no design days
+    //    but that is a valid use case
+    auto oa_controller = modelObject.controllerOutdoorAir();
+    if (auto oa_sys_ = oa_controller.airLoopHVACOutdoorAirSystem()) {
+      if (auto a_ = oa_sys_->airLoopHVAC()) {
+        for (const auto& z : a_->thermalZones()) {
+          if (auto dsoaOrList_ = getOrCreateThermalZoneDSOA(z)) {
+            IdfExtensibleGroup eg = idfObject.pushExtensibleGroup({z.nameString(), dsoaOrList_->nameString(), zoneDSZADName(z).value_or("")});
+          }
+        }
+      }
+    }
 
     m_idfObjects.push_back(idfObject);
     return boost::optional<IdfObject>(idfObject);

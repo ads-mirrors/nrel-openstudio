@@ -1518,6 +1518,9 @@ namespace energyplus {
     boost::optional<IdfObject> translateThermalZone(model::ThermalZone& modelObject);
     void translateThermalZoneSpacesWhenCombinedSpaces(model::ThermalZone& modelObject, IdfObject& idfObject);
     void translateThermalZoneSpacesToEnergyPlusSpaces(model::ThermalZone& modelObject, IdfObject& idfObject);
+    // Helper for the DesignSpecification:ZoneAirDistribution, returns empty when the DSZAD is not needed,
+    // which is when fields on Sizing:Zone related to it are all defaulted (Implemeted in ForwardTranslateSizingZone)
+    boost::optional<std::string> zoneDSZADName(const model::ThermalZone& zone);
 
     boost::optional<IdfObject> translateThermostatSetpointDualSetpoint(model::ThermostatSetpointDualSetpoint& tsds);
 
