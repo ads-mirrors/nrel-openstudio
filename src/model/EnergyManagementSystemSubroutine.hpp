@@ -12,6 +12,8 @@
 namespace openstudio {
 namespace model {
 
+  class EnergyManagementSystemMeteredOutputVariable;
+
   namespace detail {
 
     class EnergyManagementSystemSubroutine_Impl;
@@ -64,6 +66,9 @@ namespace model {
     //@}
     /** @name Other */
     //@{
+
+    // Convenience method to return all EnergyManagementSystemMeteredOutputVariable that refer to this Subroutine
+    std::vector<EnergyManagementSystemMeteredOutputVariable> energyManagementSystemMeteredOutputVariables() const;
 
     //@}
    protected:
