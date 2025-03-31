@@ -19,6 +19,7 @@
 #include "../CoilHeatingWater.hpp"
 #include "../CurveBiquadratic.hpp"
 #include "../CurveQuadratic.hpp"
+#include "../DesignSpecificationOutdoorAir.hpp"
 #include "../ElectricEquipment.hpp"
 #include "../ElectricEquipmentDefinition.hpp"
 #include "../FanConstantVolume.hpp"
@@ -41,6 +42,7 @@
 #include "../SizingZone.hpp"
 #include "../SizingZone_Impl.hpp"
 #include "../Space.hpp"
+#include "../SpaceType.hpp"
 #include "../SpaceInfiltrationDesignFlowRate.hpp"
 #include "../SpaceInfiltrationEffectiveLeakageArea.hpp"
 #include "../StraightComponent.hpp"
@@ -905,4 +907,50 @@ TEST_F(ModelFixture, ThermalZone_HeatCoolFuelTypes) {
   EXPECT_TRUE(testFuelTypeEquality({FuelType::Electricity, FuelType::Gas}, z.coolingFuelTypes()));
   EXPECT_TRUE(testFuelTypeEquality({FuelType::Electricity, FuelType::Gas, FuelType::Propane}, z.heatingFuelTypes()));
   EXPECT_TRUE(testAppGFuelTypeEquality({AppGFuelType::Fuel, AppGFuelType::HeatPump}, z.appGHeatingFuelTypes()));
+}
+
+TEST_F(ModelFixture, ThermalZone_SpacesWithDSOA) {
+  Model m;
+  ThermalZone z(m);
+  Space space1(m);
+  Space space2(m);
+
+  EXPECT_TRUE(space1.setThermalZone(z));
+  EXPECT_TRUE(space2.setThermalZone(z));
+  EXPECT_TRUE(z.spacesWithDesignSpecificationOutdoorAir().empty());
+
+  auto compareSpacesWithDSOA = [&](const std::vector<Space>& expectedSpaces) -> bool {
+    auto spaces = z.spacesWithDesignSpecificationOutdoorAir();
+    EXPECT_EQ(expectedSpaces.size(), spaces.size());
+
+    std::vector<std::string> expectedSpaceNames;
+    expectedSpaceNames.reserve(expectedSpaces.size());
+    std::transform(expectedSpaces.cbegin(), expectedSpaces.cend(), std::back_inserter(expectedSpaceNames),
+                   [](const auto& s) { return s.nameString(); });
+    std::sort(expectedSpaceNames.begin(), expectedSpaceNames.end());
+
+    std::vector<std::string> spaceNames;
+    spaceNames.reserve(spaces.size());
+    std::transform(spaces.cbegin(), spaces.cend(), std::back_inserter(spaceNames), [](const auto& s) { return s.nameString(); });
+    std::sort(spaceNames.begin(), spaceNames.end());
+    EXPECT_EQ(expectedSpaceNames, spaceNames);
+    return expectedSpaceNames == spaceNames;
+  };
+
+  DesignSpecificationOutdoorAir dsoa_space1(m);
+  EXPECT_TRUE(space1.setDesignSpecificationOutdoorAir(dsoa_space1));
+  EXPECT_EQ(1, z.spacesWithDesignSpecificationOutdoorAir().size());
+  compareSpacesWithDSOA({space1});
+
+  SpaceType space_type(m);
+  DesignSpecificationOutdoorAir dsoa_sp(m);
+  EXPECT_TRUE(space_type.setDesignSpecificationOutdoorAir(dsoa_sp));
+  EXPECT_TRUE(space1.setSpaceType(space_type));
+  EXPECT_TRUE(space2.setSpaceType(space_type));
+
+  EXPECT_EQ(dsoa_space1, space1.designSpecificationOutdoorAir().get());
+  EXPECT_EQ(dsoa_sp, space2.designSpecificationOutdoorAir().get());
+
+  EXPECT_EQ(2, z.spacesWithDesignSpecificationOutdoorAir().size());
+  compareSpacesWithDSOA({space1, space2});
 }
