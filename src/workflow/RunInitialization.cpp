@@ -36,7 +36,7 @@ void OSWorkflow::runInitialization() {
         openstudio::filesystem::remove_all(generatedFilesDir);
       }
       LOG(Debug, "Creating generated files directory: " << generatedFilesDir);
-      openstudio::filesystem::create_directory(generatedFilesDir);
+      openstudio::filesystem::create_directories(generatedFilesDir);
 
       // insert the generated files directory in the first spot so all generated ExternalFiles go here
       auto fps = workflowJSON.filePaths();
