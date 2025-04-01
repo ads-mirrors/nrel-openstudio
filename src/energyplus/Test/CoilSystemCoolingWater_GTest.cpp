@@ -185,7 +185,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_AirLoopHVAC) 
     EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
     EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::DesignWaterTemperatureDifference));
 
-    // FIXME: what's creating this if i have it commented out in the addToNode method?
     EXPECT_EQ(0, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
   }
 
@@ -323,7 +322,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_AirLoopHVAC) 
     EXPECT_TRUE(idf_companionCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
     EXPECT_TRUE(idf_companionCoil.isEmpty(Coil_Cooling_WaterFields::DesignWaterTemperatureDifference));
 
-    // FIXME: what's creating this if i have it commented out in the addToNode method?
     EXPECT_EQ(0, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
   }
 }

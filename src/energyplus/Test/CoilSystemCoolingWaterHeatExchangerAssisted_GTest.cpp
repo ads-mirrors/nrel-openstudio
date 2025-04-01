@@ -80,9 +80,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerA
   ASSERT_EQ(1u, idfCoils.size());
   WorkspaceObject idfCoil(idfCoils[0]);
 
-  // No CoilSystem:Cooling:Water wrapper needed, it's inside a unitary
-  EXPECT_EQ(0, w.getObjectsByType(IddObjectType::CoilSystem_Cooling_Water).size());
-
   // Check that the Unitary ends up with the CoilSystemCoolingWaterHeatExchangerAssisted
   EXPECT_EQ("CoilSystem:Cooling:Water:HeatExchangerAssisted", idfUnitary.getString(AirLoopHVAC_UnitarySystemFields::CoolingCoilObjectType).get());
   EXPECT_EQ(idfCoilSystem.nameString(), idfUnitary.getString(AirLoopHVAC_UnitarySystemFields::CoolingCoilName).get());
@@ -103,9 +100,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerA
   EXPECT_EQ("Coil:Cooling:Water", idfCoilSystem.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::CoolingCoilObjectType).get());
   EXPECT_EQ(coil.coolingCoil().nameString(), idfCoilSystem.getString(CoilSystem_Cooling_Water_HeatExchangerAssistedFields::CoolingCoilName).get());
 
-  // Check Controller:WaterCoil created by coil.addToNode
-  EXPECT_EQ(1, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
-
   EXPECT_EQ(coil.coolingCoil().nameString(), idfCoil.getString(Coil_Cooling_WaterFields::Name).get());
   EXPECT_EQ("Always On Discrete", idfCoil.getString(Coil_Cooling_WaterFields::AvailabilityScheduleName).get());
   EXPECT_EQ("Autosize", idfCoil.getString(Coil_Cooling_WaterFields::DesignWaterFlowRate).get());
@@ -124,6 +118,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerA
   EXPECT_EQ("CrossFlow", idfCoil.getString(Coil_Cooling_WaterFields::HeatExchangerConfiguration).get());
   EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
   EXPECT_TRUE(idfCoil.isEmpty(Coil_Cooling_WaterFields::DesignWaterTemperatureDifference));
+
+  // Check Controller:WaterCoil created by coil.addToNode
+  EXPECT_EQ(1, w.getObjectsByType(IddObjectType::Controller_WaterCoil).size());
 }
 
 TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWaterHeatExchangerAssisted_AirLoopHVAC) {

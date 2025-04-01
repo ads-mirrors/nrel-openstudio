@@ -7,8 +7,6 @@
 #include "CoilSystemCoolingWaterHeatExchangerAssisted_Impl.hpp"
 #include "AirToAirComponent.hpp"
 #include "AirToAirComponent_Impl.hpp"
-#include "ControllerWaterCoil.hpp"
-#include "ControllerWaterCoil_Impl.hpp"
 #include "WaterToAirComponent.hpp"
 #include "WaterToAirComponent_Impl.hpp"
 #include "CoilCoolingWater.hpp"

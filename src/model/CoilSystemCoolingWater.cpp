@@ -18,8 +18,6 @@
 #include "Node_Impl.hpp"
 #include "AirLoopHVAC.hpp"
 #include "AirLoopHVAC_Impl.hpp"
-#include "ControllerWaterCoil.hpp"
-#include "ControllerWaterCoil_Impl.hpp"
 
 #include "AirLoopHVACUnitarySystem.hpp"
 #include "AirLoopHVACUnitarySystem_Impl.hpp"
