@@ -16,6 +16,7 @@
 #include "../EnergyManagementSystemProgram.hpp"
 #include "../EnergyManagementSystemSensor.hpp"
 #include "../EnergyManagementSystemSubroutine.hpp"
+#include "../EnergyManagementSystemMeteredOutputVariable.hpp"
 #include "../OutputVariable.hpp"
 #include "../OutputVariable_Impl.hpp"
 #include "../Model_Impl.hpp"
@@ -194,4 +195,18 @@ TEST_F(ModelFixture, EMSSubroutine_EMSSubroutine) {
   fan_program_3.resetBody();
   body = fan_program_3.body();
   EXPECT_EQ("", body.get());
+}
+
+TEST_F(ModelFixture, EMSSubroutine_emsMeteredOutputVariables) {
+  Model model;
+
+  //add program
+  EnergyManagementSystemSubroutine program(model);
+  EXPECT_TRUE(program.energyManagementSystemMeteredOutputVariables().empty());
+
+  EnergyManagementSystemMeteredOutputVariable meteredoutvar(model, "Elec_Consumption");
+  EXPECT_TRUE(meteredoutvar.setEMSProgramOrSubroutineName(program));
+  EXPECT_EQ(program.nameString(), meteredoutvar.emsProgramOrSubroutineName());
+  ASSERT_EQ(1, program.energyManagementSystemMeteredOutputVariables().size());
+  EXPECT_EQ(meteredoutvar, program.energyManagementSystemMeteredOutputVariables().at(0));
 }

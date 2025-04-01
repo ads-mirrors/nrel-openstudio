@@ -12,6 +12,11 @@
 #include "EnergyManagementSystemSubroutine_Impl.hpp"
 
 namespace openstudio {
+
+class AppGFuelType;
+class ComponentType;
+class FuelType;
+
 namespace model {
 
   namespace detail {
@@ -113,6 +118,14 @@ namespace model {
       //@}
       /** @name Other */
       //@{
+
+      // This is not an HVACComponent but it will help in the determination of the PlantUserDefinedComponent, so implementation is here because it's
+      // more logical
+      ComponentType componentType() const;
+      boost::optional<FuelType> fuelTypeFromResourceType() const;
+      std::vector<FuelType> coolingFuelTypes() const;
+      std::vector<FuelType> heatingFuelTypes() const;
+      std::vector<AppGFuelType> appGHeatingFuelTypes() const;
 
       //@}
      protected:

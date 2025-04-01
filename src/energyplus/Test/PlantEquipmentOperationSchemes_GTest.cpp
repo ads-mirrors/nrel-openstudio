@@ -28,6 +28,8 @@
 #include "../../model/CoolingTowerVariableSpeed.hpp"
 #include "../../model/DistrictCooling.hpp"
 #include "../../model/DistrictHeatingWater.hpp"
+#include "../../model/EnergyManagementSystemProgram.hpp"
+#include "../../model/EnergyManagementSystemMeteredOutputVariable.hpp"
 #include "../../model/EvaporativeFluidCoolerSingleSpeed.hpp"
 #include "../../model/EvaporativeFluidCoolerTwoSpeed.hpp"
 #include "../../model/FluidCoolerSingleSpeed.hpp"
@@ -721,11 +723,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_PlantEquipmentOperationSchemes_compo
   }
 
   {
-    PlantComponentUserDefined obj(m);
-    EXPECT_EQ(openstudio::energyplus::ComponentType::BOTH, openstudio::energyplus::componentType(obj));
-  }
-
-  {
     HeatPumpWaterToWaterEquationFitHeating obj(m);
     EXPECT_EQ(openstudio::energyplus::ComponentType::HEATING, openstudio::energyplus::componentType(obj));
   }
@@ -796,6 +793,28 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_PlantEquipmentOperationSchemes_compo
 
     obj.setHeater2Capacity(100.0);
     EXPECT_EQ(openstudio::energyplus::ComponentType::HEATING, openstudio::energyplus::componentType(obj));
+  }
+
+  {
+    PlantComponentUserDefined plant_comp(m);
+    EXPECT_EQ(openstudio::energyplus::ComponentType::NONE, openstudio::energyplus::componentType(plant_comp));
+    // I create an EMSMeteredOutputVar of type "Heating" and "Electricity" into the plantSimulationProgram,
+    // and check that the PlantComponentUserDefined has the right fuel types
+    auto sim_pgrm = plant_comp.plantSimulationProgram().get();
+    sim_pgrm.setName("Sim_Pgrm");
+    sim_pgrm.setBody("SET Elec_Htg_Cons = 0");
+    {
+      EnergyManagementSystemMeteredOutputVariable meteredoutvar(m, "Plant Heating Comp Electricity Consumption");
+      EXPECT_TRUE(meteredoutvar.setEMSVariableName("Elec_Htg_Cons"));
+      EXPECT_TRUE(meteredoutvar.setUpdateFrequency("SystemTimestep"));
+      EXPECT_TRUE(meteredoutvar.setEMSProgramOrSubroutineName(sim_pgrm));
+      EXPECT_TRUE(meteredoutvar.setResourceType("Electricity"));
+      EXPECT_TRUE(meteredoutvar.setGroupType("HVAC"));
+      EXPECT_TRUE(meteredoutvar.setEndUseCategory("Heating"));
+      EXPECT_TRUE(meteredoutvar.setEndUseSubcategory(""));
+      EXPECT_TRUE(meteredoutvar.setUnits("J"));
+      EXPECT_EQ(openstudio::energyplus::ComponentType::HEATING, openstudio::energyplus::componentType(plant_comp));
+    }
   }
 
   {

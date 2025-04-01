@@ -79,3 +79,59 @@ TEST_F(ModelFixture, EMSMeteredOutputVariable) {
   ASSERT_TRUE(outvar_sen.emsSensor());
   EXPECT_EQ(outvar_sen.emsVariableObject().get(), outvar_sen.emsSensor().get());
 }
+
+TEST_F(ModelFixture, EMSMeteredOutputVariable_fuelTypes) {
+
+  Model model;
+  EnergyManagementSystemMeteredOutputVariable meteredoutvar(model, "MeteredVar");
+
+  EXPECT_TRUE(meteredoutvar.setResourceType("NaturalGas"));
+
+  std::vector<std::pair<std::string, ComponentType>> expectedComponentTypes{
+    {"Heating", ComponentType::Heating},
+    {"HeatingCoils", ComponentType::Heating},
+    {"Boilers", ComponentType::Heating},
+    {"Baseboard", ComponentType::Heating},
+    {"HeatRecoveryForHeating", ComponentType::Heating},
+    {"OnSiteGeneration", ComponentType::Heating},
+    {"Cooling", ComponentType::Cooling},
+    {"Refrigeration", ComponentType::Cooling},
+    {"HeatRecoveryForCooling", ComponentType::Cooling},
+    {"HeatRecoveryForHeating", ComponentType::Heating},
+    {"CoolingCoils", ComponentType::Cooling},
+    {"Chillers", ComponentType::Cooling},
+    {"InteriorLights", ComponentType::None},
+    {"InteriorEquipment", ComponentType::None},
+    {"ExteriorEquipment", ComponentType::None},
+    {"Fans", ComponentType::None},
+    {"Pumps", ComponentType::None},
+    {"HeatRejection", ComponentType::None},
+    {"Humidifier", ComponentType::None},
+    {"HeatRecovery", ComponentType::None},
+    {"WaterSystems", ComponentType::None},
+  };
+  const auto validCats = EnergyManagementSystemMeteredOutputVariable::endUseCategoryValues();
+
+  // Start by asserting that it doesn't throw for no reason
+  {
+    for (const auto& [cat, expectedComponentType] : expectedComponentTypes) {
+      SCOPED_TRACE(cat.data());
+      EXPECT_TRUE(meteredoutvar.setEndUseCategory(cat));
+      EXPECT_NO_THROW(meteredoutvar.componentType());
+      EXPECT_EQ(expectedComponentType, meteredoutvar.componentType()) << "Failed for " << cat;
+      if (expectedComponentType == ComponentType::Heating) {
+        EXPECT_TRUE(meteredoutvar.coolingFuelTypes().empty());
+        testFuelTypeEquality({FuelType::Gas}, meteredoutvar.heatingFuelTypes());
+        testAppGFuelTypeEquality({AppGFuelType::Fuel}, meteredoutvar.appGHeatingFuelTypes());
+      } else if (expectedComponentType == ComponentType::Cooling) {
+        testFuelTypeEquality({FuelType::Gas}, meteredoutvar.coolingFuelTypes());
+        testFuelTypeEquality({}, meteredoutvar.heatingFuelTypes());
+        testAppGFuelTypeEquality({}, meteredoutvar.appGHeatingFuelTypes());
+      } else {
+        testFuelTypeEquality({}, meteredoutvar.coolingFuelTypes());
+        testFuelTypeEquality({}, meteredoutvar.heatingFuelTypes());
+        testAppGFuelTypeEquality({}, meteredoutvar.appGHeatingFuelTypes());
+      }
+    }
+  }
+}
