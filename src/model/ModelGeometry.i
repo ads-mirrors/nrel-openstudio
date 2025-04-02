@@ -32,6 +32,10 @@
   %ignore openstudio::model::Space::setThermalZone;
   %ignore openstudio::model::Space::waterUseEquipment;
 
+  %ignore openstudio::model::Space::zoneMixing;
+  %ignore openstudio::model::Space::supplyZoneMixing;
+  %ignore openstudio::model::Space::exhaustZoneMixing;
+
   %ignore openstudio::model::DaylightingDeviceTubular::transitionZones;
   %ignore openstudio::model::DaylightingDeviceTubular::addTransitionZone;
   %ignore openstudio::model::DaylightingDeviceTubular::addTransitionZones;

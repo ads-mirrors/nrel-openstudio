@@ -401,11 +401,22 @@ SWIG_MODELOBJECT(LoadingIndex, 1);
         std::vector<openstudio::model::ThermalZone> getThermalZones(const openstudio::model::Building& building){
           return building.thermalZones();
         }
+
+        // Space (ModelGeometry.i)
         boost::optional<openstudio::model::ThermalZone> getThermalZone(const openstudio::model::Space& space){
           return space.thermalZone();
         }
         bool setThermalZone(openstudio::model::Space space, openstudio::model::ThermalZone thermalZone){
           return space.setThermalZone(thermalZone);
+        }
+        std::vector<openstudio::model::ZoneMixing> getZoneMixing(const openstudio::model::Space& space){
+          return space.zoneMixing();
+        }
+        std::vector<openstudio::model::ZoneMixing> getSupplyZoneMixing(const openstudio::model::Space& space){
+          return space.supplyZoneMixing();
+        }
+        std::vector<openstudio::model::ZoneMixing> getExhaustZoneMixing(const openstudio::model::Space& space){
+          return space.exhaustZoneMixing();
         }
 
         openstudio::model::ThermalZone getThermalZone(const openstudio::model::ZonePropertyUserViewFactorsBySurfaceName& zoneProp){
@@ -490,6 +501,15 @@ SWIG_MODELOBJECT(LoadingIndex, 1);
       public bool setThermalZone(OpenStudio.ThermalZone thermalZone)
       {
         return OpenStudio.OpenStudioModelHVAC.setThermalZone(this, thermalZone);
+      }
+      public ZoneMixingVector zoneMixing() {
+        return OpenStudio.OpenStudioModelHVAC.getZoneMixing(this);
+      }
+      public ZoneMixingVector supplyZoneMixing() {
+        return OpenStudio.OpenStudioModelHVAC.getSupplyZoneMixing(this);
+      }
+      public ZoneMixingVector exhaustZoneMixing() {
+        return OpenStudio.OpenStudioModelHVAC.getExhaustZoneMixing(this);
       }
     }
 
