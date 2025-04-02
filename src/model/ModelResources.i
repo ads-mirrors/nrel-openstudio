@@ -39,9 +39,8 @@
   // HeatExchangerDesiccantBalancedFlow is done later in ModelHVAC.i
   %ignore openstudio::model::HeatExchangerDesiccantBalancedFlowPerformanceDataType1::heatExchangerDesiccantBalancedFlows;
 
-  // TODO: why?
-  // ignore schedule type
-  // %ignore openstudio::model::ScheduleType;
+  // Done later in ModelHVAC.i
+  %ignore openstudio::model::ExternalFile::chillerElectricASHRAE205s;
 
 #endif
 

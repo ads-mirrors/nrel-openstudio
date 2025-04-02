@@ -436,6 +436,11 @@ SWIG_MODELOBJECT(LoadingIndex, 1);
           return hxData.heatExchangerDesiccantBalancedFlows();
         }
 
+        // Reimplemented from ModelResources.i
+        std::vector<openstudio::model::ChillerElectricASHRAE205> getChillerElectricASHRAE205s(const openstudio::model::ExternalFile& externalFile) {
+          return externalFile.chillerElectricASHRAE205s();
+        }
+
         // DaylightingDeviceTubular, reimplemented from ModelGeometry.i
         std::vector<TransitionZone> transitionZones(const openstudio::model::DaylightingDeviceTubular& tubular) {
           return tubular.transitionZones();
@@ -523,6 +528,12 @@ SWIG_MODELOBJECT(LoadingIndex, 1);
     public partial class HeatExchangerDesiccantBalancedFlowPerformanceDataType1 : ResourceObject {
       public HeatExchangerDesiccantBalancedFlowVector heatExchangerDesiccantBalancedFlows() {
         return OpenStudio.OpenStudioModelHVAC.getHeatExchangerDesiccantBalancedFlows(this);
+      }
+    }
+
+    public partial class ExternalFile : ResourceObject {
+      public ChillerElectricASHRAE205Vector chillerElectricASHRAE205s() {
+        return OpenStudio.OpenStudioModelHVAC.getChillerElectricASHRAE205s(this);
       }
     }
 
