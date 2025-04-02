@@ -48,6 +48,12 @@ known_errors = {
   "OpenStudioUtilitiesData" => [
     "SWIGTYPE_p_std__variantT_std__monostate_bool_double_int_unsigned_int_std__string_std__vectorT_openstudio__Attribute_t_t.cs",
   ],
+  "OpenStudioUtilitiesIdf" => [
+    "SWIGTYPE_p_std__shared_ptrT_openstudio__detail__Workspace_Impl_t.cs" # Protected
+  ],
+  "OpenStudioModelCore" => [
+    "SWIGTYPE_p_std__shared_ptrT_openstudio__model__detail__Model_Impl_t.cs" # Protected
+  ],
 }
 n_ignored = known_errors.sum{|k, v| v.size}
 
