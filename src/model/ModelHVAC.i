@@ -405,7 +405,11 @@ SWIG_MODELOBJECT(LoadingIndex, 1);
           return zoneProp.thermalZone();
         }
 
-        // EMS Actuator setter for ThermalZone (reimplemented from ModelCore.i)
+        // EMS Actuator getter/setter for ThermalZone (reimplemented from ModelCore.i)
+        boost::optional<ThermalZone> getThermalZoneForEMSActuator(const openstudio::model::EnergyManagementSystemActuator& actuator) {
+          return actuator.thermalZone();
+        }
+
         bool setThermalZoneForEMSActuator(openstudio::model::EnergyManagementSystemActuator actuator, openstudio::model::ThermalZone thermalZone) {
           return actuator.setThermalZone(thermalZone);
         }
@@ -485,6 +489,10 @@ SWIG_MODELOBJECT(LoadingIndex, 1);
     }
 
     public partial class EnergyManagementSystemActuator : ModelObject {
+      public OptionalThermalZone thermalZone() {
+        return OpenStudio.OpenStudioModelHVAC.getThermalZoneForEMSActuator(this);
+      }
+
       public bool setThermalZone(OpenStudio.ThermalZone thermalZone) {
         return OpenStudio.OpenStudioModelHVAC.setThermalZoneForEMSActuator(this, thermalZone);
       }

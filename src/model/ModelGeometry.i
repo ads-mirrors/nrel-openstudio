@@ -360,7 +360,11 @@ SWIG_MODELOBJECT(ExteriorWaterEquipment, 1);
           return sc.setSubSurfaces(subSurfaces);
         }
 
-        // EMS Actuator setter for Space (reimplemented from ModelCore.i)
+        // EMS Actuator getter/setter for Space (reimplemented from ModelCore.i)
+        boost::optional<Space> getSpaceForEMSActuator(const openstudio::model::EnergyManagementSystemActuator& actuator) {
+          return actuator.space();
+        }
+
         bool setSpaceForEMSActuator(openstudio::model::EnergyManagementSystemActuator actuator, openstudio::model::Space space) {
           return actuator.setSpace(space);
         }
@@ -450,6 +454,11 @@ SWIG_MODELOBJECT(ExteriorWaterEquipment, 1);
     }
 
     public partial class EnergyManagementSystemActuator : ModelObject {
+
+      public OptionalSpace space() {
+        return OpenStudio.OpenStudioModelGeometry.getSpaceForEMSActuator(this);
+      }
+
       public bool setSpace(OpenStudio.Space space) {
         return OpenStudio.OpenStudioModelGeometry.setSpaceForEMSActuator(this, space);
       }

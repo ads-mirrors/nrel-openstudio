@@ -86,6 +86,7 @@
                                                                                             const std::string& actuatedComponentType,
                                                                                             const std::string& actuatedComponentControlType,
                                                                                             const Space& space);
+  %ignore openstudio::model::EnergyManagementSystemActuator::space;
   %ignore openstudio::model::EnergyManagementSystemActuator::setSpace;
 
   // depends on ThermalZone (ModelHVAC.i)
@@ -93,6 +94,7 @@
                                                                                             const std::string& actuatedComponentType,
                                                                                             const std::string& actuatedComponentControlType,
                                                                                             const ThermalZone& thermalZone);
+  %ignore openstudio::model::EnergyManagementSystemActuator::thermalZone;
   %ignore openstudio::model::EnergyManagementSystemActuator::setThermalZone;
 
 
