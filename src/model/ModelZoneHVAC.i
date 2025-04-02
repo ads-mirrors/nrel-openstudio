@@ -94,4 +94,73 @@ SWIG_MODELOBJECT(ZoneHVACUnitHeater,1);
 SWIG_MODELOBJECT(ZoneHVACUnitVentilator,1);
 SWIG_MODELOBJECT(ZoneHVACWaterToAirHeatPump,1);
 
+#if defined(SWIGCSHARP) || defined(SWIGJAVA)
+  %inline {
+    namespace openstudio {
+      namespace model {
+
+        // AirCondVRF, reimplemented from ModelHVAC.i
+        std::vector<ZoneHVACTerminalUnitVariableRefrigerantFlow> terminals(const openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControl& airCondVRF) {
+          return airCondVRF.terminals();
+        }
+        bool addTerminal(openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControl airCondVRF, openstudio::model::ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+          return airCondVRF.addTerminal(vrf);
+        }
+        void removeTerminal(openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControl airCondVRF, openstudio::model::ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+          airCondVRF.removeTerminal(vrf);
+        }
+
+        std::vector<ZoneHVACTerminalUnitVariableRefrigerantFlow> terminals(const openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControlHR& airCondVRF) {
+          return airCondVRF.terminals();
+        }
+        bool addTerminal(openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControlHR airCondVRF, openstudio::model::ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+          return airCondVRF.addTerminal(vrf);
+        }
+        void removeTerminal(openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControlHR airCondVRF, openstudio::model::ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+          airCondVRF.removeTerminal(vrf);
+        }
+
+      } // namespace model
+    } // namespace openstudio
+  } // %inline
+#endif
+
+#if defined(SWIGCSHARP)
+  //%pragma(csharp) imclassimports=%{
+  %pragma(csharp) moduleimports=%{
+
+    using System;
+    using System.Runtime.InteropServices;
+
+    public partial class AirConditionerVariableRefrigerantFlowFluidTemperatureControl : HVACComponent {
+      public ZoneHVACTerminalUnitVariableRefrigerantFlowVector terminals(){
+        return OpenStudio.OpenStudioModelZoneHVAC.terminals(this);
+      }
+
+      public bool addTerminal(OpenStudio.ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+        return OpenStudio.OpenStudioModelZoneHVAC.addTerminal(this, vrf);
+      }
+
+      public void removeTerminal(OpenStudio.ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+        OpenStudio.OpenStudioModelZoneHVAC.removeTerminal(this, vrf);
+      }
+    }
+
+    public partial class AirConditionerVariableRefrigerantFlowFluidTemperatureControlHR : HVACComponent {
+      public ZoneHVACTerminalUnitVariableRefrigerantFlowVector terminals(){
+        return OpenStudio.OpenStudioModelZoneHVAC.terminals(this);
+      }
+
+      public bool addTerminal(OpenStudio.ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+        return OpenStudio.OpenStudioModelZoneHVAC.addTerminal(this, vrf);
+      }
+
+      public void removeTerminal(OpenStudio.ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+        OpenStudio.OpenStudioModelZoneHVAC.removeTerminal(this, vrf);
+      }
+    }
+
+  %}
+#endif
+
 #endif

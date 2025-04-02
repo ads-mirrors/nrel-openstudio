@@ -63,6 +63,13 @@
   %ignore openstudio::model::CoilHeatingGasMultiStageStageData::parentCoil;
   %ignore openstudio::model::CoilHeatingElectricMultiStageStageData::parentCoil;
 
+  // AirCondVRF terminals: in ModelZoneHVAC.i
+  %ignore openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControl::addTerminal;
+  %ignore openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControl::removeTerminal;
+  %ignore openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControl::terminals;
+  %ignore openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControlHR::addTerminal;
+  %ignore openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControlHR::removeTerminal;
+  %ignore openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControlHR::terminals;
 #endif
 
 #if defined SWIGPYTHON
