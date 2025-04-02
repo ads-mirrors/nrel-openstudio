@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>NET7</TargetFrameworks>
+    <TargetFrameworks>NET7;NET8;NET9;NET10</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <Platform>x64</Platform>
   </PropertyGroup>
