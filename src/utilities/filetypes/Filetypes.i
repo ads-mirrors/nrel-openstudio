@@ -80,6 +80,7 @@
 %ignore std::vector<openstudio::EpwGroundTemperatureDepth>::vector(size_type);
 %ignore std::vector<openstudio::EpwGroundTemperatureDepth>::resize(size_type);
 %template(EpwGroundTemperatureDepthVector) std::vector<openstudio::EpwGroundTemperatureDepth>;
+%template(OptionalEpwGroundTemperatureDepth) boost::optional<openstudio::EpwGroundTemperatureDepth>;
 
 %ignore std::vector<openstudio::EpwHoliday>::vector(size_type);
 %ignore std::vector<openstudio::EpwHoliday>::resize(size_type);
