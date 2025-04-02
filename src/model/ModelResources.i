@@ -339,7 +339,9 @@ SWIG_MODELOBJECT(HeatExchangerDesiccantBalancedFlowPerformanceDataType1, 1);
         : this(model) {
         this.setCurveOrTableObject(curve);
       }
+    }
 
+    public partial class Model : Workspace {
       public OptionalPythonPluginSearchPaths pythonPluginSearchPaths() {
         return OpenStudio.OpenStudioModelResources.pythonPluginSearchPaths(this);
       }
