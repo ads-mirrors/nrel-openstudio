@@ -630,7 +630,7 @@ module IRB # :nodoc:
 
     @CONF[:IRB_RC].call(irb.context) if @CONF[:IRB_RC]
     # puts @CONF[:PROMPT_MODE]
-    os_version = "3.8.0" # OpenStudio::openStudioVersion
+    os_version = "3.10.0" # OpenStudio::openStudioVersion
     @CONF[:PROMPT][:OPENSTUDIO] = {
       :PROMPT_I=>"(os #{os_version}) :%03n > ",
       :PROMPT_S=>"(os #{os_version}) :%03n%l> ",
@@ -884,53 +884,53 @@ ENV.reject! { |k, _| ['GEM', 'BUNDLE'].any? { |x| k.start_with?(x) } }
     RbConfig::CONFIG['arch'] = 'x64-mingw32'
   end
 
-    # require bundler
-    # have to do some forward declaration and pre-require to get around autoload cycles
-    require 'bundler/errors'
-    #require 'bundler/environment_preserver'
-    require 'bundler/plugin'
-    #require 'bundler/rubygems_ext'
-    require 'bundler/rubygems_integration'
+  # require bundler
+  # have to do some forward declaration and pre-require to get around autoload cycles
+  require 'bundler/errors'
+  #require 'bundler/environment_preserver'
+  require 'bundler/plugin'
+  #require 'bundler/rubygems_ext'
+  require 'bundler/rubygems_integration'
 
-    # Global list, to be populated below
-    $ignore_native_gem_names = []
+  # Global list, to be populated below
+  $ignore_native_gem_names = []
 
-    module Bundler
-      class RubygemsIntegration
+  module Bundler
+    class RubygemsIntegration
 
-        alias :ori_spec_missing_extensions? :spec_missing_extensions?
+      alias :ori_spec_missing_extensions? :spec_missing_extensions?
 
-        def spec_missing_extensions?(spec, default = true)
+      def spec_missing_extensions?(spec, default = true)
 
-          # This avoids getting an annoying message for no reason
-          if $ignore_native_gem_names.any? {|name| name == spec.name }
-            return false
-          end
-
-          return ori_spec_missing_extensions?(spec, default)
+        # This avoids getting an annoying message for no reason
+        if $ignore_native_gem_names.any? {|name| name == spec.name }
+          return false
         end
+
+        return ori_spec_missing_extensions?(spec, default)
       end
     end
+  end
 
-    require 'bundler/version'
-    require 'bundler/ruby_version'
-    #require 'bundler/constants'
-    #require 'bundler/current_ruby'
-    require 'bundler/gem_helpers'
-    #require 'bundler/plugin'
-    require 'bundler/source'
-    require 'bundler/definition'
-    require 'bundler/dsl'
-    require 'bundler/uri_credentials_filter'
-    require 'bundler/uri_normalizer'
-    require 'bundler/index'
-    require 'bundler/digest'
-    require 'bundler/source/git'
-    require 'bundler/source/git/git_proxy'
-    require 'bundler/match_remote_metadata'
-    require 'bundler/remote_specification'
-    require 'bundler/stub_specification'
-    require 'bundler'
+  require 'bundler/version'
+  require 'bundler/ruby_version'
+  #require 'bundler/constants'
+  #require 'bundler/current_ruby'
+  require 'bundler/gem_helpers'
+  #require 'bundler/plugin'
+  require 'bundler/source'
+  require 'bundler/definition'
+  require 'bundler/dsl'
+  require 'bundler/uri_credentials_filter'
+  require 'bundler/uri_normalizer'
+  require 'bundler/index'
+  require 'bundler/digest'
+  require 'bundler/source/git'
+  require 'bundler/source/git/git_proxy'
+  require 'bundler/match_remote_metadata'
+  require 'bundler/remote_specification'
+  require 'bundler/stub_specification'
+  require 'bundler'
 
   begin
     # activate bundled gems
