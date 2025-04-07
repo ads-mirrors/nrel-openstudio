@@ -851,6 +851,8 @@ ENV.reject! { |k, _| ['GEM', 'BUNDLE'].any? { |x| k.start_with?(x) } }
 
     if (use_bundler) {
       initCmd += R"ruby(
+  $logger.trace "embedded_gems_to_activate=#{embedded_gems_to_activate.map{ |s| s.name} }"
+
   # Load the bundle before activating any embedded gems
   embedded_gems_to_activate.each do |spec|
     if spec.name == "bundler"
@@ -884,6 +886,7 @@ ENV.reject! { |k, _| ['GEM', 'BUNDLE'].any? { |x| k.start_with?(x) } }
     RbConfig::CONFIG['arch'] = 'x64-mingw32'
   end
 
+  $logger.trace "Requiring bundler"
   # require bundler
   # have to do some forward declaration and pre-require to get around autoload cycles
   require 'bundler/errors'
@@ -962,9 +965,16 @@ ENV.reject! { |k, _| ['GEM', 'BUNDLE'].any? { |x| k.start_with?(x) } }
     locked_specs = Bundler.definition.instance_variable_get(:@locked_specs)
 
     embedded_gems_to_activate.each do |spec|
-      next if spec.extensions.empty?
+      $logger.trace "embedded_gems_to_activate.each: spec: #{spec.name}"
+      if spec.extensions.empty?
+        $logger.trace "Spec #{spec.name} has no extensions"
+        next
+      end
 
-      next unless locked_specs.any? {|locked_spec| locked_spec.name == spec.name}
+      unless locked_specs.any? {|locked_spec| locked_spec.name == spec.name}
+        $logger.trace "#{spec.name} not in locked_specs"
+        next
+      end
 
       dep_to_requirements = {}
       locked_specs.each do |locked_spec|
