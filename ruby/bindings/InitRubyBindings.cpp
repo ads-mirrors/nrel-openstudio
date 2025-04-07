@@ -965,16 +965,17 @@ ENV.reject! { |k, _| ['GEM', 'BUNDLE'].any? { |x| k.start_with?(x) } }
     locked_specs = Bundler.definition.instance_variable_get(:@locked_specs)
 
     embedded_gems_to_activate.each do |spec|
-      $logger.trace "embedded_gems_to_activate.each: spec: #{spec.name}"
       if spec.extensions.empty?
-        $logger.trace "Spec #{spec.name} has no extensions"
+        # $logger.trace "Spec #{spec.name} has no extensions"
         next
       end
 
       unless locked_specs.any? {|locked_spec| locked_spec.name == spec.name}
-        $logger.trace "#{spec.name} not in locked_specs"
+        # $logger.trace "#{spec.name} not in locked_specs"
         next
       end
+
+      $logger.trace "embedded_gems_to_activate.each: spec: #{spec.name}"
 
       dep_to_requirements = {}
       locked_specs.each do |locked_spec|
