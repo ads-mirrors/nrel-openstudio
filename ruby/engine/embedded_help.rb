@@ -721,7 +721,11 @@ def require_rb_config_with_patch
   s = EmbeddedScripting::getFileAsString(path_with_extension)
   s = OpenStudio::preprocess_ruby_script(s)
 
-  s = s.gsub(/CONFIG\["prefix"\] = .*/, 'CONFIG["prefix"] = ":"').gsub(/CONFIG\["libdir"\] = .*/, 'CONFIG["libdir"] = "$(prefix)"')
+  s = (
+    s.gsub(/CONFIG\["prefix"\] = .*/, 'CONFIG["prefix"] = ":"')
+     .gsub(/CONFIG\["libdir"\] = .*/, 'CONFIG["libdir"] = "$(prefix)"')
+     .gsub(/CONFIG\["rubylibprefix"\] = .*/, 'CONFIG["rubylibprefix"] = "$(libdir)/$(RUBY_BASE_NAME)"') # win32 only
+  )
 
   result = Kernel::eval(s, BINDING, path_with_extension)
 
