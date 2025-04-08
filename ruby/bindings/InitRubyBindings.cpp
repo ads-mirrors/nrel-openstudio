@@ -662,6 +662,10 @@ end)ruby";
     // in hash.c there's lot of env-related functions, but all private, aside from rb_env_clear();
     const std::string clearEnvs = R"ruby(
 ENV.reject! { |k, _| ['GEM', 'BUNDLE'].any? { |x| k.start_with?(x) } }
+# No env variable isn't the same as empty. Gem::PathSupport does stuff like @home = env["GEM_HOME"] || Gem.default_dir
+ENV['GEM_HOME'] = ''
+ENV['GEM_PATH'] = ''
+ENV['GEM_SPEC_CACHE'] = ''
   )ruby";
 
     openstudio::evalString(clearEnvs);
@@ -749,6 +753,21 @@ ENV.reject! { |k, _| ['GEM', 'BUNDLE'].any? { |x| k.start_with?(x) } }
     end
   end
 
+#  module Gem
+#    def self.default_dir
+#      @default_dir = ""
+#    end
+#
+#    def self.find_home
+#      ""
+#    end
+#
+#    def self.default_specifications_dir
+#      @default_specifications_dir = ""
+#    end
+#  end
+#
+  Gem.clear_paths
   Gem::Deprecate.skip = true
 
   # find all the embedded gems
