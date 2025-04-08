@@ -94,6 +94,7 @@ module Kernel
   # puts $LOAD_PATH
 
   # TODO: double check and update platform-specific includes
+  $LOAD_PATH.clear
   $LOAD_PATH << ':'
   $LOAD_PATH << ":/ruby/site_ruby/#{RUBY_V}"
   $LOAD_PATH << ":/ruby/site_ruby/#{RUBY_V}/#{RUBY_PLATFORM}"
