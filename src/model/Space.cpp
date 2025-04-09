@@ -129,6 +129,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iterator>
+#include <ranges>
 
 #include <fmt/core.h>
 
@@ -2197,6 +2198,77 @@ namespace model {
       return result;
     }
 
+    SpaceInfiltrationDesignFlowRate Space_Impl::setInfiltrationDesignFlowRateHelper() {
+      // We try to grab an existing one, whether that's on the SpaceType or Space, because we want to retain other parameters like Term Coefficients
+      auto spis = this->spaceInfiltrationDesignFlowRates();
+
+      boost::optional<SpaceInfiltrationDesignFlowRate> spi_;
+
+      // handle space type
+      if (auto sp_ = this->spaceType()) {
+        auto sp_spis = sp_->spaceInfiltrationDesignFlowRates();
+        if (!sp_spis.empty()) {
+          // if sp is used by multiple ParentObjects (includes Space, Building, excludes SpaceLoadInstances), create and use clone instead of original
+          if (sp_->getModelObjectSources<ParentObject>().size() > 1u) {
+            sp_ = sp_->clone().cast<SpaceType>();
+            sp_spis = sp_->spaceInfiltrationDesignFlowRates();
+            setSpaceType(*sp_);
+          }
+          // If the Space didn't have one, we move the SpaceType one to the space
+          if (spis.empty()) {
+            spi_ = std::move(sp_spis.front());
+            sp_spis.erase(sp_spis.begin());
+            spi_->setSpace(getObject<Space>());
+          }
+
+          for (auto& spi : sp_spis) {
+            spi.remove();
+          }
+        }
+      }
+
+      if (spi_) {
+        return *spi_;
+      }
+
+      if (spis.empty()) {
+        SpaceInfiltrationDesignFlowRate spi(this->model());
+        spi.setSpace(getObject<Space>());
+        return spi;
+      }
+
+      auto& spi = spis[0];
+      for (auto& spi : spis | std::views::drop(1)) {
+        spi.remove();
+      }
+      return spi;
+    }
+
+    bool Space_Impl::setInfiltrationDesignFlowRate(double infiltrationDesignFlowRate) {
+      auto spi = setInfiltrationDesignFlowRateHelper();
+      return spi.setDesignFlowRate(infiltrationDesignFlowRate);
+    }
+
+    bool Space_Impl::setInfiltrationDesignFlowPerSpaceFloorArea(double infiltrationDesignFlowPerSpaceFloorArea) {
+      auto spi = setInfiltrationDesignFlowRateHelper();
+      return spi.setFlowperSpaceFloorArea(infiltrationDesignFlowPerSpaceFloorArea);
+    }
+
+    bool Space_Impl::setInfiltrationDesignFlowPerExteriorSurfaceArea(double infiltrationDesignFlowPerExteriorSurfaceArea) {
+      auto spi = setInfiltrationDesignFlowRateHelper();
+      return spi.setFlowperExteriorSurfaceArea(infiltrationDesignFlowPerExteriorSurfaceArea);
+    }
+
+    bool Space_Impl::setInfiltrationDesignFlowPerExteriorWallArea(double infiltrationDesignFlowPerExteriorWallArea) {
+      auto spi = setInfiltrationDesignFlowRateHelper();
+      return spi.setFlowperExteriorWallArea(infiltrationDesignFlowPerExteriorWallArea);
+    }
+
+    bool Space_Impl::setInfiltrationDesignAirChangesPerHour(double infiltrationDesignAirChangesPerHour) {
+      auto spi = setInfiltrationDesignFlowRateHelper();
+      return spi.setAirChangesperHour(infiltrationDesignAirChangesPerHour);
+    }
+
     void Space_Impl::hardApplySpaceType(bool hardSizeLoads) {
       Model model = this->model();
       auto space = this->getObject<Space>();
@@ -3571,6 +3643,26 @@ namespace model {
 
   double Space::infiltrationDesignAirChangesPerHour() const {
     return getImpl<detail::Space_Impl>()->infiltrationDesignAirChangesPerHour();
+  }
+
+  bool Space::setInfiltrationDesignFlowRate(double infiltrationDesignFlowRate) {
+    return getImpl<detail::Space_Impl>()->setInfiltrationDesignFlowRate(infiltrationDesignFlowRate);
+  }
+
+  bool Space::setInfiltrationDesignFlowPerSpaceFloorArea(double infiltrationDesignFlowPerSpaceFloorArea) {
+    return getImpl<detail::Space_Impl>()->setInfiltrationDesignFlowPerSpaceFloorArea(infiltrationDesignFlowPerSpaceFloorArea);
+  }
+
+  bool Space::setInfiltrationDesignFlowPerExteriorSurfaceArea(double infiltrationDesignFlowPerExteriorSurfaceArea) {
+    return getImpl<detail::Space_Impl>()->setInfiltrationDesignFlowPerExteriorSurfaceArea(infiltrationDesignFlowPerExteriorSurfaceArea);
+  }
+
+  bool Space::setInfiltrationDesignFlowPerExteriorWallArea(double infiltrationDesignFlowPerExteriorWallArea) {
+    return getImpl<detail::Space_Impl>()->setInfiltrationDesignFlowPerExteriorWallArea(infiltrationDesignFlowPerExteriorWallArea);
+  }
+
+  bool Space::setInfiltrationDesignAirChangesPerHour(double infiltrationDesignAirChangesPerHour) {
+    return getImpl<detail::Space_Impl>()->setInfiltrationDesignAirChangesPerHour(infiltrationDesignAirChangesPerHour);
   }
 
   void Space::hardApplySpaceType(bool hardSizeLoads) {
