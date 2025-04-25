@@ -59,24 +59,8 @@ static constexpr std::array<std::pair<std::string_view, std::string_view>, 3> ap
   {"resources", "resource"},
 }};
 
-static constexpr std::array<std::string_view, 10> ignoredSubFolders{
+static constexpr std::array<std::string_view, 1> ignoredSubFolders{
   "tests/output",
-
-  // [f"{approvedSubFolder}/{ignoredPythonSubFolder}"
-  //  for ignoredPythonSubFolder in ['__pycache__', '.pytest_cache', '.mypy_cache']
-  //  for approvedSubFolder in ['docs', 'tests', 'resources']
-  // ]
-  "docs/__pycache__",
-  "tests/__pycache__",
-  "resources/__pycache__",
-
-  "docs/.pytest_cache",
-  "tests/.pytest_cache",
-  "resources/.pytest_cache",
-
-  "docs/.mypy_cache",
-  "tests/.mypy_cache",
-  "resources/.mypy_cache",
 };
 
 // TODO: do we want to keep ignoring the docs/ directory?
@@ -1030,12 +1014,24 @@ bool BCLMeasure::checkForUpdatesFiles() {
   for (const auto& [subFolderName, usageType] : approvedSubFolderToUsageMap) {
     openstudio::path approvedSubFolderAbsolutePath = m_directory / toPath(subFolderName);
     if (openstudio::filesystem::exists(approvedSubFolderAbsolutePath)) {
-      for (const auto& relativeFilePath : openstudio::filesystem::recursive_directory_files(approvedSubFolderAbsolutePath)) {
-        openstudio::path absoluteFilePath = approvedSubFolderAbsolutePath / relativeFilePath;
-        if (!isApprovedFile(absoluteFilePath, m_directory)) {
-          continue;
+
+      for (auto it = openstudio::filesystem::recursive_directory_iterator(approvedSubFolderAbsolutePath);
+           it != openstudio::filesystem::recursive_directory_iterator(); ++it) {
+        const auto& absoluteFilePath = it->path();
+
+        if (openstudio::filesystem::is_directory(absoluteFilePath)) {
+          const std::string name = absoluteFilePath.filename().string();
+          if (!name.empty() && (name[0] == '.' || name == "__pycache__")) {
+            // Skip this directory and all its children
+            it.disable_recursion_pending();
+          }
+        } else if (openstudio::filesystem::is_regular_file(absoluteFilePath)) {
+          if (!isApprovedFile(absoluteFilePath, m_directory)) {
+            continue;
+          }
+          const openstudio::path relativeFilePath = openstudio::filesystem::relative(absoluteFilePath, m_directory);
+          result |= addWithUsageTypeIfNotExisting(relativeFilePath, std::string(usageType));
         }
-        result |= addWithUsageTypeIfNotExisting(toPath(subFolderName) / relativeFilePath, std::string(usageType));
       }
     }
   }
@@ -1168,13 +1164,25 @@ boost::optional<BCLMeasure> BCLMeasure::clone(const openstudio::path& newDir) co
           != usageTypesIgnoredOnClone.cend()) {
         continue;
       }
-      openstudio::path subFolderPath = toPath(subFolderName);
-      openstudio::path approvedSubFolderAbsolutePath = m_directory / subFolderPath;
+      const openstudio::path approvedSubFolderAbsolutePath = m_directory / toPath(subFolderName);
       if (openstudio::filesystem::exists(approvedSubFolderAbsolutePath)) {
-        for (const auto& relativeFilePath : openstudio::filesystem::recursive_directory_files(approvedSubFolderAbsolutePath)) {
-          openstudio::path absoluteFilePath = approvedSubFolderAbsolutePath / relativeFilePath;
-          if (isApprovedFile(absoluteFilePath, m_directory)) {
-            filesToCopy.emplace_back(absoluteFilePath, newDir / subFolderPath / relativeFilePath);
+
+        for (auto it = openstudio::filesystem::recursive_directory_iterator(approvedSubFolderAbsolutePath);
+             it != openstudio::filesystem::recursive_directory_iterator(); ++it) {
+          const auto& absoluteFilePath = it->path();
+
+          if (openstudio::filesystem::is_directory(absoluteFilePath)) {
+            const std::string name = absoluteFilePath.filename().string();
+            if (!name.empty() && (name[0] == '.' || name == "__pycache__")) {
+              // Skip this directory and all its children
+              it.disable_recursion_pending();
+            }
+          } else if (openstudio::filesystem::is_regular_file(absoluteFilePath)) {
+            if (!isApprovedFile(absoluteFilePath, m_directory)) {
+              continue;
+            }
+            const openstudio::path relativeFilePath = openstudio::filesystem::relative(absoluteFilePath, m_directory);
+            filesToCopy.emplace_back(absoluteFilePath, newDir / relativeFilePath);
           }
         }
       }
