@@ -35,6 +35,7 @@
 #include "../LifeCycleCost.hpp"
 #include "../LifeCycleCost_Impl.hpp"
 #include "../SpaceInfiltrationDesignFlowRate.hpp"
+#include "../SpaceInfiltrationDesignFlowRate_Impl.hpp"
 #include "../AirLoopHVACSupplyPlenum.hpp"
 #include "../AirLoopHVACReturnPlenum.hpp"
 
@@ -1308,6 +1309,121 @@ TEST_F(ModelFixture, Space_InfiltrationDesignFlowRate) {
   EXPECT_DOUBLE_EQ(7.0491803278688531E-4, building.infiltrationDesignFlowPerExteriorSurfaceArea());
   EXPECT_DOUBLE_EQ(11.944444444444446E-4, building.infiltrationDesignFlowPerExteriorWallArea());
   EXPECT_DOUBLE_EQ(1.72, building.infiltrationDesignAirChangesPerHour());
+}
+
+TEST_F(ModelFixture, SpaceInfilHelper_DoesNotCloneWhenSpaceTypeHasNoInfiltration) {
+  Model model;
+  SpaceType sp(model);
+  Space s1(model);
+  Space s2(model);
+  s1.setSpaceType(sp);
+  s2.setSpaceType(sp);
+
+  EXPECT_EQ(0, model.getConcreteModelObjects<SpaceInfiltrationDesignFlowRate>().size());
+  EXPECT_EQ(0, s1.spaceInfiltrationDesignFlowRates().size());
+  EXPECT_EQ(0, s2.spaceInfiltrationDesignFlowRates().size());
+  EXPECT_EQ(0, sp.spaceInfiltrationDesignFlowRates().size());
+
+  EXPECT_EQ(0.0, s1.infiltrationDesignAirChangesPerHour());
+  EXPECT_EQ(0.0, s2.infiltrationDesignAirChangesPerHour());
+
+  EXPECT_TRUE(s1.setInfiltrationDesignAirChangesPerHour(0.6));
+
+  // No clone
+  EXPECT_EQ(1u, model.getConcreteModelObjects<SpaceType>().size());
+  EXPECT_EQ(sp, s1.spaceType().get());
+  EXPECT_EQ(sp, s2.spaceType().get());
+
+  // But it created one on the Space
+  auto spis = model.getConcreteModelObjects<SpaceInfiltrationDesignFlowRate>();
+  ASSERT_EQ(1, spis.size());
+  auto& spi = spis.front();
+  ASSERT_TRUE(spi.space());
+  EXPECT_EQ(s1, spi.space().get());
+  EXPECT_EQ(1, s1.spaceInfiltrationDesignFlowRates().size());
+  EXPECT_EQ(0, s2.spaceInfiltrationDesignFlowRates().size());
+  EXPECT_EQ(0, sp.spaceInfiltrationDesignFlowRates().size());
+
+  EXPECT_EQ(0.6, s1.infiltrationDesignAirChangesPerHour());
+  EXPECT_EQ(0.0, s2.infiltrationDesignAirChangesPerHour());
+}
+
+TEST_F(ModelFixture, SpaceInfilHelper_DoesNotCloneWhenSpaceTypeIsNotShared) {
+  Model model;
+  SpaceType sp(model);
+  SpaceInfiltrationDesignFlowRate spi(model);
+  spi.setAirChangesperHour(1.7);
+  spi.setTemperatureTermCoefficient(0.3);  // Non default!
+  ASSERT_TRUE(spi.setSpaceType(sp));
+
+  Space s1(model);
+  s1.setSpaceType(sp);
+
+  EXPECT_EQ(1, model.getConcreteModelObjects<SpaceInfiltrationDesignFlowRate>().size());
+  EXPECT_EQ(0, s1.spaceInfiltrationDesignFlowRates().size());
+  EXPECT_EQ(1, sp.spaceInfiltrationDesignFlowRates().size());
+
+  EXPECT_EQ(1.7, s1.infiltrationDesignAirChangesPerHour());
+
+  EXPECT_TRUE(s1.setInfiltrationDesignAirChangesPerHour(0.6));
+
+  // No clone
+  EXPECT_EQ(1u, model.getConcreteModelObjects<SpaceType>().size());
+  EXPECT_EQ(sp, s1.spaceType().get());
+
+  // But moved to the Space itself, while retaining the properties
+  auto newSpis = model.getConcreteModelObjects<SpaceInfiltrationDesignFlowRate>();
+  ASSERT_EQ(1, newSpis.size());
+  auto& newSpi = newSpis.front();
+  ASSERT_TRUE(newSpi.space());
+  EXPECT_EQ(s1, newSpi.space().get());
+  EXPECT_EQ(1, s1.spaceInfiltrationDesignFlowRates().size());
+  EXPECT_EQ(0, sp.spaceInfiltrationDesignFlowRates().size());
+
+  EXPECT_EQ(0.6, s1.infiltrationDesignAirChangesPerHour());
+  EXPECT_EQ(0.3, newSpi.temperatureTermCoefficient());
+}
+
+TEST_F(ModelFixture, SpaceInfilHelper_DoesCloneWhenSpaceTypeIsShared) {
+  Model model;
+  SpaceType sp(model);
+  SpaceInfiltrationDesignFlowRate spi(model);
+  spi.setAirChangesperHour(1.7);
+  spi.setTemperatureTermCoefficient(0.3);  // Non default!
+  ASSERT_TRUE(spi.setSpaceType(sp));
+
+  Space s1(model);
+  s1.setSpaceType(sp);
+  Space s2(model);
+  s2.setSpaceType(sp);
+
+  EXPECT_EQ(1, model.getConcreteModelObjects<SpaceInfiltrationDesignFlowRate>().size());
+  EXPECT_EQ(0, s1.spaceInfiltrationDesignFlowRates().size());
+  EXPECT_EQ(0, s2.spaceInfiltrationDesignFlowRates().size());
+  EXPECT_EQ(1, sp.spaceInfiltrationDesignFlowRates().size());
+
+  EXPECT_EQ(1.7, s1.infiltrationDesignAirChangesPerHour());
+  EXPECT_EQ(1.7, s2.infiltrationDesignAirChangesPerHour());
+
+  EXPECT_TRUE(s1.setInfiltrationDesignAirChangesPerHour(0.6));
+
+  EXPECT_EQ(2u, model.getConcreteModelObjects<SpaceType>().size());
+  EXPECT_NE(sp, s1.spaceType().get());
+  EXPECT_EQ(sp, s2.spaceType().get());
+
+  EXPECT_EQ(2, model.getConcreteModelObjects<SpaceInfiltrationDesignFlowRate>().size());
+  ASSERT_EQ(1u, s1.spaceInfiltrationDesignFlowRates().size());
+  EXPECT_EQ(0u, s1.spaceType()->spaceInfiltrationDesignFlowRates().size());
+  EXPECT_EQ(0u, s2.spaceInfiltrationDesignFlowRates().size());
+  EXPECT_EQ(1u, sp.spaceInfiltrationDesignFlowRates().size());
+
+  auto newSpi = s1.spaceInfiltrationDesignFlowRates().front();
+  EXPECT_NE(spi, newSpi);
+  EXPECT_EQ(0.6, s1.infiltrationDesignAirChangesPerHour());
+  EXPECT_EQ(0.3, newSpi.temperatureTermCoefficient());
+
+  EXPECT_EQ(1.7, s2.infiltrationDesignAirChangesPerHour());
+  EXPECT_EQ(0.3, spi.temperatureTermCoefficient());
 }
 
 TEST_F(ModelFixture, Space_Plenum) {
