@@ -21,6 +21,9 @@
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #endif
+#if __APPLE__
+#  include "../../dependencies/cpprestsdk_char_traits_workaround.hpp"
+#endif
 #define _TURN_OFF_PLATFORM_STRING  // cpprestsdk has an ugly macro U() that makes fmt break...
 #include <cpprest/http_listener.h>
 #if (defined(__GNUC__))
