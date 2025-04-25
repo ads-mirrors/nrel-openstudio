@@ -36,6 +36,7 @@
   %ignore openstudio::model::Model::lightingSimulationControl;
   %ignore openstudio::model::Model::outputControlFiles;
   %ignore openstudio::model::Model::outputControlReportingTolerances;
+  %ignore openstudio::model::Model::outputControlResilienceSummaries;
   %ignore openstudio::model::Model::outputControlTableStyle;
   %ignore openstudio::model::Model::outputControlTimestamp;
   %ignore openstudio::model::Model::outputDebuggingData;
@@ -85,6 +86,7 @@
                                                                                             const std::string& actuatedComponentType,
                                                                                             const std::string& actuatedComponentControlType,
                                                                                             const Space& space);
+  %ignore openstudio::model::EnergyManagementSystemActuator::space;
   %ignore openstudio::model::EnergyManagementSystemActuator::setSpace;
 
   // depends on ThermalZone (ModelHVAC.i)
@@ -92,6 +94,7 @@
                                                                                             const std::string& actuatedComponentType,
                                                                                             const std::string& actuatedComponentControlType,
                                                                                             const ThermalZone& thermalZone);
+  %ignore openstudio::model::EnergyManagementSystemActuator::thermalZone;
   %ignore openstudio::model::EnergyManagementSystemActuator::setThermalZone;
 
 

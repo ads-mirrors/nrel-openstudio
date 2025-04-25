@@ -63,6 +63,13 @@
   %ignore openstudio::model::CoilHeatingGasMultiStageStageData::parentCoil;
   %ignore openstudio::model::CoilHeatingElectricMultiStageStageData::parentCoil;
 
+  // AirCondVRF terminals: in ModelZoneHVAC.i
+  %ignore openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControl::addTerminal;
+  %ignore openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControl::removeTerminal;
+  %ignore openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControl::terminals;
+  %ignore openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControlHR::addTerminal;
+  %ignore openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControlHR::removeTerminal;
+  %ignore openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControlHR::terminals;
 #endif
 
 #if defined SWIGPYTHON
@@ -394,18 +401,33 @@ SWIG_MODELOBJECT(LoadingIndex, 1);
         std::vector<openstudio::model::ThermalZone> getThermalZones(const openstudio::model::Building& building){
           return building.thermalZones();
         }
+
+        // Space (ModelGeometry.i)
         boost::optional<openstudio::model::ThermalZone> getThermalZone(const openstudio::model::Space& space){
           return space.thermalZone();
         }
         bool setThermalZone(openstudio::model::Space space, openstudio::model::ThermalZone thermalZone){
           return space.setThermalZone(thermalZone);
         }
+        std::vector<openstudio::model::ZoneMixing> getZoneMixing(const openstudio::model::Space& space){
+          return space.zoneMixing();
+        }
+        std::vector<openstudio::model::ZoneMixing> getSupplyZoneMixing(const openstudio::model::Space& space){
+          return space.supplyZoneMixing();
+        }
+        std::vector<openstudio::model::ZoneMixing> getExhaustZoneMixing(const openstudio::model::Space& space){
+          return space.exhaustZoneMixing();
+        }
 
         openstudio::model::ThermalZone getThermalZone(const openstudio::model::ZonePropertyUserViewFactorsBySurfaceName& zoneProp){
           return zoneProp.thermalZone();
         }
 
-        // EMS Actuator setter for ThermalZone (reimplemented from ModelCore.i)
+        // EMS Actuator getter/setter for ThermalZone (reimplemented from ModelCore.i)
+        boost::optional<ThermalZone> getThermalZoneForEMSActuator(const openstudio::model::EnergyManagementSystemActuator& actuator) {
+          return actuator.thermalZone();
+        }
+
         bool setThermalZoneForEMSActuator(openstudio::model::EnergyManagementSystemActuator actuator, openstudio::model::ThermalZone thermalZone) {
           return actuator.setThermalZone(thermalZone);
         }
@@ -423,6 +445,11 @@ SWIG_MODELOBJECT(LoadingIndex, 1);
             const openstudio::model::HeatExchangerDesiccantBalancedFlowPerformanceDataType1& hxData)
         {
           return hxData.heatExchangerDesiccantBalancedFlows();
+        }
+
+        // Reimplemented from ModelResources.i
+        std::vector<openstudio::model::ChillerElectricASHRAE205> getChillerElectricASHRAE205s(const openstudio::model::ExternalFile& externalFile) {
+          return externalFile.chillerElectricASHRAE205s();
         }
 
         // DaylightingDeviceTubular, reimplemented from ModelGeometry.i
@@ -475,6 +502,15 @@ SWIG_MODELOBJECT(LoadingIndex, 1);
       {
         return OpenStudio.OpenStudioModelHVAC.setThermalZone(this, thermalZone);
       }
+      public ZoneMixingVector zoneMixing() {
+        return OpenStudio.OpenStudioModelHVAC.getZoneMixing(this);
+      }
+      public ZoneMixingVector supplyZoneMixing() {
+        return OpenStudio.OpenStudioModelHVAC.getSupplyZoneMixing(this);
+      }
+      public ZoneMixingVector exhaustZoneMixing() {
+        return OpenStudio.OpenStudioModelHVAC.getExhaustZoneMixing(this);
+      }
     }
 
     public partial class ZonePropertyUserViewFactorsBySurfaceName : ModelObject {
@@ -485,6 +521,10 @@ SWIG_MODELOBJECT(LoadingIndex, 1);
     }
 
     public partial class EnergyManagementSystemActuator : ModelObject {
+      public OptionalThermalZone thermalZone() {
+        return OpenStudio.OpenStudioModelHVAC.getThermalZoneForEMSActuator(this);
+      }
+
       public bool setThermalZone(OpenStudio.ThermalZone thermalZone) {
         return OpenStudio.OpenStudioModelHVAC.setThermalZoneForEMSActuator(this, thermalZone);
       }
@@ -508,6 +548,12 @@ SWIG_MODELOBJECT(LoadingIndex, 1);
     public partial class HeatExchangerDesiccantBalancedFlowPerformanceDataType1 : ResourceObject {
       public HeatExchangerDesiccantBalancedFlowVector heatExchangerDesiccantBalancedFlows() {
         return OpenStudio.OpenStudioModelHVAC.getHeatExchangerDesiccantBalancedFlows(this);
+      }
+    }
+
+    public partial class ExternalFile : ResourceObject {
+      public ChillerElectricASHRAE205Vector chillerElectricASHRAE205s() {
+        return OpenStudio.OpenStudioModelHVAC.getChillerElectricASHRAE205s(this);
       }
     }
 
