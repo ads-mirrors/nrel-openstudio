@@ -545,7 +545,8 @@ if(UNIX)
   if(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     # TODO: workaround for #5398, remove when updating boost
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-constexpr-conversion -Wno-deprecated-declarations")
+    AddCXXFlagIfSupported(-Wno-enum-constexpr-conversion COMPILER_SUPPORTS_enum_constexpr_conversion) # Clang 16.0+ and Apple Clang 15+ only
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
   endif()
 endif()
 
