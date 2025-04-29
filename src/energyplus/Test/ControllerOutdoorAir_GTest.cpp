@@ -13,14 +13,26 @@
 #include "../../model/Model.hpp"
 #include "../../model/AirLoopHVAC.hpp"
 #include "../../model/AirLoopHVACOutdoorAirSystem.hpp"
-#include "../../model/Node.hpp"
+#include "../../model/AirTerminalSingleDuctConstantVolumeNoReheat.hpp"
 #include "../../model/ControllerMechanicalVentilation.hpp"
-
-#include <utilities/idd/Controller_OutdoorAir_FieldEnums.hxx>
-#include <utilities/idd/IddEnums.hxx>
-#include "../../utilities/idf/IdfExtensibleGroup.hpp"
+#include "../../model/DesignSpecificationOutdoorAir.hpp"
+#include "../../model/Node.hpp"
+#include "../../model/Schedule.hpp"
+#include "../../model/Space.hpp"
+#include "../../model/SpaceType.hpp"
+#include "../../model/ThermalZone.hpp"
 
 #include "../../utilities/core/Logger.hpp"
+#include "../../utilities/geometry/Point3d.hpp"
+#include "../../utilities/idf/IdfExtensibleGroup.hpp"
+#include "../../utilities/idf/WorkspaceExtensibleGroup.hpp"
+#include "../../utilities/idf/WorkspaceObject.hpp"
+#include "../../utilities/idf/WorkspaceObject_Impl.hpp"
+
+#include <utilities/idd/Controller_OutdoorAir_FieldEnums.hxx>
+#include <utilities/idd/Controller_MechanicalVentilation_FieldEnums.hxx>
+#include <utilities/idd/IddEnums.hxx>
+#include <utilities/idd/IddObject.hpp>
 
 using namespace openstudio::energyplus;
 using namespace openstudio::model;
@@ -32,6 +44,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ControllerOutdoorAir) {
   ForwardTranslator ft;
 
   ControllerOutdoorAir controller_oa(m);
+  ControllerMechanicalVentilation controller_mv = controller_oa.controllerMechanicalVentilation();
 
   // Not used: not translated
   {
@@ -39,33 +52,82 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ControllerOutdoorAir) {
     Workspace w = ft.translateModel(m);
 
     WorkspaceObjectVector idf_controller_oas(w.getObjectsByType(IddObjectType::Controller_OutdoorAir));
-    EXPECT_EQ(0u, idf_controller_oas.size());
-    EXPECT_EQ(0u, w.getObjectsByType(IddObjectType::AirLoopHVAC).size());
-    EXPECT_EQ(0u, w.getObjectsByType(IddObjectType::AirLoopHVAC_OutdoorAirSystem).size());
+    EXPECT_EQ(0, idf_controller_oas.size());
+    EXPECT_EQ(0, w.getObjectsByType(IddObjectType::AirLoopHVAC).size());
+    EXPECT_EQ(0, w.getObjectsByType(IddObjectType::AirLoopHVAC_OutdoorAirSystem).size());
   }
 
   AirLoopHVAC a(m);
   AirLoopHVACOutdoorAirSystem oa_sys(m, controller_oa);
+
+  constexpr double width = 10.0;
+  constexpr double height = 3.6;  // It's convenient for ACH, since 3600 s/hr
+
+  // Counterclockwise points
+  std::vector<Point3d> floorPointsSpace1{{0.0, 0.0, 0.0}, {0.0, width, 0.0}, {width, width, 0.0}, {width, 0.0, 0.0}};
+
+  auto space = Space::fromFloorPrint(floorPointsSpace1, height, m, "Space 1").get();
+  ThermalZone z(m);
+  space.setThermalZone(z);
+
+  auto alwaysOn = m.alwaysOnDiscreteSchedule();
+  AirTerminalSingleDuctConstantVolumeNoReheat atu(m, alwaysOn);
+  EXPECT_TRUE(a.addBranchForZone(z, atu));
 
   // Not used since the OutdoorAirSystem isn't used itself: not translated
   {
     Workspace w = ft.translateModel(m);
 
     WorkspaceObjectVector idf_controller_oas(w.getObjectsByType(IddObjectType::Controller_OutdoorAir));
-    EXPECT_EQ(0u, idf_controller_oas.size());
-    EXPECT_EQ(1u, w.getObjectsByType(IddObjectType::AirLoopHVAC).size());
-    EXPECT_EQ(0u, w.getObjectsByType(IddObjectType::AirLoopHVAC_OutdoorAirSystem).size());
+    EXPECT_EQ(0, idf_controller_oas.size());
+    EXPECT_EQ(1, w.getObjectsByType(IddObjectType::AirLoopHVAC).size());
+    EXPECT_EQ(0, w.getObjectsByType(IddObjectType::AirLoopHVAC_OutdoorAirSystem).size());
   }
 
   Node supplyOutlet = a.supplyOutletNode();
   EXPECT_TRUE(oa_sys.addToNode(supplyOutlet));
-  // Not used: should be translated
+
+  EXPECT_FALSE(controller_mv.hasZonesWithDesignSpecificationOutdoorAir());
+
+  // used: should be translated, but it has no DSOA
   {
     Workspace w = ft.translateModel(m);
 
     WorkspaceObjectVector idf_controller_oas(w.getObjectsByType(IddObjectType::Controller_OutdoorAir));
-    EXPECT_EQ(1u, idf_controller_oas.size());
-    EXPECT_EQ(1u, w.getObjectsByType(IddObjectType::AirLoopHVAC).size());
-    EXPECT_EQ(1u, w.getObjectsByType(IddObjectType::AirLoopHVAC_OutdoorAirSystem).size());
+    EXPECT_EQ(1, idf_controller_oas.size());
+    EXPECT_EQ(1, w.getObjectsByType(IddObjectType::AirLoopHVAC).size());
+    EXPECT_EQ(1, w.getObjectsByType(IddObjectType::AirLoopHVAC_OutdoorAirSystem).size());
+
+    // Zero zones with a DSOA: no Controller:MechanicalVentilation should have been written
+    EXPECT_EQ(0, w.getObjectsByType(IddObjectType::Controller_MechanicalVentilation).size());
+  }
+
+  DesignSpecificationOutdoorAir dsoa(m);
+  dsoa.setName("DSOA");
+  EXPECT_TRUE(space.setDesignSpecificationOutdoorAir(dsoa));
+
+  EXPECT_TRUE(controller_mv.hasZonesWithDesignSpecificationOutdoorAir());
+
+  // used and has DSOA
+  {
+    Workspace w = ft.translateModel(m);
+
+    WorkspaceObjectVector idf_controller_oas(w.getObjectsByType(IddObjectType::Controller_OutdoorAir));
+    EXPECT_EQ(1, idf_controller_oas.size());
+    EXPECT_EQ(1, w.getObjectsByType(IddObjectType::AirLoopHVAC).size());
+    EXPECT_EQ(1, w.getObjectsByType(IddObjectType::AirLoopHVAC_OutdoorAirSystem).size());
+
+    // Zones with a DSOA: no Controller:MechanicalVentilation should have been written
+    ASSERT_EQ(1, w.getObjectsByType(IddObjectType::Controller_MechanicalVentilation).size());
+    auto idf_controller_mv = w.getObjectsByType(IddObjectType::Controller_MechanicalVentilation)[0];
+    ASSERT_EQ(1, idf_controller_mv.numExtensibleGroups());
+    {
+      auto w_eg = idf_controller_mv.extensibleGroups()[0].cast<WorkspaceExtensibleGroup>();
+      EXPECT_EQ(z.nameString(), w_eg.getString(Controller_MechanicalVentilationExtensibleFields::ZoneorZoneListName).get());
+      auto dsoaOrList_ = w_eg.getTarget(Controller_MechanicalVentilationExtensibleFields::DesignSpecificationOutdoorAirObjectName);
+      ASSERT_TRUE(dsoaOrList_);
+      EXPECT_EQ(dsoaOrList_->iddObject().type(), IddObjectType::DesignSpecification_OutdoorAir);
+      EXPECT_EQ(dsoa.nameString(), dsoaOrList_->nameString());
+    }
   }
 }
