@@ -193,7 +193,7 @@ namespace energyplus {
       idfObject.setDouble(Sizing_ZoneFields::HeatingMaximumAirFlowFraction, value.get());
     }
 
-    // These fields are onto OS:Sizing:Zonne but they are on DesignSpecification:ZoneAirDistribution in E+:
+    // These fields are onto OS:Sizing:Zone but they are on DesignSpecification:ZoneAirDistribution in E+:
     // * Design Zone Air Distribution Effectiveness in Cooling Mode
     // * Design Zone Air Distribution Effectiveness in Heating Mode
     // * Design Zone Secondary Recirculation Fraction
@@ -245,6 +245,7 @@ namespace energyplus {
     // This would be done in forwardTranslateControllerMechanicalVentilation except doing it here maintains proper order of the idf file.
 
     // Now that Multiple AirLoopHVACs serving the same zone are possible, need to loop on all
+    // NOTE: translateControllerMechanicalVentilation ensures ControllerMechanicalVentilation doesn't end up with no extensible groups!
     for (const auto& airLoopHVAC : thermalZone.airLoopHVACs()) {
       if (boost::optional<model::AirLoopHVACOutdoorAirSystem> oaSystem = airLoopHVAC.airLoopHVACOutdoorAirSystem()) {
         model::ControllerOutdoorAir controllerOutdoorAir = oaSystem->getControllerOutdoorAir();

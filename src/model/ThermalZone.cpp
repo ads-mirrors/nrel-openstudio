@@ -794,6 +794,12 @@ namespace model {
       return getObject<ModelObject>().getModelObjectSources<Space>(Space::iddObjectType());
     }
 
+    std::vector<Space> ThermalZone_Impl::spacesWithDesignSpecificationOutdoorAir() const {
+      auto spaces = this->spaces();
+      spaces.erase(std::remove_if(spaces.begin(), spaces.end(), [](const auto& s) { return !s.designSpecificationOutdoorAir(); }), spaces.end());
+      return spaces;
+    }
+
     double ThermalZone_Impl::floorArea() const {
       double result(0.0);
       for (const Space& space : spaces()) {
@@ -3000,6 +3006,10 @@ SELECT {} FROM ZoneSizes
 
   std::vector<Space> ThermalZone::spaces() const {
     return getImpl<detail::ThermalZone_Impl>()->spaces();
+  }
+
+  std::vector<Space> ThermalZone::spacesWithDesignSpecificationOutdoorAir() const {
+    return getImpl<detail::ThermalZone_Impl>()->spacesWithDesignSpecificationOutdoorAir();
   }
 
   double ThermalZone::floorArea() const {

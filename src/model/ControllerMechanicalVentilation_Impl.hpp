@@ -77,6 +77,10 @@ namespace model {
       //@{
 
       ControllerOutdoorAir controllerOutdoorAir() const;
+
+      // Convenience method to check whether it links to zones that have DesignSpecificationOutdoorAir(s) assigned
+      bool hasZonesWithDesignSpecificationOutdoorAir() const;
+
       //@}
      protected:
      private:
