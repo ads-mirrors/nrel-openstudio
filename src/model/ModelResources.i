@@ -39,9 +39,8 @@
   // HeatExchangerDesiccantBalancedFlow is done later in ModelHVAC.i
   %ignore openstudio::model::HeatExchangerDesiccantBalancedFlowPerformanceDataType1::heatExchangerDesiccantBalancedFlows;
 
-  // TODO: why?
-  // ignore schedule type
-  // %ignore openstudio::model::ScheduleType;
+  // Done later in ModelHVAC.i
+  %ignore openstudio::model::ExternalFile::chillerElectricASHRAE205s;
 
 #endif
 
@@ -339,7 +338,9 @@ SWIG_MODELOBJECT(HeatExchangerDesiccantBalancedFlowPerformanceDataType1, 1);
         : this(model) {
         this.setCurveOrTableObject(curve);
       }
+    }
 
+    public partial class Model : Workspace {
       public OptionalPythonPluginSearchPaths pythonPluginSearchPaths() {
         return OpenStudio.OpenStudioModelResources.pythonPluginSearchPaths(this);
       }

@@ -94,6 +94,7 @@ module Kernel
   # puts $LOAD_PATH
 
   # TODO: double check and update platform-specific includes
+  $LOAD_PATH.clear
   $LOAD_PATH << ':'
   $LOAD_PATH << ":/ruby/site_ruby/#{RUBY_V}"
   $LOAD_PATH << ":/ruby/site_ruby/#{RUBY_V}/#{RUBY_PLATFORM}"
@@ -159,6 +160,11 @@ module Kernel
   end
 
   def require path
+    # puts "requiring #{path} from #{caller.first}"
+    # puts "LOADED_FEATURES"
+    # puts $LOADED_FEATURES
+    # puts "LOADED"
+    # puts $LOADED
     result = false
     original_directory = Dir.pwd
     path_with_extension = path
@@ -700,6 +706,58 @@ class Dir
   end
 end
 
+# Instead of loading the generated (at build time) rbconfig.rb then manually
+# fixing the CONFIG values, we load the original file, then we do replacements
+# and we let the "magic" RbConfig::expand happen which has less chances of
+# screw ups
+def require_rb_config_with_patch
+  path_with_extension = EmbeddedScripting.fileNames.find{|x| x.include?('rbconfig.rb')}
+  if $LOADED.include?(path_with_extension)
+    return false
+  end
+
+  original_directory = Dir.pwd
+  $LOADED << path_with_extension
+  s = EmbeddedScripting::getFileAsString(path_with_extension)
+  s = OpenStudio::preprocess_ruby_script(s)
+
+  s = (
+    s.gsub(/CONFIG\["prefix"\] = .*/, 'CONFIG["prefix"] = ":"')
+     .gsub(/CONFIG\["libdir"\] = .*/, 'CONFIG["libdir"] = "$(prefix)"')
+     .gsub(/CONFIG\["rubylibprefix"\] = .*/, 'CONFIG["rubylibprefix"] = "$(libdir)/$(RUBY_BASE_NAME)"') # win32 only
+  )
+
+  result = Kernel::eval(s, BINDING, path_with_extension)
+
+  current_directory = Dir.pwd
+  if original_directory != current_directory
+    Dir.chdir(original_directory)
+  end
+
+  return result
+end
+
+require_rb_config_with_patch
+
+module RbConfig
+  def RbConfig.ruby
+    EmbeddedScripting::applicationFilePath;
+  end
+end
+
+# This is going to be used by rubygems/defaults.rb#default_dir
+# RbConfig::CONFIG["rubylibprefix"] = ':/ruby'
+# Instead of fixing just this one, we globally fix the prefix
+# if RbConfig::CONFIG['prefix'] == '/'
+#   # Normally CONFIG["libdir"] = "$(prefix)/lib" but we want just $(prefix)
+#   puts "Fixing RbConfig prefix from #{RbConfig::CONFIG['prefix']} to ':'"
+#   libdir = RbConfig::CONFIG['libdir']
+#   RbConfig::CONFIG.transform_values!{ |val| val.gsub(libdir, ':').gsub('//', ':/') }
+#   RbConfig::CONFIG['bindir'] = File.dirname(EmbeddedScripting::applicationFilePath)
+# end
+raise "rubylibprefix isn't correct, it's '#{RbConfig::CONFIG["rubylibprefix"]}' but should be ':/ruby' "unless RbConfig::CONFIG["rubylibprefix"] == ':/ruby'
+
+# NOTE: fileutils requires rbconfig, so we have to do our RbConfig shenanigans beforehand
 require 'fileutils'
 module FileUtils
   class << self
@@ -844,13 +902,5 @@ module Find
         end
       end
     end
-  end
-end
-
-require 'rbconfig'
-
-module RbConfig
-  def RbConfig.ruby
-    EmbeddedScripting::applicationFilePath;
   end
 end

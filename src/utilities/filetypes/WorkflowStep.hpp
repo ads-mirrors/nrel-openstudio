@@ -95,6 +95,9 @@ class UTILITIES_API WorkflowStep
 class UTILITIES_API MeasureStep : public WorkflowStep
 {
  public:
+  // Makes no sense really, providing it for SWIG only now, really for WorkflowJSON::getMeasureStepsWithIndex
+  MeasureStep();
+
   MeasureStep(const std::string& measureDirName);
 
   std::string measureDirName() const;

@@ -35,6 +35,12 @@ namespace openstudio {
 namespace energyplus {
 
   boost::optional<IdfObject> ForwardTranslator::translateControllerMechanicalVentilation(ControllerMechanicalVentilation& modelObject) {
+
+    // NOTE: don't translate it if it has no DSOA
+    if (!modelObject.hasZonesWithDesignSpecificationOutdoorAir()) {
+      return boost::none;
+    }
+
     OptionalString s;
     OptionalDouble d;
     OptionalModelObject temp;
@@ -55,28 +61,16 @@ namespace energyplus {
     bool useAvailabiltySchedule = true;
     auto availabilitySchedule = modelObject.availabilitySchedule();
 
-    // Find the associated oa controller
-    auto oaControllers = modelObject.model().getConcreteModelObjects<ControllerOutdoorAir>();
-    auto predicate = [&](const ControllerOutdoorAir& oaController) {
-      auto mechanicalVentilationController = oaController.controllerMechanicalVentilation();
-      if (mechanicalVentilationController.handle() == modelObject.handle()) {
-        return true;
-      }
-      return false;
-    };
-    auto oaController = std::find_if(oaControllers.begin(), oaControllers.end(), predicate);
     // alwaysOnDiscreteSchedule is the default availability schedule for the mechanical ventilation controller
     // if the default is still in place BUT the user has defined a minimumOutdoorAirSchedule for the oa controller,
     // then use the minimumOutdoorAirSchedule for the mechanical ventilation controller availability schedule
     // The minimumOutdoorAirSchedule will not do its job while the controller mechanical ventilation object is available.
     if (availabilitySchedule == modelObject.model().alwaysOnDiscreteSchedule()) {
-      if (oaController != oaControllers.end()) {
-        if (auto minOASchedule = oaController->minimumOutdoorAirSchedule()) {
-          auto _schedule = translateAndMapModelObject(minOASchedule.get());
-          OS_ASSERT(_schedule);
-          idfObject.setString(Controller_MechanicalVentilationFields::AvailabilityScheduleName, _schedule->name().get());
-          useAvailabiltySchedule = false;
-        }
+      if (auto minOASchedule = modelObject.controllerOutdoorAir().minimumOutdoorAirSchedule()) {
+        auto _schedule = translateAndMapModelObject(minOASchedule.get());
+        OS_ASSERT(_schedule);
+        idfObject.setString(Controller_MechanicalVentilationFields::AvailabilityScheduleName, _schedule->name().get());
+        useAvailabiltySchedule = false;
       }
     }
 
@@ -103,6 +97,8 @@ namespace energyplus {
         idfObject.setString(openstudio::Controller_MechanicalVentilationFields::SystemOutdoorAirMethod, s.get());
       }
     }
+
+    // Extensible Groups for DSOAs are pushed in translateSizingZone to retain order of the file
 
     m_idfObjects.push_back(idfObject);
     return boost::optional<IdfObject>(idfObject);

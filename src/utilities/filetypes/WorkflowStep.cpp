@@ -275,12 +275,13 @@ bool WorkflowStep::operator==(const WorkflowStep& other) const {
   return m_impl == other.m_impl;
 }
 
-MeasureStep::MeasureStep(const std::string& measureDirName)
-  : WorkflowStep(std::shared_ptr<detail::MeasureStep_Impl>(new detail::MeasureStep_Impl(measureDirName))) {
+MeasureStep::MeasureStep() : WorkflowStep(std::make_shared<detail::MeasureStep_Impl>("")) {}
+
+MeasureStep::MeasureStep(const std::string& measureDirName) : WorkflowStep(std::make_shared<detail::MeasureStep_Impl>(measureDirName)) {
   OS_ASSERT(getImpl<detail::MeasureStep_Impl>());
 }
 
-MeasureStep::MeasureStep(std::shared_ptr<detail::MeasureStep_Impl> impl) : WorkflowStep(impl) {
+MeasureStep::MeasureStep(std::shared_ptr<detail::MeasureStep_Impl> impl) : WorkflowStep(std::move(impl)) {
   OS_ASSERT(getImpl<detail::MeasureStep_Impl>());
 }
 

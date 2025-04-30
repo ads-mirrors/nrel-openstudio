@@ -14,6 +14,9 @@
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #endif
+#if __APPLE__
+#  include "../../../dependencies/cpprestsdk_char_traits_workaround.hpp"
+#endif
 // Macro U from cpprestsdk is clashing with (cf boost https://github.com/microsoft/cpprestsdk/issues/1214)
 #define _TURN_OFF_PLATFORM_STRING
 #include <cpprest/http_client.h>

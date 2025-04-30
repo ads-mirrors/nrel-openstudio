@@ -273,7 +273,7 @@ bool OSWorkflow::run() {
     }
   }
   if (!openstudio::filesystem::is_directory(runDirPath)) {
-    openstudio::filesystem::create_directory(runDirPath);
+    openstudio::filesystem::create_directories(runDirPath);
   }
 
   FileLogSink logFile(runDirPath / "run.log");

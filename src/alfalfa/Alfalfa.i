@@ -34,7 +34,7 @@
   using namespace openstudio::alfalfa;
 %}
 
-%ignore openstudio::alfalfa::AlfalfaComponentBase;
+%ignore openstudio::alfalfa::AlfalfaComponentBase::clone;
 %ignore openstudio::alfalfa::AlfalfaActuator::clone;
 %ignore openstudio::alfalfa::AlfalfaConstant::clone;
 %ignore openstudio::alfalfa::AlfalfaMeter::clone;

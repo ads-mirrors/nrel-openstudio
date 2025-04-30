@@ -230,6 +230,9 @@ namespace model {
     /// returns all spaces in this thermal zone
     std::vector<Space> spaces() const;
 
+    /// return all spaces that have a design specification outdoor air assigned
+    std::vector<Space> spacesWithDesignSpecificationOutdoorAir() const;
+
     /** Accumulates the floorArea (m^2) of spaces. Does not include space multiplier. */
     double floorArea() const;
 

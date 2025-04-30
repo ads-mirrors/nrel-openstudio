@@ -3,6 +3,7 @@
 
 %include <utilities/core/CommonInclude.i>
 %import <utilities/core/CommonImport.i>
+%import <utilities/bcl/LocalBCL.i>
 
 %{
   #include <utilities/xml/XMLValidator.hpp>

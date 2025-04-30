@@ -80,6 +80,7 @@
 %ignore std::vector<openstudio::EpwGroundTemperatureDepth>::vector(size_type);
 %ignore std::vector<openstudio::EpwGroundTemperatureDepth>::resize(size_type);
 %template(EpwGroundTemperatureDepthVector) std::vector<openstudio::EpwGroundTemperatureDepth>;
+%template(OptionalEpwGroundTemperatureDepth) boost::optional<openstudio::EpwGroundTemperatureDepth>;
 
 %ignore std::vector<openstudio::EpwHoliday>::vector(size_type);
 %ignore std::vector<openstudio::EpwHoliday>::resize(size_type);
@@ -118,6 +119,9 @@
 %ignore std::vector<openstudio::MeasureStep>::resize(size_type);
 %template(MeasureStepVector) std::vector<openstudio::MeasureStep>;
 %template(OptionalMeasureStep) boost::optional<openstudio::MeasureStep>;
+// WorkflowJSON::getMeasureStepsWithIndex
+%template(UIntMeasureStepPair) std::pair<unsigned, openstudio::MeasureStep>;
+%template(UIntMeasureStepPairVector) std::vector<std::pair<unsigned, openstudio::MeasureStep> >;
 
 %template(WorkflowJSONVector) std::vector<openstudio::WorkflowJSON>;
 %template(OptionalWorkflowJSON) boost::optional<openstudio::WorkflowJSON>;
