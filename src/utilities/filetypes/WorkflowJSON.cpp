@@ -29,6 +29,8 @@ namespace detail {
 
     if (exists(result)) {
       result = boost::filesystem::canonical(result);
+    } else {
+      result = boost::filesystem::weakly_canonical(result);
     }
 
     return result;
@@ -353,6 +355,19 @@ namespace detail {
     return result;
   }
 
+  bool WorkflowJSON_Impl::setRootDir(const openstudio::path& path) {
+    if (path.is_relative()) {
+      auto canonical_path = canonicalOrAbsolute(path);
+      if (!pathBeginsWith(m_oswDir, canonical_path)) {
+        LOG(Warn, "Resulting rootDir '" << canonical_path << "' is not a descendant of oswDir: '" << m_oswDir << "'");
+      }
+    }
+
+    m_value["root"] = toString(path);
+    onUpdate();
+    return true;
+  }
+
   openstudio::path WorkflowJSON_Impl::runDir() const {
     Json::Value defaultValue("./run");
     Json::Value runDirectory = m_value.get("run_directory", defaultValue);
@@ -365,6 +380,19 @@ namespace detail {
       return canonicalOrAbsolute(result, absoluteRootDir());
     }
     return result;
+  }
+
+  bool WorkflowJSON_Impl::setRunDir(const openstudio::path& path) {
+    if (path.is_relative()) {
+      auto canonical_path = canonicalOrAbsolute(path);
+      if (!pathBeginsWith(m_oswDir, canonical_path)) {
+        LOG(Warn, "Resulting runDir '" << canonical_path << "' is not a descendant of oswDir: '" << m_oswDir << "'");
+      }
+    }
+
+    m_value["run_directory"] = toString(path);
+    onUpdate();
+    return true;
   }
 
   openstudio::path WorkflowJSON_Impl::outPath() const {
@@ -1051,12 +1079,20 @@ openstudio::path WorkflowJSON::absoluteRootDir() const {
   return getImpl<detail::WorkflowJSON_Impl>()->absoluteRootDir();
 }
 
+bool WorkflowJSON::setRootDir(const openstudio::path& path) {
+  return getImpl<detail::WorkflowJSON_Impl>()->setRootDir(path);
+}
+
 openstudio::path WorkflowJSON::runDir() const {
   return getImpl<detail::WorkflowJSON_Impl>()->runDir();
 }
 
 openstudio::path WorkflowJSON::absoluteRunDir() const {
   return getImpl<detail::WorkflowJSON_Impl>()->absoluteRunDir();
+}
+
+bool WorkflowJSON::setRunDir(const openstudio::path& path) {
+  return getImpl<detail::WorkflowJSON_Impl>()->setRunDir(path);
 }
 
 openstudio::path WorkflowJSON::outPath() const {
