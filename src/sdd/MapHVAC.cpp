@@ -5749,6 +5749,8 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFlui
         heatPumpType = typeElement.text().as_string();
       }
 
+      plantLoop.addSupplyBranchForComponent(mo->cast<model::HVACComponent>());
+
       // Handle supplemental boilers only for heating heat pumps
       if (heatPumpType == "Heating" || heatPumpType == "HeatAndCoolChangeOver") {
         if (auto heatPump = mo->optionalCast<model::HeatPumpPlantLoopEIRHeating>()) {
@@ -7890,24 +7892,10 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateHtPu
   boost::optional<model::PlantLoop> plant;
   
   if (heatPumpType == "Cooling") {
-    // For cooling heat pumps, use the cooling fluid segments
-    pugi::xml_node clgFluidSegInRefElement = element.child("ClgFluidSegInRef");
-    [[maybe_unused]] pugi::xml_node clgFluidSegOutRefElement = element.child("ClgFluidSegOutRef");
-    
-    // Find the plant loop
-    plant = loopForSupplySegment(clgFluidSegInRefElement, model);
-    if (!plant) {
-      LOG(Error, name << " has a ClgFluidSegInRef element, but could not be properly attached to PlantLoop.");
-      return result;
-    }
-    
     // Create the cooling heat pump object
     model::HeatPumpPlantLoopEIRCooling coolingHeatPump(model);
     coolingHeatPump.setName(name);
     result = coolingHeatPump;
-    
-    // Add the heat pump to the supply side of the plant loop
-    plant->addSupplyBranchForComponent(coolingHeatPump);
     
     // Process cooling-specific attributes
     // This variable will be reused throughout the function
@@ -8074,24 +8062,10 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateHtPu
     
     return result;
   } else {
-    // For heating heat pumps or changeOver types, use the heating fluid segments
-    pugi::xml_node htgFluidSegInRefElement = element.child("HtgFluidSegInRef");
-    [[maybe_unused]] pugi::xml_node htgFluidSegOutRefElement = element.child("HtgFluidSegOutRef");
-    
-    // Find the plant loop
-    plant = loopForSupplySegment(htgFluidSegInRefElement, model);
-    if (!plant) {
-      LOG(Error, name << " has a HtgFluidSegInRef element, but could not be properly attached to PlantLoop.");
-      return result;
-    }
-    
     // Create the heating heat pump object
     model::HeatPumpPlantLoopEIRHeating heatPump(model);
     heatPump.setName(name);
     result = heatPump;
-    
-    // Add the heat pump to the supply side of the plant loop
-    plant->addSupplyBranchForComponent(heatPump);
     
     // Configure condenser type
     std::string cndsrType = element.child("CndsrType").text().as_string();
