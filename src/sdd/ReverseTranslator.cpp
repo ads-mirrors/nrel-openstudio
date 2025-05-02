@@ -955,13 +955,13 @@ namespace sdd {
       customSpaceHeatingMeter.setName("Custom Space Heating Electricity");
       customSpaceHeatingMeter.setFuelType("Electricity");
       customSpaceHeatingMeter.addKeyVarGroup("", "Heating:Electricity");
-      for(const auto coil : m_spaceHeatingWaterHeaters) {
+      for(const auto& coil : m_spaceHeatingWaterHeaters) {
         customSpaceHeatingMeter.addKeyVarGroup(coil.nameString(), "Water Heater Electricity Energy");
       }
-      for(const auto coil : m_spaceHeatingAirToWaterHeatPumps) {
+      for(const auto& coil : m_spaceHeatingAirToWaterHeatPumps) {
         customSpaceHeatingMeter.addKeyVarGroup(coil.nameString(), "Cooling Coil Water Heating Electricity Energy");
       }
-      for(const auto fan : m_spaceHeatingFans) {
+      for(const auto& fan : m_spaceHeatingFans) {
         customSpaceHeatingMeter.addKeyVarGroup(fan.nameString(), "Fan Electricity Energy");
       }
 
@@ -975,10 +975,10 @@ namespace sdd {
       auto customSpaceHeatingDecrement = model::MeterCustomDecrement(*result, "WaterSystems:Electricity");
       customSpaceHeatingDecrement.setName("Custom Water Systems Electricity");
       customSpaceHeatingDecrement.setFuelType("Electricity");
-      for(const auto coil : m_spaceHeatingWaterHeaters) {
+      for(const auto& coil : m_spaceHeatingWaterHeaters) {
         customSpaceHeatingDecrement.addKeyVarGroup(coil.nameString(), "Water Heater Electricity Energy");
       }
-      for(const auto coil : m_spaceHeatingAirToWaterHeatPumps) {
+      for(const auto& coil : m_spaceHeatingAirToWaterHeatPumps) {
         customSpaceHeatingDecrement.addKeyVarGroup(coil.nameString(), "Cooling Coil Water Heating Electricity Energy");
       }
       meter = model::OutputMeter(*result);

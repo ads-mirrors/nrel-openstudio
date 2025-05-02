@@ -5714,7 +5714,6 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFlui
   // Track boilers referenced by multiple heat pumps for capacity splitting
   std::map<std::string, int> boilerReferenceCount;
   std::map<std::string, pugi::xml_node> boilerElements;
-  
   // First pass: count references to each boiler
   for (const auto& heatPumpElement : heatPumpElements) {
     pugi::xml_node htgSuppBlrRefElement = heatPumpElement.child("HtgSuppBlrRef");
@@ -5743,87 +5742,90 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFlui
     auto heatPumpElement = heatPumpElements[i];
 
     if (boost::optional<model::ModelObject> mo = translateHtPump(heatPumpElement, model)) {
-      auto heatPump = mo->cast<model::HeatPumpPlantLoopEIRHeating>();
-      
-      // Check if it references a supplemental boiler
-      pugi::xml_node htgSuppBlrRefElement = heatPumpElement.child("HtgSuppBlrRef");
-      if (htgSuppBlrRefElement) {
-        std::string supplementalBoilerName = htgSuppBlrRefElement.text().as_string();
-        if (!supplementalBoilerName.empty()) {
-          // We need to handle the boiler connection here for all cases
-          int refCount = boilerReferenceCount[supplementalBoilerName];
-          
-          if (boilerElements.find(supplementalBoilerName) != boilerElements.end()) {
-            // Create a new boiler with a portion of the capacity
-            pugi::xml_node boilerElement = boilerElements[supplementalBoilerName];
-            
-            // Create a name for this instance, only add suffix if multiple references
-            std::string instanceName = (refCount > 1) ? 
-              supplementalBoilerName + "_HP" + std::to_string(i+1) : 
-              supplementalBoilerName;
-            
-            // Find or create the boiler with reduced capacity
-            boost::optional<model::ModelObject> boilerMO;
-            
-            // Check if already created for this heat pump
-            if (auto existingBoiler = model.getModelObjectByName<model::BoilerHotWater>(instanceName)) {
-              boilerMO = existingBoiler;
-            } else {
-              // Create a new boiler using the XML element
-              // First check if original has already been translated
-              if (auto existingBoiler = model.getModelObjectByName<model::BoilerHotWater>(supplementalBoilerName)) {
-                // Clone the existing boiler
-                model::BoilerHotWater newBoiler = existingBoiler->clone().cast<model::BoilerHotWater>();
-                newBoiler.setName(instanceName);
+      // Determine if this is a heating or cooling heat pump
+      std::string heatPumpType = "Heating"; // Default to heating
+      pugi::xml_node typeElement = heatPumpElement.child("Type");
+      if (typeElement) {
+        heatPumpType = typeElement.text().as_string();
+      }
+
+      // Handle supplemental boilers only for heating heat pumps
+      if (heatPumpType == "Heating" || heatPumpType == "HeatAndCoolChangeOver") {
+        if (auto heatPump = mo->optionalCast<model::HeatPumpPlantLoopEIRHeating>()) {
+          // Check if it references a supplemental boiler
+          pugi::xml_node htgSuppBlrRefElement = heatPumpElement.child("HtgSuppBlrRef");
+          if (htgSuppBlrRefElement) {
+            std::string supplementalBoilerName = htgSuppBlrRefElement.text().as_string();
+            if (!supplementalBoilerName.empty()) {
+              // We need to handle the boiler connection here for all cases
+              int refCount = boilerReferenceCount[supplementalBoilerName];
+              
+              if (boilerElements.find(supplementalBoilerName) != boilerElements.end()) {
+                // Create a new boiler with a portion of the capacity
+                pugi::xml_node boilerElement = boilerElements[supplementalBoilerName];
                 
-                // Scale the capacity by the reference count only if multiple references
-                if (refCount > 1 && !newBoiler.isNominalCapacityAutosized()) {
-                  double capacity = newBoiler.nominalCapacity().get();
-                  newBoiler.setNominalCapacity(capacity / refCount);
-                }
+                // Create a name for this instance, only add suffix if multiple references
+                std::string instanceName = (refCount > 1) ? 
+                  supplementalBoilerName + "_HP" + std::to_string(i+1) : 
+                  supplementalBoilerName;
                 
-                boilerMO = newBoiler;
-              } else {
-                // Translate from original element
-                boilerMO = translateBoiler(boilerElement, model);
-                if (boilerMO) {
-                  auto boiler = boilerMO->cast<model::BoilerHotWater>();
-                  boiler.setName(instanceName);
-                  
-                  // Scale the capacity by the reference count only if multiple references
-                  if (refCount > 1 && !boiler.isNominalCapacityAutosized()) {
-                    double capacity = boiler.nominalCapacity().get();
-                    boiler.setNominalCapacity(capacity / refCount);
+                // Find or create the boiler with reduced capacity
+                boost::optional<model::ModelObject> boilerMO;
+                
+                // Check if already created for this heat pump
+                if (auto existingBoiler = model.getModelObjectByName<model::BoilerHotWater>(instanceName)) {
+                  boilerMO = existingBoiler;
+                } else {
+                  // Create a new boiler using the XML element
+                  // First check if original has already been translated
+                  if (auto existingBoiler = model.getModelObjectByName<model::BoilerHotWater>(supplementalBoilerName)) {
+                    // Clone the existing boiler
+                    model::BoilerHotWater newBoiler = existingBoiler->clone(model).cast<model::BoilerHotWater>();
+                    newBoiler.setName(instanceName);
+                    
+                    // Scale the capacity by the reference count only if multiple references
+                    if (refCount > 1 && !newBoiler.isNominalCapacityAutosized()) {
+                      double capacity = newBoiler.nominalCapacity().get();
+                      newBoiler.setNominalCapacity(capacity / refCount);
+                    }
+                    
+                    boilerMO = newBoiler;
+                  } else {
+                    // Translate from original element
+                    boilerMO = translateBoiler(boilerElement, model);
+                    if (boilerMO) {
+                      auto boiler = boilerMO->cast<model::BoilerHotWater>();
+                      boiler.setName(instanceName);
+                      
+                      // Scale the capacity by the reference count only if multiple references
+                      if (refCount > 1 && !boiler.isNominalCapacityAutosized()) {
+                        double capacity = boiler.nominalCapacity().get();
+                        boiler.setNominalCapacity(capacity / refCount);
+                      }
+                    }
                   }
                 }
-              }
-            }
-            
-            // Add the boiler to the plant loop after the heat pump
-            if (boilerMO) {
-              auto boiler = boilerMO->cast<model::BoilerHotWater>();
-              if (auto outletModelObject = heatPump.outletModelObject()) {
-                if (auto outletNode = outletModelObject->optionalCast<model::Node>()) {
-                  if (auto inletModelObject = boiler.inletModelObject()) {
-                    // Check for boiler-attached pump
-                    pugi::xml_node boilerPumpElement = boilerElement.child("Pump");
-                    if (boilerPumpElement) {
-                      if (auto pumpModelObject = translatePump(boilerPumpElement, model)) {
-                        if (auto inletNode = inletModelObject->optionalCast<model::Node>()) {
-                          if (auto pump = pumpModelObject->optionalCast<model::PumpVariableSpeed>()) {
-                            pump->addToNode(outletNode.get());
-                          } else if (auto pump = pumpModelObject->optionalCast<model::PumpConstantSpeed>()) {
-                            pump->addToNode(outletNode.get());
+                
+                // Add the boiler to the plant loop after the heat pump
+                if (boilerMO) {
+                  auto boiler = boilerMO->cast<model::BoilerHotWater>();
+                  if (auto outletModelObject = heatPump->supplyOutletModelObject()) {
+                    if (auto outletNode = outletModelObject->optionalCast<model::Node>()) {
+                      boiler.addToNode(*outletNode);
+                      if (auto inletModelObject = boiler.inletModelObject()) {
+                        // Check for boiler-attached pump
+                        pugi::xml_node boilerPumpElement = boilerElement.child("Pump");
+                        if (boilerPumpElement) {
+                          if (auto pumpModelObject = translatePump(boilerPumpElement, model)) {
+                            if (auto pump = pumpModelObject->optionalCast<model::PumpVariableSpeed>()) {
+                              pump->addToNode(*outletNode);
+                            } else if (auto pump = pumpModelObject->optionalCast<model::PumpConstantSpeed>()) {
+                              pump->addToNode(*outletNode);
+                            }
                           }
                         }
                       }
                     }
-                    
-                    // Connect the boiler
-                    model::Node newNode(model);
-                    outletNode->outletModelObject()->get().removeSource();
-                    outletNode->addOutletModelObject(newNode);
-                    boiler.addToNode(newNode);
                   }
                 }
               }
@@ -5832,6 +5834,7 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFlui
         }
       }
       
+      // Check for bypass on either type of heat pump
       std::string hasBypass = heatPumpElement.child("HasBypass").text().as_string();
       if (hasBypass == "Yes" || hasBypass == "True" || hasBypass == "1") {
         bypass = true;
@@ -5840,9 +5843,9 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFlui
   }
 
   // Boilers
-  std::vector<pugi::xml_node> boilerElements = makeVectorOfChildren(fluidSysElement, "Blr");
-  for (std::vector<pugi::xml_node>::size_type i = 0; i < boilerElements.size(); i++) {
-    auto boilerElement = boilerElements[i];
+  std::vector<pugi::xml_node> allBoilerElements = makeVectorOfChildren(fluidSysElement, "Blr");
+  for (std::vector<pugi::xml_node>::size_type i = 0; i < allBoilerElements.size(); i++) {
+    auto boilerElement = allBoilerElements[i];
     
     // Skip boilers that are already handled as supplemental to heat pumps
     auto nameElement = boilerElement.child("Name");
@@ -6694,7 +6697,6 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFlui
   {
     LOG(Error,plantLoop.name().get() << " does not have a setpoint.");
   }
-
 
   return plantLoop;
 }
@@ -7877,217 +7879,428 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateHtPu
   pugi::xml_node nameElement = element.child("Name");
   std::string name = nameElement.text().as_string();
 
-  // For now, we'll assume all heat pumps are heating-only, as that's what the example shows
-  // In the future, we'll need to check HtPump:Type to determine if it's Heating, Cooling, or HeatAndCoolChangeOver
+  // Determine the heat pump type: Heating, Cooling, or HeatAndCoolChangeOver
+  std::string heatPumpType = "Heating"; // Default to heating
+  pugi::xml_node typeElement = element.child("Type");
+  if (typeElement) {
+    heatPumpType = typeElement.text().as_string();
+  }
   
   // Get nodes referenced by the heat pump
-  pugi::xml_node htgFluidSegInRefElement = element.child("HtgFluidSegInRef");
-  pugi::xml_node htgFluidSegOutRefElement = element.child("HtgFluidSegOutRef");
+  boost::optional<model::PlantLoop> plant;
   
-  // Find the plant loop
-  boost::optional<model::PlantLoop> plant = loopForSupplySegment(htgFluidSegInRefElement, model);
-  if (!plant) {
-    LOG(Error, name << " has a HtgFluidSegInRef element, but could not be properly attached to PlantLoop.");
-    return result;
-  }
-
-  // Create the heat pump object
-  model::HeatPumpPlantLoopEIRHeating heatPump(model);
-  heatPump.setName(name);
-  result = heatPump;
-
-  // Configure condenser type
-  std::string cndsrType = element.child("CndsrType").text().as_string();
-  heatPump.setCondenserType(cndsrType);
-
-  // Configure compressor location
-  pugi::xml_node cprsrLocElement = element.child("CprsrLoc");
-  if (cprsrLocElement) {
-    // CprsrLoc is "Zone" or "Outdoor"
-    std::string cprsrLoc = cprsrLocElement.text().as_string();
-    if (cprsrLoc == "Zone") {
-      // In a zone - get the zone reference
-      pugi::xml_node cprsrZnRefElement = element.child("CprsrZn");
-      if (cprsrZnRefElement) {
-        std::string zoneName = cprsrZnRefElement.text().as_string();
-        if (auto thermalZone = model.getModelObjectByName<model::ThermalZone>(zoneName)) {
-          // Source side inlet/outlet nodes are in this zone
-          // Currently not handled - would need to create nodes in the zone
-          LOG(Warn, "HtPump '" << name << "' has compressor in zone '" << zoneName << "', which is not fully supported yet.");
-        }
-      }
+  if (heatPumpType == "Cooling") {
+    // For cooling heat pumps, use the cooling fluid segments
+    pugi::xml_node clgFluidSegInRefElement = element.child("ClgFluidSegInRef");
+    [[maybe_unused]] pugi::xml_node clgFluidSegOutRefElement = element.child("ClgFluidSegOutRef");
+    
+    // Find the plant loop
+    plant = loopForSupplySegment(clgFluidSegInRefElement, model);
+    if (!plant) {
+      LOG(Error, name << " has a ClgFluidSegInRef element, but could not be properly attached to PlantLoop.");
+      return result;
     }
-  }
-
-  // Add the heat pump to the supply side of the plant loop
-  plant->addSupplyBranchForComponent(heatPump);
-
-  // Check for and add pump if present
-  pugi::xml_node pumpElement = element.child("Pump");
-  if (pumpElement) {
-    if (auto pumpModelObject = translatePump(pumpElement, model)) {
-      if (auto inletModelObject = heatPump.inletModelObject()) {
-        if (auto inletNode = inletModelObject->optionalCast<model::Node>()) {
-          if (auto pump = pumpModelObject->optionalCast<model::PumpVariableSpeed>()) {
-            pump->addToNode(inletNode.get());
-          } else if (auto pump = pumpModelObject->optionalCast<model::PumpConstantSpeed>()) {
-            pump->addToNode(inletNode.get());
+    
+    // Create the cooling heat pump object
+    model::HeatPumpPlantLoopEIRCooling coolingHeatPump(model);
+    coolingHeatPump.setName(name);
+    result = coolingHeatPump;
+    
+    // Add the heat pump to the supply side of the plant loop
+    plant->addSupplyBranchForComponent(coolingHeatPump);
+    
+    // Process cooling-specific attributes
+    // This variable will be reused throughout the function
+    auto coolingHeatPump_ref = coolingHeatPump;
+    
+    // Configure condenser type
+    std::string cndsrType = element.child("CndsrType").text().as_string();
+    coolingHeatPump.setCondenserType(cndsrType);
+    
+    // Configure compressor location
+    pugi::xml_node cprsrLocElement = element.child("CprsrLoc");
+    if (cprsrLocElement) {
+      // CprsrLoc is "Zone" or "Outdoor"
+      std::string cprsrLoc = cprsrLocElement.text().as_string();
+      if (cprsrLoc == "Zone") {
+        // In a zone - get the zone reference
+        pugi::xml_node cprsrZnRefElement = element.child("CprsrZn");
+        if (cprsrZnRefElement) {
+          std::string zoneName = cprsrZnRefElement.text().as_string();
+          if (auto thermalZone = model.getModelObjectByName<model::ThermalZone>(zoneName)) {
+            // Source side inlet/outlet nodes are in this zone
+            // Currently not handled - would need to create nodes in the zone
+            LOG(Warn, "HtPump '" << name << "' has compressor in zone '" << zoneName << "', which is not fully supported yet.");
           }
         }
       }
     }
-  }
-
-  // The supplemental boiler is now handled in translateFluidSys to support
-  // splitting boilers that are referenced by multiple heat pumps
-  // We don't need to do anything here as it's handled at the FluidSys level
-
-  // Set performance parameters
-  
-  // Reference capacity
-  pugi::xml_node htgCapRtdSimElement = element.child("HtgCapRtdSim");
-  boost::optional<double> htgCapRtdSim = lexicalCastToDouble(htgCapRtdSimElement);
-  if (htgCapRtdSim) {
-    double value = unitToUnit(htgCapRtdSim.get(), "Btu/h", "W").get();
-    if (autosize()) {
-      heatPump.autosizeReferenceCapacity();
-    } else {
-      heatPump.setReferenceCapacity(value);
+    
+    // Check for and add pump if present
+    pugi::xml_node pumpElement = element.child("Pump");
+    if (pumpElement) {
+      if (auto pumpModelObject = translatePump(pumpElement, model)) {
+        if (auto inletModelObject = coolingHeatPump.supplyInletModelObject()) {
+          if (auto inletNode = inletModelObject->optionalCast<model::Node>()) {
+            if (auto pump = pumpModelObject->optionalCast<model::PumpVariableSpeed>()) {
+              pump->addToNode(inletNode.get());
+            } else if (auto pump = pumpModelObject->optionalCast<model::PumpConstantSpeed>()) {
+              pump->addToNode(inletNode.get());
+            }
+          }
+        }
+      }
     }
+    
+    // Set performance parameters
+    
+    // Reference capacity
+    pugi::xml_node clgCapRtdSimElement = element.child("ClgCapRtdSim");
+    boost::optional<double> clgCapRtdSim = lexicalCastToDouble(clgCapRtdSimElement);
+    if (clgCapRtdSim) {
+      double value = unitToUnit(clgCapRtdSim.get(), "Btu/h", "W").get();
+      if (autosize()) {
+        coolingHeatPump.autosizeReferenceCapacity();
+      } else {
+        coolingHeatPump.setReferenceCapacity(value);
+      }
+    } else {
+      coolingHeatPump.autosizeReferenceCapacity();
+    }
+    
+    // Reference COP
+    pugi::xml_node clgCOPSimElement = element.child("ClgCOPSim");
+    boost::optional<double> clgCOPSim = lexicalCastToDouble(clgCOPSimElement);
+    if (clgCOPSim) {
+      coolingHeatPump.setReferenceCoefficientofPerformance(clgCOPSim.get());
+    } else {
+      // If COP not provided, try to convert from EER if available
+      pugi::xml_node clgEERElement = element.child("ClgEER");
+      boost::optional<double> clgEER = lexicalCastToDouble(clgEERElement);
+      if (clgEER) {
+        // Convert EER (Btu/h/W) to COP (W/W) - multiply by 0.293
+        double cop = clgEER.get() * 0.293;
+        coolingHeatPump.setReferenceCoefficientofPerformance(cop);
+      }
+    }
+    
+    // Sizing Factor
+    pugi::xml_node sizingFactorElement = element.child("SizingFactor");
+    boost::optional<double> sizingFactor = lexicalCastToDouble(sizingFactorElement);
+    if (sizingFactor) {
+      coolingHeatPump.setSizingFactor(sizingFactor.get());
+    }
+    
+    // Capacity Modifier Function of Temperature Curve
+    pugi::xml_node clgCap_fTempCrvRefElement = element.child("ClgCap_fTempCrvRef");
+    if (clgCap_fTempCrvRefElement) {
+      std::string curveName = clgCap_fTempCrvRefElement.text().as_string();
+      if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
+        coolingHeatPump.setCapacityModifierFunctionofTemperatureCurve(curve.get());
+      }
+    }
+    
+    // Electric Input to Output Ratio Modifier Function of Temperature Curve
+    pugi::xml_node clgEIR_fTempCrvRefElement = element.child("ClgEIR_fTempCrvRef");
+    if (clgEIR_fTempCrvRefElement) {
+      std::string curveName = clgEIR_fTempCrvRefElement.text().as_string();
+      if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
+        coolingHeatPump.setElectricInputtoOutputRatioModifierFunctionofTemperatureCurve(curve.get());
+      }
+    }
+    
+    // Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve
+    pugi::xml_node clgEIR_fPLRCrvRefElement = element.child("ClgEIR_fPLRCrvRef");
+    if (clgEIR_fPLRCrvRefElement) {
+      std::string curveName = clgEIR_fPLRCrvRefElement.text().as_string();
+      if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
+        coolingHeatPump.setElectricInputtoOutputRatioModifierFunctionofPartLoadRatioCurve(curve.get());
+      }
+    }
+    
+    // Control Type
+    pugi::xml_node clgCtrlTypeElement = element.child("ClgCtrlType");
+    if (clgCtrlTypeElement) {
+      std::string controlType = clgCtrlTypeElement.text().as_string();
+      coolingHeatPump.setControlType(controlType);
+    }
+    
+    // Flow Mode
+    pugi::xml_node clgFlowModeElement = element.child("ClgFlowMode");
+    if (clgFlowModeElement) {
+      std::string flowMode = clgFlowModeElement.text().as_string();
+      coolingHeatPump.setFlowMode(flowMode);
+    }
+    
+    // Minimum Part Load Ratio
+    pugi::xml_node clgPLRMinElement = element.child("ClgPLRMin");
+    boost::optional<double> clgPLRMin = lexicalCastToDouble(clgPLRMinElement);
+    if (clgPLRMin) {
+      coolingHeatPump.setMinimumPartLoadRatio(clgPLRMin.get());
+    }
+    
+    // Minimum and Maximum Source Inlet Temperature
+    pugi::xml_node clgSrcTempMinElement = element.child("ClgSrcTempMin");
+    boost::optional<double> clgSrcTempMin = lexicalCastToDouble(clgSrcTempMinElement);
+    if (clgSrcTempMin) {
+      double value = unitToUnit(clgSrcTempMin.get(), "F", "C").get();
+      coolingHeatPump.setMinimumSourceInletTemperature(value);
+    }
+    
+    pugi::xml_node clgSrcTempMaxElement = element.child("ClgSrcTempMax");
+    boost::optional<double> clgSrcTempMax = lexicalCastToDouble(clgSrcTempMaxElement);
+    if (clgSrcTempMax) {
+      double value = unitToUnit(clgSrcTempMax.get(), "F", "C").get();
+      coolingHeatPump.setMaximumSourceInletTemperature(value);
+    }
+    
+    // Minimum Supply Water Temperature Curve
+    pugi::xml_node clgMinSupWtrTempCrvRefElement = element.child("ClgMinSupWtrTempCrvRef");
+    if (clgMinSupWtrTempCrvRefElement) {
+      std::string curveName = clgMinSupWtrTempCrvRefElement.text().as_string();
+      if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
+        coolingHeatPump.setMinimumSupplyWaterTemperatureCurve(curve.get());
+      }
+    }
+    
+    // Maximum Supply Water Temperature Curve
+    pugi::xml_node clgMaxSupWtrTempCrvRefElement = element.child("ClgMaxSupWtrTempCrvRef");
+    if (clgMaxSupWtrTempCrvRefElement) {
+      std::string curveName = clgMaxSupWtrTempCrvRefElement.text().as_string();
+      if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
+        coolingHeatPump.setMaximumSupplyWaterTemperatureCurve(curve.get());
+      }
+    }
+    
+    return result;
   } else {
-    heatPump.autosizeReferenceCapacity();
-  }
-
-  // Reference COP
-  pugi::xml_node copSimElement = element.child("COPSim");
-  boost::optional<double> copSim = lexicalCastToDouble(copSimElement);
-  if (copSim) {
-    heatPump.setReferenceCoefficientOfPerformance(copSim.get());
-  }
-
-  // Sizing Factor
-  pugi::xml_node sizingFactorElement = element.child("SizingFactor");
-  boost::optional<double> sizingFactor = lexicalCastToDouble(sizingFactorElement);
-  if (sizingFactor) {
-    heatPump.setSizingFactor(sizingFactor.get());
-  }
-
-  // Capacity Modifier Function of Temperature Curve
-  pugi::xml_node htgCap_fTempCrvRefElement = element.child("HtgCap_fTempCrvRef");
-  if (htgCap_fTempCrvRefElement) {
-    std::string curveName = htgCap_fTempCrvRefElement.text().as_string();
-    if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
-      heatPump.setCapacityModifierFunctionOfTemperatureCurve(curve.get());
+    // For heating heat pumps or changeOver types, use the heating fluid segments
+    pugi::xml_node htgFluidSegInRefElement = element.child("HtgFluidSegInRef");
+    [[maybe_unused]] pugi::xml_node htgFluidSegOutRefElement = element.child("HtgFluidSegOutRef");
+    
+    // Find the plant loop
+    plant = loopForSupplySegment(htgFluidSegInRefElement, model);
+    if (!plant) {
+      LOG(Error, name << " has a HtgFluidSegInRef element, but could not be properly attached to PlantLoop.");
+      return result;
     }
-  }
-
-  // Electric Input to Output Ratio Modifier Function of Temperature Curve
-  pugi::xml_node htgEIR_fTempCrvRefElement = element.child("HtgEIR_fTempCrvRef");
-  if (htgEIR_fTempCrvRefElement) {
-    std::string curveName = htgEIR_fTempCrvRefElement.text().as_string();
-    if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
-      heatPump.setElectricInputToOutputRatioModifierFunctionOfTemperatureCurve(curve.get());
+    
+    // Create the heating heat pump object
+    model::HeatPumpPlantLoopEIRHeating heatPump(model);
+    heatPump.setName(name);
+    result = heatPump;
+    
+    // Add the heat pump to the supply side of the plant loop
+    plant->addSupplyBranchForComponent(heatPump);
+    
+    // Configure condenser type
+    std::string cndsrType = element.child("CndsrType").text().as_string();
+    heatPump.setCondenserType(cndsrType);
+    
+    // Configure compressor location
+    pugi::xml_node cprsrLocElement = element.child("CprsrLoc");
+    if (cprsrLocElement) {
+      // CprsrLoc is "Zone" or "Outdoor"
+      std::string cprsrLoc = cprsrLocElement.text().as_string();
+      if (cprsrLoc == "Zone") {
+        // In a zone - get the zone reference
+        pugi::xml_node cprsrZnRefElement = element.child("CprsrZn");
+        if (cprsrZnRefElement) {
+          std::string zoneName = cprsrZnRefElement.text().as_string();
+          if (auto thermalZone = model.getModelObjectByName<model::ThermalZone>(zoneName)) {
+            // Source side inlet/outlet nodes are in this zone
+            // Currently not handled - would need to create nodes in the zone
+            LOG(Warn, "HtPump '" << name << "' has compressor in zone '" << zoneName << "', which is not fully supported yet.");
+          }
+        }
+      }
     }
-  }
 
-  // Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve
-  pugi::xml_node htgEIR_fPLRCrvRefElement = element.child("HtgEIR_fPLRCrvRef");
-  if (htgEIR_fPLRCrvRefElement) {
-    std::string curveName = htgEIR_fPLRCrvRefElement.text().as_string();
-    if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
-      heatPump.setElectricInputToOutputRatioModifierFunctionOfPartLoadRatioCurve(curve.get());
+    // Check for and add pump if present
+    pugi::xml_node pumpElement = element.child("Pump");
+    if (pumpElement) {
+      if (auto pumpModelObject = translatePump(pumpElement, model)) {
+        if (auto inletModelObject = heatPump.supplyInletModelObject()) {
+          if (auto inletNode = inletModelObject->optionalCast<model::Node>()) {
+            if (auto pump = pumpModelObject->optionalCast<model::PumpVariableSpeed>()) {
+              pump->addToNode(inletNode.get());
+            } else if (auto pump = pumpModelObject->optionalCast<model::PumpConstantSpeed>()) {
+              pump->addToNode(inletNode.get());
+            }
+          }
+        }
+      }
     }
-  }
 
-  // Control Type
-  pugi::xml_node htgCtrlTypeElement = element.child("HtgCtrlType");
-  if (htgCtrlTypeElement) {
-    std::string controlType = htgCtrlTypeElement.text().as_string();
-    heatPump.setControlType(controlType);
-  }
+    // The supplemental boiler is now handled in translateFluidSys to support
+    // splitting boilers that are referenced by multiple heat pumps
+    // We don't need to do anything here as it's handled at the FluidSys level
 
-  // Flow Mode
-  pugi::xml_node htgFlowModeElement = element.child("HtgFlowMode");
-  if (htgFlowModeElement) {
-    std::string flowMode = htgFlowModeElement.text().as_string();
-    heatPump.setFlowMode(flowMode);
-  }
-
-  // Minimum Part Load Ratio
-  pugi::xml_node htgPLRMinElement = element.child("HtgPLRMin");
-  boost::optional<double> htgPLRMin = lexicalCastToDouble(htgPLRMinElement);
-  if (htgPLRMin) {
-    heatPump.setMinimumPartLoadRatio(htgPLRMin.get());
-  }
-
-  // Minimum and Maximum Source Inlet Temperature
-  pugi::xml_node htgSrcTempMinElement = element.child("HtgSrcTempMin");
-  boost::optional<double> htgSrcTempMin = lexicalCastToDouble(htgSrcTempMinElement);
-  if (htgSrcTempMin) {
-    double value = unitToUnit(htgSrcTempMin.get(), "F", "C").get();
-    heatPump.setMinimumSourceInletTemperature(value);
-  }
-
-  pugi::xml_node htgSrcTempMaxElement = element.child("HtgSrcTempMax");
-  boost::optional<double> htgSrcTempMax = lexicalCastToDouble(htgSrcTempMaxElement);
-  if (htgSrcTempMax) {
-    double value = unitToUnit(htgSrcTempMax.get(), "F", "C").get();
-    heatPump.setMaximumSourceInletTemperature(value);
-  }
-
-  // Defrost parameters
-  pugi::xml_node htgDefrostTempMaxElement = element.child("HtgDefrostTempMax");
-  if (htgDefrostTempMaxElement) {
-    boost::optional<double> htgDefrostTempMax = lexicalCastToDouble(htgDefrostTempMaxElement);
-    if (htgDefrostTempMax) {
-      double value = unitToUnit(htgDefrostTempMax.get(), "F", "C").get();
-      heatPump.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(value);
-    }
-  }
-
-  pugi::xml_node htgDefrostCtrlElement = element.child("HtgDefrostCtrl");
-  if (htgDefrostCtrlElement) {
-    std::string defrostControl = htgDefrostCtrlElement.text().as_string();
-    if (defrostControl == "TimedEmpirical") {
-      // EnergyPlus currently doesn't have "TimedEmpirical" as an option, so use "Timed"
-      heatPump.setHeatPumpDefrostControl("Timed");
+    // Set performance parameters
+    
+    // Reference capacity
+    pugi::xml_node htgCapRtdSimElement = element.child("HtgCapRtdSim");
+    boost::optional<double> htgCapRtdSim = lexicalCastToDouble(htgCapRtdSimElement);
+    if (htgCapRtdSim) {
+      double value = unitToUnit(htgCapRtdSim.get(), "Btu/h", "W").get();
+      if (autosize()) {
+        heatPump.autosizeReferenceCapacity();
+      } else {
+        heatPump.setReferenceCapacity(value);
+      }
     } else {
-      heatPump.setHeatPumpDefrostControl(defrostControl);
+      heatPump.autosizeReferenceCapacity();
     }
-  }
 
-  pugi::xml_node htgDefrostTimeFracElement = element.child("HtgDefrostTimeFrac");
-  boost::optional<double> htgDefrostTimeFrac = lexicalCastToDouble(htgDefrostTimeFracElement);
-  if (htgDefrostTimeFrac) {
-    heatPump.setHeatPumpDefrostTimePeriodFraction(htgDefrostTimeFrac.get());
-  }
-
-  // Timed empirical defrost curves
-  pugi::xml_node htgDefrostFreq_fTempCrvRefElement = element.child("HtgDefrostFreq_fTempCrvRef");
-  if (htgDefrostFreq_fTempCrvRefElement) {
-    std::string curveName = htgDefrostFreq_fTempCrvRefElement.text().as_string();
-    if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
-      heatPump.setTimedEmpiricalDefrostFrequencyCurve(curve.get());
+    // Reference COP
+    pugi::xml_node copSimElement = element.child("COPSim");
+    boost::optional<double> copSim = lexicalCastToDouble(copSimElement);
+    if (copSim) {
+      heatPump.setReferenceCoefficientofPerformance(copSim.get());
     }
-  }
 
-  pugi::xml_node htgDefrostHtLd_fTempCrvRefElement = element.child("HtgDefrostHtLd_fTempCrvRef");
-  if (htgDefrostHtLd_fTempCrvRefElement) {
-    std::string curveName = htgDefrostHtLd_fTempCrvRefElement.text().as_string();
-    if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
-      heatPump.setTimedEmpiricalDefrostHeatLoadPenaltyCurve(curve.get());
+    // Sizing Factor
+    pugi::xml_node sizingFactorElement = element.child("SizingFactor");
+    boost::optional<double> sizingFactor = lexicalCastToDouble(sizingFactorElement);
+    if (sizingFactor) {
+      heatPump.setSizingFactor(sizingFactor.get());
     }
-  }
 
-  pugi::xml_node htgDefrostHIFrac_fTempCrvRefElement = element.child("HtgDefrostHIFrac_fTempCrvRef");
-  if (htgDefrostHIFrac_fTempCrvRefElement) {
-    std::string curveName = htgDefrostHIFrac_fTempCrvRefElement.text().as_string();
-    if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
-      heatPump.setTimedEmpiricalDefrostHeatInputEnergyFractionCurve(curve.get());
+    // Capacity Modifier Function of Temperature Curve
+    pugi::xml_node htgCap_fTempCrvRefElement = element.child("HtgCap_fTempCrvRef");
+    if (htgCap_fTempCrvRefElement) {
+      std::string curveName = htgCap_fTempCrvRefElement.text().as_string();
+      if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
+        heatPump.setCapacityModifierFunctionofTemperatureCurve(curve.get());
+      }
     }
-  }
 
-  return result;
+    // Electric Input to Output Ratio Modifier Function of Temperature Curve
+    pugi::xml_node htgEIR_fTempCrvRefElement = element.child("HtgEIR_fTempCrvRef");
+    if (htgEIR_fTempCrvRefElement) {
+      std::string curveName = htgEIR_fTempCrvRefElement.text().as_string();
+      if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
+        heatPump.setElectricInputtoOutputRatioModifierFunctionofTemperatureCurve(curve.get());
+      }
+    }
+
+    // Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve
+    pugi::xml_node htgEIR_fPLRCrvRefElement = element.child("HtgEIR_fPLRCrvRef");
+    if (htgEIR_fPLRCrvRefElement) {
+      std::string curveName = htgEIR_fPLRCrvRefElement.text().as_string();
+      if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
+        heatPump.setElectricInputtoOutputRatioModifierFunctionofPartLoadRatioCurve(curve.get());
+      }
+    }
+
+    // Control Type
+    pugi::xml_node htgCtrlTypeElement = element.child("HtgCtrlType");
+    if (htgCtrlTypeElement) {
+      std::string controlType = htgCtrlTypeElement.text().as_string();
+      heatPump.setControlType(controlType);
+    }
+
+    // Flow Mode
+    pugi::xml_node htgFlowModeElement = element.child("HtgFlowMode");
+    if (htgFlowModeElement) {
+      std::string flowMode = htgFlowModeElement.text().as_string();
+      heatPump.setFlowMode(flowMode);
+    }
+
+    // Minimum Part Load Ratio
+    pugi::xml_node htgPLRMinElement = element.child("HtgPLRMin");
+    boost::optional<double> htgPLRMin = lexicalCastToDouble(htgPLRMinElement);
+    if (htgPLRMin) {
+      heatPump.setMinimumPartLoadRatio(htgPLRMin.get());
+    }
+
+    // Minimum and Maximum Source Inlet Temperature
+    pugi::xml_node htgSrcTempMinElement = element.child("HtgSrcTempMin");
+    boost::optional<double> htgSrcTempMin = lexicalCastToDouble(htgSrcTempMinElement);
+    if (htgSrcTempMin) {
+      double value = unitToUnit(htgSrcTempMin.get(), "F", "C").get();
+      heatPump.setMinimumSourceInletTemperature(value);
+    }
+
+    pugi::xml_node htgSrcTempMaxElement = element.child("HtgSrcTempMax");
+    boost::optional<double> htgSrcTempMax = lexicalCastToDouble(htgSrcTempMaxElement);
+    if (htgSrcTempMax) {
+      double value = unitToUnit(htgSrcTempMax.get(), "F", "C").get();
+      heatPump.setMaximumSourceInletTemperature(value);
+    }
+    
+    // Minimum Supply Water Temperature Curve
+    pugi::xml_node htgMinSupWtrTempCrvRefElement = element.child("HtgMinSupWtrTempCrvRef");
+    if (htgMinSupWtrTempCrvRefElement) {
+      std::string curveName = htgMinSupWtrTempCrvRefElement.text().as_string();
+      if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
+        heatPump.setMinimumSupplyWaterTemperatureCurve(curve.get());
+      }
+    }
+  
+    // Maximum Supply Water Temperature Curve
+    pugi::xml_node htgMaxSupWtrTempCrvRefElement = element.child("HtgMaxSupWtrTempCrvRef");
+    if (htgMaxSupWtrTempCrvRefElement) {
+      std::string curveName = htgMaxSupWtrTempCrvRefElement.text().as_string();
+      if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
+        heatPump.setMaximumSupplyWaterTemperatureCurve(curve.get());
+      }
+    }
+
+    // Defrost parameters
+    pugi::xml_node htgDefrostTempMaxElement = element.child("HtgDefrostTempMax");
+    if (htgDefrostTempMaxElement) {
+      boost::optional<double> htgDefrostTempMax = lexicalCastToDouble(htgDefrostTempMaxElement);
+      if (htgDefrostTempMax) {
+        double value = unitToUnit(htgDefrostTempMax.get(), "F", "C").get();
+        heatPump.setMaximumOutdoorDryBulbTemperatureForDefrostOperation(value);
+      }
+    }
+
+    pugi::xml_node htgDefrostCtrlElement = element.child("HtgDefrostCtrl");
+    if (htgDefrostCtrlElement) {
+      std::string defrostControl = htgDefrostCtrlElement.text().as_string();
+      if (defrostControl == "TimedEmpirical") {
+        // EnergyPlus currently doesn't have "TimedEmpirical" as an option, so use "Timed"
+        heatPump.setHeatPumpDefrostControl("Timed");
+      } else {
+        heatPump.setHeatPumpDefrostControl(defrostControl);
+      }
+    }
+
+    pugi::xml_node htgDefrostTimeFracElement = element.child("HtgDefrostTimeFrac");
+    boost::optional<double> htgDefrostTimeFrac = lexicalCastToDouble(htgDefrostTimeFracElement);
+    if (htgDefrostTimeFrac) {
+      heatPump.setHeatPumpDefrostTimePeriodFraction(htgDefrostTimeFrac.get());
+    }
+
+    // Timed empirical defrost curves
+    pugi::xml_node htgDefrostFreq_fTempCrvRefElement = element.child("HtgDefrostFreq_fTempCrvRef");
+    if (htgDefrostFreq_fTempCrvRefElement) {
+      std::string curveName = htgDefrostFreq_fTempCrvRefElement.text().as_string();
+      if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
+        heatPump.setTimedEmpiricalDefrostFrequencyCurve(curve.get());
+      }
+    }
+
+    pugi::xml_node htgDefrostHtLd_fTempCrvRefElement = element.child("HtgDefrostHtLd_fTempCrvRef");
+    if (htgDefrostHtLd_fTempCrvRefElement) {
+      std::string curveName = htgDefrostHtLd_fTempCrvRefElement.text().as_string();
+      if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
+        heatPump.setTimedEmpiricalDefrostHeatLoadPenaltyCurve(curve.get());
+      }
+    }
+
+    pugi::xml_node htgDefrostHIFrac_fTempCrvRefElement = element.child("HtgDefrostHIFrac_fTempCrvRef");
+    if (htgDefrostHIFrac_fTempCrvRefElement) {
+      std::string curveName = htgDefrostHIFrac_fTempCrvRefElement.text().as_string();
+      if (auto curve = model.getModelObjectByName<model::Curve>(curveName)) {
+        heatPump.setTimedEmpiricalDefrostHeatInputEnergyFractionCurve(curve.get());
+      }
+    }
+
+    return result;
+  }
 }
 
 boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateChiller(
