@@ -5749,7 +5749,25 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFlui
         heatPumpType = typeElement.text().as_string();
       }
 
-      plantLoop.addSupplyBranchForComponent(mo->cast<model::HVACComponent>());
+      model::WaterToWaterComponent heatPump = mo->cast<model::WaterToWaterComponent>();
+
+      plantLoop.addSupplyBranchForComponent(heatPump);
+
+      // Check for heat pump attached circulating pump
+      pugi::xml_node pumpElement = heatPumpElement.child("Pump");
+      if (pumpElement) {
+        if (auto pumpModelObject = translatePump(pumpElement, model)) {
+          if (auto inletModelObject = heatPump.supplyInletModelObject()) {
+            if (auto inletNode = inletModelObject->optionalCast<model::Node>()) {
+              if (auto pump = pumpModelObject->optionalCast<model::PumpVariableSpeed>()) {
+                pump->addToNode(inletNode.get());
+              } else if (auto pump = pumpModelObject->optionalCast<model::PumpConstantSpeed>()) {
+                pump->addToNode(inletNode.get());
+              }
+            }
+          }
+        }
+      }
 
       // Handle supplemental boilers only for heating heat pumps
       if (heatPumpType == "Heating" || heatPumpType == "HeatAndCoolChangeOver") {
@@ -8090,21 +8108,7 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateHtPu
       }
     }
 
-    // Check for and add pump if present
-    pugi::xml_node pumpElement = element.child("Pump");
-    if (pumpElement) {
-      if (auto pumpModelObject = translatePump(pumpElement, model)) {
-        if (auto inletModelObject = heatPump.supplyInletModelObject()) {
-          if (auto inletNode = inletModelObject->optionalCast<model::Node>()) {
-            if (auto pump = pumpModelObject->optionalCast<model::PumpVariableSpeed>()) {
-              pump->addToNode(inletNode.get());
-            } else if (auto pump = pumpModelObject->optionalCast<model::PumpConstantSpeed>()) {
-              pump->addToNode(inletNode.get());
-            }
-          }
-        }
-      }
-    }
+    // Heat pump attached pumps are handled in translateFluidSys
 
     // The supplemental boiler is now handled in translateFluidSys to support
     // splitting boilers that are referenced by multiple heat pumps
