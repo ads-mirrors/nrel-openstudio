@@ -8,10 +8,12 @@
 
 #include "Schedule.hpp"
 #include "Schedule_Impl.hpp"
-#include "WaterToAirComponent.hpp"
-#include "WaterToAirComponent_Impl.hpp"
+#include "HVACComponent.hpp"
+#include "HVACComponent_Impl.hpp"
 #include "CoilCoolingWater.hpp"
 #include "CoilCoolingWater_Impl.hpp"
+#include "CoilSystemCoolingWaterHeatExchangerAssisted.hpp"
+#include "CoilSystemCoolingWaterHeatExchangerAssisted_Impl.hpp"
 #include "Model.hpp"
 #include "Model_Impl.hpp"
 #include "Node.hpp"
@@ -87,24 +89,47 @@ namespace model {
 
     std::vector<ModelObject> CoilSystemCoolingWater_Impl::children() const {
       std::vector<ModelObject> result;
-      if (OptionalWaterToAirComponent intermediate = optionalCoolingCoil()) {
+      if (OptionalHVACComponent intermediate = optionalCoolingCoil()) {
         result.push_back(*intermediate);
       }
-      if (OptionalWaterToAirComponent intermediate = optionalCompanionCoilUsedForHeatRecovery()) {
+      if (OptionalHVACComponent intermediate = companionCoilUsedForHeatRecovery()) {
         result.push_back(*intermediate);
       }
 
       return result;
     }
 
+    std::vector<IdfObject> CoilSystemCoolingWater_Impl::remove() {
+      std::vector<IdfObject> result;
+
+      if (auto c_ = optionalCoolingCoil()) {  // This is false when the explicit ctor throws
+        if (boost::optional<WaterToAirComponent> cc_ = c_->optionalCast<WaterToAirComponent>()) {
+          cc_->removeFromPlantLoop();
+        } else if (auto cc_ = c_->optionalCast<CoilSystemCoolingWaterHeatExchangerAssisted>()) {
+          cc_->coolingCoil().removeFromPlantLoop();
+        } else {
+          OS_ASSERT(false);
+        }
+      }
+      if (auto companionCoil_ = companionCoilUsedForHeatRecovery()) {
+        if (auto cc_ = companionCoil_->optionalCast<WaterToAirComponent>()) {
+          cc_->removeFromPlantLoop();
+        } else {
+          OS_ASSERT(false);
+        }
+      }
+
+      return StraightComponent_Impl::remove();
+    }
+
     ModelObject CoilSystemCoolingWater_Impl::clone(Model model) const {
       auto coilSystemClone = StraightComponent_Impl::clone(model).cast<CoilSystemCoolingWater>();
 
-      if (OptionalWaterToAirComponent intermediate = optionalCoolingCoil()) {
-        coilSystemClone.setCoolingCoil(intermediate->clone(model).cast<WaterToAirComponent>());
+      if (OptionalHVACComponent intermediate = optionalCoolingCoil()) {
+        coilSystemClone.setCoolingCoil(intermediate->clone(model).cast<HVACComponent>());
       }
-      if (OptionalWaterToAirComponent intermediate = optionalCompanionCoilUsedForHeatRecovery()) {
-        coilSystemClone.setCompanionCoilUsedForHeatRecovery(intermediate->clone(model).cast<WaterToAirComponent>());
+      if (OptionalHVACComponent intermediate = companionCoilUsedForHeatRecovery()) {
+        coilSystemClone.setCompanionCoilUsedForHeatRecovery(intermediate->clone(model).cast<HVACComponent>());
       }
 
       return std::move(coilSystemClone);
@@ -127,50 +152,10 @@ namespace model {
     }
 
     boost::optional<HVACComponent> CoilSystemCoolingWater_Impl::containingHVACComponent() const {
-      // AirLoopHVACUnitarySystem
-      std::vector<AirLoopHVACUnitarySystem> airLoopHVACUnitarySystems = this->model().getConcreteModelObjects<AirLoopHVACUnitarySystem>();
-
-      for (const auto& airLoopHVACUnitarySystem : airLoopHVACUnitarySystems) {
-        if (boost::optional<HVACComponent> coolingCoil = airLoopHVACUnitarySystem.coolingCoil()) {
-          if (coolingCoil->handle() == this->handle()) {
-            return airLoopHVACUnitarySystem;
-          }
-        }
-      }
-
       return boost::none;
     }
 
     boost::optional<ZoneHVACComponent> CoilSystemCoolingWater_Impl::containingZoneHVACComponent() const {
-
-      // ZoneHVACFourPipeFanCoil
-      std::vector<ZoneHVACFourPipeFanCoil> zoneHVACFourPipeFanCoils;
-
-      zoneHVACFourPipeFanCoils = this->model().getConcreteModelObjects<ZoneHVACFourPipeFanCoil>();
-
-      for (const auto& zoneHVACFourPipeFanCoil : zoneHVACFourPipeFanCoils) {
-        if (boost::optional<HVACComponent> coil = zoneHVACFourPipeFanCoil.coolingCoil()) {
-          if (coil->handle() == this->handle()) {
-            return zoneHVACFourPipeFanCoil;
-          }
-        }
-      }
-
-      // ZoneHVACUnitVentilator
-      std::vector<ZoneHVACUnitVentilator> zoneHVACUnitVentilators;
-
-      zoneHVACUnitVentilators = this->model().getConcreteModelObjects<ZoneHVACUnitVentilator>();
-
-      for (const auto& zoneHVACUnitVentilator : zoneHVACUnitVentilators) {
-        if (boost::optional<HVACComponent> coil = zoneHVACUnitVentilator.coolingCoil()) {
-          if (coil->handle() == this->handle()) {
-            return zoneHVACUnitVentilator;
-          }
-        }
-      }
-
-      // ZoneHVAC:WindowAirConditioner not wrapped
-
       return boost::none;
     }
 
@@ -198,8 +183,8 @@ namespace model {
       return value.get();
     }
 
-    WaterToAirComponent CoilSystemCoolingWater_Impl::coolingCoil() const {
-      boost::optional<WaterToAirComponent> value = optionalCoolingCoil();
+    HVACComponent CoilSystemCoolingWater_Impl::coolingCoil() const {
+      boost::optional<HVACComponent> value = optionalCoolingCoil();
       if (!value) {
         LOG_AND_THROW(briefDescription() << " does not have an Cooling Coil attached.");
       }
@@ -236,8 +221,8 @@ namespace model {
       return value.get();
     }
 
-    boost::optional<WaterToAirComponent> CoilSystemCoolingWater_Impl::companionCoilUsedForHeatRecovery() const {
-      return optionalCompanionCoilUsedForHeatRecovery();
+    boost::optional<HVACComponent> CoilSystemCoolingWater_Impl::companionCoilUsedForHeatRecovery() const {
+      return getObject<ModelObject>().getModelObjectTarget<HVACComponent>(OS_CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery);
     }
 
     bool CoilSystemCoolingWater_Impl::setAvailabilitySchedule(Schedule& schedule) {
@@ -246,7 +231,7 @@ namespace model {
       return result;
     }
 
-    bool CoilSystemCoolingWater_Impl::setCoolingCoil(const WaterToAirComponent& coolingCoil) {
+    bool CoilSystemCoolingWater_Impl::setCoolingCoil(const HVACComponent& coolingCoil) {
       const bool result = setPointer(OS_CoilSystem_Cooling_WaterFields::CoolingCoil, coolingCoil.handle());
       return result;
     }
@@ -286,9 +271,16 @@ namespace model {
       return result;
     }
 
-    bool CoilSystemCoolingWater_Impl::setCompanionCoilUsedForHeatRecovery(const WaterToAirComponent& companionCoilUsedForHeatRecovery) {
-      const bool result = setPointer(OS_CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery, companionCoilUsedForHeatRecovery.handle());
-      return result;
+    bool CoilSystemCoolingWater_Impl::setCompanionCoilUsedForHeatRecovery(const HVACComponent& companionCoilUsedForHeatRecovery) {
+      if (companionCoilUsedForHeatRecovery.iddObjectType() == IddObjectType::OS_Coil_Cooling_Water) {
+        const bool result =
+          setPointer(OS_CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery, companionCoilUsedForHeatRecovery.handle());
+        return result;
+      } else {
+        LOG(Warn, "Invalid Companion Coil Used For Heat Recovery Type (expected CoilCoolingWater, not '"
+                    << companionCoilUsedForHeatRecovery.iddObjectType().valueName() << "') for " << briefDescription());
+        return false;
+      }
     }
 
     void CoilSystemCoolingWater_Impl::resetCompanionCoilUsedForHeatRecovery() {
@@ -300,27 +292,18 @@ namespace model {
       return getObject<ModelObject>().getModelObjectTarget<Schedule>(OS_CoilSystem_Cooling_WaterFields::AvailabilityScheduleName);
     }
 
-    boost::optional<WaterToAirComponent> CoilSystemCoolingWater_Impl::optionalCoolingCoil() const {
-      return getObject<ModelObject>().getModelObjectTarget<WaterToAirComponent>(OS_CoilSystem_Cooling_WaterFields::CoolingCoil);
-    }
-
-    boost::optional<WaterToAirComponent> CoilSystemCoolingWater_Impl::optionalCompanionCoilUsedForHeatRecovery() const {
-      return getObject<ModelObject>().getModelObjectTarget<WaterToAirComponent>(OS_CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery);
+    boost::optional<HVACComponent> CoilSystemCoolingWater_Impl::optionalCoolingCoil() const {
+      return getObject<ModelObject>().getModelObjectTarget<HVACComponent>(OS_CoilSystem_Cooling_WaterFields::CoolingCoil);
     }
 
   }  // namespace detail
 
-  CoilSystemCoolingWater::CoilSystemCoolingWater(const Model& model) : StraightComponent(CoilSystemCoolingWater::iddObjectType(), model) {
-    OS_ASSERT(getImpl<detail::CoilSystemCoolingWater_Impl>());
-
+  void CoilSystemCoolingWater::assignEnergyPlusIDDDefaults() {
     bool ok = true;
-    auto alwaysOn = model.alwaysOnDiscreteSchedule();
+    auto alwaysOn = model().alwaysOnDiscreteSchedule();
     ok = setAvailabilitySchedule(alwaysOn);
     OS_ASSERT(ok);
 
-    CoilCoolingWater coolingCoil(model);
-    ok = setCoolingCoil(coolingCoil);
-    OS_ASSERT(ok);
     ok = setDehumidificationControlType("None");
     OS_ASSERT(ok);
     ok = setRunonSensibleLoad(true);
@@ -335,29 +318,29 @@ namespace model {
     OS_ASSERT(ok);
   }
 
-  CoilSystemCoolingWater::CoilSystemCoolingWater(const Model& model, const WaterToAirComponent& coolingCoil)
+  CoilSystemCoolingWater::CoilSystemCoolingWater(const Model& model) : StraightComponent(CoilSystemCoolingWater::iddObjectType(), model) {
+    OS_ASSERT(getImpl<detail::CoilSystemCoolingWater_Impl>());
+
+    CoilCoolingWater coolingCoil(model);
+    coolingCoil.setName(name().get() + " Cooling Coil");
+    bool ok = setCoolingCoil(coolingCoil);
+    OS_ASSERT(ok);
+
+    assignEnergyPlusIDDDefaults();
+  }
+
+  CoilSystemCoolingWater::CoilSystemCoolingWater(const Model& model, const HVACComponent& coolingCoil)
     : StraightComponent(CoilSystemCoolingWater::iddObjectType(), model) {
     OS_ASSERT(getImpl<detail::CoilSystemCoolingWater_Impl>());
 
     bool ok = true;
-    auto alwaysOn = model.alwaysOnDiscreteSchedule();
-    ok = setAvailabilitySchedule(alwaysOn);
-    OS_ASSERT(ok);
-
     ok = setCoolingCoil(coolingCoil);
-    OS_ASSERT(ok);
-    ok = setDehumidificationControlType("None");
-    OS_ASSERT(ok);
-    ok = setRunonSensibleLoad(true);
-    OS_ASSERT(ok);
-    ok = setRunonLatentLoad(false);
-    OS_ASSERT(ok);
-    ok = setMinimumAirToWaterTemperatureOffset(0.0);
-    OS_ASSERT(ok);
-    ok = setEconomizerLockout(true);
-    OS_ASSERT(ok);
-    ok = setMinimumWaterLoopTemperatureForHeatRecovery(0.0);
-    OS_ASSERT(ok);
+    if (!ok) {
+      remove();
+      LOG_AND_THROW("Unable to set " << briefDescription() << "'s Cooling Coil " << coolingCoil.briefDescription() << ".");
+    }
+
+    assignEnergyPlusIDDDefaults();
   }
 
   IddObjectType CoilSystemCoolingWater::iddObjectType() {
@@ -372,7 +355,7 @@ namespace model {
     return getImpl<detail::CoilSystemCoolingWater_Impl>()->availabilitySchedule();
   }
 
-  WaterToAirComponent CoilSystemCoolingWater::coolingCoil() const {
+  HVACComponent CoilSystemCoolingWater::coolingCoil() const {
     return getImpl<detail::CoilSystemCoolingWater_Impl>()->coolingCoil();
   }
 
@@ -400,7 +383,7 @@ namespace model {
     return getImpl<detail::CoilSystemCoolingWater_Impl>()->minimumWaterLoopTemperatureForHeatRecovery();
   }
 
-  boost::optional<WaterToAirComponent> CoilSystemCoolingWater::companionCoilUsedForHeatRecovery() const {
+  boost::optional<HVACComponent> CoilSystemCoolingWater::companionCoilUsedForHeatRecovery() const {
     return getImpl<detail::CoilSystemCoolingWater_Impl>()->companionCoilUsedForHeatRecovery();
   }
 
@@ -408,7 +391,7 @@ namespace model {
     return getImpl<detail::CoilSystemCoolingWater_Impl>()->setAvailabilitySchedule(schedule);
   }
 
-  bool CoilSystemCoolingWater::setCoolingCoil(const WaterToAirComponent& coolingCoil) {
+  bool CoilSystemCoolingWater::setCoolingCoil(const HVACComponent& coolingCoil) {
     return getImpl<detail::CoilSystemCoolingWater_Impl>()->setCoolingCoil(coolingCoil);
   }
 
@@ -436,7 +419,7 @@ namespace model {
     return getImpl<detail::CoilSystemCoolingWater_Impl>()->setMinimumWaterLoopTemperatureForHeatRecovery(minimumWaterLoopTemperatureForHeatRecovery);
   }
 
-  bool CoilSystemCoolingWater::setCompanionCoilUsedForHeatRecovery(const WaterToAirComponent& companionCoilUsedForHeatRecovery) {
+  bool CoilSystemCoolingWater::setCompanionCoilUsedForHeatRecovery(const HVACComponent& companionCoilUsedForHeatRecovery) {
     return getImpl<detail::CoilSystemCoolingWater_Impl>()->setCompanionCoilUsedForHeatRecovery(companionCoilUsedForHeatRecovery);
   }
 

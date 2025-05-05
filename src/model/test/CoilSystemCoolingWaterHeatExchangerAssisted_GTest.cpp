@@ -98,11 +98,16 @@ TEST_F(ModelFixture, CoilSystemCoolingWaterHeatExchangerAssisted_clone) {
   auto hx = coilSystem.heatExchanger().cast<HeatExchangerAirToAirSensibleAndLatent>();
 
   AirLoopHVAC a(m);
+  EXPECT_EQ(2, a.supplyComponents().size());  // o --- o
   Node n = a.supplyOutletNode();
   EXPECT_TRUE(coilSystem.addToNode(n));
+  EXPECT_EQ(3, a.supplyComponents().size());  // o --- oa_sys --- o
 
   PlantLoop p(m);
+  EXPECT_EQ(5, p.demandComponents().size());  // o --- Splitter --- o --- Mixer --- o
+
   EXPECT_TRUE(p.addDemandBranchForComponent(cc));
+  EXPECT_EQ(7, p.demandComponents().size());  // o --- Splitter --- o --- coolingCoil --- Mixer --- o
 
   EXPECT_EQ(1u, m.getConcreteModelObjects<CoilSystemCoolingWaterHeatExchangerAssisted>().size());
   EXPECT_EQ(1u, m.getConcreteModelObjects<CoilCoolingWater>().size());
@@ -118,7 +123,7 @@ TEST_F(ModelFixture, CoilSystemCoolingWaterHeatExchangerAssisted_clone) {
   //EXPECT_EQ(coilSystem.plantLoop()->handle(), p.handle());
   //EXPECT_TRUE(hx.airLoopHVAC());
 
-  auto coilSystem2 = coilSystem.clone(m).cast<CoilSystemCoolingWaterHeatExchangerAssisted>();
+  auto coilSystemClone = coilSystem.clone(m).cast<CoilSystemCoolingWaterHeatExchangerAssisted>();
 
   EXPECT_EQ(2u, m.getConcreteModelObjects<CoilSystemCoolingWaterHeatExchangerAssisted>().size());
   EXPECT_EQ(2u, m.getConcreteModelObjects<CoilCoolingWater>().size());
@@ -128,12 +133,23 @@ TEST_F(ModelFixture, CoilSystemCoolingWaterHeatExchangerAssisted_clone) {
   EXPECT_TRUE(coilSystem.inletModelObject());
   EXPECT_TRUE(coilSystem.outletModelObject());
 
-  EXPECT_FALSE(coilSystem2.airLoopHVAC());
-  EXPECT_FALSE(coilSystem2.inletModelObject());
-  EXPECT_FALSE(coilSystem2.outletModelObject());
+  EXPECT_FALSE(coilSystemClone.airLoopHVAC());
+  EXPECT_FALSE(coilSystemClone.inletModelObject());
+  EXPECT_FALSE(coilSystemClone.outletModelObject());
 
-  EXPECT_NE(coilSystem2.coolingCoil().handle(), cc.handle());
-  EXPECT_NE(coilSystem2.heatExchanger().handle(), hx.handle());
+  EXPECT_NE(coilSystemClone.coolingCoil().handle(), cc.handle());
+  EXPECT_NE(coilSystemClone.heatExchanger().handle(), hx.handle());
+
+  coilSystemClone.remove();
+  EXPECT_EQ(1, m.getConcreteModelObjects<CoilSystemCoolingWaterHeatExchangerAssisted>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<CoilCoolingWater>().size());
+
+  coilSystem.remove();
+  EXPECT_EQ(0, m.getConcreteModelObjects<CoilSystemCoolingWaterHeatExchangerAssisted>().size());
+  EXPECT_EQ(0, m.getConcreteModelObjects<CoilCoolingWater>().size());
+
+  EXPECT_EQ(2, a.supplyComponents().size());  // o --- o
+  EXPECT_EQ(5, p.demandComponents().size());  // o --- Splitter --- o --- Mixer --- o
 }
 
 TEST_F(ModelFixture, CoilSystemCoolingWaterHeatExchangerAssisted_containingComponent) {

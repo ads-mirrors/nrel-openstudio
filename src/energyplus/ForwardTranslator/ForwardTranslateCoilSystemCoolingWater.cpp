@@ -74,36 +74,32 @@ namespace energyplus {
           idf->setString(Coil_Cooling_WaterFields::AirInletNodeName, airInletNodeName);
           idf->setString(Coil_Cooling_WaterFields::AirOutletNodeName, airOutletNodeName);
           // Add IddObjectType::Coil_Cooling_Water_DetailedGeometry if implemented
+        } else if (idf->iddObject().type() == IddObjectType::CoilSystem_Cooling_Water_HeatExchangerAssisted) {
+          // The logic is built in the translateCoilSystemCoolingWaterHeatExchangerAssisted method
+          // Essentially it's the same as getting the HX (CoilSystem_Cooling_Water_HeatExchangerAssistedFields::HeatExchangerName)
+          // and setting HeatExchanger_AirToAir_SensibleAndLatentFields::SupplyAirInletNodeName & ExhaustAirOutletNodeName
         } else {
-          // Shouldn't happen, accepts only Coil:Cooling:Water or Coil:Cooling:Water:DetailedGeometry
-          // Shouldn't happen, accepts only Coil:Cooling:DX:SingleSpeed or Coil:Cooling:DX:VariableSpeed
-          LOG(Fatal, modelObject.briefDescription()
-                       << " appears to have a cooling coil that shouldn't have been accepted: " << coolingCoil.briefDescription());
-          OS_ASSERT(false);
-        }
-      }
-      if (auto coilCoolingWater = coolingCoil.optionalCast<CoilCoolingWater>()) {
-        if (auto controller = coilCoolingWater->controllerWaterCoil()) {
-          if (auto idf = translateAndMapModelObject(controller.get())) {
-            idf->setString(Controller_WaterCoilFields::SensorNodeName, airOutletNodeName);
-          }
+          // Shouldn't happen, accepts only Coil:Cooling:Water CoilSystem:Cooling:Water:HeatExchangerAssisted (or Coil:Cooling:Water:DetailedGeometry, not wrapped)
+          LOG_AND_THROW(modelObject.briefDescription()
+                        << " appears to have a cooling coil that shouldn't have been accepted: " << coolingCoil.briefDescription());
         }
       }
 
-      // Need a SPM:MixedAir on the Coil:Cooling:Water outlet node (that we **created** just above in IDF directly, so it won't get picked up by the
+      // TODO: is that true?!
+      // Need a SPM:MixedAir on the outlet node (that we **created** just above in IDF directly, so it won't get picked up by the
       // ForwardTranslateAirLoopHVAC method)
       if (boost::optional<AirLoopHVAC> airLoop_ = modelObject.airLoopHVAC()) {
         std::vector<StraightComponent> fans;
         std::vector<ModelObject> supplyComponents = airLoop_->supplyComponents();
 
-        for (auto it = supplyComponents.begin(); it != supplyComponents.end(); ++it) {
-          if (auto fan_ = it->optionalCast<FanVariableVolume>()) {
+        for (auto& supplyComponent : supplyComponents) {
+          if (auto fan_ = supplyComponent.optionalCast<FanVariableVolume>()) {
             fans.insert(fans.begin(), std::move(*fan_));
-          } else if (auto fan_ = it->optionalCast<FanConstantVolume>()) {
+          } else if (auto fan_ = supplyComponent.optionalCast<FanConstantVolume>()) {
             fans.insert(fans.begin(), std::move(*fan_));
-          } else if (auto fan_ = it->optionalCast<FanSystemModel>()) {
+          } else if (auto fan_ = supplyComponent.optionalCast<FanSystemModel>()) {
             fans.insert(fans.begin(), std::move(*fan_));
-          } else if (auto fan_ = it->optionalCast<FanOnOff>()) {
+          } else if (auto fan_ = supplyComponent.optionalCast<FanOnOff>()) {
             fans.insert(fans.begin(), std::move(*fan_));
           }
         }
@@ -177,20 +173,21 @@ namespace energyplus {
     idfObject.setDouble(CoilSystem_Cooling_WaterFields::MinimumWaterLoopTemperatureForHeatRecovery, minimumWaterLoopTemperatureForHeatRecovery);
 
     // Companion Coil Used For Heat Recovery: Optional Object
-    if (boost::optional<WaterToAirComponent> companionCoilUsedForHeatRecovery_ = modelObject.companionCoilUsedForHeatRecovery()) {
-      if (boost::optional<IdfObject> wo_ = translateAndMapModelObject(companionCoilUsedForHeatRecovery_.get())) {
-        idfObject.setString(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery, wo_->nameString());
-        if (wo_->iddObject().type() == IddObjectType::Coil_Cooling_Water) {
-          wo_->setString(Coil_Cooling_WaterFields::AirInletNodeName, modelObject.airLoopHVACOutdoorAirSystem()->reliefAirModelObject()->nameString());
-          wo_->setString(Coil_Cooling_WaterFields::AirOutletNodeName, wo_->nameString() + " Exhaust Outlet Node");  // FIXME
-          // Add IddObjectType::Coil_Cooling_Water_DetailedGeometry if implemented
+    if (boost::optional<HVACComponent> companionCoilUsedForHeatRecovery_ = modelObject.companionCoilUsedForHeatRecovery()) {
+      if (auto comp_ = companionCoilUsedForHeatRecovery_->optionalCast<CoilCoolingWater>()) {
+        if (comp_->airInletModelObject()) {
+          if (boost::optional<IdfObject> idf_ = translateAndMapModelObject(companionCoilUsedForHeatRecovery_.get())) {
+            idfObject.setString(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery, idf_->nameString());
+          }
         } else {
-          // Shouldn't happen, accepts only Coil:Cooling:Water or Coil:Cooling:Water:DetailedGeometry
-          // Shouldn't happen, accepts only Coil:Cooling:DX:SingleSpeed or Coil:Cooling:DX:VariableSpeed
-          LOG(Fatal, modelObject.briefDescription() << " appears to have a companion coil used for heat recovery that shouldn't have been accepted: "
-                                                    << companionCoilUsedForHeatRecovery_.get().briefDescription());
-          OS_ASSERT(false);
+          LOG(Warn, modelObject.briefDescription()
+                      << " has a companion coil used for heat recovery that is not connected to an AirLoopHVAC / AirLoopHVACOutdoorAirSystem"
+                      << " and will not be translated:" << comp_->briefDescription());
         }
+      } else {
+        // Shouldn't happen, accepts only Coil:Cooling:Water
+        LOG_AND_THROW(modelObject.briefDescription() << " appears to have a companion coil used for heat recovery that shouldn't have been accepted: "
+                                                     << companionCoilUsedForHeatRecovery_.get().briefDescription());
       }
     }
 
