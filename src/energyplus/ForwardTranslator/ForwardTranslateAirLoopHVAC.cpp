@@ -277,13 +277,6 @@ namespace energyplus {
           controller = supplyComponent.cast<CoilHeatingWater>().controllerWaterCoil();
           break;
         }
-        case openstudio::IddObjectType::OS_CoilSystem_Cooling_Water: {
-          auto coolingCoil = supplyComponent.cast<CoilSystemCoolingWater>().coolingCoil();
-          if (auto coilCoolingWater = coolingCoil.optionalCast<CoilCoolingWater>()) {
-            controller = coilCoolingWater->controllerWaterCoil();
-          }
-          break;
-        }
         case openstudio::IddObjectType::OS_CoilSystem_Cooling_Water_HeatExchangerAssisted: {
           auto coolingCoil = supplyComponent.cast<CoilSystemCoolingWaterHeatExchangerAssisted>().coolingCoil();
           if (auto coilCoolingWater = coolingCoil.optionalCast<CoilCoolingWater>()) {
@@ -291,6 +284,10 @@ namespace energyplus {
           }
           break;
         }
+        // case openstudio::IddObjectType::OS_CoilSystem_Cooling_Water: {
+        //   // No-op: this has its own controller
+        //   break;
+        // }
         default: {
           break;
         }
