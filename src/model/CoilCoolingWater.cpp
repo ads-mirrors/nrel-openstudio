@@ -273,46 +273,66 @@ namespace model {
     }
 
     bool CoilCoolingWater_Impl::addToNode(Node& node) {
-      bool success(false);
+      bool success = false;
 
       auto t_containingHVACComponent = containingHVACComponent();
       auto t_airLoop = node.airLoopHVAC();
 
-      if (t_airLoop && t_containingHVACComponent && t_containingHVACComponent->optionalCast<CoilSystemCoolingWaterHeatExchangerAssisted>()) {
-        LOG(Warn, this->briefDescription()
-                    << " cannot be connected directly to an AirLoopHVAC when it's part of a parent CoilSystemCoolingWaterHeatExchangerAssisted. "
-                       "Please call CoilSystemCoolingWaterHeatExchangerAssisted::addToNode instead");
+      // Reject adding coils parent of a Parent System
+      if (t_airLoop && t_containingHVACComponent) {
+        if (t_containingHVACComponent->optionalCast<CoilSystemCoolingWaterHeatExchangerAssisted>()) {
+          LOG(Warn, this->briefDescription()
+                      << " cannot be connected directly to an AirLoopHVAC when it's part of a parent CoilSystemCoolingWaterHeatExchangerAssisted. "
+                         "Please call CoilSystemCoolingWaterHeatExchangerAssisted::addToNode instead");
+          return false;
+        }
 
-        /*       } else if (t_airLoop && t_containingHVACComponent && t_containingHVACComponent->optionalCast<CoilSystemCoolingWater>()) {
-        LOG(Warn, this->briefDescription()
-                    << " cannot be connected directly to an AirLoopHVAC when it's part of a parent CoilSystemCoolingWater. "
-                       "Please call CoilSystemCoolingWater::addToNode instead"); */
+        if (t_containingHVACComponent->optionalCast<CoilSystemCoolingWater>()
+            && t_containingHVACComponent->cast<CoilSystemCoolingWater>().coolingCoil().handle() == this->handle()) {
+          LOG(Warn, this->briefDescription()
+                      << " cannot be connected directly to an AirLoopHVAC when it's the primary cooling coil of a parent CoilSystemCoolingWater. "
+                         "Please call CoilSystemCoolingWater::addToNode instead");
+          return false;
+        }
+      }
 
-      } else {
+      success = WaterToAirComponent_Impl::addToNode(node);
+      if (!success) {
+        return false;
+      }
+      // We only add the controller if we are not part of a containing ZoneHVACComponent, and we have a PlantLoop assigned
+      if (containingZoneHVACComponent() || !waterInletModelObject()) {
+        // We're done
+        return true;
+      }
 
-        success = WaterToAirComponent_Impl::addToNode(node);
-        auto t_containingZoneHVACComponent = containingZoneHVACComponent();
-
-        if (success && (!t_containingZoneHVACComponent)) {
-          if (auto t_waterInletModelObject = waterInletModelObject()) {
-            if (auto oldController = controllerWaterCoil()) {
-              if (!openstudio::istringEqual(oldController->action().get(), "Reverse")) {
-                LOG(Warn,
-                    briefDescription()
-                      << " has an existing ControllerWaterCoil with action set to something else than 'Reverse'. Make sure this is what you want");
-              }
-            } else {
-              if (t_containingHVACComponent && t_containingHVACComponent->optionalCast<CoilSystemCoolingWater>()) {
-                // no-op
-              } else {
-                Model t_model = model();
-                ControllerWaterCoil controller(t_model);
-                controller.getImpl<ControllerWaterCoil_Impl>()->setWaterCoil(getObject<HVACComponent>());
-                controller.setAction("Reverse");
-              }
+      // We don't need a controller if we are part of a CoilSystemCoolingWater (directly, or indirectly via a
+      // CoilSystemCoolingWaterHeatExchangerAssisted)
+      bool needAController = true;
+      if (t_containingHVACComponent) {
+        if (t_containingHVACComponent->optionalCast<CoilSystemCoolingWater>()) {
+          needAController = false;
+        } else if (auto hxAssisted_ = t_containingHVACComponent->optionalCast<CoilSystemCoolingWaterHeatExchangerAssisted>()) {
+          if (auto parent_ = hxAssisted_->containingHVACComponent()) {
+            if (parent_->optionalCast<CoilSystemCoolingWater>()) {
+              needAController = false;
             }
           }
         }
+      }
+
+      if (auto oldController_ = controllerWaterCoil()) {
+        if (!needAController) {
+          oldController_->remove();
+        } else if (!openstudio::istringEqual(oldController_->action().get(), "Reverse")) {
+          LOG(Warn, briefDescription()
+                      << " has an existing ControllerWaterCoil with action set to something else than 'Reverse'. Make sure this is what you want");
+        }
+      } else if (needAController) {
+        Model t_model = model();
+        ControllerWaterCoil controller(t_model);
+        controller.getImpl<ControllerWaterCoil_Impl>()->setWaterCoil(getObject<HVACComponent>());
+        controller.setAction("Reverse");
       }
 
       return success;
