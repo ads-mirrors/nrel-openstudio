@@ -152,50 +152,10 @@ namespace model {
     }
 
     boost::optional<HVACComponent> CoilSystemCoolingWater_Impl::containingHVACComponent() const {
-      // AirLoopHVACUnitarySystem
-      std::vector<AirLoopHVACUnitarySystem> airLoopHVACUnitarySystems = this->model().getConcreteModelObjects<AirLoopHVACUnitarySystem>();
-
-      for (const auto& airLoopHVACUnitarySystem : airLoopHVACUnitarySystems) {
-        if (boost::optional<HVACComponent> coolingCoil = airLoopHVACUnitarySystem.coolingCoil()) {
-          if (coolingCoil->handle() == this->handle()) {
-            return airLoopHVACUnitarySystem;
-          }
-        }
-      }
-
       return boost::none;
     }
 
     boost::optional<ZoneHVACComponent> CoilSystemCoolingWater_Impl::containingZoneHVACComponent() const {
-
-      // ZoneHVACFourPipeFanCoil
-      std::vector<ZoneHVACFourPipeFanCoil> zoneHVACFourPipeFanCoils;
-
-      zoneHVACFourPipeFanCoils = this->model().getConcreteModelObjects<ZoneHVACFourPipeFanCoil>();
-
-      for (const auto& zoneHVACFourPipeFanCoil : zoneHVACFourPipeFanCoils) {
-        if (boost::optional<HVACComponent> coil = zoneHVACFourPipeFanCoil.coolingCoil()) {
-          if (coil->handle() == this->handle()) {
-            return zoneHVACFourPipeFanCoil;
-          }
-        }
-      }
-
-      // ZoneHVACUnitVentilator
-      std::vector<ZoneHVACUnitVentilator> zoneHVACUnitVentilators;
-
-      zoneHVACUnitVentilators = this->model().getConcreteModelObjects<ZoneHVACUnitVentilator>();
-
-      for (const auto& zoneHVACUnitVentilator : zoneHVACUnitVentilators) {
-        if (boost::optional<HVACComponent> coil = zoneHVACUnitVentilator.coolingCoil()) {
-          if (coil->handle() == this->handle()) {
-            return zoneHVACUnitVentilator;
-          }
-        }
-      }
-
-      // ZoneHVAC:WindowAirConditioner not wrapped
-
       return boost::none;
     }
 
