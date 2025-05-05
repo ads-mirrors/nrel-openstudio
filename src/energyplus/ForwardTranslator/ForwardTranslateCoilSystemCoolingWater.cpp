@@ -74,6 +74,10 @@ namespace energyplus {
           idf->setString(Coil_Cooling_WaterFields::AirInletNodeName, airInletNodeName);
           idf->setString(Coil_Cooling_WaterFields::AirOutletNodeName, airOutletNodeName);
           // Add IddObjectType::Coil_Cooling_Water_DetailedGeometry if implemented
+        } else if (idf->iddObject().type() == IddObjectType::CoilSystem_Cooling_Water_HeatExchangerAssisted) {
+          // The logic is built in the translateCoilSystemCoolingWaterHeatExchangerAssisted method
+          // Essentially it's the same as getting the HX (CoilSystem_Cooling_Water_HeatExchangerAssistedFields::HeatExchangerName)
+          // and setting HeatExchanger_AirToAir_SensibleAndLatentFields::SupplyAirInletNodeName & ExhaustAirOutletNodeName
         } else {
           // Shouldn't happen, accepts only Coil:Cooling:Water CoilSystem:Cooling:Water:HeatExchangerAssisted (or Coil:Cooling:Water:DetailedGeometry, not wrapped)
           LOG_AND_THROW(modelObject.briefDescription()
