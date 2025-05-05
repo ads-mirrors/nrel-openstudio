@@ -13,7 +13,7 @@ namespace openstudio {
 namespace model {
 
   class Schedule;
-  class WaterToAirComponent;
+  class HVACComponent;
 
   namespace detail {
 
@@ -70,7 +70,7 @@ namespace model {
 
       Schedule availabilitySchedule() const;
 
-      WaterToAirComponent coolingCoil() const;
+      HVACComponent coolingCoil() const;
 
       std::string dehumidificationControlType() const;
 
@@ -84,7 +84,7 @@ namespace model {
 
       double minimumWaterLoopTemperatureForHeatRecovery() const;
 
-      boost::optional<WaterToAirComponent> companionCoilUsedForHeatRecovery() const;
+      boost::optional<HVACComponent> companionCoilUsedForHeatRecovery() const;
 
       //@}
       /** @name Setters */
@@ -92,7 +92,7 @@ namespace model {
 
       bool setAvailabilitySchedule(Schedule& schedule);
 
-      bool setCoolingCoil(const WaterToAirComponent& coolingCoil);
+      bool setCoolingCoil(const HVACComponent& coolingCoil);
 
       bool setDehumidificationControlType(const std::string& dehumidificationControlType);
 
@@ -106,7 +106,7 @@ namespace model {
 
       bool setMinimumWaterLoopTemperatureForHeatRecovery(double minimumWaterLoopTemperatureForHeatRecovery);
 
-      bool setCompanionCoilUsedForHeatRecovery(const WaterToAirComponent& companionCoilUsedForHeatRecovery);
+      bool setCompanionCoilUsedForHeatRecovery(const HVACComponent& companionCoilUsedForHeatRecovery);
 
       void resetCompanionCoilUsedForHeatRecovery();
 
@@ -120,8 +120,8 @@ namespace model {
       REGISTER_LOGGER("openstudio.model.CoilSystemCoolingWater");
 
       boost::optional<Schedule> optionalAvailabilitySchedule() const;
-      boost::optional<WaterToAirComponent> optionalCoolingCoil() const;
-      boost::optional<WaterToAirComponent> optionalCompanionCoilUsedForHeatRecovery() const;
+      boost::optional<HVACComponent> optionalCoolingCoil() const;
+      boost::optional<HVACComponent> optionalCompanionCoilUsedForHeatRecovery() const;
     };
 
   }  // namespace detail

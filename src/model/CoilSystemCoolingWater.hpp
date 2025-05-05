@@ -14,7 +14,7 @@ namespace openstudio {
 namespace model {
 
   class Schedule;
-  class WaterToAirComponent;
+  class HVACComponent;
 
   namespace detail {
 
@@ -31,7 +31,7 @@ namespace model {
 
     explicit CoilSystemCoolingWater(const Model& model);
 
-    explicit CoilSystemCoolingWater(const Model& model, const WaterToAirComponent& coolingCoil);
+    explicit CoilSystemCoolingWater(const Model& model, const HVACComponent& coolingCoil);
 
     virtual ~CoilSystemCoolingWater() = default;
     // Default the copy and move operators because the virtual dtor is explicit
@@ -51,7 +51,7 @@ namespace model {
 
     Schedule availabilitySchedule() const;
 
-    WaterToAirComponent coolingCoil() const;
+    HVACComponent coolingCoil() const;
 
     std::string dehumidificationControlType() const;
 
@@ -65,7 +65,7 @@ namespace model {
 
     double minimumWaterLoopTemperatureForHeatRecovery() const;
 
-    boost::optional<WaterToAirComponent> companionCoilUsedForHeatRecovery() const;
+    boost::optional<HVACComponent> companionCoilUsedForHeatRecovery() const;
 
     //@}
     /** @name Setters */
@@ -73,7 +73,8 @@ namespace model {
 
     bool setAvailabilitySchedule(Schedule& schedule);
 
-    bool setCoolingCoil(const WaterToAirComponent& coolingCoil);
+    // CoilCoolingWater or CoilSystemCoolingWaterHeatExchangerAssisted
+    bool setCoolingCoil(const HVACComponent& coolingCoil);
 
     bool setDehumidificationControlType(const std::string& dehumidificationControlType);
 
@@ -87,7 +88,8 @@ namespace model {
 
     bool setMinimumWaterLoopTemperatureForHeatRecovery(double minimumWaterLoopTemperatureForHeatRecovery);
 
-    bool setCompanionCoilUsedForHeatRecovery(const WaterToAirComponent& companionCoilUsedForHeatRecovery);
+    // Only CoilCoolingWater is supported by E+ as a companion coil right now
+    bool setCompanionCoilUsedForHeatRecovery(const HVACComponent& companionCoilUsedForHeatRecovery);
 
     void resetCompanionCoilUsedForHeatRecovery();
 

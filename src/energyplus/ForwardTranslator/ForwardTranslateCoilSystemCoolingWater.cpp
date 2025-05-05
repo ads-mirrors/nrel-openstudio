@@ -177,7 +177,7 @@ namespace energyplus {
     idfObject.setDouble(CoilSystem_Cooling_WaterFields::MinimumWaterLoopTemperatureForHeatRecovery, minimumWaterLoopTemperatureForHeatRecovery);
 
     // Companion Coil Used For Heat Recovery: Optional Object
-    if (boost::optional<WaterToAirComponent> companionCoilUsedForHeatRecovery_ = modelObject.companionCoilUsedForHeatRecovery()) {
+    if (boost::optional<HVACComponent> companionCoilUsedForHeatRecovery_ = modelObject.companionCoilUsedForHeatRecovery()) {
       if (boost::optional<IdfObject> wo_ = translateAndMapModelObject(companionCoilUsedForHeatRecovery_.get())) {
         idfObject.setString(CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery, wo_->nameString());
         if (wo_->iddObject().type() == IddObjectType::Coil_Cooling_Water) {

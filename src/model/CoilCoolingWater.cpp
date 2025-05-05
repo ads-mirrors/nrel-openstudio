@@ -389,7 +389,7 @@ namespace model {
           if (coilSystem.coolingCoil().handle() == handle()) {
             return coilSystem;
           }
-          if (boost::optional<WaterToAirComponent> companionCoilUsedForHeatRecovery = coilSystem.companionCoilUsedForHeatRecovery()) {
+          if (boost::optional<HVACComponent> companionCoilUsedForHeatRecovery = coilSystem.companionCoilUsedForHeatRecovery()) {
             if (companionCoilUsedForHeatRecovery->handle() == this->handle()) {
               return coilSystem;
             }
