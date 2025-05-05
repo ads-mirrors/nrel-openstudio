@@ -52,8 +52,11 @@ namespace model {
       // Will also clone the coolingCoil and companionCoilUsedForHeatRecovery
       virtual ModelObject clone(Model model) const override;
 
-      // This function will connect the underlying Coil:Cooling:Water object
+      // This function will connect the air side only, for water side, use the coils directly
       virtual bool addToNode(Node& node) override;
+
+      // Need to disconnect the Water side of the coil(s) before removing
+      virtual std::vector<IdfObject> remove() override;
 
       virtual boost::optional<HVACComponent> containingHVACComponent() const override;
 

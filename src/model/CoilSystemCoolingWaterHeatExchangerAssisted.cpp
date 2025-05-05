@@ -73,8 +73,12 @@ namespace model {
     std::vector<ModelObject> CoilSystemCoolingWaterHeatExchangerAssisted_Impl::children() const {
       std::vector<ModelObject> result;
 
-      result.push_back(coolingCoil());
-      result.push_back(heatExchanger());
+      if (auto intermediate = optionalCoolingCoil()) {
+        result.push_back(*intermediate);
+      }
+      if (auto intermediate = optionalHeatExchanger()) {
+        result.push_back(*intermediate);
+      }
 
       return result;
     }
@@ -93,6 +97,14 @@ namespace model {
       }
 
       return std::move(newCoilSystem);
+    }
+
+    std::vector<IdfObject> CoilSystemCoolingWaterHeatExchangerAssisted_Impl::remove() {
+      if (auto cc_ = optionalCoolingCoil()) {
+        cc_->removeFromPlantLoop();
+      }
+
+      return StraightComponent_Impl::remove();
     }
 
     boost::optional<HVACComponent> CoilSystemCoolingWaterHeatExchangerAssisted_Impl::containingHVACComponent() const {
@@ -248,13 +260,12 @@ namespace model {
 
     bool ok = setHeatExchanger(heatExchanger);
     if (!ok) {
+      remove();
       LOG_AND_THROW("Unable to set " << briefDescription() << "'s Heat Exchanger " << heatExchanger.briefDescription() << ".");
     }
 
     CoilCoolingWater coolingCoil(model);
     setCoolingCoil(coolingCoil);
-
-    setHeatExchanger(heatExchanger);
   }
 
   IddObjectType CoilSystemCoolingWaterHeatExchangerAssisted::iddObjectType() {

@@ -12,6 +12,8 @@
 #include "HVACComponent_Impl.hpp"
 #include "CoilCoolingWater.hpp"
 #include "CoilCoolingWater_Impl.hpp"
+#include "CoilSystemCoolingWaterHeatExchangerAssisted.hpp"
+#include "CoilSystemCoolingWaterHeatExchangerAssisted_Impl.hpp"
 #include "Model.hpp"
 #include "Model_Impl.hpp"
 #include "Node.hpp"
@@ -95,6 +97,29 @@ namespace model {
       }
 
       return result;
+    }
+
+    std::vector<IdfObject> CoilSystemCoolingWater_Impl::remove() {
+      std::vector<IdfObject> result;
+
+      if (auto c_ = optionalCoolingCoil()) {  // This is false when the explicit ctor throws
+        if (boost::optional<WaterToAirComponent> cc_ = c_->optionalCast<WaterToAirComponent>()) {
+          cc_->removeFromPlantLoop();
+        } else if (auto cc_ = c_->optionalCast<CoilSystemCoolingWaterHeatExchangerAssisted>()) {
+          cc_->coolingCoil().removeFromPlantLoop();
+        } else {
+          OS_ASSERT(false);
+        }
+      }
+      if (auto companionCoil_ = companionCoilUsedForHeatRecovery()) {
+        if (auto cc_ = companionCoil_->optionalCast<WaterToAirComponent>()) {
+          cc_->removeFromPlantLoop();
+        } else {
+          OS_ASSERT(false);
+        }
+      }
+
+      return StraightComponent_Impl::remove();
     }
 
     ModelObject CoilSystemCoolingWater_Impl::clone(Model model) const {
