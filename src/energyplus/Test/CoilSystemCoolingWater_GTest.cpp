@@ -161,6 +161,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_WithCompanion
   EXPECT_TRUE(coilSystemCoolingWater.setEconomizerLockout(false));  // Opposite from IDD default
   EXPECT_TRUE(coilSystemCoolingWater.setMinimumWaterLoopTemperatureForHeatRecovery(1.2));
   CoilCoolingWater companionCoilUsedForHeatRecovery(m);
+  companionCoilUsedForHeatRecovery.setName("CompanionCoilUsedForHeatRecovery");
   EXPECT_TRUE(coilSystemCoolingWater.setCompanionCoilUsedForHeatRecovery(companionCoilUsedForHeatRecovery));
 
   AirLoopHVAC airLoop(m);
@@ -170,8 +171,16 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_WithCompanion
   EXPECT_TRUE(oaSystem.addToNode(supplyOutletNode));
   Node oaNode = oaSystem.outboardOANode().get();
   EXPECT_TRUE(coilSystemCoolingWater.addToNode(oaNode));
-  Node reliefNode = oaSystem.reliefAirModelObject()->cast<Node>();
+  Node reliefNode = oaSystem.outboardReliefNode().get();
   EXPECT_TRUE(companionCoilUsedForHeatRecovery.addToNode(reliefNode));
+
+  oaNode.setName("Outdoor Air Inlet Node");
+  reliefNode.setName("Relief Node");
+  oaSystem.reliefAirModelObject()->setName("Return to OA System Node");
+  oaSystem.outdoorAirModelObject()->setName("OA System Outlet to Mixed Node");
+  airLoop.mixedAirNode()->setName("Mixed Air Node");
+  airLoop.supplyInletNode().setName("Supply Inlet Node");
+  airLoop.supplyOutletNode().setName("Supply Outlet Node");
 
   // They must be connected to a PlantLoop too
   PlantLoop chw_p(m);
@@ -181,6 +190,11 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_WithCompanion
   EXPECT_TRUE(pipe.addToNode(coolingOutlet));
   Node pipeOutlet = pipe.outletModelObject()->cast<Node>();
   EXPECT_TRUE(companionCoilUsedForHeatRecovery.addToNode(pipeOutlet));
+
+  cc.waterInletModelObject()->setName("Cooling Coil Water Inlet Node");
+  cc.waterOutletModelObject()->setName("Cooling Coil Water Outlet to Pipe Inlet Node");
+  pipe.outletModelObject()->setName("Pipe Outlet to Companion Coil Water Inlet Node");
+  companionCoilUsedForHeatRecovery.waterOutletModelObject()->setName("Companion Coil Water Outlet Node");
 
   const Workspace w = ft.translateModel(m);
 
@@ -242,12 +256,19 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_WithCompanion
   EXPECT_EQ("Autosize", idf_coolingCoil.getString(Coil_Cooling_WaterFields::DesignInletAirTemperature).get());
   EXPECT_EQ("Autosize", idf_coolingCoil.getString(Coil_Cooling_WaterFields::DesignInletAirHumidityRatio).get());
   EXPECT_EQ("Autosize", idf_coolingCoil.getString(Coil_Cooling_WaterFields::DesignOutletAirHumidityRatio).get());
+
   EXPECT_EQ(cc.waterInletModelObject().get().nameString(), idf_coolingCoil.getString(Coil_Cooling_WaterFields::WaterInletNodeName).get());
+  EXPECT_EQ("Cooling Coil Water Inlet Node", idf_coolingCoil.getString(Coil_Cooling_WaterFields::WaterInletNodeName).get());
   EXPECT_EQ(cc.waterOutletModelObject().get().nameString(), idf_coolingCoil.getString(Coil_Cooling_WaterFields::WaterOutletNodeName).get());
+  EXPECT_EQ("Cooling Coil Water Outlet to Pipe Inlet Node", idf_coolingCoil.getString(Coil_Cooling_WaterFields::WaterOutletNodeName).get());
   EXPECT_EQ(idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::AirInletNodeName).get(),
             idf_coolingCoil.getString(Coil_Cooling_WaterFields::AirInletNodeName).get());
+
+  EXPECT_EQ("Outdoor Air Inlet Node", idf_coolingCoil.getString(Coil_Cooling_WaterFields::AirInletNodeName).get());
   EXPECT_EQ(idfCoilSystem.getString(CoilSystem_Cooling_WaterFields::AirOutletNodeName).get(),
             idf_coolingCoil.getString(Coil_Cooling_WaterFields::AirOutletNodeName).get());
+  EXPECT_EQ("OA System Outlet to Mixed Node", idf_coolingCoil.getString(Coil_Cooling_WaterFields::AirOutletNodeName).get());
+
   EXPECT_EQ("SimpleAnalysis", idf_coolingCoil.getString(Coil_Cooling_WaterFields::TypeofAnalysis).get());
   EXPECT_EQ("CrossFlow", idf_coolingCoil.getString(Coil_Cooling_WaterFields::HeatExchangerConfiguration).get());
   EXPECT_TRUE(idf_coolingCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
@@ -262,14 +283,19 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingWater_WithCompanion
   EXPECT_EQ("Autosize", idf_companionCoil.getString(Coil_Cooling_WaterFields::DesignInletAirTemperature).get());
   EXPECT_EQ("Autosize", idf_companionCoil.getString(Coil_Cooling_WaterFields::DesignInletAirHumidityRatio).get());
   EXPECT_EQ("Autosize", idf_companionCoil.getString(Coil_Cooling_WaterFields::DesignOutletAirHumidityRatio).get());
+
   EXPECT_EQ(companionCoilUsedForHeatRecovery.waterInletModelObject().get().nameString(),
             idf_companionCoil.getString(Coil_Cooling_WaterFields::WaterInletNodeName).get());
+  EXPECT_EQ("Companion Coil Water Outlet Node", idf_companionCoil.getString(Coil_Cooling_WaterFields::WaterOutletNodeName).get());
   EXPECT_EQ(companionCoilUsedForHeatRecovery.waterOutletModelObject().get().nameString(),
             idf_companionCoil.getString(Coil_Cooling_WaterFields::WaterOutletNodeName).get());
+  EXPECT_EQ("Pipe Outlet to Companion Coil Water Inlet Node", idf_companionCoil.getString(Coil_Cooling_WaterFields::WaterInletNodeName).get());
+
   EXPECT_EQ(idfController.getString(Controller_OutdoorAirFields::ReliefAirOutletNodeName).get(),
             idf_companionCoil.getString(Coil_Cooling_WaterFields::AirInletNodeName).get());
-  EXPECT_EQ(coilSystemCoolingWater.companionCoilUsedForHeatRecovery().get().nameString() + " Exhaust Outlet Node",
-            idf_companionCoil.getString(Coil_Cooling_WaterFields::AirOutletNodeName).get());  // FIXME
+  EXPECT_EQ("Return to OA System Node", idf_companionCoil.getString(Coil_Cooling_WaterFields::AirInletNodeName).get());
+  EXPECT_EQ("Relief Node", idf_companionCoil.getString(Coil_Cooling_WaterFields::AirOutletNodeName).get());
+
   EXPECT_EQ("SimpleAnalysis", idf_companionCoil.getString(Coil_Cooling_WaterFields::TypeofAnalysis).get());
   EXPECT_EQ("CrossFlow", idf_companionCoil.getString(Coil_Cooling_WaterFields::HeatExchangerConfiguration).get());
   EXPECT_TRUE(idf_companionCoil.isEmpty(Coil_Cooling_WaterFields::CondensateCollectionWaterStorageTankName));
