@@ -84,52 +84,6 @@ namespace energyplus {
                         << " appears to have a cooling coil that shouldn't have been accepted: " << coolingCoil.briefDescription());
         }
       }
-
-      // TODO: is that true?!
-      // Need a SPM:MixedAir on the outlet node (that we **created** just above in IDF directly, so it won't get picked up by the
-      // ForwardTranslateAirLoopHVAC method)
-      if (boost::optional<AirLoopHVAC> airLoop_ = modelObject.airLoopHVAC()) {
-        std::vector<StraightComponent> fans;
-        std::vector<ModelObject> supplyComponents = airLoop_->supplyComponents();
-
-        for (auto& supplyComponent : supplyComponents) {
-          if (auto fan_ = supplyComponent.optionalCast<FanVariableVolume>()) {
-            fans.insert(fans.begin(), std::move(*fan_));
-          } else if (auto fan_ = supplyComponent.optionalCast<FanConstantVolume>()) {
-            fans.insert(fans.begin(), std::move(*fan_));
-          } else if (auto fan_ = supplyComponent.optionalCast<FanSystemModel>()) {
-            fans.insert(fans.begin(), std::move(*fan_));
-          } else if (auto fan_ = supplyComponent.optionalCast<FanOnOff>()) {
-            fans.insert(fans.begin(), std::move(*fan_));
-          }
-        }
-
-        if (!fans.empty()) {
-          // Fan closest to the supply outlet node
-          StraightComponent fan = fans.front();
-          OptionalNode inletNode = fan.inletModelObject()->optionalCast<Node>();
-          OptionalNode outletNode = fan.outletModelObject()->optionalCast<Node>();
-
-          // No reason this wouldn't be ok at this point really...
-          // TODO: change to OS_ASSERT?
-          if (inletNode && outletNode) {
-
-            IdfObject idf_spm(IddObjectType::SetpointManager_MixedAir);
-            idf_spm.setString(SetpointManager_MixedAirFields::Name, airOutletNodeName + " OS Default SPM");
-            idf_spm.setString(SetpointManager_MixedAirFields::ControlVariable, "Temperature");
-
-            Node supplyOutletNode = airLoop_->supplyOutletNode();
-            idf_spm.setString(SetpointManager_MixedAirFields::ReferenceSetpointNodeName, supplyOutletNode.nameString());
-
-            idf_spm.setString(SetpointManager_MixedAirFields::FanInletNodeName, inletNode->nameString());
-            idf_spm.setString(SetpointManager_MixedAirFields::FanOutletNodeName, outletNode->nameString());
-
-            idf_spm.setString(SetpointManager_MixedAirFields::SetpointNodeorNodeListName, airOutletNodeName);
-
-            m_idfObjects.push_back(idf_spm);
-          }
-        }
-      }
     }
 
     // Availability Schedule Name: Optional Object
