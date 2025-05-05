@@ -12,8 +12,11 @@
 #include "../CoilCoolingWater_Impl.hpp"
 #include "../CoilSystemCoolingWaterHeatExchangerAssisted.hpp"
 #include "../CoilSystemCoolingWaterHeatExchangerAssisted_Impl.hpp"
+
 #include "../AirLoopHVAC.hpp"
 #include "../ChillerElectricEIR.hpp"
+#include "../CoilCoolingDXSingleSpeed.hpp"
+#include "../CoilCoolingDXSingleSpeed_Impl.hpp"
 #include "../Node.hpp"
 #include "../PlantLoop.hpp"
 #include "../Schedule.hpp"
@@ -128,6 +131,34 @@ TEST_F(ModelFixture, CoilSystemCoolingWater_GettersSetters) {
   EXPECT_FALSE(coilSystemCoolingWater.setCompanionCoilUsedForHeatRecovery(wrongCompanionCoil));
   ASSERT_TRUE(coilSystemCoolingWater.companionCoilUsedForHeatRecovery());
   EXPECT_EQ(companionCoilUsedForHeatRecovery, coilSystemCoolingWater.companionCoilUsedForHeatRecovery().get());
+}
+
+TEST_F(ModelFixture, CoilSystemCoolingWater_ExplicitCtor) {
+  {
+    Model m;
+    CoilCoolingWater coolingCoil(m);
+    CoilSystemCoolingWater coilSystem(m, coolingCoil);
+    EXPECT_EQ(coolingCoil, coilSystem.coolingCoil());
+    EXPECT_EQ(1, m.getConcreteModelObjects<CoilSystemCoolingWater>().size());
+    EXPECT_EQ(1, m.getConcreteModelObjects<CoilCoolingWater>().size());
+  }
+
+  {
+    Model m;
+    CoilSystemCoolingWaterHeatExchangerAssisted coolingCoil(m);
+    CoilSystemCoolingWater coilSystem(m, coolingCoil);
+    EXPECT_EQ(coolingCoil, coilSystem.coolingCoil());
+    EXPECT_EQ(1, m.getConcreteModelObjects<CoilSystemCoolingWater>().size());
+    EXPECT_EQ(1, m.getConcreteModelObjects<CoilSystemCoolingWaterHeatExchangerAssisted>().size());
+  }
+
+  {
+    Model m;
+    CoilCoolingDXSingleSpeed coolingCoil(m);
+    EXPECT_ANY_THROW(CoilSystemCoolingWater coilSystem(m, coolingCoil));
+    EXPECT_EQ(0, m.getConcreteModelObjects<CoilSystemCoolingWater>().size());
+    EXPECT_EQ(1, m.getConcreteModelObjects<CoilCoolingDXSingleSpeed>().size());
+  }
 }
 
 TEST_F(ModelFixture, CoilSystemCoolingWater_HeatCoolFuelTypes) {

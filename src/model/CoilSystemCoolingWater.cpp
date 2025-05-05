@@ -347,12 +347,15 @@ namespace model {
     OS_ASSERT(getImpl<detail::CoilSystemCoolingWater_Impl>());
 
     bool ok = true;
+    ok = setCoolingCoil(coolingCoil);
+    if (!ok) {
+      remove();
+      LOG_AND_THROW("Unable to set " << briefDescription() << "'s Cooling Coil " << coolingCoil.briefDescription() << ".");
+    }
     auto alwaysOn = model.alwaysOnDiscreteSchedule();
     ok = setAvailabilitySchedule(alwaysOn);
     OS_ASSERT(ok);
 
-    ok = setCoolingCoil(coolingCoil);
-    OS_ASSERT(ok);
     ok = setDehumidificationControlType("None");
     OS_ASSERT(ok);
     ok = setRunonSensibleLoad(true);
