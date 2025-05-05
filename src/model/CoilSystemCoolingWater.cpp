@@ -298,17 +298,12 @@ namespace model {
 
   }  // namespace detail
 
-  CoilSystemCoolingWater::CoilSystemCoolingWater(const Model& model) : StraightComponent(CoilSystemCoolingWater::iddObjectType(), model) {
-    OS_ASSERT(getImpl<detail::CoilSystemCoolingWater_Impl>());
-
+  void CoilSystemCoolingWater::assignEnergyPlusIDDDefaults() {
     bool ok = true;
-    auto alwaysOn = model.alwaysOnDiscreteSchedule();
+    auto alwaysOn = model().alwaysOnDiscreteSchedule();
     ok = setAvailabilitySchedule(alwaysOn);
     OS_ASSERT(ok);
 
-    CoilCoolingWater coolingCoil(model);
-    ok = setCoolingCoil(coolingCoil);
-    OS_ASSERT(ok);
     ok = setDehumidificationControlType("None");
     OS_ASSERT(ok);
     ok = setRunonSensibleLoad(true);
@@ -323,6 +318,17 @@ namespace model {
     OS_ASSERT(ok);
   }
 
+  CoilSystemCoolingWater::CoilSystemCoolingWater(const Model& model) : StraightComponent(CoilSystemCoolingWater::iddObjectType(), model) {
+    OS_ASSERT(getImpl<detail::CoilSystemCoolingWater_Impl>());
+
+    CoilCoolingWater coolingCoil(model);
+    coolingCoil.setName(name().get() + " Cooling Coil");
+    bool ok = setCoolingCoil(coolingCoil);
+    OS_ASSERT(ok);
+
+    assignEnergyPlusIDDDefaults();
+  }
+
   CoilSystemCoolingWater::CoilSystemCoolingWater(const Model& model, const HVACComponent& coolingCoil)
     : StraightComponent(CoilSystemCoolingWater::iddObjectType(), model) {
     OS_ASSERT(getImpl<detail::CoilSystemCoolingWater_Impl>());
@@ -333,22 +339,8 @@ namespace model {
       remove();
       LOG_AND_THROW("Unable to set " << briefDescription() << "'s Cooling Coil " << coolingCoil.briefDescription() << ".");
     }
-    auto alwaysOn = model.alwaysOnDiscreteSchedule();
-    ok = setAvailabilitySchedule(alwaysOn);
-    OS_ASSERT(ok);
 
-    ok = setDehumidificationControlType("None");
-    OS_ASSERT(ok);
-    ok = setRunonSensibleLoad(true);
-    OS_ASSERT(ok);
-    ok = setRunonLatentLoad(false);
-    OS_ASSERT(ok);
-    ok = setMinimumAirToWaterTemperatureOffset(0.0);
-    OS_ASSERT(ok);
-    ok = setEconomizerLockout(true);
-    OS_ASSERT(ok);
-    ok = setMinimumWaterLoopTemperatureForHeatRecovery(0.0);
-    OS_ASSERT(ok);
+    assignEnergyPlusIDDDefaults();
   }
 
   IddObjectType CoilSystemCoolingWater::iddObjectType() {

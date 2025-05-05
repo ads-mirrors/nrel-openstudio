@@ -111,6 +111,8 @@ namespace model {
     /// @endcond
    private:
     REGISTER_LOGGER("openstudio.model.CoilSystemCoolingWater");
+
+    void assignEnergyPlusIDDDefaults();
   };
 
   /** \relates CoilSystemCoolingWater*/
