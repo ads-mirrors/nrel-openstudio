@@ -121,7 +121,6 @@ namespace model {
 
       boost::optional<Schedule> optionalAvailabilitySchedule() const;
       boost::optional<HVACComponent> optionalCoolingCoil() const;
-      boost::optional<HVACComponent> optionalCompanionCoilUsedForHeatRecovery() const;
     };
 
   }  // namespace detail

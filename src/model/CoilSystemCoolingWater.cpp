@@ -90,7 +90,7 @@ namespace model {
       if (OptionalHVACComponent intermediate = optionalCoolingCoil()) {
         result.push_back(*intermediate);
       }
-      if (OptionalHVACComponent intermediate = optionalCompanionCoilUsedForHeatRecovery()) {
+      if (OptionalHVACComponent intermediate = companionCoilUsedForHeatRecovery()) {
         result.push_back(*intermediate);
       }
 
@@ -103,7 +103,7 @@ namespace model {
       if (OptionalHVACComponent intermediate = optionalCoolingCoil()) {
         coilSystemClone.setCoolingCoil(intermediate->clone(model).cast<HVACComponent>());
       }
-      if (OptionalHVACComponent intermediate = optionalCompanionCoilUsedForHeatRecovery()) {
+      if (OptionalHVACComponent intermediate = companionCoilUsedForHeatRecovery()) {
         coilSystemClone.setCompanionCoilUsedForHeatRecovery(intermediate->clone(model).cast<HVACComponent>());
       }
 
@@ -237,7 +237,7 @@ namespace model {
     }
 
     boost::optional<HVACComponent> CoilSystemCoolingWater_Impl::companionCoilUsedForHeatRecovery() const {
-      return optionalCompanionCoilUsedForHeatRecovery();
+      return getObject<ModelObject>().getModelObjectTarget<HVACComponent>(OS_CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery);
     }
 
     bool CoilSystemCoolingWater_Impl::setAvailabilitySchedule(Schedule& schedule) {
@@ -309,10 +309,6 @@ namespace model {
 
     boost::optional<HVACComponent> CoilSystemCoolingWater_Impl::optionalCoolingCoil() const {
       return getObject<ModelObject>().getModelObjectTarget<HVACComponent>(OS_CoilSystem_Cooling_WaterFields::CoolingCoil);
-    }
-
-    boost::optional<HVACComponent> CoilSystemCoolingWater_Impl::optionalCompanionCoilUsedForHeatRecovery() const {
-      return getObject<ModelObject>().getModelObjectTarget<HVACComponent>(OS_CoilSystem_Cooling_WaterFields::CompanionCoilUsedForHeatRecovery);
     }
 
   }  // namespace detail
