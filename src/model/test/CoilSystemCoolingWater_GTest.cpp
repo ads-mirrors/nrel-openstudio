@@ -14,10 +14,14 @@
 #include "../CoilSystemCoolingWaterHeatExchangerAssisted_Impl.hpp"
 
 #include "../AirLoopHVAC.hpp"
+#include "../AirLoopHVACOutdoorAirSystem.hpp"
 #include "../ChillerElectricEIR.hpp"
 #include "../CoilCoolingDXSingleSpeed.hpp"
 #include "../CoilCoolingDXSingleSpeed_Impl.hpp"
+#include "../ControllerWaterCoil.hpp"
+#include "../ControllerWaterCoil_Impl.hpp"
 #include "../Node.hpp"
+#include "../Node_Impl.hpp"
 #include "../PlantLoop.hpp"
 #include "../Schedule.hpp"
 #include "../ScheduleConstant.hpp"
@@ -182,9 +186,151 @@ TEST_F(ModelFixture, CoilSystemCoolingWater_HeatCoolFuelTypes) {
   testAppGFuelTypeEquality({}, coilSystem.appGHeatingFuelTypes());
 }
 
-TEST_F(ModelFixture, CoilSystemCoolingWater_clone) {}
+TEST_F(ModelFixture, CoilSystemCoolingWater_clone_remove) {
 
-TEST_F(ModelFixture, CoilSystemCoolingWater_remove) {}
+  Model m;
+
+  // Wrap Around Water Coil Heat Recovery Mode
+  // CoilSystem has:
+  // - Primary Cooling Coil: a CoilSystemCoolingWaterHeatExchangerAssisted
+  //     - This HXAssisted has a CoilCoolingWater as its coolingCoil
+  // - Companion Coil: a CoilCoolingWater
+  //
+  // CoilSystem is connected to an AirLoopHVACOutdoorAirSystem on the OA Intake
+  // Companion Coil is connected to OA Relief
+  // Both coils are connected to a PlantLoop in series on the demand side
+
+  CoilSystemCoolingWaterHeatExchangerAssisted coilSystemHXAssisted(m);
+  auto coolingCoil = coilSystemHXAssisted.coolingCoil().cast<CoilCoolingWater>();
+  coolingCoil.setName("Primary Cooling Coil inside HXAssisted");
+  CoilSystemCoolingWater coilSystem(m, coilSystemHXAssisted);
+
+  CoilCoolingWater companionCoil(m);
+  companionCoil.setName("Companion Coil");
+  EXPECT_TRUE(coilSystem.setCompanionCoilUsedForHeatRecovery(companionCoil));
+
+  // Air side connections
+  AirLoopHVAC a(m);
+  AirLoopHVACOutdoorAirSystem oa_sys(m);
+  EXPECT_EQ(2, a.supplyComponents().size());       // o --- o
+  EXPECT_EQ(1, oa_sys.oaComponents().size());      // o
+  EXPECT_EQ(1, oa_sys.reliefComponents().size());  // o
+  {
+    Node n = a.supplyOutletNode();
+    EXPECT_TRUE(oa_sys.addToNode(n));
+  }
+  EXPECT_EQ(3, a.supplyComponents().size());       // o --- oa_sys --- o
+  EXPECT_EQ(1, oa_sys.oaComponents().size());      // o
+  EXPECT_EQ(1, oa_sys.reliefComponents().size());  // o
+  {
+    Node n = oa_sys.outboardOANode().get();
+    EXPECT_TRUE(coilSystem.addToNode(n));
+  }
+  EXPECT_EQ(3, a.supplyComponents().size());       // o --- oa_sys --- o
+  EXPECT_EQ(3, oa_sys.oaComponents().size());      // o --- coilSystem --- o
+  EXPECT_EQ(1, oa_sys.reliefComponents().size());  // o
+  {
+    Node n = oa_sys.outboardReliefNode().get();
+    EXPECT_TRUE(companionCoil.addToNode(n));
+  }
+  EXPECT_EQ(3, a.supplyComponents().size());       // o --- oa_sys --- o
+  EXPECT_EQ(3, oa_sys.oaComponents().size());      // o --- coilSystem --- o
+  EXPECT_EQ(3, oa_sys.reliefComponents().size());  // o --- companionCoil --- o
+
+  // Plant Side connections: in series
+  PlantLoop p(m);
+  EXPECT_EQ(5, p.demandComponents().size());  // o --- Splitter --- o --- Mixer --- o
+
+  EXPECT_TRUE(p.addDemandBranchForComponent(coolingCoil));
+  EXPECT_EQ(7, p.demandComponents().size());  // o --- Splitter --- o --- coolingCoil --- Mixer --- o
+
+  {
+    Node n = coolingCoil.waterOutletModelObject()->cast<Node>();
+    EXPECT_TRUE(companionCoil.addToNode(n));
+  }
+  EXPECT_EQ(9, p.demandComponents().size());  // o --- Splitter --- o --- coolingCoil --- o --- HR Coil --- o --- Mixer --- o
+
+  EXPECT_EQ(1, m.getConcreteModelObjects<CoilSystemCoolingWater>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<CoilSystemCoolingWaterHeatExchangerAssisted>().size());
+  EXPECT_EQ(2, m.getConcreteModelObjects<CoilCoolingWater>().size());
+
+  ASSERT_TRUE(coilSystem.airLoopHVAC());
+  EXPECT_EQ(coilSystem.airLoopHVAC()->handle(), a.handle());
+
+  EXPECT_TRUE(coolingCoil.plantLoop());
+  EXPECT_TRUE(companionCoil.plantLoop());
+
+  EXPECT_FALSE(coolingCoil.controllerWaterCoil());
+  EXPECT_FALSE(companionCoil.controllerWaterCoil());
+  EXPECT_EQ(0, m.getConcreteModelObjects<ControllerWaterCoil>().size());
+
+  auto coilSystemClone = coilSystem.clone(m).cast<CoilSystemCoolingWater>();
+
+  EXPECT_EQ(2, m.getConcreteModelObjects<CoilSystemCoolingWater>().size());
+  EXPECT_EQ(2, m.getConcreteModelObjects<CoilSystemCoolingWaterHeatExchangerAssisted>().size());
+  EXPECT_EQ(4, m.getConcreteModelObjects<CoilCoolingWater>().size());
+  EXPECT_EQ(0, m.getConcreteModelObjects<ControllerWaterCoil>().size());
+
+  EXPECT_TRUE(coilSystem.airLoopHVAC());
+  EXPECT_TRUE(coilSystem.inletModelObject());
+  EXPECT_TRUE(coilSystem.outletModelObject());
+
+  EXPECT_FALSE(coilSystemClone.airLoopHVAC());
+  EXPECT_FALSE(coilSystemClone.inletModelObject());
+  EXPECT_FALSE(coilSystemClone.outletModelObject());
+
+  EXPECT_TRUE(coilSystemClone.coolingCoil().optionalCast<CoilSystemCoolingWaterHeatExchangerAssisted>());
+  EXPECT_NE(coilSystemHXAssisted.handle(), coilSystemClone.coolingCoil().handle());
+
+  ASSERT_TRUE(coilSystemClone.companionCoilUsedForHeatRecovery());
+  EXPECT_TRUE(coilSystemClone.companionCoilUsedForHeatRecovery()->optionalCast<CoilCoolingWater>());
+  EXPECT_NE(companionCoil.handle(), coilSystemClone.companionCoilUsedForHeatRecovery()->handle());
+
+  // Clone into another Model
+  {
+    Model m2;
+    auto coilSystemClone = coilSystem.clone(m2).cast<CoilSystemCoolingWater>();
+
+    EXPECT_EQ(1, m2.getConcreteModelObjects<CoilSystemCoolingWater>().size());
+    EXPECT_EQ(1, m2.getConcreteModelObjects<CoilSystemCoolingWaterHeatExchangerAssisted>().size());
+    EXPECT_EQ(2, m2.getConcreteModelObjects<CoilCoolingWater>().size());
+    EXPECT_EQ(0, m2.getConcreteModelObjects<ControllerWaterCoil>().size());
+
+    EXPECT_FALSE(coilSystemClone.airLoopHVAC());
+    EXPECT_FALSE(coilSystemClone.inletModelObject());
+    EXPECT_FALSE(coilSystemClone.outletModelObject());
+
+    EXPECT_TRUE(coilSystemClone.coolingCoil().optionalCast<CoilSystemCoolingWaterHeatExchangerAssisted>());
+    EXPECT_NE(coilSystemHXAssisted.handle(), coilSystemClone.coolingCoil().handle());
+
+    ASSERT_TRUE(coilSystemClone.companionCoilUsedForHeatRecovery());
+    EXPECT_TRUE(coilSystemClone.companionCoilUsedForHeatRecovery()->optionalCast<CoilCoolingWater>());
+    EXPECT_NE(companionCoil.handle(), coilSystemClone.companionCoilUsedForHeatRecovery()->handle());
+
+    // Remove
+    coilSystemClone.remove();
+    EXPECT_EQ(0, m2.getConcreteModelObjects<CoilSystemCoolingWater>().size());
+    EXPECT_EQ(0, m2.getConcreteModelObjects<CoilSystemCoolingWaterHeatExchangerAssisted>().size());
+    EXPECT_EQ(0, m2.getConcreteModelObjects<CoilCoolingWater>().size());
+  }
+
+  coilSystemClone.remove();
+  EXPECT_EQ(1, m.getConcreteModelObjects<CoilSystemCoolingWater>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<CoilSystemCoolingWaterHeatExchangerAssisted>().size());
+  EXPECT_EQ(2, m.getConcreteModelObjects<CoilCoolingWater>().size());
+  EXPECT_EQ(0, m.getConcreteModelObjects<ControllerWaterCoil>().size());
+
+  coilSystem.remove();
+  EXPECT_EQ(0, m.getConcreteModelObjects<CoilSystemCoolingWater>().size());
+  EXPECT_EQ(0, m.getConcreteModelObjects<CoilSystemCoolingWaterHeatExchangerAssisted>().size());
+  EXPECT_EQ(0, m.getConcreteModelObjects<CoilCoolingWater>().size());
+  EXPECT_EQ(0, m.getConcreteModelObjects<ControllerWaterCoil>().size());
+
+  EXPECT_EQ(3, a.supplyComponents().size());       // o --- oa_sys --- o
+  EXPECT_EQ(1, oa_sys.oaComponents().size());      // o
+  EXPECT_EQ(1, oa_sys.reliefComponents().size());  // o
+  EXPECT_EQ(5, p.demandComponents().size());       // o --- Splitter --- o --- Mixer --- o
+}
 
 TEST_F(ModelFixture, CoilSystemCoolingWater_addToNode) {
   // Water Size Economizer Model
@@ -199,11 +345,11 @@ TEST_F(ModelFixture, CoilSystemCoolingWater_addToNode) {
 
     EXPECT_EQ(2u, a.supplyComponents().size());
 
-    EXPECT_TRUE(cc.addToNode(n));
-    EXPECT_EQ(3u, a.supplyComponents().size());
+    EXPECT_FALSE(cc.addToNode(n));
+    EXPECT_EQ(2u, a.supplyComponents().size());
 
     EXPECT_TRUE(coilSystem.addToNode(n));
-    EXPECT_EQ(5u, a.supplyComponents().size());
+    EXPECT_EQ(3u, a.supplyComponents().size());
 
     {
       auto containingHVACComponent = cc.containingHVACComponent();
@@ -231,14 +377,14 @@ TEST_F(ModelFixture, CoilSystemCoolingWater_addToNode) {
 
     EXPECT_EQ(2u, a.supplyComponents().size());
 
-    EXPECT_TRUE(cc.addToNode(n));
-    EXPECT_EQ(3u, a.supplyComponents().size());
+    EXPECT_FALSE(cc.addToNode(n));
+    EXPECT_EQ(2, a.supplyComponents().size());
 
     EXPECT_TRUE(hr.addToNode(n));
-    EXPECT_EQ(5u, a.supplyComponents().size());
+    EXPECT_EQ(3, a.supplyComponents().size());
 
     EXPECT_TRUE(coilSystem.addToNode(n));
-    EXPECT_EQ(7u, a.supplyComponents().size());
+    EXPECT_EQ(5, a.supplyComponents().size());
 
     {
       auto containingHVACComponent = cc.containingHVACComponent();
