@@ -661,8 +661,12 @@ class Dir
     end
 
     # DLM: seems like this is needed for embedded paths, possibly due to leading ':' character?
-    override_args_extglob = false
+    # JM (2025): Seems like fnmatch behaves differently than Dir.glob
+    # fnmatch specifically needs EXTGLOB to allow patterns like '{a,b}' while
+    # glob seems to allow that directly
+    override_args_extglob = true
 
+    flags = flags | File::FNM_EXTGLOB if override_args_extglob
     result = []
     pattern_array.each do |pattern|
 
