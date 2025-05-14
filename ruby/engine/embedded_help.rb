@@ -698,6 +698,10 @@ class Dir
 
     end
 
+    if debug
+      puts result
+    end
+
     if block_given?
       return yield(result)
     else
