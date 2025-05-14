@@ -36,7 +36,7 @@ module OpenStudio
       end
       absolute_path = ':' + absolute_path
     else
-      absolute_path = File.expand_path p2
+      absolute_path = File.expand_path p
     end
     return absolute_path
   end
