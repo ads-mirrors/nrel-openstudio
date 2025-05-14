@@ -120,6 +120,10 @@ if(BUILD_TESTING)
     COMMAND $<TARGET_FILE:openstudio> ruby_version
   )
 
+  add_test(NAME OpenStudioCLI.ruby_version_trace
+    COMMAND $<TARGET_FILE:openstudio> --loglevel Trace ruby_version
+  )
+
   add_test(NAME OpenStudioCLI.python_version
     COMMAND $<TARGET_FILE:openstudio> python_version
   )
