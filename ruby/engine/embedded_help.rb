@@ -668,6 +668,8 @@ class Dir
 
       absolute_pattern = if pattern.to_s.chars.first == ':'
                            OpenStudio.get_absolute_path(pattern)
+                         elsif !base.nil?
+                           File.expand_path(pattern, base)
                          else
                            pattern
                          end
