@@ -629,7 +629,7 @@ class Dir
   def self.glob(pattern, _flags = 0, flags: _flags, base: nil, sort: true)
 
     debug = false
-    debug = !base.nil? && base.start_with?(':/ruby/gems/3.2.0/specifications/default')
+    # debug = !base.nil? && base.start_with?(':/ruby/gems/3.2.0/specifications/default')
     pattern_array = []
     if pattern.is_a? String
       pattern_array = [pattern]
