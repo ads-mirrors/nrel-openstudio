@@ -545,6 +545,7 @@ end
 
     openstudio::evalString(initScript);
 
+#ifndef _WIN32  // no io/console available
     const std::string irbPatch = R"ruby(if $logger.trace?
 require 'irb'
 require 'irb/lc/error'
@@ -655,6 +656,7 @@ end
 end)ruby";
 
     openstudio::evalString(irbPatch);
+#endif
   }
 
   void setupEmbeddedGemsClearEnvVars() {
