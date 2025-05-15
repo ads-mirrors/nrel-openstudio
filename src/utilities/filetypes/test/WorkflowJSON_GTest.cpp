@@ -1483,3 +1483,26 @@ TEST(Filetypes, WorkflowJSON_ValidateMeasures_WrongOrder) {
 
   EXPECT_EQ("OpenStudio measure 'FakeModelMeasure' called after Energyplus simulation.", sink.logMessages()[0].logMessage());
 }
+
+TEST(Filetypes, WorkflowJSON_rootDir) {
+  auto p = resourcesPath() / toPath("utilities/Filetypes/full.osw");
+  WorkflowJSON w(p);
+  EXPECT_EQ(p, w.oswPath().get());
+  EXPECT_EQ(p.parent_path(), w.oswDir());
+  EXPECT_EQ(toPath("../.."), w.rootDir());
+  EXPECT_EQ(w.oswDir().parent_path().parent_path(), w.absoluteRootDir());
+  EXPECT_EQ(toPath("./run"), w.runDir());
+  EXPECT_EQ(w.oswDir().parent_path().parent_path() / "run", w.absoluteRunDir());
+
+  EXPECT_TRUE(w.setRootDir("../"));
+  EXPECT_EQ(toPath(".."), w.rootDir());
+  EXPECT_EQ(w.oswDir().parent_path(), w.absoluteRootDir());
+  EXPECT_EQ(toPath("./run"), w.runDir());
+  EXPECT_EQ(w.oswDir().parent_path() / "run", w.absoluteRunDir());
+
+  EXPECT_TRUE(w.setRunDir("../run"));
+  EXPECT_EQ(toPath(".."), w.rootDir());
+  EXPECT_EQ(w.oswDir().parent_path(), w.absoluteRootDir());
+  EXPECT_EQ(toPath("../run"), w.runDir());
+  EXPECT_EQ(w.oswDir().parent_path().parent_path() / "run", w.absoluteRunDir());
+}

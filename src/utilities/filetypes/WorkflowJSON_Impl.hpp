@@ -89,9 +89,12 @@ namespace detail {
 
     openstudio::path rootDir() const;
     openstudio::path absoluteRootDir() const;
+    bool setRootDir(const openstudio::path& path);
 
     openstudio::path runDir() const;
     openstudio::path absoluteRunDir() const;
+
+    bool setRunDir(const openstudio::path& path);
 
     openstudio::path outPath() const;
     openstudio::path absoluteOutPath() const;

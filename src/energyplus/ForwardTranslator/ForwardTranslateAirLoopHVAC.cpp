@@ -18,6 +18,8 @@
 #include "../../model/SizingSystem_Impl.hpp"
 #include "../../model/CoilCoolingWater.hpp"
 #include "../../model/CoilCoolingWater_Impl.hpp"
+#include "../../model/CoilSystemCoolingWater.hpp"
+#include "../../model/CoilSystemCoolingWater_Impl.hpp"
 #include "../../model/CoilSystemCoolingWaterHeatExchangerAssisted.hpp"
 #include "../../model/CoilSystemCoolingWaterHeatExchangerAssisted_Impl.hpp"
 #include "../../model/CoilHeatingWater.hpp"
@@ -282,6 +284,10 @@ namespace energyplus {
           }
           break;
         }
+        // case openstudio::IddObjectType::OS_CoilSystem_Cooling_Water: {
+        //   // No-op: this has its own controller
+        //   break;
+        // }
         default: {
           break;
         }

@@ -443,6 +443,9 @@ set(${target_name}_src
   CoilPerformanceDXCooling.hpp
   CoilPerformanceDXCooling_Impl.hpp
   CoilPerformanceDXCooling.cpp
+  CoilSystemCoolingWater.hpp
+  CoilSystemCoolingWater_Impl.hpp
+  CoilSystemCoolingWater.cpp
   CoilSystemCoolingWaterHeatExchangerAssisted.hpp
   CoilSystemCoolingWaterHeatExchangerAssisted_Impl.hpp
   CoilSystemCoolingWaterHeatExchangerAssisted.cpp
@@ -2014,6 +2017,7 @@ set(${target_name}_test_src
   test/CoilHeatingWaterBaseboardRadiant_GTest.cpp
   test/CoilPerformanceDXCooling_GTest.cpp
   test/CoilSystemCoolingDXHeatExchangerAssisted_GTest.cpp
+  test/CoilSystemCoolingWater_GTest.cpp
   test/CoilSystemCoolingWaterHeatExchangerAssisted_GTest.cpp
   test/CoilSystemIntegratedHeatPumpAirSource_GTest.cpp
   test/CoilUserDefined_GTest.cpp

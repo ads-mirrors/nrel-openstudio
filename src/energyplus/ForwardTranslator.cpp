@@ -1207,6 +1207,11 @@ namespace energyplus {
         retVal = translateCoilPerformanceDXCooling(mo);
         break;
       }
+      case openstudio::IddObjectType::OS_CoilSystem_Cooling_Water: {
+        auto mo = modelObject.cast<CoilSystemCoolingWater>();
+        retVal = translateCoilSystemCoolingWater(mo);
+        break;
+      }
       case openstudio::IddObjectType::OS_CoilSystem_Cooling_Water_HeatExchangerAssisted: {
         auto mo = modelObject.cast<CoilSystemCoolingWaterHeatExchangerAssisted>();
         retVal = translateCoilSystemCoolingWaterHeatExchangerAssisted(mo);

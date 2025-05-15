@@ -14,6 +14,8 @@
 #include "../../model/CoilCoolingWater_Impl.hpp"
 #include "../../model/ControllerWaterCoil.hpp"
 #include "../../model/ControllerWaterCoil_Impl.hpp"
+#include "../../model/CoilSystemCoolingWater.hpp"
+#include "../../model/CoilSystemCoolingWater_Impl.hpp"
 
 #include "../../model/AirLoopHVAC.hpp"
 #include "../../model/FanVariableVolume.hpp"
@@ -47,18 +49,30 @@ namespace energyplus {
     IdfObject idfObject = createRegisterAndNameIdfObject(openstudio::IddObjectType::CoilSystem_Cooling_Water_HeatExchangerAssisted, modelObject);
 
     std::string hxSupplyAirInletNodeName;
+    std::string hxExhaustAirOutletNodeName;
     // InletNodeName
     if (auto mo = modelObject.inletModelObject()) {
       if (auto node = mo->optionalCast<Node>()) {
         hxSupplyAirInletNodeName = node->nameString();
       }
-    }
-
-    std::string hxExhaustAirOutletNodeName;
-    // OutletNodeName
-    if (auto mo = modelObject.outletModelObject()) {
-      if (auto node = mo->optionalCast<Node>()) {
-        hxExhaustAirOutletNodeName = node->nameString();
+      // OutletNodeName
+      if (auto mo = modelObject.outletModelObject()) {
+        if (auto node = mo->optionalCast<Node>()) {
+          hxExhaustAirOutletNodeName = node->nameString();
+        }
+      }
+    } else if (auto comp_ = modelObject.containingHVACComponent()) {
+      if (auto coilSystem_ = comp_->optionalCast<CoilSystemCoolingWater>()) {
+        if (auto mo = coilSystem_->inletModelObject()) {
+          if (auto node = mo->optionalCast<Node>()) {
+            hxSupplyAirInletNodeName = node->nameString();
+          }
+        }
+        if (auto mo = coilSystem_->outletModelObject()) {
+          if (auto node = mo->optionalCast<Node>()) {
+            hxExhaustAirOutletNodeName = node->nameString();
+          }
+        }
       }
     }
 

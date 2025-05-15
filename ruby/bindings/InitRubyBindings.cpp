@@ -630,7 +630,7 @@ module IRB # :nodoc:
 
     @CONF[:IRB_RC].call(irb.context) if @CONF[:IRB_RC]
     # puts @CONF[:PROMPT_MODE]
-    os_version = "3.8.0" # OpenStudio::openStudioVersion
+    os_version = "3.10.0" # OpenStudio::openStudioVersion
     @CONF[:PROMPT][:OPENSTUDIO] = {
       :PROMPT_I=>"(os #{os_version}) :%03n > ",
       :PROMPT_S=>"(os #{os_version}) :%03n%l> ",
@@ -662,6 +662,10 @@ end)ruby";
     // in hash.c there's lot of env-related functions, but all private, aside from rb_env_clear();
     const std::string clearEnvs = R"ruby(
 ENV.reject! { |k, _| ['GEM', 'BUNDLE'].any? { |x| k.start_with?(x) } }
+# No env variable isn't the same as empty. Gem::PathSupport does stuff like @home = env["GEM_HOME"] || Gem.default_dir
+ENV['GEM_HOME'] = ''
+ENV['GEM_PATH'] = ''
+ENV['GEM_SPEC_CACHE'] = ''
   )ruby";
 
     openstudio::evalString(clearEnvs);
@@ -749,6 +753,21 @@ ENV.reject! { |k, _| ['GEM', 'BUNDLE'].any? { |x| k.start_with?(x) } }
     end
   end
 
+#  module Gem
+#    def self.default_dir
+#      @default_dir = ""
+#    end
+#
+#    def self.find_home
+#      ""
+#    end
+#
+#    def self.default_specifications_dir
+#      @default_specifications_dir = ""
+#    end
+#  end
+#
+  Gem.clear_paths
   Gem::Deprecate.skip = true
 
   # find all the embedded gems
@@ -851,6 +870,8 @@ ENV.reject! { |k, _| ['GEM', 'BUNDLE'].any? { |x| k.start_with?(x) } }
 
     if (use_bundler) {
       initCmd += R"ruby(
+  $logger.trace "embedded_gems_to_activate=#{embedded_gems_to_activate.map{ |s| s.name} }"
+
   # Load the bundle before activating any embedded gems
   embedded_gems_to_activate.each do |spec|
     if spec.name == "bundler"
@@ -884,53 +905,54 @@ ENV.reject! { |k, _| ['GEM', 'BUNDLE'].any? { |x| k.start_with?(x) } }
     RbConfig::CONFIG['arch'] = 'x64-mingw32'
   end
 
-    # require bundler
-    # have to do some forward declaration and pre-require to get around autoload cycles
-    require 'bundler/errors'
-    #require 'bundler/environment_preserver'
-    require 'bundler/plugin'
-    #require 'bundler/rubygems_ext'
-    require 'bundler/rubygems_integration'
+  $logger.trace "Requiring bundler"
+  # require bundler
+  # have to do some forward declaration and pre-require to get around autoload cycles
+  require 'bundler/errors'
+  #require 'bundler/environment_preserver'
+  require 'bundler/plugin'
+  #require 'bundler/rubygems_ext'
+  require 'bundler/rubygems_integration'
 
-    # Global list, to be populated below
-    $ignore_native_gem_names = []
+  # Global list, to be populated below
+  $ignore_native_gem_names = []
 
-    module Bundler
-      class RubygemsIntegration
+  module Bundler
+    class RubygemsIntegration
 
-        alias :ori_spec_missing_extensions? :spec_missing_extensions?
+      alias :ori_spec_missing_extensions? :spec_missing_extensions?
 
-        def spec_missing_extensions?(spec, default = true)
+      def spec_missing_extensions?(spec, default = true)
 
-          # This avoids getting an annoying message for no reason
-          if $ignore_native_gem_names.any? {|name| name == spec.name }
-            return false
-          end
-
-          return ori_spec_missing_extensions?(spec, default)
+        # This avoids getting an annoying message for no reason
+        if $ignore_native_gem_names.any? {|name| name == spec.name }
+          return false
         end
+
+        return ori_spec_missing_extensions?(spec, default)
       end
     end
+  end
 
-    require 'bundler/version'
-    require 'bundler/ruby_version'
-    #require 'bundler/constants'
-    #require 'bundler/current_ruby'
-    require 'bundler/gem_helpers'
-    #require 'bundler/plugin'
-    require 'bundler/source'
-    require 'bundler/definition'
-    require 'bundler/dsl'
-    require 'bundler/uri_credentials_filter'
-    require 'bundler/uri_normalizer'
-    require 'bundler/index'
-    require 'bundler/digest'
-    require 'bundler/source/git'
-    require 'bundler/source/git/git_proxy'
-    require 'bundler/match_remote_metadata'
-    require 'bundler/remote_specification'
-    require 'bundler/stub_specification'
-    require 'bundler'
+  require 'bundler/version'
+  require 'bundler/ruby_version'
+  #require 'bundler/constants'
+  #require 'bundler/current_ruby'
+  require 'bundler/gem_helpers'
+  #require 'bundler/plugin'
+  require 'bundler/source'
+  require 'bundler/definition'
+  require 'bundler/dsl'
+  require 'bundler/uri_credentials_filter'
+  require 'bundler/uri_normalizer'
+  require 'bundler/index'
+  require 'bundler/digest'
+  require 'bundler/source/git'
+  require 'bundler/source/git/git_proxy'
+  require 'bundler/match_remote_metadata'
+  require 'bundler/remote_specification'
+  require 'bundler/stub_specification'
+  require 'bundler'
 
   begin
     # activate bundled gems
@@ -961,10 +983,20 @@ ENV.reject! { |k, _| ['GEM', 'BUNDLE'].any? { |x| k.start_with?(x) } }
     # Filter out dependencies with native extensions that we already have embedded in the CLI and that satisfy the requirements
     locked_specs = Bundler.definition.instance_variable_get(:@locked_specs)
 
-    embedded_gems_to_activate.each do |spec|
-      next if spec.extensions.empty?
+    extra_load_paths = []
 
-      next unless locked_specs.any? {|locked_spec| locked_spec.name == spec.name}
+    embedded_gems_to_activate.each do |spec|
+      if spec.extensions.empty?
+        # $logger.trace "Spec #{spec.name} has no extensions"
+        next
+      end
+
+      unless locked_specs.any? {|locked_spec| locked_spec.name == spec.name}
+        # $logger.trace "#{spec.name} not in locked_specs"
+        next
+      end
+
+      $logger.trace "embedded_gems_to_activate.each: spec: #{spec.name}"
 
       dep_to_requirements = {}
       locked_specs.each do |locked_spec|
@@ -975,27 +1007,67 @@ ENV.reject! { |k, _| ['GEM', 'BUNDLE'].any? { |x| k.start_with?(x) } }
         end
       end
 
-
       if locked_specs.none? { |locked_spec| locked_spec.dependencies.any? {|x| x.name == spec.name} }
-        locked_spec_v = locked_specs.select{|locked_spec| locked_spec.name == spec.name}.first.version
-        $logger.debug("Removing native gem #{spec.name} from Bundler locked_specs (version #{locked_spec_v}), using the embedded dependency (CLI one has version #{spec.version})")
+        locked_spec = locked_specs.select{|locked_spec| locked_spec.name == spec.name}.first
+        $logger.debug("Removing native gem #{spec.name} from Bundler locked_specs (version #{locked_spec.version}), using the embedded dependency (CLI one has version #{spec.version})")
         $logger.trace("Gems having #{spec.name} as a dependency: #{dep_to_requirements}")
+        locked_spec.dependencies.each do |dep|
+          $logger.trace("Activating dependency #{dep.name} first")
+          found_spec = embedded_gems_to_activate.find { |x| x.name == dep.name }
+          raise "Can't find #{dep.name}" unless found_spec
+
+          next if found_spec.activated
+
+          # found_spec.load_paths.reject {|path| $LOAD_PATH.include?(path) }
+          Gem::Specification.add_spec(found_spec)  # Will add it to Gem::Specification.stubs too
+          raise "Failed to activate #{spec.name}" unless found_spec.activate
+          Bundler.rubygems.mark_loaded(found_spec)
+          stub = Gem::Specification.stubs_for(found_spec.name).first
+          bundler_stub = Bundler::StubSpecification.from_stub(stub)
+          if !locked_specs[dep].nil?
+            x = locked_specs[dep].first
+            x.instance_variable_set(:@version, found_spec.version)
+            class <<x
+              private
+              def use_exact_resolved_specifications?
+                @use_exact_resolved_specifications = false
+              end
+            end
+            #  locked_specs.delete_by_name(dep.name)
+            # locked_specs[dep] = bundler_stub
+            extra_load_paths += found_spec.full_require_paths
+          end
+        end
+
+        Gem::Specification.add_spec(spec)
         raise "Failed to activate #{spec.name}" unless spec.activate
+        Bundler.rubygems.mark_loaded(spec)
+        stub = Gem::Specification.stubs_for(spec.name).first
+        bundler_stub = Bundler::StubSpecification.from_stub(stub)
+        raise "That shouldn't happen" if locked_specs[spec.name].nil?
+        # locked_specs.delete_by_name(spec.name)
+        # locked_specs[spec.name] = bundler_stub
+
+        extra_load_paths += spec.full_require_paths
+
         $ignore_native_gem_names << spec.name
-        locked_specs.delete_by_name(spec.name)
       end
     end
 
+
     # I am pretty sure sure we don't need this. Because internally Bundler.definition.filter_specs will ignore it from the dependencies if it's there as well
-    # Bundler.definition.instance_variable_set(:@dependencies,  Bundler.definition.dependencies.select { |dep| $ignore_native_gem_names.include?(dep.name) } )
+    # Bundler.definition.instance_variable_set(:@dependencies,  Bundler.definition.dependencies.select { |dep| !$ignore_native_gem_names.include?(dep.name) } )
 
     remaining_specs = []
     Bundler.definition.specs_for(keep_groups).each {|s| remaining_specs << s.name}
 
     $logger.info "Specs to be included [#{remaining_specs.join(',')}]"
 
-
+    # This is going to remove some stuff from the LOAD_PATH that we already loaded, when we really don't want to, so we readd them...
     Bundler.setup(*keep_groups)
+
+    Bundler.rubygems.add_to_load_path(extra_load_paths - $LOAD_PATH)
+
   ensure
 
     if original_arch
