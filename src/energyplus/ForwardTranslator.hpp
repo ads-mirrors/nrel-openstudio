@@ -1712,7 +1712,7 @@ namespace energyplus {
 
     ModelObjectMap m_map;
 
-    using ZoneToMaybeDSOA = std::map<const openstudio::Handle, const boost::optional<IdfObject>>;
+    using ZoneToMaybeDSOA = std::map<const openstudio::Handle, const boost::optional<openstudio::IdfObject>>;
     ZoneToMaybeDSOA m_zoneDSOAsMap;
 
     std::vector<IdfObject> m_idfObjects;
