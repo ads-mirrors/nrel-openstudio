@@ -965,7 +965,7 @@ namespace sdd {
         openstudio::model::ElectricEquipment elecEquipment(elecEquipmentDefinition);
         elecEquipment.setName(name + " Electric Equipment Loads");
         elecEquipment.setSpace(space);
-        elecEquipment.setEndUseSubcategory("Process");
+        elecEquipment.setEndUseSubcategory("Receptacle");
 
         if (elecEqpPwrDensSchRefElement) {
           std::string scheduleName = escapeName(elecEqpPwrDensSchRefElement.text().as_string());
@@ -1016,7 +1016,7 @@ namespace sdd {
         openstudio::model::ElectricEquipment electricEquipment(electricEquipmentDefinition);
         electricEquipment.setName(name + " Process Electric Loads");
         electricEquipment.setSpace(space);
-        electricEquipment.setEndUseSubcategory("Process");
+        electricEquipment.setEndUseSubcategory("Receptacle");
 
         if (procElecSchRefElement) {
           std::string scheduleName = escapeName(procElecSchRefElement.text().as_string());
