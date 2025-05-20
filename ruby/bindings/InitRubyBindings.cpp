@@ -534,9 +534,22 @@ if RbConfig::CONFIG['arch'] =~ /x64-mswin64/
 end
 
 # load embedded ruby gems
+# This loads :/ruby/gems/3.2.0/specifications/default
 require 'rubygems'
 require 'rubygems/version'
 Gem::Platform.local
+
+# Note that we have three standard locations where we have gemspecs
+#
+# 1. This is the Ruby-built in stuff (eg; csv, fileutils, irb, json, reline, etc)
+#':/ruby/gems/3.2.0/specifications/default',
+#
+# 2. This is the Ruby-built in stuff that's brought in via gems/bundled_gems (https://github.com/ruby/ruby/blob/f91480d7a671b1b114270a4b5e4d3c5aa6dabce9/gems/bundled_gems)
+# (rbs, debug, matrix, rexml, etc)
+#  ':/ruby/gems/3.2.0/specifications',
+#
+# 3. Where we have the openstudio-gems gemspecs (openstudio-standards, etc)
+#':/ruby/3.2.0/specifications',
 
 if original_arch
   RbConfig::CONFIG['arch'] = original_arch
@@ -545,6 +558,7 @@ end
 
     openstudio::evalString(initScript);
 
+#ifndef _WIN32  // no io/console available
     const std::string irbPatch = R"ruby(if $logger.trace?
 require 'irb'
 require 'irb/lc/error'
@@ -655,6 +669,7 @@ end
 end)ruby";
 
     openstudio::evalString(irbPatch);
+#endif
   }
 
   void setupEmbeddedGemsClearEnvVars() {
