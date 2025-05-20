@@ -1058,6 +1058,63 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateAirS
     if (_optStartNumDays) {
       optimumStart.setNumberofPreviousDays(_optStartNumDays.get());
     }
+
+    // Add the new properties to the OptimumStart object (ticket 3631)
+    
+    // Control Algorithm (ConstantTemperatureGradient, AdaptiveTemperatureGradient, AdaptiveASHRAE, ConstantStartTime)
+    auto optStartCtrlAlgElement = airSystemElement.child("OptStartCtrlAlg");
+    if (optStartCtrlAlgElement) {
+      std::string controlAlgorithm = optStartCtrlAlgElement.text().as_string();
+      optimumStart.setControlAlgorithm(controlAlgorithm);
+    }
+    
+    // Constant Temperature Gradients
+    auto optStartClgGradientConstElement = airSystemElement.child("OptStartClgGradientConst");
+    boost::optional<double> _optStartClgGradientConst = lexicalCastToDouble(optStartClgGradientConstElement);
+    if (_optStartClgGradientConst) {
+      // Convert from F to C if needed
+      double gradientValue = _optStartClgGradientConst.get() * 5.0 / 9.0;
+      optimumStart.setConstantTemperatureGradientduringCooling(gradientValue);
+    }
+    
+    auto optStartHtgGradientConstElement = airSystemElement.child("OptStartHtgGradientConst");
+    boost::optional<double> _optStartHtgGradientConst = lexicalCastToDouble(optStartHtgGradientConstElement);
+    if (_optStartHtgGradientConst) {
+      // Convert from F to C if needed
+      double gradientValue = _optStartHtgGradientConst.get() * 5.0 / 9.0;
+      optimumStart.setConstantTemperatureGradientduringHeating(gradientValue);
+    }
+    
+    // Constant Start Time (used when using ConstantStartTime algorithm)
+    auto optStartConstStartTimeElement = airSystemElement.child("OptStartConstStartTime");
+    boost::optional<double> _optStartConstStartTime = lexicalCastToDouble(optStartConstStartTimeElement);
+    if (_optStartConstStartTime) {
+      optimumStart.setConstantStartTime(_optStartConstStartTime.get());
+    }
+    
+    // Allow the existing implementations to continue working as before
+    auto optStartWindElement = airSystemElement.child("OptStartWind");
+    if (optStartWindElement) {
+      std::string optStartWindValue = optStartWindElement.text().as_string();
+      if (istringEqual(optStartWindValue, "Yes") || 
+          istringEqual(optStartWindValue, "True") || 
+          optStartWindElement.text().as_int() == 1) {
+        // Only set these if they haven't been explicitly specified above
+        if (!_optStartClgGradientConst) {
+          optimumStart.setConstantTemperatureGradientduringCooling(3.0);
+        }
+        if (!_optStartHtgGradientConst) {
+          optimumStart.setConstantTemperatureGradientduringHeating(3.0);
+        }
+      }
+    }
+    
+    auto optStartSpFractionElement = airSystemElement.child("OptStartSpFraction");
+    boost::optional<double> _optStartSpFraction = lexicalCastToDouble(optStartSpFractionElement);
+    if (_optStartSpFraction) {
+      optimumStart.setInitialTemperatureGradientduringCooling(_optStartSpFraction.get());
+      optimumStart.setInitialTemperatureGradientduringHeating(_optStartSpFraction.get());
+    }
   }
 
   // Night Cycle
