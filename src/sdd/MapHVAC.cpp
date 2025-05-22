@@ -6642,10 +6642,6 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFlui
   }
   else if( istringEqual(tempCtrlElement.text().as_string(),"FixedDualSetpoint") )
   {
-    // It would be better to use setpoint manager dual setpoint, but
-    // until it is available we use component setpoint operation and but
-    // scheduled SPMs on the heating and cooling components.
-
     pugi::xml_node fixedSupTempElement = fluidSysElement.child("FixedSupTemp");
     double fixedSupTemp = 10.0;
     boost::optional<double> _fixedSupTemp = lexicalCastToDouble(fixedSupTempElement);
@@ -6683,92 +6679,6 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFlui
     };
 
     addDualSPM(plantLoop.name().get() + " Supply Outlet SPM", supplyOutletNode);
-
-    // "Heating" components
-    std::vector<model::BoilerHotWater> boilers =
-    subsetCastVector<model::BoilerHotWater>(plantLoop.supplyComponents(model::BoilerHotWater::iddObjectType()));
-    for(auto it = boilers.begin();
-        it != boilers.end();
-        ++it)
-    {
-      boost::optional<model::ModelObject> mo = it->outletModelObject();
-      OS_ASSERT(mo);
-      boost::optional<model::Node> node = mo->optionalCast<model::Node>();
-      OS_ASSERT(node);
-
-      addDualSPM(it->name().get() + " SPM", node.get());
-    }
-
-    std::vector<model::WaterHeaterMixed> waterHeaters =
-    subsetCastVector<model::WaterHeaterMixed>(plantLoop.supplyComponents(model::WaterHeaterMixed::iddObjectType()));
-    for(auto it = waterHeaters.begin();
-        it != waterHeaters.end();
-        ++it)
-    {
-      boost::optional<model::ModelObject> mo = it->supplyOutletModelObject();
-      OS_ASSERT(mo);
-      boost::optional<model::Node> node = mo->optionalCast<model::Node>();
-      OS_ASSERT(node);
-
-      addDualSPM(it->name().get() + " SPM", node.get());
-    }
-
-    // "Cooling" components
-    std::vector<model::ChillerElectricEIR> chillers =
-    subsetCastVector<model::ChillerElectricEIR>(plantLoop.supplyComponents(model::ChillerElectricEIR::iddObjectType()));
-    for(auto it = chillers.begin();
-        it != chillers.end();
-        ++it)
-    {
-      boost::optional<model::ModelObject> mo = it->supplyOutletModelObject();
-      OS_ASSERT(mo);
-      boost::optional<model::Node> node = mo->optionalCast<model::Node>();
-      OS_ASSERT(node);
-
-      addDualSPM(it->name().get() + " SPM", node.get());
-    }
-
-    std::vector<model::CoolingTowerVariableSpeed> variableTowers =
-    subsetCastVector<model::CoolingTowerVariableSpeed>(plantLoop.supplyComponents(model::CoolingTowerVariableSpeed::iddObjectType()));
-    for(auto it = variableTowers.begin();
-        it != variableTowers.end();
-        ++it)
-    {
-      boost::optional<model::ModelObject> mo = it->outletModelObject();
-      OS_ASSERT(mo);
-      boost::optional<model::Node> node = mo->optionalCast<model::Node>();
-      OS_ASSERT(node);
-
-      addDualSPM(it->name().get() + " SPM", node.get());
-    }
-
-    std::vector<model::CoolingTowerTwoSpeed> twoSpeedTowers =
-    subsetCastVector<model::CoolingTowerTwoSpeed>(plantLoop.supplyComponents(model::CoolingTowerTwoSpeed::iddObjectType()));
-    for(auto it = twoSpeedTowers.begin();
-        it != twoSpeedTowers.end();
-        ++it)
-    {
-      boost::optional<model::ModelObject> mo = it->outletModelObject();
-      OS_ASSERT(mo);
-      boost::optional<model::Node> node = mo->optionalCast<model::Node>();
-      OS_ASSERT(node);
-
-      addDualSPM(it->name().get() + " SPM", node.get());
-    }
-
-    std::vector<model::CoolingTowerSingleSpeed> constantTowers =
-    subsetCastVector<model::CoolingTowerSingleSpeed>(plantLoop.supplyComponents(model::CoolingTowerSingleSpeed::iddObjectType()));
-    for(auto it = constantTowers.begin();
-        it != constantTowers.end();
-        ++it)
-    {
-      boost::optional<model::ModelObject> mo = it->outletModelObject();
-      OS_ASSERT(mo);
-      boost::optional<model::Node> node = mo->optionalCast<model::Node>();
-      OS_ASSERT(node);
-
-      addDualSPM(it->name().get() + " SPM", node.get());
-    }
   }
   else
   {
