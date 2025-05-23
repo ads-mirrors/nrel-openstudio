@@ -151,6 +151,32 @@ namespace sdd {
       building.setNorthAxis(buildingAzimuth);
     }
 
+    // Add support for Terrain via Proj:BldgTerrain (ticket 3676)
+    pugi::xml_node terrainElement = element.child("BldgTerrain");
+    if (terrainElement) {
+      // Get the terrain value from SDD
+      std::string terrain = terrainElement.text().as_string();
+      
+      if (!terrain.empty()) {
+        // Validate the terrain value against allowed options in EnergyPlus
+        if (istringEqual(terrain, "Country") || 
+            istringEqual(terrain, "Suburbs") || 
+            istringEqual(terrain, "City") || 
+            istringEqual(terrain, "Ocean") || 
+            istringEqual(terrain, "Urban")) {
+          
+          // Get or create the Site object
+          model::Site site = model.getUniqueModelObject<model::Site>();
+          
+          // Set the terrain property on the Site object
+          site.setTerrain(terrain);
+          LOG(Info, "Set Site terrain to " << terrain << " from CBECC BldgTerrain");
+        } else {
+          LOG(Warn, "Invalid terrain value '" << terrain << "'. Must be one of: Country, Suburbs, City, Ocean, Urban");
+        }
+      }
+    }
+
     // translate shadingSurfaces
     std::vector<pugi::xml_node> exteriorShadingElements = makeVectorOfChildren(element, "ExtShdgObj");
     if (!exteriorShadingElements.empty()) {
