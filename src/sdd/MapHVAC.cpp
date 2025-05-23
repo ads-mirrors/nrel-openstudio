@@ -2904,6 +2904,21 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFan(
     motorInAirstream = true;
   }
 
+  // EndUseCat
+  pugi::xml_node endUseCatElement = fanElement.child("EndUseCat");
+  std::string endUseSubcategory = "Interior Fans"; // default
+  if (endUseCatElement) {
+    endUseSubcategory = endUseCatElement.text().as_string();
+  }
+
+  // Check if we should use legacy fan objects or the new Fan:SystemModel
+  pugi::xml_node useLegacyFanObjElement = fanElement.child("UseLegacyFanObj");
+  bool useLegacyFanObj = false;
+  if (useLegacyFanObjElement) {
+    useLegacyFanObj = (useLegacyFanObjElement.text().as_int() == 1);
+  }
+
+  // Calculate flowCap in SI units
   boost::optional<double> flowCap;
 
   if( ! autosize() )
@@ -2919,70 +2934,277 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFan(
     }
   }
 
-  // ConstantVolume
-  if( istringEqual(fanControlMethodElement.text().as_string(),"ConstantVolume") ||
-      istringEqual(fanControlMethodElement.text().as_string(),"TwoSpeed") )
-  {
-    // The type of fan is dependent on the context.  We use FanOnOff for cycling zone systems, FanConstantVolume for everything else
-    pugi::xml_node parentElement = fanElement.parent();
+  // Create Fan:SystemModel if specified and not using legacy fan objects
+  if (!useLegacyFanObj) {
+    // Create a Fan:SystemModel object
+    model::FanSystemModel fan(model);
+    fan.setName(nameElement.text().as_string());
 
-    if (openstudio::istringEqual(parentElement.name(), "ZnSys"))
+    if (availSch) {
+      fan.setAvailabilitySchedule(availSch.get());
+    }
+
+    // Set flow rate
+    if (flowCap) {
+      fan.setDesignMaximumAirFlowRate(flowCap.get());
+    } else {
+      fan.autosizeDesignMaximumAirFlowRate();
+    }
+
+    // Set speed control method
+    std::string ctrlMthdSim = fanControlMethodElement.text().as_string();
+    if (istringEqual(ctrlMthdSim, "VariableSpeedDrive")) {
+      fan.setSpeedControlMethod("Continuous");
+    } else {
+      fan.setSpeedControlMethod("Discrete");
+    }
+
+    // Set minimum flow fraction
+    pugi::xml_node flowMinSimElement = fanElement.child("FlowMinSim");
+    boost::optional<double> _flowMinSim = lexicalCastToDouble(flowMinSimElement);
+    if (_flowMinSim && flowCap) {
+      double flowMinSim = unitToUnit(_flowMinSim.get(), "cfm", "m^3/s").get();
+      double minFlowFraction = flowMinSim / flowCap.get();
+      fan.setElectricPowerMinimumFlowRateFraction(minFlowFraction);
+    }
+
+    // Set pressure rise
+    boost::optional<double> _totStaticPress = lexicalCastToDouble(totStaticPressElement);
+    if (_totStaticPress) {
+      // Convert in WC to Pa
+      fan.setDesignPressureRise(_totStaticPress.get() * 249.0889);
+    }
+
+    // Set motor efficiency
+    boost::optional<double> _mtrEff = lexicalCastToDouble(mtrEffElement);
+    if (_mtrEff) {
+      fan.setMotorEfficiency(_mtrEff.get());
+    }
+
+    // Set motor in airstream fraction
+    fan.setMotorInAirStreamFraction(motorInAirstream ? 1.0 : 0.0);
+
+    // Design power sizing method is always set to TotalEfficiencyAndPressure
+    fan.setDesignPowerSizingMethod("TotalEfficiencyAndPressure");
+
+    // Set fan total efficiency
+    boost::optional<double> _totEff = lexicalCastToDouble(totEffElement);
+    if (_totEff) {
+      fan.setFanTotalEfficiency(_totEff.get());
+    }
+
+    // Set power curve
+    pugi::xml_node pwr_fPLRCrvElement = fanElement.child("Pwr_fPLRCrvRef");
+    boost::optional<model::Curve> pwr_fPLRCrv;
+    pwr_fPLRCrv = model.getModelObjectByName<model::Curve>(pwr_fPLRCrvElement.text().as_string());
+    if (pwr_fPLRCrv) {
+      fan.setElectricPowerFunctionofFlowFractionCurve(pwr_fPLRCrv.get());
+    }
+
+    // Set end use subcategory
+    fan.setEndUseSubcategory(endUseSubcategory);
+
+    // Handle multi-speed fans
+    pugi::xml_node numSpdsElement = fanElement.child("NumSpds");
+    if (numSpdsElement) {
+      int numSpds = numSpdsElement.text().as_int();
+      if (numSpds >= 1) {
+        // Clear any existing speeds
+        fan.removeAllSpeeds();
+
+        // Add speeds based on FlowFrac and PwrFrac arrays
+        for (int i = 1; i <= numSpds; i++) {
+          std::string flowFracKey = "FlowFrac" + std::to_string(i);
+          std::string pwrFracKey = "PwrFrac" + std::to_string(i);
+
+          pugi::xml_node flowFracElement = fanElement.child(flowFracKey.c_str());
+          pugi::xml_node pwrFracElement = fanElement.child(pwrFracKey.c_str());
+
+          if (flowFracElement) {
+            double flowFrac = flowFracElement.text().as_double();
+            
+            if (pwrFracElement) {
+              double pwrFrac = pwrFracElement.text().as_double();
+              fan.addSpeed(flowFrac, pwrFrac);
+            } else {
+              fan.addSpeed(flowFrac);
+            }
+          }
+        }
+      }
+    } else if (istringEqual(ctrlMthdSim, "MultiSpeed") || istringEqual(ctrlMthdSim, "TwoSpeed")) {
+      // For backward compatibility with TwoSpeed control method
+      // If CtrlMthdSim is MultiSpeed or TwoSpeed, create two speeds if not already defined
+      int numSpds = 2;  // Default to 2 speeds for TwoSpeed/MultiSpeed
+      
+      // If NumSpds is explicitly set, use that value instead
+      pugi::xml_node numSpdsElement = fanElement.child("NumSpds");
+      if (numSpdsElement) {
+        numSpds = numSpdsElement.text().as_int();
+      }
+      
+      // Clear any existing speeds
+      fan.removeAllSpeeds();
+      
+      // Add speeds with default values if not explicitly defined
+      for (int i = 1; i <= numSpds; i++) {
+        double flowFrac = static_cast<double>(i) / numSpds;
+        double pwrFrac = flowFrac * flowFrac * flowFrac;  // Default cubic relationship
+        
+        // Check for explicit values
+        std::string flowFracKey = "FlowFrac" + std::to_string(i);
+        std::string pwrFracKey = "PwrFrac" + std::to_string(i);
+        
+        pugi::xml_node flowFracElement = fanElement.child(flowFracKey.c_str());
+        pugi::xml_node pwrFracElement = fanElement.child(pwrFracKey.c_str());
+        
+        if (flowFracElement) {
+          flowFrac = flowFracElement.text().as_double();
+        }
+        
+        if (pwrFracElement) {
+          pwrFrac = pwrFracElement.text().as_double();
+        }
+        
+        fan.addSpeed(flowFrac, pwrFrac);
+      }
+    }
+
+    result = fan;
+  } else {
+    // Use legacy fan objects (original implementation)
+    
+    // ConstantVolume or TwoSpeed
+    if (istringEqual(fanControlMethodElement.text().as_string(), "ConstantVolume") ||
+        istringEqual(fanControlMethodElement.text().as_string(), "TwoSpeed") ||
+        istringEqual(fanControlMethodElement.text().as_string(), "MultiSpeed"))
     {
-      // Type
+      // The type of fan is dependent on the context. We use FanOnOff for cycling zone systems, FanConstantVolume for everything else
+      pugi::xml_node parentElement = fanElement.parent();
 
-      auto znSysType = parentElement.child("TypeSim").text().as_string();
-      auto znSysFanCtrl = parentElement.child("FanCtrl").text().as_string();
-      auto nightCycleFanCtrl = parentElement.child("NightCycleFanCtrl").text().as_string();
+      if (openstudio::istringEqual(parentElement.name(), "ZnSys"))
+      {
+        // Type
+        auto znSysType = parentElement.child("TypeSim").text().as_string();
+        auto znSysFanCtrl = parentElement.child("FanCtrl").text().as_string();
+        auto nightCycleFanCtrl = parentElement.child("NightCycleFanCtrl").text().as_string();
 
-      if( istringEqual(znSysFanCtrl,"Cycling") ||
-          ( ! istringEqual(nightCycleFanCtrl,"StaysOff") ) ||
-          (
-            istringEqual(znSysType,"VRF") &&
-            istringEqual(znSysFanCtrl,"Continuous") &&
-            istringEqual(fanControlMethodElement.text().as_string(),"TwoSpeed")
-          )
-        )
+        if (istringEqual(znSysFanCtrl, "Cycling") ||
+            (!istringEqual(nightCycleFanCtrl, "StaysOff")) ||
+            (
+              istringEqual(znSysType, "VRF") &&
+              istringEqual(znSysFanCtrl, "Continuous") &&
+              (istringEqual(fanControlMethodElement.text().as_string(), "TwoSpeed") || 
+               istringEqual(fanControlMethodElement.text().as_string(), "MultiSpeed"))
+            )
+           )
+        {
+          model::Schedule schedule = model.alwaysOnDiscreteSchedule();
+
+          model::FanOnOff fan(model, schedule);
+
+          fan.setName(nameElement.text().as_string());
+
+          if (availSch) {
+            fan.setAvailabilitySchedule(availSch.get());
+          }
+
+          // TotEff
+          boost::optional<double> _totEff = lexicalCastToDouble(totEffElement);
+          if (_totEff)
+          {
+            fan.setFanEfficiency(_totEff.get());
+          }
+
+          // MtrEff
+          boost::optional<double> _mtrEff = lexicalCastToDouble(mtrEffElement);
+          if (_mtrEff)
+          {
+            fan.setMotorEfficiency(_mtrEff.get());
+          }
+
+          // FlowCap
+          if (flowCap)
+          {
+            fan.setMaximumFlowRate(flowCap.get());
+          }
+
+          // TotStaticPress
+          boost::optional<double> _totStaticPress = lexicalCastToDouble(totStaticPressElement);
+          if (_totStaticPress)
+          {
+            // Convert in WC to Pa
+            fan.setPressureRise(_totStaticPress.get() * 249.0889);
+          }
+
+          // MtrPos
+          if (motorInAirstream)
+          {
+            fan.setMotorInAirstreamFraction(1.0);
+          }
+          else
+          {
+            fan.setMotorInAirstreamFraction(0.0);
+          }
+
+          // Pwr_fPLRCrvRef
+          pugi::xml_node pwr_fPLRCrvElement = fanElement.child("Pwr_fPLRCrvRef");
+          boost::optional<model::Curve> pwr_fPLRCrv;
+          pwr_fPLRCrv = model.getModelObjectByName<model::Curve>(pwr_fPLRCrvElement.text().as_string());
+          if (pwr_fPLRCrv)
+          {
+            fan.setFanPowerRatioFunctionofSpeedRatioCurve(pwr_fPLRCrv.get());
+          }
+
+          // End Use Subcategory
+          fan.setEndUseSubcategory(endUseSubcategory);
+
+          result = fan;
+        }
+      }
+
+      if (!result)
       {
         model::Schedule schedule = model.alwaysOnDiscreteSchedule();
 
-        model::FanOnOff fan(model,schedule);
+        model::FanConstantVolume fan(model, schedule);
 
         fan.setName(nameElement.text().as_string());
 
-        if( availSch ) {
+        if (availSch) {
           fan.setAvailabilitySchedule(availSch.get());
         }
 
         // TotEff
         boost::optional<double> _totEff = lexicalCastToDouble(totEffElement);
-        if( _totEff )
+        if (_totEff)
         {
           fan.setFanEfficiency(_totEff.get());
         }
 
         // MtrEff
         boost::optional<double> _mtrEff = lexicalCastToDouble(mtrEffElement);
-        if( _mtrEff )
+        if (_mtrEff)
         {
           fan.setMotorEfficiency(_mtrEff.get());
         }
 
         // FlowCap
-        if( flowCap )
+        if (flowCap)
         {
           fan.setMaximumFlowRate(flowCap.get());
         }
 
         // TotStaticPress
         boost::optional<double> _totStaticPress = lexicalCastToDouble(totStaticPressElement);
-        if( _totStaticPress )
+        if (_totStaticPress)
         {
           // Convert in WC to Pa
-          fan.setPressureRise(_totStaticPress.get() * 249.0889 );
+          fan.setPressureRise(_totStaticPress.get() * 249.0889);
         }
 
         // MtrPos
-        if( motorInAirstream )
+        if (motorInAirstream)
         {
           fan.setMotorInAirstreamFraction(1.0);
         }
@@ -2991,64 +3213,75 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFan(
           fan.setMotorInAirstreamFraction(0.0);
         }
 
-        // Pwr_fPLRCrvRef
-        pugi::xml_node pwr_fPLRCrvElement = fanElement.child("Pwr_fPLRCrvRef");
-        boost::optional<model::Curve> pwr_fPLRCrv;
-        pwr_fPLRCrv = model.getModelObjectByName<model::Curve>(pwr_fPLRCrvElement.text().as_string());
-        if( pwr_fPLRCrv )
-        {
-          fan.setFanPowerRatioFunctionofSpeedRatioCurve(pwr_fPLRCrv.get());
-        }
-
         // End Use Subcategory
-        fan.setEndUseSubcategory("Interior Fans");
+        fan.setEndUseSubcategory(endUseSubcategory);
 
         result = fan;
       }
     }
-
-    if( ! result )
+    // Variable Volume
+    else if (istringEqual(fanControlMethodElement.text().as_string(), "VariableSpeedDrive"))
     {
       model::Schedule schedule = model.alwaysOnDiscreteSchedule();
 
-      model::FanConstantVolume fan(model,schedule);
+      model::FanVariableVolume fan(model, schedule);
 
       fan.setName(nameElement.text().as_string());
 
-      if( availSch ) {
+      if (availSch) {
         fan.setAvailabilitySchedule(availSch.get());
       }
 
       // TotEff
       boost::optional<double> _totEff = lexicalCastToDouble(totEffElement);
-      if( _totEff )
+      if (_totEff)
       {
         fan.setFanEfficiency(_totEff.get());
       }
 
       // MtrEff
       boost::optional<double> _mtrEff = lexicalCastToDouble(mtrEffElement);
-      if( _mtrEff )
+      if (_mtrEff)
       {
         fan.setMotorEfficiency(_mtrEff.get());
       }
 
       // FlowCap
-      if( flowCap )
+      if (flowCap)
       {
         fan.setMaximumFlowRate(flowCap.get());
       }
 
       // TotStaticPress
       boost::optional<double> _totStaticPress = lexicalCastToDouble(totStaticPressElement);
-      if( _totStaticPress )
+      if (_totStaticPress)
       {
         // Convert in WC to Pa
-        fan.setPressureRise(_totStaticPress.get() * 249.0889 );
+        fan.setPressureRise(_totStaticPress.get() * 249.0889);
+      }
+
+      // Pwr_fPLRCrvRef
+      pugi::xml_node pwr_fPLRCrvElement = fanElement.child("Pwr_fPLRCrvRef");
+      boost::optional<model::Curve> pwr_fPLRCrv;
+      pwr_fPLRCrv = model.getModelObjectByName<model::Curve>(pwr_fPLRCrvElement.text().as_string());
+      if (pwr_fPLRCrv)
+      {
+        if (boost::optional<model::CurveCubic> curveCubic = pwr_fPLRCrv->optionalCast<model::CurveCubic>())
+        {
+          fan.setFanPowerCoefficient1(curveCubic->coefficient1Constant());
+          fan.setFanPowerCoefficient2(curveCubic->coefficient2x());
+          fan.setFanPowerCoefficient3(curveCubic->coefficient3xPOW2());
+          fan.setFanPowerCoefficient4(curveCubic->coefficient4xPOW3());
+          fan.setFanPowerCoefficient5(0.0);
+        }
+        else
+        {
+          LOG(Warn, "Fan: " << fan.name().get() << " references an unsupported curve type.");
+        }
       }
 
       // MtrPos
-      if( motorInAirstream )
+      if (motorInAirstream)
       {
         fan.setMotorInAirstreamFraction(1.0);
       }
@@ -3057,89 +3290,19 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFan(
         fan.setMotorInAirstreamFraction(0.0);
       }
 
+      pugi::xml_node flowMinSimElement = fanElement.child("FlowMinSim");
+      boost::optional<double> _flowMinSim = lexicalCastToDouble(flowMinSimElement);
+      if (_flowMinSim)
+      {
+        double value = unitToUnit(_flowMinSim.get(), "cfm", "m^3/s").get();
+        fan.setFanPowerMinimumAirFlowRate(value);
+      }
+
+      // End Use Subcategory
+      fan.setEndUseSubcategory(endUseSubcategory);
+
       result = fan;
     }
-  }
-  // Variable Volume
-  else if( istringEqual(fanControlMethodElement.text().as_string(),"VariableSpeedDrive") )
-  {
-    model::Schedule schedule = model.alwaysOnDiscreteSchedule();
-
-    model::FanVariableVolume fan(model,schedule);
-
-    fan.setName(nameElement.text().as_string());
-
-    if( availSch ) {
-      fan.setAvailabilitySchedule(availSch.get());
-    }
-
-    // TotEff
-    boost::optional<double> _totEff = lexicalCastToDouble(totEffElement);
-    if( _totEff )
-    {
-      fan.setFanEfficiency(_totEff.get());
-    }
-
-    // MtrEff
-    boost::optional<double> _mtrEff = lexicalCastToDouble(mtrEffElement);
-    if( _mtrEff )
-    {
-      fan.setMotorEfficiency(_mtrEff.get());
-    }
-
-    // FlowCap
-    if( flowCap )
-    {
-      fan.setMaximumFlowRate(flowCap.get());
-    }
-
-    // TotStaticPress
-    boost::optional<double> _totStaticPress = lexicalCastToDouble(totStaticPressElement);
-    if( _totStaticPress )
-    {
-      // Convert in WC to Pa
-      fan.setPressureRise(_totStaticPress.get() * 249.0889 );
-    }
-
-    // Pwr_fPLRCrvRef
-    pugi::xml_node pwr_fPLRCrvElement = fanElement.child("Pwr_fPLRCrvRef");
-    boost::optional<model::Curve> pwr_fPLRCrv;
-    pwr_fPLRCrv = model.getModelObjectByName<model::Curve>(pwr_fPLRCrvElement.text().as_string());
-    if( pwr_fPLRCrv )
-    {
-      if( boost::optional<model::CurveCubic> curveCubic = pwr_fPLRCrv->optionalCast<model::CurveCubic>() )
-      {
-        fan.setFanPowerCoefficient1(curveCubic->coefficient1Constant());
-        fan.setFanPowerCoefficient2(curveCubic->coefficient2x());
-        fan.setFanPowerCoefficient3(curveCubic->coefficient3xPOW2());
-        fan.setFanPowerCoefficient4(curveCubic->coefficient4xPOW3());
-        fan.setFanPowerCoefficient5(0.0);
-      }
-      else
-      {
-        LOG(Warn,"Fan: " << fan.name().get() << " references an unsupported curve type.");
-      }
-    }
-
-    // MtrPos
-    if( motorInAirstream )
-    {
-      fan.setMotorInAirstreamFraction(1.0);
-    }
-    else
-    {
-      fan.setMotorInAirstreamFraction(0.0);
-    }
-
-    pugi::xml_node flowMinSimElement = fanElement.child("FlowMinSim");
-    boost::optional<double> _flowMinSim = lexicalCastToDouble(flowMinSimElement);
-    if( _flowMinSim )
-    {
-      double value = unitToUnit(_flowMinSim.get(),"cfm","m^3/s").get();
-      fan.setFanPowerMinimumAirFlowRate(value);
-    }
-
-    result = fan;
   }
 
   return result;
