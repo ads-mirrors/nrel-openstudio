@@ -98,13 +98,9 @@ namespace energyplus {
           auto zones = airLoopHVAC->demandComponents(modelObject, airLoopHVAC->demandOutletNode(), model::ThermalZone::iddObjectType());
           if (!zones.empty()) {
             auto zone = zones.front();
-            auto spaces = zone.cast<model::ThermalZone>().spaces();
-            if (!spaces.empty()) {
-              if (auto designSpecificationOutdoorAir = spaces.front().designSpecificationOutdoorAir()) {
-                dsoa_found = true;
-                idfObject.setString(AirTerminal_SingleDuct_MixerFields::DesignSpecificationOutdoorAirObjectName,
-                                    designSpecificationOutdoorAir->name().get());
-              }
+            if (auto dsoaOrList_ = getOrCreateThermalZoneDSOA(zone.cast<ThermalZone>())) {
+              dsoa_found = true;
+              idfObject.setString(AirTerminal_SingleDuct_MixerFields::DesignSpecificationOutdoorAirObjectName, dsoaOrList_->nameString());
             }
           }
         }

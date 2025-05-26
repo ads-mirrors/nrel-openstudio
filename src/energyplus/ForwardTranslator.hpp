@@ -508,7 +508,11 @@ namespace energyplus {
 
   namespace detail {
     struct ForwardTranslatorInitializer;
-  };
+
+    // TODO: I have to put this back because of AirTerminalDualDuctVAV which should be using Control for Outdoor Air
+    // I'm setting it up as a free function in detail:: though, so you know you shouldn't call it!
+    boost::optional<IdfObject> translateDesignSpecificationOutdoorAir(model::DesignSpecificationOutdoorAir& modelObject);
+  };  // namespace detail
 
 #define ENERGYPLUS_VERSION "25.1"
 
@@ -938,7 +942,14 @@ namespace energyplus {
 
     boost::optional<IdfObject> translateDesignDay(model::DesignDay& modelObject);
 
-    boost::optional<IdfObject> translateDesignSpecificationOutdoorAir(model::DesignSpecificationOutdoorAir& modelObject);
+    // Construct (or fetch if already created) a DesignSpecificationOutdoorAir (DSOA) or DSOA:SpaceList
+    // * if there are no spaces with a DSOA assigned: return empty
+    // * otherwise:
+    // * otherwise:
+    //      * if we translated to E+ with spaces:
+    //          * If a single one: DSOA, otherwise create a DSOA:SpaceList
+    //      * if we do not use E+ spaces: create DSOA
+    boost::optional<IdfObject> getOrCreateThermalZoneDSOA(const model::ThermalZone& z);
 
     boost::optional<IdfObject> translateDistrictCooling(model::DistrictCooling& modelObject);
 
@@ -1507,6 +1518,9 @@ namespace energyplus {
     boost::optional<IdfObject> translateThermalZone(model::ThermalZone& modelObject);
     void translateThermalZoneSpacesWhenCombinedSpaces(model::ThermalZone& modelObject, IdfObject& idfObject);
     void translateThermalZoneSpacesToEnergyPlusSpaces(model::ThermalZone& modelObject, IdfObject& idfObject);
+    // Helper for the DesignSpecification:ZoneAirDistribution, returns empty when the DSZAD is not needed,
+    // which is when fields on Sizing:Zone related to it are all defaulted (Implemeted in ForwardTranslateSizingZone)
+    boost::optional<std::string> zoneDSZADName(const model::ThermalZone& zone);
 
     boost::optional<IdfObject> translateThermostatSetpointDualSetpoint(model::ThermostatSetpointDualSetpoint& tsds);
 
@@ -1697,6 +1711,9 @@ namespace energyplus {
     FluidPropertiesMap m_fluidPropertiesMap;
 
     ModelObjectMap m_map;
+
+    using ZoneToMaybeDSOA = std::map<const openstudio::Handle, boost::optional<IdfObject>>;
+    ZoneToMaybeDSOA m_zoneDSOAsMap;
 
     std::vector<IdfObject> m_idfObjects;
 

@@ -76,29 +76,26 @@ namespace energyplus {
 
     // ControlForOutdoorAir: if yes, get the zone's space's DSOA
     {
-      bool dsoa_found = false;
       if (modelObject.controlForOutdoorAir()) {
+        bool dsoa_found = false;
         if (auto airLoopHVAC = modelObject.airLoopHVAC()) {
           auto zones = airLoopHVAC->demandComponents(modelObject, airLoopHVAC->demandOutletNode(), model::ThermalZone::iddObjectType());
           if (!zones.empty()) {
             auto zone = zones.front();
-            auto spaces = zone.cast<model::ThermalZone>().spaces();
-            if (!spaces.empty()) {
-              if (auto designSpecificationOutdoorAir = spaces.front().designSpecificationOutdoorAir()) {
-                idfObject.setString(AirTerminal_DualDuct_VAV_OutdoorAirFields::DesignSpecificationOutdoorAirObjectName,
-                                    designSpecificationOutdoorAir->name().get());
-                dsoa_found = true;
-              }
+            if (auto dsoaOrList_ = getOrCreateThermalZoneDSOA(zone.cast<ThermalZone>())) {
+              idfObject.setString(AirTerminal_DualDuct_VAV_OutdoorAirFields::DesignSpecificationOutdoorAirObjectName, dsoaOrList_->nameString());
+              dsoa_found = true;
             }
           }
         }
-      }
-      if (!dsoa_found) {
-        LOG(Error, "Cannot set the Required 'Design Specification Outdoor Air' (DSOA) object for "
-                     << modelObject.briefDescription()
-                     << ". You should set controlForOutdoorAir to 'true' and ensure the zone's Space/SpaceType has a DSOA attached.");
+        if (!dsoa_found) {
+          LOG(Error, "Cannot set the Required 'Design Specification Outdoor Air' (DSOA) object for "
+                       << modelObject.briefDescription()
+                       << ". You should set controlForOutdoorAir to 'true' and ensure the zone's Space/SpaceType has a DSOA attached.");
+        }
       }
     }
+
     // Populate fields for AirDistributionUnit
     if (boost::optional<ModelObject> outletNode = modelObject.outletModelObject()) {
       _airDistributionUnit.setString(ZoneHVAC_AirDistributionUnitFields::AirDistributionUnitOutletNodeName, outletNode->name().get());

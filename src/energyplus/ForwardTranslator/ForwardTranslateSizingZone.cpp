@@ -15,8 +15,6 @@
 #include "../../model/ControllerMechanicalVentilation_Impl.hpp"
 #include "../../model/ControllerOutdoorAir.hpp"
 #include "../../model/ControllerOutdoorAir_Impl.hpp"
-#include "../../model/DesignSpecificationOutdoorAir.hpp"
-#include "../../model/DesignSpecificationOutdoorAir_Impl.hpp"
 #include "../../model/ThermalZone.hpp"
 #include "../../model/ThermalZone_Impl.hpp"
 #include "../../model/Schedule.hpp"
@@ -38,6 +36,22 @@ using namespace openstudio::model;
 namespace openstudio {
 
 namespace energyplus {
+
+  boost::optional<std::string> ForwardTranslator::zoneDSZADName(const ThermalZone& zone) {
+    // If any of the DSZAD fields is non-default, then it's worth it to translate it. Otherwise it has no effect.
+    auto sizingZone = zone.sizingZone();
+
+    const bool isDSZADTranslated =
+      !(sizingZone.isDesignZoneAirDistributionEffectivenessinCoolingModeDefaulted()
+        && sizingZone.isDesignZoneAirDistributionEffectivenessinHeatingModeDefaulted()
+        && sizingZone.isDesignZoneSecondaryRecirculationFractionDefaulted() && sizingZone.isDesignMinimumZoneVentilationEfficiencyDefaulted());
+
+    if (!isDSZADTranslated) {
+      return boost::none;
+    }
+
+    return zone.nameString() + " Design Spec Zone Air Dist";
+  }
 
   boost::optional<IdfObject> ForwardTranslator::translateSizingZone(SizingZone& modelObject) {
     boost::optional<std::string> s;
@@ -198,21 +212,11 @@ namespace energyplus {
     // * Design Zone Air Distribution Effectiveness in Heating Mode
     // * Design Zone Secondary Recirculation Fraction
     // * Design Minimum Zone Ventilation Efficiency
-
     // If any of the DSZAD fields is non-default, then it's worth it to translate it. Otherwise it has no effect.
-    bool isDSZADTranslated =
-      !(modelObject.isDesignZoneAirDistributionEffectivenessinCoolingModeDefaulted()
-        && modelObject.isDesignZoneAirDistributionEffectivenessinHeatingModeDefaulted()
-        && modelObject.isDesignZoneSecondaryRecirculationFractionDefaulted() && modelObject.isDesignMinimumZoneVentilationEfficiencyDefaulted());
-
-    // Have to declare it here for scoping, so that we can access it when trying to set it for the Controller:MechanicalVentilation
-    std::string dSZADName;
-
-    if (isDSZADTranslated) {
+    if (auto dSZADName_ = zoneDSZADName(thermalZone)) {
       IdfObject dSZAD(IddObjectType::DesignSpecification_ZoneAirDistribution);
 
-      dSZADName = name + " Design Spec Zone Air Dist";
-      dSZAD.setName(dSZADName);
+      dSZAD.setName(*dSZADName_);
 
       // register the DSZAD
       m_idfObjects.push_back(dSZAD);
@@ -239,40 +243,6 @@ namespace energyplus {
       }
 
       idfObject.setString(Sizing_ZoneFields::DesignSpecificationZoneAirDistributionObjectName, dSZAD.name().get());
-    }
-
-    // Add ThermalZone and associated design objects to ControllerMechanicalVentilation.
-    // This would be done in forwardTranslateControllerMechanicalVentilation except doing it here maintains proper order of the idf file.
-
-    // Now that Multiple AirLoopHVACs serving the same zone are possible, need to loop on all
-    // NOTE: translateControllerMechanicalVentilation ensures ControllerMechanicalVentilation doesn't end up with no extensible groups!
-    for (const auto& airLoopHVAC : thermalZone.airLoopHVACs()) {
-      if (boost::optional<model::AirLoopHVACOutdoorAirSystem> oaSystem = airLoopHVAC.airLoopHVACOutdoorAirSystem()) {
-        model::ControllerOutdoorAir controllerOutdoorAir = oaSystem->getControllerOutdoorAir();
-        model::ControllerMechanicalVentilation controllerMechanicalVentilation = controllerOutdoorAir.controllerMechanicalVentilation();
-        if (boost::optional<IdfObject> _controllerMechanicalVentilation = translateAndMapModelObject(controllerMechanicalVentilation)) {
-          IdfExtensibleGroup eg = _controllerMechanicalVentilation->pushExtensibleGroup();
-
-          // Thermal Zone Name
-          eg.setString(Controller_MechanicalVentilationExtensibleFields::ZoneorZoneListName, name);
-
-          // DesignSpecificationOutdoorAir
-          std::vector<model::Space> spaces = thermalZone.spaces();
-
-          if (!spaces.empty()) {
-            if (boost::optional<model::DesignSpecificationOutdoorAir> designOASpec = spaces.front().designSpecificationOutdoorAir()) {
-              if (boost::optional<IdfObject> _designOASpec = translateAndMapModelObject(designOASpec.get())) {
-                eg.setString(Controller_MechanicalVentilationExtensibleFields::DesignSpecificationOutdoorAirObjectName, _designOASpec->name().get());
-              }
-            }
-          }
-
-          // DesignSpecificationZoneAirDistributionObjectName
-          if (isDSZADTranslated) {
-            eg.setString(Controller_MechanicalVentilationExtensibleFields::DesignSpecificationZoneAirDistributionObjectName, dSZADName);
-          }
-        }
-      }
     }
 
     if (modelObject.accountforDedicatedOutdoorAirSystem()) {
