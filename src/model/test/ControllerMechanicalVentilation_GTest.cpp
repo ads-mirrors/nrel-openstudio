@@ -12,6 +12,7 @@
 #include "../AirLoopHVACOutdoorAirSystem.hpp"
 #include "../DesignSpecificationOutdoorAir.hpp"
 #include "../Node.hpp"
+#include "../SizingSystem.hpp"
 #include "../Space.hpp"
 #include "../ThermalZone.hpp"
 
@@ -34,9 +35,42 @@ TEST_F(ModelFixture, ControllerMechanicalVentilation) {
 TEST_F(ModelFixture, ControllerMechanicalVentilation_SystemOutdoorAirMethod) {
 
   Model m;
-  ControllerMechanicalVentilation c(m);
-  EXPECT_TRUE(c.isSystemOutdoorAirMethodDefaulted());
-  EXPECT_EQ("Standard62.1VentilationRateProcedure", c.systemOutdoorAirMethod());
+  ControllerMechanicalVentilation controller_mv(m);
+  EXPECT_TRUE(controller_mv.isSystemOutdoorAirMethodDefaulted());
+  EXPECT_EQ("Standard62.1VentilationRateProcedure", controller_mv.systemOutdoorAirMethod());
+
+  ControllerOutdoorAir controller_oa(m);
+  EXPECT_TRUE(controller_oa.setControllerMechanicalVentilation(controller_mv));
+  EXPECT_TRUE(controller_mv.isSystemOutdoorAirMethodDefaulted());
+  EXPECT_EQ("Standard62.1VentilationRateProcedure", controller_mv.systemOutdoorAirMethod());
+
+  AirLoopHVACOutdoorAirSystem oa_system(m, controller_oa);
+  EXPECT_EQ("Standard62.1VentilationRateProcedure", controller_mv.systemOutdoorAirMethod());
+
+  AirLoopHVAC a(m);
+  auto sz = a.sizingSystem();
+
+  auto supplyInletNode = a.supplyInletNode();
+  EXPECT_TRUE(oa_system.addToNode(supplyInletNode));
+
+  // System Outdoor Air Method is common to both ControllerMechanicalVentilation and SizingSystem
+  EXPECT_TRUE(sz.setSystemOutdoorAirMethod("ZoneSum"));
+  EXPECT_TRUE(controller_mv.isSystemOutdoorAirMethodDefaulted());
+  EXPECT_EQ("ZoneSum", controller_mv.systemOutdoorAirMethod());
+
+  // System Outdoor Air Method is NOT common to both ControllerMechanicalVentilation and SizingSystem
+  EXPECT_TRUE(sz.setSystemOutdoorAirMethod("Standard62.1SimplifiedProcedure"));
+  EXPECT_TRUE(controller_mv.isSystemOutdoorAirMethodDefaulted());
+  EXPECT_EQ("Standard62.1VentilationRateProcedure", controller_mv.systemOutdoorAirMethod());
+
+  // Explicitly set the System Outdoor Air Method on the ControllerMechanicalVentilation
+  // => takes precedence over SizingSystem even if that method is common to both
+  EXPECT_TRUE(sz.setSystemOutdoorAirMethod("ZoneSum"));
+  EXPECT_TRUE(controller_mv.isSystemOutdoorAirMethodDefaulted());
+  EXPECT_EQ("ZoneSum", controller_mv.systemOutdoorAirMethod());
+  controller_mv.setSystemOutdoorAirMethod("ProportionalControlBasedOnOccupancySchedule");
+  EXPECT_FALSE(controller_mv.isSystemOutdoorAirMethodDefaulted());
+  EXPECT_EQ("ProportionalControlBasedOnOccupancySchedule", controller_mv.systemOutdoorAirMethod());
 }
 
 TEST_F(ModelFixture, ControllerMechanicalVentilation_hasZonesWithDesignSpecificationOutdoorAir) {

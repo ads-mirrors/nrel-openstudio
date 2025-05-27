@@ -109,8 +109,13 @@ namespace model {
           if (oaSystem) {
             const auto airLoop = oaSystem->airLoopHVAC();
             if (airLoop) {
-              const auto sizingSystem = airLoop->sizingSystem();
-              result = sizingSystem.systemOutdoorAirMethod();
+              const auto sizingSystemOAMethod = airLoop->sizingSystem().systemOutdoorAirMethod();
+              const auto possible_vals = systemOutdoorAirMethodValues();
+              if (std::find_if(possible_vals.cbegin(), possible_vals.cend(),
+                               [&sizingSystemOAMethod](const std::string& val) { return openstudio::istringEqual(val, sizingSystemOAMethod); })
+                  != possible_vals.cend()) {
+                result = sizingSystemOAMethod;
+              }
             }
           }
         }
