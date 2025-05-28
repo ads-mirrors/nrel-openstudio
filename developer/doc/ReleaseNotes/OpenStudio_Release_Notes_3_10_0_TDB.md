@@ -88,6 +88,15 @@ You can also refer to the [OpenStudio SDK Python Binding Version Compatibility M
 * [#5365](https://github.com/NREL/OpenStudio/pull/5365) - E+ 25.1.0: Wrap OutputControl:ResilienceSummaries
 
 * [#5312](https://github.com/NREL/OpenStudio/pull/5312) - Wrap PythonPlugin:SearchPaths
+    * The unique object was wrapped in the SDK.
+    * Forward translation intentionally happens before PythonPlugin_Instance so that there cannot be two PythonPlugin_SearchPaths objects.
+
+* [#5134](https://github.com/NREL/OpenStudio/pull/5134) - Addresses #5132, EPW design condition methods should return boost::optional doubles or integers
+    * `EpwDesignCondition` has many API-breaking changes related to its getters. The previous behavior was to misleadingly return a value of 0 for any empty design condition header field. The types for the getters are now either boost::optional<double> or boost::optional<int>.
+
+* [#5350](https://github.com/NREL/OpenStudio/pull/5350) - Wrap CoilSystem:Cooling:Water
+    * The object was wrapped in the SDK.
+    * This coil system enables "Water Side Economizer Mode" and "Wrap Around Water Coil Heat Recovery Mode".
 
 ## Minor changes and bug fixes
 
