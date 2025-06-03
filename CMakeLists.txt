@@ -644,11 +644,6 @@ endif()
 
 if(UNIX)
   if(APPLE)
-
-    # TODO: temp for #5281 - Resigned with a different entitlements to avoid an issue when we pip install stuff into the E+ dir with native comps (numpy for eg)
-    set(ENERGYPLUS_REPO "jmarrec")
-    set(ENERGYPLUS_RELEASE_NAME "v25.1.0-WithDSOASpaceListFixes-python-entitlements")
-
     if (ARCH MATCHES "arm64")
       set(ENERGYPLUS_EXPECTED_HASH f2fce0c8883d057dae498d1a0a717a80)
       set(ENERGYPLUS_PLATFORM "Darwin-macOS13-arm64")
