@@ -780,9 +780,9 @@ namespace sdd {
         outlet->setName(zoneComp->name().get() + " Outlet Node");
       }
     }
- 
-    const auto & zones = result->getModelObjects<model::ThermalZone>();
-    for( auto & z : zones ) {
+
+    const auto& zones = result->getModelObjects<model::ThermalZone>();
+    for (auto& z : zones) {
       z.zoneAirNode().setName(z.nameString() + " Room Air Node");
     }
 
@@ -948,20 +948,20 @@ namespace sdd {
     meter.setInstallLocationType(InstallLocationType::Facility);
     meter.setReportingFrequency("Hourly");
 
-    if (! m_spaceHeatingWaterHeaters.empty()) {
+    if (!m_spaceHeatingWaterHeaters.empty()) {
       // Custom meter that adds together the standard "Heating:Electricity",
       // plus the heat pump water heater energy that is used for space heating
       auto customSpaceHeatingMeter = model::MeterCustom(*result);
       customSpaceHeatingMeter.setName("Custom Space Heating Electricity");
       customSpaceHeatingMeter.setFuelType("Electricity");
       customSpaceHeatingMeter.addKeyVarGroup("", "Heating:Electricity");
-      for(const auto& coil : m_spaceHeatingWaterHeaters) {
+      for (const auto& coil : m_spaceHeatingWaterHeaters) {
         customSpaceHeatingMeter.addKeyVarGroup(coil.nameString(), "Water Heater Electricity Energy");
       }
-      for(const auto& coil : m_spaceHeatingAirToWaterHeatPumps) {
+      for (const auto& coil : m_spaceHeatingAirToWaterHeatPumps) {
         customSpaceHeatingMeter.addKeyVarGroup(coil.nameString(), "Cooling Coil Water Heating Electricity Energy");
       }
-      for(const auto& fan : m_spaceHeatingFans) {
+      for (const auto& fan : m_spaceHeatingFans) {
         customSpaceHeatingMeter.addKeyVarGroup(fan.nameString(), "Fan Electricity Energy");
       }
 
@@ -975,10 +975,10 @@ namespace sdd {
       auto customSpaceHeatingDecrement = model::MeterCustomDecrement(*result, "WaterSystems:Electricity");
       customSpaceHeatingDecrement.setName("Custom Water Systems Electricity");
       customSpaceHeatingDecrement.setFuelType("Electricity");
-      for(const auto& coil : m_spaceHeatingWaterHeaters) {
+      for (const auto& coil : m_spaceHeatingWaterHeaters) {
         customSpaceHeatingDecrement.addKeyVarGroup(coil.nameString(), "Water Heater Electricity Energy");
       }
-      for(const auto& coil : m_spaceHeatingAirToWaterHeatPumps) {
+      for (const auto& coil : m_spaceHeatingAirToWaterHeatPumps) {
         customSpaceHeatingDecrement.addKeyVarGroup(coil.nameString(), "Cooling Coil Water Heating Electricity Energy");
       }
       meter = model::OutputMeter(*result);
@@ -1314,17 +1314,17 @@ namespace sdd {
         }
       }
 
-      var = model::OutputVariable("Zone Radiant HVAC Heating Rate",*result);
+      var = model::OutputVariable("Zone Radiant HVAC Heating Rate", *result);
       var.setReportingFrequency(interval);
-      var = model::OutputVariable("Zone Radiant HVAC Cooling Rate",*result);
+      var = model::OutputVariable("Zone Radiant HVAC Cooling Rate", *result);
       var.setReportingFrequency(interval);
-      var = model::OutputVariable("Zone Radiant HVAC Mass Flow Rate",*result);
+      var = model::OutputVariable("Zone Radiant HVAC Mass Flow Rate", *result);
       var.setReportingFrequency(interval);
-      var = model::OutputVariable("Zone Radiant HVAC Inlet Temperature",*result);
+      var = model::OutputVariable("Zone Radiant HVAC Inlet Temperature", *result);
       var.setReportingFrequency(interval);
-      var = model::OutputVariable("Zone Radiant HVAC Outlet Temperature",*result);
+      var = model::OutputVariable("Zone Radiant HVAC Outlet Temperature", *result);
       var.setReportingFrequency(interval);
-      var = model::OutputVariable("Zone Radiant HVAC Electricity Rate",*result);
+      var = model::OutputVariable("Zone Radiant HVAC Electricity Rate", *result);
       var.setReportingFrequency(interval);
     }
 
@@ -1828,6 +1828,29 @@ namespace sdd {
 
     // DLM: always assume California?
     site.setTimeZone(-8.0);
+
+    // Add support for Terrain via Proj:BldgTerrain (ticket 3676)
+    pugi::xml_node terrainElement = element.child("BldgTerrain");
+    if (terrainElement) {
+      // Get the terrain value from SDD
+      std::string terrain = terrainElement.text().as_string();
+
+      if (!terrain.empty()) {
+        // Validate the terrain value against allowed options in EnergyPlus
+        if (istringEqual(terrain, "Country") || istringEqual(terrain, "Suburbs") || istringEqual(terrain, "City") || istringEqual(terrain, "Ocean")
+            || istringEqual(terrain, "Urban")) {
+
+          // Get or create the Site object
+          model::Site site = model.getUniqueModelObject<model::Site>();
+
+          // Set the terrain property on the Site object
+          site.setTerrain(terrain);
+          LOG(Info, "Set Site terrain to " << terrain << " from CBECC BldgTerrain");
+        } else {
+          LOG(Warn, "Invalid terrain value '" << terrain << "'. Must be one of: Country, Suburbs, City, Ocean, Urban");
+        }
+      }
+    }
 
     return site;
   }

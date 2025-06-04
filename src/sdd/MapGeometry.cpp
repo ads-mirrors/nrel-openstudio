@@ -58,6 +58,8 @@
 #include "../model/ScheduleConstant_Impl.hpp"
 #include "../model/ScheduleRuleset.hpp"
 #include "../model/ScheduleRuleset_Impl.hpp"
+#include "../model/Site.hpp"
+#include "../model/Site_Impl.hpp"
 #include "../model/ScheduleTypeLimits.hpp"
 #include "../model/ScheduleTypeLimits_Impl.hpp"
 #include "../model/SurfacePropertyConvectionCoefficients.hpp"
@@ -149,32 +151,6 @@ namespace sdd {
       double northAngle = normalizeAngle0to360(northAngleElement.text().as_double());
       double buildingAzimuth = 360.0 - northAngle;
       building.setNorthAxis(buildingAzimuth);
-    }
-
-    // Add support for Terrain via Proj:BldgTerrain (ticket 3676)
-    pugi::xml_node terrainElement = element.child("BldgTerrain");
-    if (terrainElement) {
-      // Get the terrain value from SDD
-      std::string terrain = terrainElement.text().as_string();
-      
-      if (!terrain.empty()) {
-        // Validate the terrain value against allowed options in EnergyPlus
-        if (istringEqual(terrain, "Country") || 
-            istringEqual(terrain, "Suburbs") || 
-            istringEqual(terrain, "City") || 
-            istringEqual(terrain, "Ocean") || 
-            istringEqual(terrain, "Urban")) {
-          
-          // Get or create the Site object
-          model::Site site = model.getUniqueModelObject<model::Site>();
-          
-          // Set the terrain property on the Site object
-          site.setTerrain(terrain);
-          LOG(Info, "Set Site terrain to " << terrain << " from CBECC BldgTerrain");
-        } else {
-          LOG(Warn, "Invalid terrain value '" << terrain << "'. Must be one of: Country, Suburbs, City, Ocean, Urban");
-        }
-      }
     }
 
     // translate shadingSurfaces

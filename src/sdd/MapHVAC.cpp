@@ -26,6 +26,8 @@
 #include "../model/FanVariableVolume_Impl.hpp"
 #include "../model/FanOnOff.hpp"
 #include "../model/FanOnOff_Impl.hpp"
+#include "../model/FanSystemModel.hpp"
+#include "../model/FanSystemModel_Impl.hpp"
 #include "../model/FanZoneExhaust.hpp"
 #include "../model/FanZoneExhaust_Impl.hpp"
 #include "../model/CoilHeatingWaterToAirHeatPumpEquationFit.hpp"
