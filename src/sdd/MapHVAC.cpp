@@ -3014,22 +3014,59 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFan(
         // Clear any existing speeds
         fan.removeAllSpeeds();
 
-        // Add speeds based on FlowFrac and PwrFrac arrays
-        for (int i = 1; i <= numSpds; i++) {
-          std::string flowFracKey = "FlowFrac" + std::to_string(i);
-          std::string pwrFracKey = "PwrFrac" + std::to_string(i);
+        // Check for FlowFrac and PwrFrac with index attributes first
+        std::map<int, double> flowFractions;
+        std::map<int, double> pwrFractions;
+        
+        // Collect all FlowFrac elements with index attributes
+        for (pugi::xml_node flowFracNode = fanElement.child("FlowFrac"); flowFracNode; flowFracNode = flowFracNode.next_sibling("FlowFrac")) {
+          pugi::xml_attribute indexAttr = flowFracNode.attribute("index");
+          if (indexAttr) {
+            int index = indexAttr.as_int();
+            double value = flowFracNode.text().as_double();
+            flowFractions[index] = value;
+          }
+        }
+        
+        // Collect all PwrFrac elements with index attributes
+        for (pugi::xml_node pwrFracNode = fanElement.child("PwrFrac"); pwrFracNode; pwrFracNode = pwrFracNode.next_sibling("PwrFrac")) {
+          pugi::xml_attribute indexAttr = pwrFracNode.attribute("index");
+          if (indexAttr) {
+            int index = indexAttr.as_int();
+            double value = pwrFracNode.text().as_double();
+            pwrFractions[index] = value;
+          }
+        }
 
-          pugi::xml_node flowFracElement = fanElement.child(flowFracKey.c_str());
-          pugi::xml_node pwrFracElement = fanElement.child(pwrFracKey.c_str());
-
-          if (flowFracElement) {
-            double flowFrac = flowFracElement.text().as_double();
-            
-            if (pwrFracElement) {
-              double pwrFrac = pwrFracElement.text().as_double();
+        // If we found indexed FlowFrac/PwrFrac elements, use those
+        if (!flowFractions.empty()) {
+          for (const auto& [index, flowFrac] : flowFractions) {
+            auto pwrFracIt = pwrFractions.find(index);
+            if (pwrFracIt != pwrFractions.end()) {
+              double pwrFrac = pwrFracIt->second;
               fan.addSpeed(flowFrac, pwrFrac);
             } else {
               fan.addSpeed(flowFrac);
+            }
+          }
+        } else {
+          // Fall back to original method of looking for FlowFrac1, FlowFrac2, etc.
+          for (int i = 1; i <= numSpds; i++) {
+            std::string flowFracKey = "FlowFrac" + std::to_string(i);
+            std::string pwrFracKey = "PwrFrac" + std::to_string(i);
+
+            pugi::xml_node flowFracElement = fanElement.child(flowFracKey.c_str());
+            pugi::xml_node pwrFracElement = fanElement.child(pwrFracKey.c_str());
+
+            if (flowFracElement) {
+              double flowFrac = flowFracElement.text().as_double();
+              
+              if (pwrFracElement) {
+                double pwrFrac = pwrFracElement.text().as_double();
+                fan.addSpeed(flowFrac, pwrFrac);
+              } else {
+                fan.addSpeed(flowFrac);
+              }
             }
           }
         }
@@ -3047,28 +3084,65 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateFan(
       
       // Clear any existing speeds
       fan.removeAllSpeeds();
+
+      // Check for FlowFrac and PwrFrac with index attributes first
+      std::map<int, double> flowFractions;
+      std::map<int, double> pwrFractions;
       
-      // Add speeds with default values if not explicitly defined
-      for (int i = 1; i <= numSpds; i++) {
-        double flowFrac = static_cast<double>(i) / numSpds;
-        double pwrFrac = flowFrac * flowFrac * flowFrac;  // Default cubic relationship
-        
-        // Check for explicit values
-        std::string flowFracKey = "FlowFrac" + std::to_string(i);
-        std::string pwrFracKey = "PwrFrac" + std::to_string(i);
-        
-        pugi::xml_node flowFracElement = fanElement.child(flowFracKey.c_str());
-        pugi::xml_node pwrFracElement = fanElement.child(pwrFracKey.c_str());
-        
-        if (flowFracElement) {
-          flowFrac = flowFracElement.text().as_double();
+      // Collect all FlowFrac elements with index attributes
+      for (pugi::xml_node flowFracNode = fanElement.child("FlowFrac"); flowFracNode; flowFracNode = flowFracNode.next_sibling("FlowFrac")) {
+        pugi::xml_attribute indexAttr = flowFracNode.attribute("index");
+        if (indexAttr) {
+          int index = indexAttr.as_int();
+          double value = flowFracNode.text().as_double();
+          flowFractions[index] = value;
         }
-        
-        if (pwrFracElement) {
-          pwrFrac = pwrFracElement.text().as_double();
+      }
+      
+      // Collect all PwrFrac elements with index attributes
+      for (pugi::xml_node pwrFracNode = fanElement.child("PwrFrac"); pwrFracNode; pwrFracNode = pwrFracNode.next_sibling("PwrFrac")) {
+        pugi::xml_attribute indexAttr = pwrFracNode.attribute("index");
+        if (indexAttr) {
+          int index = indexAttr.as_int();
+          double value = pwrFracNode.text().as_double();
+          pwrFractions[index] = value;
         }
-        
-        fan.addSpeed(flowFrac, pwrFrac);
+      }
+
+      // If we found indexed FlowFrac/PwrFrac elements, use those
+      if (!flowFractions.empty()) {
+        for (const auto& [index, flowFrac] : flowFractions) {
+          auto pwrFracIt = pwrFractions.find(index);
+          if (pwrFracIt != pwrFractions.end()) {
+            double pwrFrac = pwrFracIt->second;
+            fan.addSpeed(flowFrac, pwrFrac);
+          } else {
+            fan.addSpeed(flowFrac);
+          }
+        }
+      } else {
+        // Add speeds with default values if not explicitly defined
+        for (int i = 1; i <= numSpds; i++) {
+          double flowFrac = static_cast<double>(i) / numSpds;
+          double pwrFrac = flowFrac * flowFrac * flowFrac;  // Default cubic relationship
+          
+          // Check for explicit values using traditional element names (FlowFrac1, etc.)
+          std::string flowFracKey = "FlowFrac" + std::to_string(i);
+          std::string pwrFracKey = "PwrFrac" + std::to_string(i);
+          
+          pugi::xml_node flowFracElement = fanElement.child(flowFracKey.c_str());
+          pugi::xml_node pwrFracElement = fanElement.child(pwrFracKey.c_str());
+          
+          if (flowFracElement) {
+            flowFrac = flowFracElement.text().as_double();
+          }
+          
+          if (pwrFracElement) {
+            pwrFrac = pwrFracElement.text().as_double();
+          }
+          
+          fan.addSpeed(flowFrac, pwrFrac);
+        }
       }
     }
 
