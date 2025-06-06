@@ -8339,6 +8339,13 @@ boost::optional<openstudio::model::ModelObject> ReverseTranslator::translateHtPu
     // Reference COP
     pugi::xml_node copSimElement = element.child("COPSim");
     boost::optional<double> copSim = lexicalCastToDouble(copSimElement);
+    
+    // Also check for HtgCOPSim which is used in newer CBECC XML files
+    if (!copSim) {
+      pugi::xml_node htgCOPSimElement = element.child("HtgCOPSim");
+      copSim = lexicalCastToDouble(htgCOPSimElement);
+    }
+    
     if (copSim) {
       heatPump.setReferenceCoefficientofPerformance(copSim.get());
     }
