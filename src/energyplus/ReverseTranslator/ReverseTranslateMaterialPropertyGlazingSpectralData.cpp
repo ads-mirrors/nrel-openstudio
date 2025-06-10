@@ -25,6 +25,11 @@ namespace energyplus {
 
     openstudio::model::MaterialPropertyGlazingSpectralData glazingSpectralData(m_model);
 
+    // Name
+    if (boost::optional<std::string> name_ = workspaceObject.name()) {
+      glazingSpectralData.setName(name_.get());
+    }
+
     // get extensible groups for spectral data fields
     for (const IdfExtensibleGroup& idfGroup : workspaceObject.extensibleGroups()) {
       auto workspaceGroup = idfGroup.cast<WorkspaceExtensibleGroup>();

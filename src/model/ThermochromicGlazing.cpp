@@ -55,8 +55,8 @@ namespace model {
   }
 
   std::ostream& operator<<(std::ostream& out, const openstudio::model::ThermochromicGroup& ThermochromicGroup) {
-    out << "(StandardGlazing = '" << ThermochromicGroup.standardGlazing().nameString() << "', Optional Data Temperature = '"
-        << ThermochromicGroup.opticalDataTemperature() << "')";
+    out << "(StandardGlazing = '" << ThermochromicGroup.standardGlazing().nameString()
+        << "', Optional Data Temperature = " << ThermochromicGroup.opticalDataTemperature() << ")";
     return out;
   }
 
