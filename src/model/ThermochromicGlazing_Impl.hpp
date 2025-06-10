@@ -13,12 +13,14 @@
 namespace openstudio {
 namespace model {
 
+  class StandardGlazing;
+  class ThermochromicGroup;
+
   namespace detail {
 
     /** ThermochromicGlazing_Impl is a Glazing_Impl that is the implementation class for ThermochromicGlazing.*/
     class MODEL_API ThermochromicGlazing_Impl : public Glazing_Impl
     {
-
      public:
       /** @name Constructors and Destructors */
       //@{
@@ -40,88 +42,50 @@ namespace model {
 
       virtual IddObjectType iddObjectType() const override;
 
-      //@}
-      /** @name Getters */
-      //@{
-
+      // Will warn if all the referenced StandardGlazings don't have the same thickness
       virtual double thickness() const override;
 
-      virtual double thermalConductivity() const;
-
-      virtual double thermalConductance() const;
-
-      virtual double thermalResistivity() const;
-
-      virtual double thermalResistance() const;
-
-      virtual double thermalTransmittance() const;
-
-      virtual double thermalAbsorptance() const;
-
-      virtual double thermalReflectance() const;
-
-      virtual double solarTransmittance() const;
-
-      virtual double solarAbsorptance() const;
-
-      virtual double solarReflectance() const;
+      // Will set the thickness of all referenced StandardGlazings
+      virtual bool setThickness(double value) override;
 
       virtual boost::optional<double> getVisibleTransmittance() const override;
 
-      virtual double visibleAbsorptance() const;
+      virtual boost::optional<double> interiorVisibleAbsorptance() const override;
 
-      virtual double visibleReflectance() const;
+      virtual boost::optional<double> exteriorVisibleAbsorptance() const override;
 
-      double opticalDataTemperature() const;
-
-      // TODO: Handle this object's extensible fields.
+      //@}
+      /** @name Getters */
+      //@{
 
       //@}
       /** @name Setters */
       //@{
 
-      virtual bool setThickness(double value) override;
-
-      virtual bool setThermalConductivity(double value);
-
-      virtual bool setThermalConductance(double value);
-
-      virtual bool setThermalResistivity(double value);
-
-      virtual bool setThermalResistance(double value);
-
-      virtual bool setThermalTransmittance(double value);
-
-      virtual bool setThermalAbsorptance(double value);
-
-      virtual bool setThermalReflectance(double value);
-
-      virtual bool setSolarTransmittance(double value);
-
-      virtual bool setSolarAbsorptance(double value);
-
-      virtual bool setSolarReflectance(double value);
-
-      virtual bool setVisibleTransmittance(double value);
-
-      virtual bool setVisibleAbsorptance(double value);
-
-      virtual bool setVisibleReflectance(double value);
-
-      bool setOpticalDataTemperature(double value);
-
-      // TODO: Handle this object's extensible fields.
-
       //@}
       /** @name Other */
       //@{
+
+      std::vector<ThermochromicGroup> thermochromicGroups() const;
+
+      unsigned int numberofThermochromicGroups() const;
+
+      boost::optional<unsigned> thermochromicGroupIndex(const ThermochromicGroup& thermochromicGroup) const;
+      boost::optional<ThermochromicGroup> getThermochromicGroup(unsigned groupIndex) const;
+
+      bool addThermochromicGroup(const ThermochromicGroup& thermochromicGroup);
+
+      // Convenience fucntion that will create a ThermochromicGroup
+      bool addThermochromicGroup(const StandardGlazing& standardGlazing, double opticalDataTemperature);
+
+      bool addThermochromicGroups(const std::vector<ThermochromicGroup>& thermochromicGroups);
+      bool removeThermochromicGroup(unsigned groupIndex);
+      void removeAllThermochromicGroups();
 
       //@}
      protected:
      private:
       REGISTER_LOGGER("openstudio.model.ThermochromicGlazing");
-
-      std::vector<Glazing> mf_glazings() const;
     };
 
   }  // namespace detail
