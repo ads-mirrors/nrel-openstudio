@@ -420,6 +420,7 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslateThermalStorageIceDetailed.cpp
   ForwardTranslator/ForwardTranslateThermalStorageChilledWaterStratified.cpp
   ForwardTranslator/ForwardTranslateThermalZone.cpp
+  ForwardTranslator/ForwardTranslateThermochromicGlazing.cpp
   ForwardTranslator/ForwardTranslateThermostatSetpointDualSetpoint.cpp
   ForwardTranslator/ForwardTranslateTimestep.cpp
   ForwardTranslator/ForwardTranslateUnitarySystemPerformanceMultispeed.cpp
@@ -845,6 +846,7 @@ set(${target_name}_test_src
   Test/TableLookup_GTest.cpp
   Test/ThermalStorageChilledWaterStratified_GTest.cpp
   Test/ThermalZone_GTest.cpp
+  Test/ThermochromicGlazing_GTest.cpp
   Test/ThermostatSetpointDualSetpoint_GTest.cpp
   Test/UnitarySystemPerformanceMultispeed_GTest.cpp
   Test/WindowPropertyFrameAndDivider_GTest.cpp
