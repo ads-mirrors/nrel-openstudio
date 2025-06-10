@@ -377,6 +377,8 @@ namespace energyplus {
 
     boost::optional<model::ModelObject> translateWindowMaterialGlazing(const WorkspaceObject& workspaceObject);
 
+    boost::optional<model::ModelObject> translateWindowMaterialGlazingGroupThermochromic(const WorkspaceObject& workspaceObject);
+
     boost::optional<model::ModelObject> translateWindowMaterialSimpleGlazingSystem(const WorkspaceObject& workspaceObject);
 
     boost::optional<model::ModelObject> translateWindowPropertyFrameAndDivider(const WorkspaceObject& workspaceObject);

@@ -987,6 +987,10 @@ namespace energyplus {
         modelObject = translateWindowMaterialGlazing(workspaceObject);
         break;
       }
+      case openstudio::IddObjectType::WindowMaterial_GlazingGroup_Thermochromic: {
+        modelObject = translateWindowMaterialGlazingGroupThermochromic(workspaceObject);
+        break;
+      }
       case openstudio::IddObjectType::WindowMaterial_SimpleGlazingSystem: {
         modelObject = translateWindowMaterialSimpleGlazingSystem(workspaceObject);
         break;

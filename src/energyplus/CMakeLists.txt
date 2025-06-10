@@ -633,6 +633,7 @@ set(${target_name}_src
   ReverseTranslator/ReverseTranslateVersion.cpp
   ReverseTranslator/ReverseTranslateWindowMaterialGas.cpp
   ReverseTranslator/ReverseTranslateWindowMaterialGlazing.cpp
+  ReverseTranslator/ReverseTranslateWindowMaterialGlazingGroupThermochromic.cpp
   ReverseTranslator/ReverseTranslateWindowMaterialSimpleGlazingSystem.cpp
   ReverseTranslator/ReverseTranslateWindowPropertyFrameAndDivider.cpp
   ReverseTranslator/ReverseTranslateWindowShadingControl.cpp
