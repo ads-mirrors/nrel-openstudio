@@ -10,6 +10,8 @@
 #include "../StandardGlazing.hpp"
 #include "../StandardGlazing_Impl.hpp"
 
+#include "../../utilities/core/StringStreamLogSink.hpp"
+
 using namespace openstudio;
 using namespace openstudio::model;
 
@@ -102,4 +104,37 @@ TEST_F(ModelFixture, ThermochromicGlazing_ThermochromicGroups) {
 
   EXPECT_EQ(group3.standardGlazing(), groups[1].standardGlazing());
   EXPECT_EQ(group3.opticalDataTemperature(), groups[1].opticalDataTemperature());
+}
+
+TEST_F(ModelFixture, ThermochromicGlazing_Thickness) {
+  Model m;
+  ThermochromicGlazing thermochromicGlazing(m);
+  thermochromicGlazing.setName("My ThermochromicGlazing");
+
+  // Create 5 groups, all with different thicknesses: 0.01, 0.02, 0.03, 0.04, 0.05, average = 0.03
+  for (int i = 1; i <= 5; ++i) {
+    StandardGlazing standardGlazing(m);
+    standardGlazing.setName("StandardGlazing" + std::to_string(i));
+
+    double optionalDataTemperature = 10.00 * (i - 1);
+    EXPECT_TRUE(thermochromicGlazing.addThermochromicGroup(standardGlazing, optionalDataTemperature));
+    standardGlazing.setThickness(0.01 * i);
+  }
+
+  StringStreamLogSink sink;
+  sink.setLogLevel(Warn);
+  EXPECT_DOUBLE_EQ(0.03, thermochromicGlazing.thickness());
+  EXPECT_EQ(1, sink.logMessages().size());
+  EXPECT_EQ(Warn, sink.logMessages().front().logLevel());
+  EXPECT_EQ("openstudio.model.ThermochromicGlazing", sink.logMessages().front().logChannel());
+  EXPECT_EQ("Thermochromic group 'My ThermochromicGlazing' contains glazings of different thicknesses.", sink.logMessages().front().logMessage());
+
+  sink.resetStringStream();
+  EXPECT_TRUE(thermochromicGlazing.setThickness(0.04));
+  for (const auto& group : thermochromicGlazing.thermochromicGroups()) {
+    EXPECT_DOUBLE_EQ(0.04, group.standardGlazing().thickness());
+  }
+  EXPECT_EQ(0, sink.logMessages().size());
+  EXPECT_DOUBLE_EQ(0.04, thermochromicGlazing.thickness());
+  EXPECT_EQ(0, sink.logMessages().size());
 }
