@@ -3131,7 +3131,8 @@ namespace energyplus {
         break;
       }
       case openstudio::IddObjectType::OS_WindowMaterial_GlazingGroup_Thermochromic: {
-        LOG(Warn, "OS_WindowMaterial_GlazingGroup_Thermochromic is not currently translated");
+        auto glazing = modelObject.cast<ThermochromicGlazing>();
+        retVal = translateThermochromicGlazing(glazing);
         break;
       }
       case openstudio::IddObjectType::OS_WindowProperty_FrameAndDivider: {

@@ -95,6 +95,15 @@ class HeatExchangerDesiccantBalancedFlow;
   }
 };
 
+%extend openstudio::model::ThermochromicGroup {
+  // Use the overloaded operator<< for string representation
+  std::string __str__() {
+    std::ostringstream os;
+    os << *$self;
+    return os.str();
+  }
+};
+
 MODELOBJECT_TEMPLATES(ScheduleType)
 MODELOBJECT_TEMPLATES(ScheduleInterval);
 MODELOBJECT_TEMPLATES(ScheduleFixedInterval);
@@ -137,6 +146,7 @@ MODELOBJECT_TEMPLATES(SimpleGlazing);
 MODELOBJECT_TEMPLATES(StandardGlazing);
 MODELOBJECT_TEMPLATES(StandardOpaqueMaterial);
 MODELOBJECT_TEMPLATES(ThermochromicGlazing);
+MODELOBJECT_TEMPLATES(ThermochromicGroup); // helper for extensible fields for ThermochromicGlazing
 MODELOBJECT_TEMPLATES(StandardsInformationMaterial);
 MODELOBJECT_TEMPLATES(ConstructionBase);
 MODELOBJECT_TEMPLATES(LayeredConstruction);

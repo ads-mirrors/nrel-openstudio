@@ -2355,6 +2355,7 @@ set(${target_name}_test_src
   test/ThermalZone_GTest.cpp
   test/ThermalStorageIceDetailed_GTest.cpp
   test/ThermalStorageChilledWaterStratified_GTest.cpp
+  test/ThermochromicGlazing_GTest.cpp
   test/TemperingValve_GTest.cpp
   test/ThreeJSForwardTranslator_GTest.cpp
   test/ThreeJSReverseTranslator_GTest.cpp
