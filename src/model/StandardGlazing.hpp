@@ -50,7 +50,7 @@ namespace model {
 
     std::string opticalDataType() const;
 
-    double thickness() const;
+    // double thickness() const; // inherited from Glazing < FenestrationMaterial < Material
 
     /** deprecated **/
     boost::optional<std::string> windowGlassSpectralDataSetName() const;
@@ -111,7 +111,7 @@ namespace model {
     bool setWindowGlassSpectralDataSet(const MaterialPropertyGlazingSpectralData& spectralData);
     void resetWindowGlassSpectralDataSet();
 
-    bool setThickness(double thickness);
+    // bool setThickness(double thickness); // inherited from Glazing < FenestrationMaterial < Material
 
     bool setSolarTransmittance(double value);
 

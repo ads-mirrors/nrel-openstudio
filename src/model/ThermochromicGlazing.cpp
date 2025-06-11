@@ -54,9 +54,9 @@ namespace model {
     return opticalDataTemperature() >= other.opticalDataTemperature();
   }
 
-  std::ostream& operator<<(std::ostream& out, const openstudio::model::ThermochromicGroup& ThermochromicGroup) {
-    out << "(StandardGlazing = '" << ThermochromicGroup.standardGlazing().nameString()
-        << "', Optional Data Temperature = " << ThermochromicGroup.opticalDataTemperature() << ")";
+  std::ostream& operator<<(std::ostream& out, const openstudio::model::ThermochromicGroup& thermochromicGroup) {
+    out << "(StandardGlazing = '" << thermochromicGroup.standardGlazing().nameString()
+        << "', Optional Data Temperature = " << thermochromicGroup.opticalDataTemperature() << ")";
     return out;
   }
 
