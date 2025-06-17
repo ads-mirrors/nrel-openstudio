@@ -69,7 +69,7 @@ jobs:
           allow_failure: false
         - name: Windows_py313
           os: windows-2019
-          python-version: '3.13'
+          python-version: '3.13.5'
           allow_failure: true  # Possible this fails, don't care yet
 
     steps:
