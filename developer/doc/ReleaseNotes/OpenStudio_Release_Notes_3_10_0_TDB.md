@@ -38,10 +38,10 @@ OpenStudio SDK 3.10.0 is supported on:
 
 * 64-bit Windows 7 – 11
 * macOS: 11.6+ x86_64, 12.1+ arm64
-* Ubuntu: 20.04 x86_64, 22.04 x86_64, 22.04 arm64
+* Ubuntu: 22.04 x86_64, 24.04 x86_64, 22.04 arm64
 * Centos7
 
-OpenStudio SDK 3.10.0 supports [EnergyPlus Release @EP_VERSION@](https://github.com/NREL/EnergyPlus/releases/tag/v@EP_VERSION@), which is bundled with the OpenStudio installer. It is no longer necessary to download and install EnergyPlus separately. Other builds of EnergyPlus are not supported by OpenStudio SDK 3.10.0.
+OpenStudio SDK 3.10.0 supports [EnergyPlus Release 25.1.0, Bug Fix Edition](https://github.com/NREL/EnergyPlus/releases/tag/v25.1.0-WithDSOASpaceListFixes), which is bundled with the OpenStudio installer. It is no longer necessary to download and install EnergyPlus separately. Other builds of EnergyPlus are not supported by OpenStudio SDK 3.10.0.
 
 OpenStudio SDK 3.10.0 supports Radiance 5.0.a.12, which is bundled with the OpenStudio installer; users no longer must install Radiance separately, and OpenStudio will use the included Radiance version regardless of any other versions that may be installed on the system. Other builds of Radiance are not supported by OpenStudio SDK 3.10.0.
 
@@ -57,7 +57,7 @@ For help with common installation problems please visit [Getting Started](http:/
 
 # OpenStudio SDK: Changelog
 
-The 3.10.0 is a **<minor/major>** release. This update includes several new features, performance improvements, and bug fixes.
+The 3.10.0 is a **major** release. This update includes several new features, performance improvements, and bug fixes.
 
 ## C++ Workflow code
 
@@ -98,7 +98,62 @@ You can also refer to the [OpenStudio SDK Python Binding Version Compatibility M
     * The object was wrapped in the SDK.
     * This coil system enables "Water Side Economizer Mode" and "Wrap Around Water Coil Heat Recovery Mode".
 
+* [#5426](https://github.com/NREL/OpenStudio/pull/5426) - Re-wrap Thermochromic window model properly to handle extensible fields and translation to/from EnergyPlus
+    * While the class `ThermochromicGlazing` has been in the model namespace for a long time, it was actually not properly wrapped, unsable, and not forward translated
+
+* [#5384](https://github.com/NREL/OpenStudio/pull/5384) + [#5403](https://github.com/NREL/OpenStudio/pull/5403)- OutdoorAir upgrades
+    * Do **not** add a `Controller:MechanicalVentilation` if it does not have a `DesignSpecification:OutdoorAir` on it, which would produce an E+ `SevereError`
+    * Use a `DesignSpecification:OutdoorAir:SpaceList` if appropriate instead of using the first `DesignSpecification:OutdoorAir` found
+        * In case you have several Spaces with unique DSOAs that are using an absolute value (Outdoor Air Flow Rate) in the same ThermalZone, this previously would lead to an incorrect amount of Outdoor Air
+
+* [#5367](https://github.com/NREL/OpenStudio/pull/5367) - Add a new `ReportingMeasure::modelOutputRequests(model, runner, argument_map)` that runs before E+ FT
+
+* [#5385](https://github.com/NREL/OpenStudio/pull/5385) - add `WorkflowJSON::setRootDir(path&)` and `setRunDir(path&)`
+
+* [#5394](https://github.com/NREL/OpenStudio/pull/5394) - `--bundle` options not working for CLI in docker-openstudio, possibly OS itself
+
 ## Minor changes and bug fixes
+
+* [#5396](https://github.com/NREL/OpenStudio/pull/5396) - Create convenience method to set SpaceInfiltrationDesignFlowRate values from Space
+
+* [#5372](https://github.com/NREL/OpenStudio/pull/5372) - add FuelTypes to PlantComponentUserDefined
+
+* [#5401](https://github.com/NREL/OpenStudio/pull/5402) - BCL measure update picks up subfolders like `resources/__pycache__` or `tests/.pytest_cache`
+
+* [#5304](https://github.com/NREL/OpenStudio/pull/5304) - Measure manager fixups and improvements
+
+* [#5378](https://github.com/NREL/OpenStudio/pull/5378) - Old materials OSC (< 0.7.4) cannot be loaded anymore
+
+* [#5373](https://github.com/NREL/OpenStudio/pull/5373) - ThreeJSForwardTranslator adds unnecessary RenderingColor objects for AirLoopHVAC
+
+* [#5382](https://github.com/NREL/OpenStudio/pull/5382) - Add a helper `IdfObject::initializeFields(bool fill_default)`
+
+* [#5334](https://github.com/NREL/OpenStudio/pull/5334) - Register AFN scheduleTypeRegistry.
+
+* [#5345](https://github.com/NREL/OpenStudio/pull/5345) - Design Range Temperature for OS:CoolingTower:SingleSpeed is not being converted into EnergyPlus
+
+* [#5322](https://github.com/NREL/OpenStudio/pull/5322) - AirLoopHVACUnitaryHeatPump(Multispeed) fixes
+
+* [#5333](https://github.com/NREL/OpenStudio/pull/5333) - Typo in Schematron extension: .sch, not .sct!
+
+* [#5337](https://github.com/NREL/OpenStudio/pull/5337) - Fixes `UnitarySystemPerformance:Multispeed` number of cooling speeds w/ `Coil:Cooling:DX`
+
+* [#5325](https://github.com/NREL/OpenStudio/pull/5325) - Wrap GroundHeatExchangerVertical "Depth of Top of Borehole" field
+
+* [#5316](https://github.com/NREL/OpenStudio/pull/5316) - OpenStudio CLI unable to require uuid in OpenStudio 3.9 (thereby breaking dependencies like openstudio-extension)
+
+* [#5320](https://github.com/NREL/OpenStudio/pull/5320) - gbXML Reverse Translator - Scan for the gbxml Schema version: skip schema validation with a warning when not 7.03
+
+* [#5305](https://github.com/NREL/OpenStudio/pull/5305) - Remove SpaceAndSpaceGroupNames from Building
+
+* [#5321](https://github.com/NREL/OpenStudio/pull/5321) - Add Tank Element Control Logic field to WaterHeaterHeatPump
+
+* [#5374](https://github.com/NREL/OpenStudio/pull/5374) - DefrostEnergyInputRatioModifierFunctionofTemperatureCurve is orphaned when AirConditionerVariableRefrigerantFlow is removed
+
+* [#5413](https://github.com/NREL/OpenStudio/pull/5413) - Deal with `ASHRAETau2017`
+
+* [#5422](https://github.com/NREL/OpenStudio/pull/5422) - define SWIG_PYTHON_SILENT_MEMLEAK to shush the python destructor warnings
+
 
 Refer to the changelog on the release page at [v3.10.0](https://github.com/NREL/OpenStudio/releases/v3.10.0)
 
@@ -106,16 +161,10 @@ Refer to the changelog on the release page at [v3.10.0](https://github.com/NREL/
 
 **New Contributors**:
 
-### OpenStudio Standards v@STANDARDS_VERSION@
+### OpenStudio Standards v0.8.2
 
-Update the openstudio-standards gem to version [@STANDARDS_VERSION@](https://github.com/NREL/openstudio-standards/releases/tag/v@STANDARDS_VERSION@)
+Update the openstudio-standards gem to version [0.8.2](https://github.com/NREL/openstudio-standards/releases/tag/v0.8.2)
 In addition to some refactoring, this release also included conversion of 90.1 data to formal database.
-
-
-### OpenStudio Server vXXX
-
-
-
 
 ---
 # This YAML header controls the pandoc (via TeX) to PDF settings
