@@ -39,7 +39,6 @@ OpenStudio SDK 3.10.0 is supported on:
 * 64-bit Windows 7 – 11
 * macOS: 11.6+ x86_64, 12.1+ arm64
 * Ubuntu: 22.04 x86_64, 24.04 x86_64, 22.04 arm64
-* Centos7
 
 OpenStudio SDK 3.10.0 supports [EnergyPlus Release 25.1.0, Bug Fix Edition](https://github.com/NREL/EnergyPlus/releases/tag/v25.1.0-WithDSOASpaceListFixes), which is bundled with the OpenStudio installer. It is no longer necessary to download and install EnergyPlus separately. Other builds of EnergyPlus are not supported by OpenStudio SDK 3.10.0.
 
