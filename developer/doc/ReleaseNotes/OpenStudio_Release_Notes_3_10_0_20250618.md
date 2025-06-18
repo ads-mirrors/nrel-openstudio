@@ -1,6 +1,6 @@
 # OpenStudio Version 3.10.0
 
-_Release Notes_ -  _TDB_
+_Release Notes_ -  2025-06-18
 
 These release notes describe version 3.10.0 of the OpenStudio SDK developed by the National Renewable Energy Laboratory (NREL), Buildings and Thermal Sciences Center, Commercial Buildings Research Group, Tools Development Section, and associated collaborators. The notes are organized into the following sections:
 
@@ -75,26 +75,26 @@ You can also refer to the [OpenStudio SDK Python Binding Version Compatibility M
 
 ## New Features, Major Fixes and API-breaking changes
 
-* [#5326](https://github.com/NREL/OpenStudio/pull/5326) - Wrap ZoneHVAC:EvaporativeCoolerUnit
+* [#5326](https://github.com/NREL/OpenStudio/pull/5326) - Wrap `ZoneHVAC:EvaporativeCoolerUnit`
     * The object was wrapped in the SDK.
     * Note: in EnergyPlus 24.2.0, the `Zone Relief Air Node Name` is an optional field. The OpenStudio SDK always fills with the connected zone's Exhaust Air Node, meaning the airflow is always being balanced by EnergyPlus: the object will extract air from the zone to balance the air supplied to the zone by the cooler outlet node.
 
-* [#5369](https://github.com/NREL/OpenStudio/pull/5369) - Wrap Output:Table:Annual and Output:Table:Monthly
+* [#5369](https://github.com/NREL/OpenStudio/pull/5369) - Wrap `Output:Table:Annual` and `Output:Table:Monthly`
     * Both objects were wrapped in the SDK
     * The OutputTableMonthly also includes a convenient factory methods to create the reports that are in the E+ datasets/StandardReports.idf
         * See `std::vector<std::string> OutputTableMonthly::validStandardReportNames` to get a list of valid methods
         * and the factory method itself: `OutputTableMonthly OutputTableMonthly::fromStandardReports(const Model& model, const std::string& standardReportName)`
 
-* [#5365](https://github.com/NREL/OpenStudio/pull/5365) - E+ 25.1.0: Wrap OutputControl:ResilienceSummaries
+* [#5365](https://github.com/NREL/OpenStudio/pull/5365) - E+ 25.1.0: Wrap `OutputControl:ResilienceSummaries`
 
-* [#5312](https://github.com/NREL/OpenStudio/pull/5312) - Wrap PythonPlugin:SearchPaths
+* [#5312](https://github.com/NREL/OpenStudio/pull/5312) - Wrap `PythonPlugin:SearchPaths`
     * The unique object was wrapped in the SDK.
     * Forward translation intentionally happens before PythonPlugin_Instance so that there cannot be two PythonPlugin_SearchPaths objects.
 
 * [#5134](https://github.com/NREL/OpenStudio/pull/5134) - Addresses #5132, EPW design condition methods should return boost::optional doubles or integers
     * `EpwDesignCondition` has many API-breaking changes related to its getters. The previous behavior was to misleadingly return a value of 0 for any empty design condition header field. The types for the getters are now either boost::optional<double> or boost::optional<int>.
 
-* [#5350](https://github.com/NREL/OpenStudio/pull/5350) - Wrap CoilSystem:Cooling:Water
+* [#5350](https://github.com/NREL/OpenStudio/pull/5350) - Wrap `CoilSystem:Cooling:Water`
     * The object was wrapped in the SDK.
     * This coil system enables "Water Side Economizer Mode" and "Wrap Around Water Coil Heat Recovery Mode".
 
