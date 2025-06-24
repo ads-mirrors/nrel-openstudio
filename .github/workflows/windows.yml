@@ -17,11 +17,9 @@ jobs:
         with:
           submodules: true # Set to true if your repository uses Git submodules
 
-      - name: Test powershell command
-        # Install required dependencies for AWS actions to work in the OpenStudio container
+      - name: Test cmd command
         shell: cmd
         run: |
-          # Update package list
           conan --version
           cmake --version
           ninja --version
