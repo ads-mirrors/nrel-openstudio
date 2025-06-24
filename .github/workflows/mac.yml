@@ -1,0 +1,25 @@
+name: Test Self-hosted Runner
+on: push
+
+jobs:
+  test-self-hosted:
+    runs-on: macOS
+    env:
+      BRANCH_NAME: ${{ github.ref_name }}
+      BUILD_NUMBER: ${{ github.run_number }}
+      DEPLOY_PATH: ${{ github.repository }}/${{ github.ref_name }}/${{ github.run_number }} # Path for S3 deployment
+      S3_BUCKET: ext-gem-dashboard
+
+    steps:
+      - name: Checkout Repository
+        # The repository will be checked out inside the 'nrel/openstudio:3.10.0' container
+        uses: actions/checkout@v4 # Use v4 for better security and features
+        with:
+          submodules: true # Set to true if your repository uses Git submodules
+
+      - name: Test bash command
+        shell: bash
+        run: |
+          conan --version
+          cmake --version
+          ninja --version
