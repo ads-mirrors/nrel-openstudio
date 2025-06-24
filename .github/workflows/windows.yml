@@ -21,6 +21,7 @@ jobs:
         # Install required dependencies for AWS actions to work in the OpenStudio container
         shell: powershell
         run: |
+          Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
           # Update package list
           conan --version
           cmake --version
