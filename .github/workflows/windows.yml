@@ -22,4 +22,3 @@ jobs:
         run: |
           conan --version
           cmake --version
-          ninja --version
