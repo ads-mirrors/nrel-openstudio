@@ -17,8 +17,8 @@ jobs:
         with:
           submodules: true # Set to true if your repository uses Git submodules
 
-      - name: Test cmd command
-        shell: cmd
+      - name: Test bash command
+        shell: bash
         run: |
           conan --version
           cmake --version
