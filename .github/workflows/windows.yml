@@ -19,9 +19,8 @@ jobs:
 
       - name: Test powershell command
         # Install required dependencies for AWS actions to work in the OpenStudio container
-        shell: powershell
+        shell: pwsh -Command "Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force; & {0}"
         run: |
-          Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
           # Update package list
           conan --version
           cmake --version
