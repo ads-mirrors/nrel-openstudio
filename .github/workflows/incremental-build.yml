@@ -61,7 +61,7 @@ jobs:
                   -DPYTHON_VERSION:STRING=3.12.2 \
                   -DBUILD_RUBY_BINDINGS:BOOL=ON \
                   -DBUILD_CLI:BOOL=ON \
-                  ../${{ OPENSTUDIO_SOURCE_NAME }}
+                  ../${{ env.OPENSTUDIO_SOURCE_NAME }}
 
 #       - name: Build with Ninja
 #         run: |
