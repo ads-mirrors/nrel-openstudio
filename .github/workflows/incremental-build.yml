@@ -67,7 +67,7 @@ jobs:
       - name: Build with Ninja
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
-          source ./conanbuild.sh
+          . ./conanbuild.sh
           ninja -j $(( $(nproc) - 1 )) package
 
       # - name: Run CTests with retries
