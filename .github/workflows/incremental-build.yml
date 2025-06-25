@@ -46,7 +46,8 @@ jobs:
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
           tail -f /dev/null
           source ./conanbuild.sh
-          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+          cmake -G Ninja \
+                -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
                 -DCMAKE_BUILD_TYPE:STRING=Release \
                 -DBUILD_TESTING:BOOL=ON-DCPACK_BINARY_DEB:BOOL=ON \
                 -DCPACK_BINARY_TGZ:BOOL=ON \
