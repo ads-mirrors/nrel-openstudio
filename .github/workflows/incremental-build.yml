@@ -16,7 +16,7 @@ jobs:
       CONAN_DOCKER_VOLUME: /home/conan-data
       OPENSTUDIO_HOST_VOLUME: /srv/data/jenkins/docker-volumes/ubuntu-2204
       OPENSTUDIO_SOURCE_VOLUME: /home/ubuntu/OpenStudio/OpenStudio
-      PR_NUMBER: ${{ github.event.pull_request.number || split(github.ref_name, '/')[0] }}
+      PR_NUMBER: ${{ github.ref }}
 
     container: # Define the Docker container for the job. All subsequent steps run inside it.
       image: kuangwenyi/openstudio-cmake-tools:jammy
