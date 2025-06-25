@@ -39,6 +39,7 @@ jobs:
         run: |
           # Set up git and fetch PR head, then detect conan profile and install dependencies
           echo $PWD
+          echo ${{ env.BRANCH_NAME }}
           cd ${{ env.OPENSTUDIO_SOURCE_VOLUME }}
           echo $PWD && ls -la
           git config --global --add safe.directory "${{ env.OPENSTUDIO_SOURCE_VOLUME }}" && \
