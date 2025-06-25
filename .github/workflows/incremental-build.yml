@@ -18,7 +18,7 @@ jobs:
       image: kuangwenyi/openstudio-cmake-tools:jammy
       options: -u root -e "LANG=en_US.UTF-8" # These options are passed to the 'docker run' command internally
       volumes:
-        - "/srv/data/jenkins/docker-volumes/conan-data:/home/root"
+        - "/srv/data/jenkins/docker-volumes/conan-data/.conan2:/github/home/.conan2" # Conan cache
         - "/srv/data/jenkins/docker-volumes/ubuntu-2204:/home/ubuntu/OpenStudio"
 
     steps:
