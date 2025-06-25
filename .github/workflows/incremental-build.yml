@@ -44,7 +44,6 @@ jobs:
           df -h
           ls -la /github/home
           ls -la /home/root
-          tail -f /dev/null
           conan profile detect && \
           conan install . --output-folder=../OS-build-release-v2 --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release
 
