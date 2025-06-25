@@ -64,11 +64,11 @@ jobs:
                 -DBUILD_CLI:BOOL=ON \
                 ../${{ env.OPENSTUDIO_SOURCE_NAME }}
 
-#       - name: Build with Ninja
-#         run: |
-#           cd OS-build-release-v2
-#           source ./conanbuild.sh
-#           ninja -j 2 package
+      - name: Build with Ninja
+        run: |
+          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
+          source ./conanbuild.sh
+          ninja -j $(( $(nproc) - 1 )) package
 
       # - name: Run CTests with retries
       #   run: |
