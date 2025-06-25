@@ -44,28 +44,25 @@ jobs:
       - name: Install dependencies and configure with CMake
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
-          ls -la
-          cat ./conanbuild.sh
           . ./conanbuild.sh
-          printenv
-          # cmake -G Ninja \
-          #       -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
-          #       -DCMAKE_BUILD_TYPE:STRING=Release \
-          #       -DBUILD_TESTING:BOOL=ON-DCPACK_BINARY_DEB:BOOL=ON \
-          #       -DCPACK_BINARY_TGZ:BOOL=ON \
-          #       -DCPACK_BINARY_IFW:BOOL=OFF \
-          #       -DCPACK_BINARY_NSIS:BOOL=OFF \
-          #       -DCPACK_BINARY_RPM:BOOL=OFF \
-          #       -DCPACK_BINARY_STGZ:BOOL=OFF \
-          #       -DCPACK_BINARY_TBZ2:BOOL=OFF \
-          #       -DCPACK_BINARY_TXZ:BOOL=OFF \
-          #       -DCPACK_BINARY_TZ:BOOL=OFF \
-          #       -DBUILD_PYTHON_BINDINGS:BOOL=ON \
-          #       -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF \
-          #       -DPYTHON_VERSION:STRING=3.12.2 \
-          #       -DBUILD_RUBY_BINDINGS:BOOL=ON \
-          #       -DBUILD_CLI:BOOL=ON \
-          #       ../${{ env.OPENSTUDIO_SOURCE_NAME }}
+          cmake -G Ninja \
+                -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
+                -DCMAKE_BUILD_TYPE:STRING=Release \
+                -DBUILD_TESTING:BOOL=ON-DCPACK_BINARY_DEB:BOOL=ON \
+                -DCPACK_BINARY_TGZ:BOOL=ON \
+                -DCPACK_BINARY_IFW:BOOL=OFF \
+                -DCPACK_BINARY_NSIS:BOOL=OFF \
+                -DCPACK_BINARY_RPM:BOOL=OFF \
+                -DCPACK_BINARY_STGZ:BOOL=OFF \
+                -DCPACK_BINARY_TBZ2:BOOL=OFF \
+                -DCPACK_BINARY_TXZ:BOOL=OFF \
+                -DCPACK_BINARY_TZ:BOOL=OFF \
+                -DBUILD_PYTHON_BINDINGS:BOOL=ON \
+                -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF \
+                -DPYTHON_VERSION:STRING=3.12.2 \
+                -DBUILD_RUBY_BINDINGS:BOOL=ON \
+                -DBUILD_CLI:BOOL=ON \
+                ../${{ env.OPENSTUDIO_SOURCE_NAME }}
 
 #       - name: Build with Ninja
 #         run: |
