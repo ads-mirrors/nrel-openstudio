@@ -22,8 +22,8 @@ jobs:
       image: kuangwenyi/openstudio-cmake-tools:jammy
       options: -u root -e "LANG=en_US.UTF-8" # These options are passed to the 'docker run' command internally
       volumes:
-        - ${{env.CONAN_HOST_VOLUME}}:${{env.CONAN_DOCKER_VOLUME}}
-        - ${{env.OPENSTUDIO_HOST_VOLUME}}:${{env.OPENSTUDIO_DOCKER_VOLUME}}
+        - ${{ env.CONAN_HOST_VOLUME }}:${{ env.CONAN_DOCKER_VOLUME }}
+        - ${{ env.OPENSTUDIO_HOST_VOLUME }}:${{ env.OPENSTUDIO_DOCKER_VOLUME }}
 
     steps:
       - name: Setup Python
