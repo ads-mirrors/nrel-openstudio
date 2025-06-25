@@ -44,7 +44,6 @@ jobs:
       - name: Install dependencies and configure with CMake
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
-          tail -f /dev/null
           source ./conanbuild.sh
           cmake -G Ninja \
                 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
