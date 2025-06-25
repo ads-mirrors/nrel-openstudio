@@ -10,10 +10,6 @@ jobs:
     runs-on: Linux
 
     env:
-      CONAN_USER_HOME: /home/runner/.conan2
-      AWS_REGION: us-west-2
-      CONAN_HOST_VOLUME: /srv/data/jenkins/docker-volumes/conan-data
-      CONAN_DOCKER_VOLUME: /home/conan-data
       OPENSTUDIO_HOST_VOLUME: /srv/data/jenkins/docker-volumes/ubuntu-2204
       OPENSTUDIO_SOURCE_VOLUME: /home/ubuntu/OpenStudio/OpenStudio
       PR_NUMBER: ${{ github.event.pull_request.number || github.ref }}
@@ -22,7 +18,7 @@ jobs:
       image: kuangwenyi/openstudio-cmake-tools:jammy
       options: -u root -e "LANG=en_US.UTF-8" # These options are passed to the 'docker run' command internally
       volumes:
-        - "/srv/data/jenkins/docker-volumes/conan-data:/home/ubuntu/conan-data"
+        - "/srv/data/jenkins/docker-volumes/conan-data:/home/root"
         - "/srv/data/jenkins/docker-volumes/ubuntu-2204:/home/ubuntu/OpenStudio"
 
     steps:
