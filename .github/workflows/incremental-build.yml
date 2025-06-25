@@ -24,10 +24,10 @@ jobs:
         - "/srv/data/jenkins/docker-volumes/ubuntu-2204:/home/ubuntu/OpenStudio"
 
     steps:
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+      # - name: Setup Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: '3.12'
       
       - name: Cmake Setup
         run: |
