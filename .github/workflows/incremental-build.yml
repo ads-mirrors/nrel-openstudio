@@ -73,7 +73,7 @@ jobs:
 
       - name: Run CTests with retries
         run: |
-          cd OS-build-release-v2
+          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
           ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure || \
           ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure || \
           ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV
