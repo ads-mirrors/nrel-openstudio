@@ -75,22 +75,17 @@ jobs:
       - name: Run CTests with retries
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
-          tail -f /dev/null &
           ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure --output-junit ctest-results.xml --test-dir ${ env.CTEST_RESULTS } || \
           ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit ctest-results.xml --test-dir ${ env.CTEST_RESULTS } || \
           ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit ctest-results.xml --test-dir ${ env.CTEST_RESULTS }
+        if: always()
         continue-on-error: true
-      - name: Run CTest and Generate JUnit XML
-        run: |
-          cd build
-          ctest --output-junit ctest-results.xml --test-dir .  # Or adjust path based on your project
-        if: always() # Ensure this step runs even if tests fail
 
       - name: Publish Test Results
         uses: test-summary/action@v2 # Or choose a different test reporting action
         with:
           paths: "build/ctest-results.xml" # Path to the generated JUnit XML file
-        if: always() # Ensure this step runs even if tests fail
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
