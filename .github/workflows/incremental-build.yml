@@ -84,7 +84,7 @@ jobs:
         continue-on-error: true
 
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action/composite@v2
         with:
           files: Testing/**/*.xml
 
