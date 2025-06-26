@@ -50,7 +50,8 @@ jobs:
           cmake -G Ninja \
                 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
                 -DCMAKE_BUILD_TYPE:STRING=Release \
-                -DBUILD_TESTING:BOOL=ON-DCPACK_BINARY_DEB:BOOL=ON \
+                -DBUILD_TESTING:BOOL=ON \
+                -DCPACK_BINARY_DEB:BOOL=ON \
                 -DCPACK_BINARY_TGZ:BOOL=ON \
                 -DCPACK_BINARY_IFW:BOOL=OFF \
                 -DCPACK_BINARY_NSIS:BOOL=OFF \
@@ -75,9 +76,9 @@ jobs:
       - name: Run CTests with retries
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
-          ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure --output-junit ctest-results.xml --test-dir ${ env.CTEST_RESULTS } || \
-          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit ctest-results.xml --test-dir ${ env.CTEST_RESULTS } || \
-          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit ctest-results.xml --test-dir ${ env.CTEST_RESULTS }
+          ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure --output-junit ctest-results.xml --test-dir ${{ env.CTEST_RESULTS }} || \
+          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit ctest-results.xml --test-dir ${{ env.CTEST_RESULTS }} || \
+          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit ctest-results.xml --test-dir ${{ env.CTEST_RESULTS }}
         if: always()
         continue-on-error: true
 
