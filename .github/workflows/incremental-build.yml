@@ -86,19 +86,11 @@ jobs:
           ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit Testing/run3/results.xml
         continue-on-error: true
 
-      # Tried to publish test results EnricoMipublish-unit-test-result-action and dorny/test-reporter@v1 and nothing worked
-      # mikepenz/action-junit-report@v4 also doesn't work. TODO: either fix this or make a custom solution if this functionality is needed
-      - name: Publish Test Results
-        uses: mikepenz/action-junit-report@v4
-        if: (!cancelled())
+      - name: Test Summary
+        uses: test-summary/action@v2
         with:
-          report_paths: ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/run*/results.xml
-          check_name: CTest Results
-          fail_on_failure: false
-          require_tests: false
-          annotate_only: false
-          detailed_summary: true
-          include_passed: true
+          paths: "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/run*/results.xml" # Path to your JUnit output file
+        if: always() # Ensure this step runs even if tests fail
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
