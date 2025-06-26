@@ -81,9 +81,10 @@ jobs:
       - name: Run CTests with retries
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
-          ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure --output-junit || \
-          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit || \
-          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit
+          mkdir -p Testing/run1 Testing/run2 Testing/run3
+          ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure --output-junit Testing/run1/results.xml || \
+          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit Testing/run2/results.xml || \
+          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit Testing/run3/results.xml
         continue-on-error: true
 
       - name: Publish Test Results
