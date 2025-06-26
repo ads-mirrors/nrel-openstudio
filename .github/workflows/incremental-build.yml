@@ -16,7 +16,7 @@ jobs:
       OPENSTUDIO_BUILD_NAME: OS-build-release-v2
       PR_NUMBER: ${{ github.event.pull_request.number || github.ref }}
       MAX_SAFE_THREADS: $(( ($(nproc) * 80 + 50) / 100 ))
-      CTEST_DIR: ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing
+      CTEST_RESULTS: Testing
 
     container: # Define the Docker container for the job. All subsequent steps run inside it.
       image: kuangwenyi/openstudio-cmake-tools:jammy
@@ -29,7 +29,7 @@ jobs:
       - name: Cleanup ctest directory
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
-          rm -rf ${{ env.CTEST_DIR }}
+          rm -rf ${{ env.CTEST_RESULTS }}
       
       - name: Cmake Setup
         run: |
@@ -76,9 +76,9 @@ jobs:
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
           tail -f /dev/null &
-          ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure --output-junit ctest-results.xml --test-dir ${ env.CTEST_DIR } || \
-          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit ctest-results.xml --test-dir ${ env.CTEST_DIR } || \
-          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit ctest-results.xml --test-dir ${ env.CTEST_DIR }
+          ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure --output-junit ctest-results.xml --test-dir ${ env.CTEST_RESULTS } || \
+          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit ctest-results.xml --test-dir ${ env.CTEST_RESULTS } || \
+          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit ctest-results.xml --test-dir ${ env.CTEST_RESULTS }
         continue-on-error: true
       - name: Run CTest and Generate JUnit XML
         run: |
