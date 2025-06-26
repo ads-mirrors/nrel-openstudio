@@ -30,67 +30,67 @@ jobs:
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
           rm -rf Testing
       
-      - name: Cmake Setup
-        run: |
-          # Set up git and fetch PR head, then detect conan profile and install dependencies
-          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
-          git config --global --add safe.directory "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}" && \
-          git config user.email "cicommercialbuilding@gmail.com" && \
-          git config user.name "ci-commercialbuildings" && \
-          git fetch origin && \
-          git fetch origin +refs/pull/*/head:refs/remotes/origin/pr/* && \
-          git checkout origin/pr/${{ env.PR_NUMBER }} && \
-          conan install . --output-folder=../${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release
+      # - name: Cmake Setup
+      #   run: |
+      #     # Set up git and fetch PR head, then detect conan profile and install dependencies
+      #     cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
+      #     git config --global --add safe.directory "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}" && \
+      #     git config user.email "cicommercialbuilding@gmail.com" && \
+      #     git config user.name "ci-commercialbuildings" && \
+      #     git fetch origin && \
+      #     git fetch origin +refs/pull/*/head:refs/remotes/origin/pr/* && \
+      #     git checkout origin/pr/${{ env.PR_NUMBER }} && \
+      #     conan install . --output-folder=../${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release
 
-      - name: Install dependencies and configure with CMake
-        run: |
-          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
-          . ./conanbuild.sh
-          cmake -G Ninja \
-                -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
-                -DCMAKE_BUILD_TYPE:STRING=Release \
-                -DBUILD_TESTING:BOOL=ON \
-                -DCPACK_BINARY_DEB:BOOL=ON \
-                -DCPACK_BINARY_TGZ:BOOL=ON \
-                -DCPACK_BINARY_IFW:BOOL=OFF \
-                -DCPACK_BINARY_NSIS:BOOL=OFF \
-                -DCPACK_BINARY_RPM:BOOL=OFF \
-                -DCPACK_BINARY_STGZ:BOOL=OFF \
-                -DCPACK_BINARY_TBZ2:BOOL=OFF \
-                -DCPACK_BINARY_TXZ:BOOL=OFF \
-                -DCPACK_BINARY_TZ:BOOL=OFF \
-                -DBUILD_PYTHON_BINDINGS:BOOL=ON \
-                -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF \
-                -DPYTHON_VERSION:STRING=3.12.2 \
-                -DBUILD_RUBY_BINDINGS:BOOL=ON \
-                -DBUILD_CLI:BOOL=ON \
-                ../${{ env.OPENSTUDIO_SOURCE_NAME }}
+      # - name: Install dependencies and configure with CMake
+      #   run: |
+      #     cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
+      #     . ./conanbuild.sh
+      #     cmake -G Ninja \
+      #           -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
+      #           -DCMAKE_BUILD_TYPE:STRING=Release \
+      #           -DBUILD_TESTING:BOOL=ON \
+      #           -DCPACK_BINARY_DEB:BOOL=ON \
+      #           -DCPACK_BINARY_TGZ:BOOL=ON \
+      #           -DCPACK_BINARY_IFW:BOOL=OFF \
+      #           -DCPACK_BINARY_NSIS:BOOL=OFF \
+      #           -DCPACK_BINARY_RPM:BOOL=OFF \
+      #           -DCPACK_BINARY_STGZ:BOOL=OFF \
+      #           -DCPACK_BINARY_TBZ2:BOOL=OFF \
+      #           -DCPACK_BINARY_TXZ:BOOL=OFF \
+      #           -DCPACK_BINARY_TZ:BOOL=OFF \
+      #           -DBUILD_PYTHON_BINDINGS:BOOL=ON \
+      #           -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF \
+      #           -DPYTHON_VERSION:STRING=3.12.2 \
+      #           -DBUILD_RUBY_BINDINGS:BOOL=ON \
+      #           -DBUILD_CLI:BOOL=ON \
+      #           ../${{ env.OPENSTUDIO_SOURCE_NAME }}
 
-      - name: Build with Ninja
-        run: |
-          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
-          . ./conanbuild.sh
-          ninja -j ${{ env.MAX_SAFE_THREADS }} package
+      # - name: Build with Ninja
+      #   run: |
+      #     cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
+      #     . ./conanbuild.sh
+      #     ninja -j ${{ env.MAX_SAFE_THREADS }} package
 
       - name: Run CTests with retries
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
-          ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure || \
-          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure || \
-          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV
+          ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure --output-junit Testing/ctest-results.xml || \
+          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit Testing/ctest-results.xml || \
+          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit Testing/ctest-results.xml
         continue-on-error: true
 
       - name: Publish Test Results
-        uses: test-summary/action@v2 # Or choose a different test reporting action
+        uses: EnricoMi/publish-unit-test-result-action/composite@v2 # Or choose a different test reporting action
         with:
-          paths: "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/**/*.xml" # Path to the generated JUnit XML file
+          paths: "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/ctest-results.xml" # Path to the generated JUnit XML file
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ubuntu-2204-artifacts
-          path: |
-            ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/*.deb
-            ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/_CPack_Packages/Linux/TGZ/*.tar.gz
-        env:
-          NODE_TLS_REJECT_UNAUTHORIZED: '0'
+      # - name: Upload build artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ubuntu-2204-artifacts
+      #     path: |
+      #       ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/*.deb
+      #       ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/_CPack_Packages/Linux/TGZ/*.tar.gz
+      #   env:
+      #     NODE_TLS_REJECT_UNAUTHORIZED: '0'
