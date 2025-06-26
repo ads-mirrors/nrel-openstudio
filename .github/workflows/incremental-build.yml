@@ -82,10 +82,23 @@ jobs:
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
           mkdir -p Testing/run1 Testing/run2 Testing/run3
-          ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure --output-junit Testing/run1/results.xml || \
-          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit Testing/run2/results.xml || \
-          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit Testing/run3/results.xml
+          ctest -j ${{ env.MAX_SAFE_THREADS }} --no-compress-output --output-on-failure --output-junit Testing/run1/results.xml || \
+          ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit Testing/run2/results.xml || \
+          ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit Testing/run3/results.xml
         continue-on-error: true
+
+      - name: Debug - List Testing directory contents
+        run: |
+          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
+          echo "Contents of Testing directory:"
+          find Testing -name "*.xml" -type f 2>/dev/null || echo "No XML files found"
+          ls -la Testing/ 2>/dev/null || echo "Testing directory not found"
+          if [ -d Testing ]; then
+            echo "Testing subdirectories:"
+            find Testing -type d
+            echo "All files in Testing:"
+            find Testing -type f
+          fi
 
       - name: Publish Test Results
         uses: mikepenz/action-junit-report@v4
