@@ -88,24 +88,24 @@ jobs:
 
       # Tried to publish test results EnricoMipublish-unit-test-result-action and dorny/test-reporter@v1 and nothing worked
       # mikepenz/action-junit-report@v4 also doesn't work. TODO: either fix this or make a custom solution if this functionality is needed
-      # - name: Publish Test Results
-      #   uses: mikepenz/action-junit-report@v4
-      #   if: (!cancelled())
-      #   with:
-      #     report_paths: Testing/**/*.xml
-      #     check_name: CTest Results
-      #     fail_on_failure: false
-      #     require_tests: false
-      #     annotate_only: false
-      #     detailed_summary: true
-      #     include_passed: true
+      - name: Publish Test Results
+        uses: mikepenz/action-junit-report@v4
+        if: (!cancelled())
+        with:
+          report_paths: ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/run*/results.xml
+          check_name: CTest Results
+          fail_on_failure: false
+          require_tests: false
+          annotate_only: false
+          detailed_summary: true
+          include_passed: true
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ubuntu-2204-artifacts
           path: |
-            ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/**/*.xml
+            # ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/run*/results.xml
             ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/*.deb
             ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/_CPack_Packages/Linux/TGZ/*.tar.gz
         env:
