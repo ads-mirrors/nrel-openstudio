@@ -87,12 +87,16 @@ jobs:
         continue-on-error: true
 
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        uses: mikepenz/action-junit-report@v4
         if: (!cancelled())
         with:
-          files: Testing/**/*.xml
-          check_name: "CTest Results"
-          comment_title: "CTest Results"
+          report_paths: Testing/**/*.xml
+          check_name: CTest Results
+          fail_on_failure: false
+          require_tests: false
+          annotate_only: false
+          detailed_summary: true
+          include_passed: true
 
       # - name: Upload build artifacts
       #   uses: actions/upload-artifact@v4
