@@ -23,10 +23,6 @@ jobs:
       image: kuangwenyi/openstudio-cmake-tools:jammy
       options: -u root -e "LANG=en_US.UTF-8" # These options are passed to the 'docker run' command internally
 
-    defaults:
-      run:
-        working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -41,11 +37,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-conan-
 
+      - name: Create build directory
+        run: mkdir -p ${{ env.OPENSTUDIO_BUILD_NAME }}
+
       - name: Install dependencies
         run: |
           conan install . --output-folder=${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release
 
       - name: Configure with CMake
+        working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
         run: |
           . ./conanbuild.sh
           cmake -G Ninja \
@@ -69,11 +69,13 @@ jobs:
                 ..
 
       - name: Build with Ninja
+        working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
         run: |
           . ./conanbuild.sh
           ninja -j ${{ env.MAX_SAFE_THREADS }} package
 
       - name: Run CTests with retries
+        working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
         run: |
           mkdir -p Testing/run1 Testing/run2 Testing/run3
           ctest -j ${{ env.MAX_SAFE_THREADS }} --no-compress-output --output-on-failure --output-junit Testing/run1/results.xml || \
