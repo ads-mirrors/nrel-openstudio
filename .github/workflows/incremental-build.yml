@@ -87,16 +87,15 @@ jobs:
         continue-on-error: true
 
       - name: Publish Test Results
-        uses: mikepenz/action-junit-report@v4
+        uses: dorny/test-reporter@v1
         if: (!cancelled())
         with:
-          report_paths: Testing/**/*.xml
-          check_name: CTest Results
-          fail_on_failure: false
-          require_tests: false
-          annotate_only: false
-          detailed_summary: true
-          include_passed: true
+          name: CTest Results
+          path: Testing/**/*.xml
+          reporter: java-junit
+          fail-on-error: false
+          only-summary: false
+          max-annotations: 50
 
       # - name: Upload build artifacts
       #   uses: actions/upload-artifact@v4
