@@ -36,17 +36,17 @@ jobs:
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
           rm -rf Testing
       
-      # - name: Cmake Setup
-      #   run: |
-      #     # Set up git and fetch PR head, then detect conan profile and install dependencies
-      #     cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
-      #     git config --global --add safe.directory "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}" && \
-      #     git config user.email "cicommercialbuilding@gmail.com" && \
-      #     git config user.name "ci-commercialbuildings" && \
-      #     git fetch origin && \
-      #     git fetch origin +refs/pull/*/head:refs/remotes/origin/pr/* && \
-      #     git checkout origin/pr/${{ env.PR_NUMBER }} && \
-      #     conan install . --output-folder=../${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release
+      - name: Cmake Setup
+        run: |
+          # Set up git and fetch PR head, then detect conan profile and install dependencies
+          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
+          git config --global --add safe.directory "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}" && \
+          git config user.email "cicommercialbuilding@gmail.com" && \
+          git config user.name "ci-commercialbuildings" && \
+          git fetch origin && \
+          git fetch origin +refs/pull/*/head:refs/remotes/origin/pr/* && \
+          git checkout origin/pr/${{ env.PR_NUMBER }} && \
+          conan install . --output-folder=../${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release
 
       # - name: Install dependencies and configure with CMake
       #   run: |
@@ -91,7 +91,7 @@ jobs:
         if: (!cancelled())
         with:
           name: CTest Results
-          path: Testing/**/*.xml
+          path: Testing/ctest-results.xml
           reporter: java-junit
           fail-on-error: false
           only-summary: false
