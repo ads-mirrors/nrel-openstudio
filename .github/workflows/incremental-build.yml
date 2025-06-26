@@ -15,6 +15,7 @@ jobs:
       OPENSTUDIO_SOURCE_NAME: OpenStudio
       OPENSTUDIO_BUILD_NAME: OS-build-release-v2
       PR_NUMBER: ${{ github.event.pull_request.number || github.ref }}
+      MAX_SAFE_THREADS: $(( ($(nproc) * 80 + 50) / 100 ))
 
     container: # Define the Docker container for the job. All subsequent steps run inside it.
       image: kuangwenyi/openstudio-cmake-tools:jammy
@@ -68,14 +69,14 @@ jobs:
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
           . ./conanbuild.sh
-          ninja -j $(( ($(nproc) * 80 + 50) / 100 )) package
+          ninja -j ${{ env.MAX_SAFE_THREADS }} package
 
-      # - name: Run CTests with retries
-      #   run: |
-      #     cd OS-build-release-v2
-      #     ctest -j 2 -T test --no-compress-output --output-on-failure || \
-      #     ctest -T test -j 2 --rerun-failed --no-compress-output --output-on-failure || \
-      #     ctest -T test -j 2 --rerun-failed --no-compress-output -VV
+      - name: Run CTests with retries
+        run: |
+          cd OS-build-release-v2
+          ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure || \
+          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure || \
+          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV
 
       # - name: Upload build artifacts
       #   uses: actions/upload-artifact@v4
