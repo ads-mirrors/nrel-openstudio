@@ -9,6 +9,12 @@ jobs:
     if: contains(github.event.pull_request.labels.*.name, 'Pull Request - Ready for CI')
     runs-on: Linux
 
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+
     env:
       OPENSTUDIO_HOST_VOLUME: /srv/data/jenkins/docker-volumes/ubuntu-2204
       OPENSTUDIO_DOCKER_VOLUME: /home/ubuntu/OpenStudio
@@ -81,7 +87,7 @@ jobs:
         continue-on-error: true
 
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
         if: (!cancelled())
         with:
           files: Testing/**/*.xml
