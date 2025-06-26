@@ -75,18 +75,18 @@ jobs:
       - name: Run CTests with retries
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
-          ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure || \
-          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure || \
-          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV
-          # ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure --output-junit Testing/ctest-results.xml || \
-          # ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit Testing/ctest-results.xml || \
-          # ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit Testing/ctest-results.xml
+          ctest -j ${{ env.MAX_SAFE_THREADS }} -T test --no-compress-output --output-on-failure --output-junit Testing/ctest-results.xml || \
+          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit Testing/ctest-results.xml || \
+          ctest -T test -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit Testing/ctest-results.xml
         continue-on-error: true
 
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action/composite@v2
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: (!cancelled())
         with:
           files: Testing/**/*.xml
+          check_name: "CTest Results"
+          comment_title: "CTest Results"
 
       # - name: Upload build artifacts
       #   uses: actions/upload-artifact@v4
