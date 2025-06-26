@@ -68,7 +68,7 @@ jobs:
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
           . ./conanbuild.sh
-          ninja -j $(( $(nproc) - 1 )) package
+          ninja -j $(( ($(nproc) * 80 + 50) / 100 )) package
 
       # - name: Run CTests with retries
       #   run: |
