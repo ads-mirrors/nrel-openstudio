@@ -6,8 +6,8 @@ on:
 
 jobs:
   build:
-    if: contains(github.event.pull_request.labels.*.name, 'Pull Request - Ready for CI')
-    runs-on: Linux
+    if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'Pull Request - Ready for CI')
+    runs-on: ubuntu-22.04
 
     permissions:
       contents: read
@@ -16,40 +16,37 @@ jobs:
       pull-requests: write
 
     env:
-      OPENSTUDIO_DOCKER_VOLUME: /github/home/OpenStudio
-      OPENSTUDIO_SOURCE_NAME: OpenStudio
       OPENSTUDIO_BUILD_NAME: OS-build-release-v2
-      PR_NUMBER: ${{ github.event.pull_request.number || github.ref }}
       MAX_SAFE_THREADS: $(( ($(nproc) * 80 + 50) / 100 ))
 
     container: # Define the Docker container for the job. All subsequent steps run inside it.
       image: kuangwenyi/openstudio-cmake-tools:jammy
       options: -u root -e "LANG=en_US.UTF-8" # These options are passed to the 'docker run' command internally
-      volumes: # envs don't work in volume definition for containers
-        - "/srv/data/jenkins/docker-volumes/conan-data/.conan2:/github/home/.conan2" # Conan cache
-        - "/srv/data/jenkins/docker-volumes/ubuntu-2204:/github/home/OpenStudio"
+
+    defaults:
+      run:
+        working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
 
     steps:
-      - name: Cleanup ctest directory
-        run: |
-          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
-          rm -rf Testing
-      
-      - name: Cmake Setup
-        run: |
-          # Set up git and fetch PR head, then detect conan profile and install dependencies
-          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
-          git config --global --add safe.directory "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}" && \
-          git config user.email "cicommercialbuilding@gmail.com" && \
-          git config user.name "ci-commercialbuildings" && \
-          git fetch origin && \
-          git fetch origin +refs/pull/*/head:refs/remotes/origin/pr/* && \
-          git checkout origin/pr/${{ env.PR_NUMBER }} && \
-          conan install . --output-folder=../${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
-      - name: Install dependencies and configure with CMake
+      - name: Cache Conan packages
+        uses: actions/cache@v4
+        with:
+          path: /github/home/.conan2
+          key: ${{ runner.os }}-conan-${{ hashFiles('**/conanfile.py') }}
+          restore-keys: |
+            ${{ runner.os }}-conan-
+
+      - name: Install dependencies
         run: |
-          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
+          conan install . --output-folder=${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release
+
+      - name: Configure with CMake
+        run: |
           . ./conanbuild.sh
           cmake -G Ninja \
                 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
@@ -69,17 +66,15 @@ jobs:
                 -DPYTHON_VERSION:STRING=3.12.2 \
                 -DBUILD_RUBY_BINDINGS:BOOL=ON \
                 -DBUILD_CLI:BOOL=ON \
-                ../${{ env.OPENSTUDIO_SOURCE_NAME }}
+                ..
 
       - name: Build with Ninja
         run: |
-          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
           . ./conanbuild.sh
           ninja -j ${{ env.MAX_SAFE_THREADS }} package
 
       - name: Run CTests with retries
         run: |
-          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
           mkdir -p Testing/run1 Testing/run2 Testing/run3
           ctest -j ${{ env.MAX_SAFE_THREADS }} --no-compress-output --output-on-failure --output-junit Testing/run1/results.xml || \
           ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit Testing/run2/results.xml || \
@@ -89,16 +84,21 @@ jobs:
       - name: Test Summary
         uses: test-summary/action@v2
         with:
-          paths: "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/run*/results.xml" # Path to your JUnit output file
-        if: always() # Ensure this step runs even if tests fail
+          paths: "${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/run*/results.xml" # Path to your JUnit output file
+          output: "${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/test-summary.md"
+        if: always()
+
+      - name: Upload test summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-summary
+          path: ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/test-summary.md
+        if: always()
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ubuntu-2204-artifacts
           path: |
-            # ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/run*/results.xml
-            ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/*.deb
-            ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/_CPack_Packages/Linux/TGZ/*.tar.gz
-        env:
-          NODE_TLS_REJECT_UNAUTHORIZED: '0'
+            ${{ env.OPENSTUDIO_BUILD_NAME }}/*.deb
+            ${{ env.OPENSTUDIO_BUILD_NAME }}/_CPack_Packages/Linux/TGZ/*.tar.gz
