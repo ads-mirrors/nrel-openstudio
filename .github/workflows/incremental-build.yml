@@ -83,7 +83,7 @@ jobs:
         run: |
           conan remote add conancenter https://center.conan.io --force
           conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force
-          conan profile detect
+          conan profile show default >/dev/null 2>&1 || conan profile detect
           conan install . --output-folder=${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release
 
       - name: Configure with CMake
