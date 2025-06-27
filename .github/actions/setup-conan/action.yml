@@ -27,8 +27,14 @@ runs:
       run: |
         # Use the container path for Conan
         CONAN_HOME="/__w/OpenStudio/OpenStudio/.conan/.conan2"
+        mkdir -p "$CONAN_HOME/profiles"
+        
+        # Check if profile exists in the workspace-specific location
         if [ ! -f "$CONAN_HOME/profiles/default" ]; then
-          conan profile detect
+          # Force detection to workspace-specific location
+          conan profile detect --force
+        else
+          echo "Using existing Conan profile at $CONAN_HOME/profiles/default"
         fi
 
     - name: Install dependencies
