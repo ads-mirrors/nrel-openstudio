@@ -86,7 +86,7 @@ jobs:
           if [ ! -f "/github/home/.conan2/profiles/default" ]; then
             conan profile detect
           fi
-          conan install . --output-folder=${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release
+          conan install . --output-folder=${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release --verify ssl=no
 
       - name: Configure with CMake
         working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
