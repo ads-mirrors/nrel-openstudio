@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'Pull Request - Ready for CI')
-    runs-on: ubuntu-22.04
+    runs-on: Linux
 
     permissions:
       contents: read
