@@ -23,5 +23,5 @@ runs:
     - name: Setup git configuration
       shell: bash
       run: |
-        git config --global --add safe.directory ${{ github.workspace }}
+        git config --global --add safe.directory $GITHUB_WORKSPACE
         git clean -fdx
