@@ -1,0 +1,38 @@
+name: 'Setup Conan Dependencies'
+description: 'Install and configure Conan dependencies for OpenStudio'
+
+inputs:
+  build-type:
+    description: 'CMake build type (Release, Debug)'
+    required: false
+    default: 'Release'
+  output-folder:
+    description: 'Conan output folder'
+    required: true
+  conan-user-home:
+    description: 'Conan user home directory'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Add Conan remotes
+      shell: bash
+      run: |
+        conan remote add conancenter https://center.conan.io --force
+        conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force
+
+    - name: Setup Conan profile
+      shell: bash
+      run: |
+        if [ ! -f "${{ inputs.conan-user-home }}/.conan2/profiles/default" ]; then
+          conan profile detect
+        fi
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        conan install . --output-folder=${{ inputs.output-folder }} --build=missing \
+          -c tools.cmake.cmaketoolchain:generator=Ninja \
+          -s compiler.cppstd=20 \
+          -s build_type=${{ inputs.build-type }}

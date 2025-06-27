@@ -1,0 +1,230 @@
+name: Build and Test Ubuntu
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - develop
+
+env:
+  BUILD_TYPE: Release
+  OPENSTUDIO_BUILD_NAME: OS-build-release-v2
+  CONAN_USER_HOME: ${{ github.workspace }}/.conan
+  CMAKE_GENERATOR: Ninja
+  CCACHE_DIR: ${{ github.workspace }}/.ccache
+
+jobs:
+  setup:
+    name: Setup Dependencies
+    runs-on: ubuntu-22.04
+    container:
+      image: kuangwenyi/openstudio-cmake-tools:jammy
+      options: -u root -e "LANG=en_US.UTF-8"
+    
+    outputs:
+      cache-key: ${{ steps.cache-key.outputs.key }}
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate cache key
+        id: cache-key
+        run: |
+          echo "key=${{ runner.os }}-deps-${{ hashFiles('conanfile.py', 'CMakeLists.txt', 'src/**/*') }}" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.CONAN_USER_HOME }}
+            ${{ env.CCACHE_DIR }}
+          key: ${{ steps.cache-key.outputs.key }}
+          restore-keys: |
+            ${{ runner.os }}-deps-
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+
+      - name: Setup Conan dependencies
+        uses: ./.github/actions/setup-conan
+        with:
+          build-type: ${{ env.BUILD_TYPE }}
+          output-folder: ${{ env.OPENSTUDIO_BUILD_NAME }}
+          conan-user-home: ${{ env.CONAN_USER_HOME }}
+
+  build:
+    name: Build OpenStudio
+    runs-on: ubuntu-22.04
+    needs: setup
+    container:
+      image: kuangwenyi/openstudio-cmake-tools:jammy
+      options: -u root -e "LANG=en_US.UTF-8"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.CONAN_USER_HOME }}
+            ${{ env.CCACHE_DIR }}
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.sha }}
+
+      - name: Create build directory
+        run: mkdir -p ${{ env.OPENSTUDIO_BUILD_NAME }}
+
+      - name: Configure CMake
+        working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
+        run: |
+          . ./conanbuild.sh
+          cmake -G Ninja \
+                -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
+                -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} \
+                -DBUILD_TESTING:BOOL=ON \
+                -DCPACK_BINARY_DEB:BOOL=ON \
+                -DCPACK_BINARY_TGZ:BOOL=ON \
+                -DCPACK_BINARY_IFW:BOOL=OFF \
+                -DCPACK_BINARY_NSIS:BOOL=OFF \
+                -DCPACK_BINARY_RPM:BOOL=OFF \
+                -DCPACK_BINARY_STGZ:BOOL=OFF \
+                -DCPACK_BINARY_TBZ2:BOOL=OFF \
+                -DCPACK_BINARY_TXZ:BOOL=OFF \
+                -DCPACK_BINARY_TZ:BOOL=OFF \
+                -DBUILD_PYTHON_BINDINGS:BOOL=ON \
+                -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF \
+                -DPYTHON_VERSION:STRING=3.12.2 \
+                -DBUILD_RUBY_BINDINGS:BOOL=ON \
+                -DBUILD_CLI:BOOL=ON \
+                ..
+
+      - name: Build with Ninja
+        working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
+        run: |
+          . ./conanbuild.sh
+          ninja -j $(nproc) package
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: |
+            ${{ env.OPENSTUDIO_BUILD_NAME }}/*.deb
+            ${{ env.OPENSTUDIO_BUILD_NAME }}/_CPack_Packages/Linux/TGZ/*.tar.gz
+            ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/
+          retention-days: 7
+
+  test:
+    name: Test OpenStudio
+    runs-on: ubuntu-22.04
+    needs: [setup, build]
+    container:
+      image: kuangwenyi/openstudio-cmake-tools:jammy
+      options: -u root -e "LANG=en_US.UTF-8"
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        test-group: [unit, integration]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.CONAN_USER_HOME }}
+            ${{ env.CCACHE_DIR }}
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: ${{ env.OPENSTUDIO_BUILD_NAME }}
+
+      - name: Run tests with retry
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 45
+          max_attempts: 2
+          retry_on: error
+          command: |
+            cd ${{ env.OPENSTUDIO_BUILD_NAME }}
+            . ./conanbuild.sh
+            case "${{ matrix.test-group }}" in
+              unit)
+                ctest -j $(nproc) -L "unit" --output-junit Testing/unit-results.xml --output-on-failure
+                ;;
+              integration)
+                ctest -j $(nproc) -L "integration" --output-junit Testing/integration-results.xml --output-on-failure
+                ;;
+              *)
+                ctest -j $(nproc) --output-junit Testing/all-results.xml --output-on-failure
+                ;;
+            esac
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results (${{ matrix.test-group }})
+          path: ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/*-results.xml
+          reporter: java-junit
+          fail-on-error: true
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.test-group }}-${{ github.sha }}
+          path: ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/
+          retention-days: 7
+
+  package:
+    name: Package and Upload
+    runs-on: ubuntu-22.04
+    needs: [build, test]
+    if: always() && needs.build.result == 'success'
+
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+
+      - name: Upload final artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ubuntu-2204-${{ github.head_ref || github.ref_name }}-${{ github.sha }}
+          path: |
+            *.deb
+            _CPack_Packages/Linux/TGZ/*.tar.gz
+          retention-days: 30
