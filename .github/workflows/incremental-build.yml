@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'Pull Request - Ready for CI')
-    runs-on: Linux
+    runs-on: linux-openstudio-2
 
     permissions:
       contents: read
@@ -26,7 +26,7 @@ jobs:
       NODE_TLS_REJECT_UNAUTHORIZED: 0
 
     container: # Define the Docker container for the job. All subsequent steps run inside it.
-      image: kuangwenyi/openstudio-cmake-tools:jammy
+      image: nrel/openstudio-cmake-tools:jammy
       options: -u root -e "LANG=en_US.UTF-8" # These options are passed to the 'docker run' command internally
 
     steps:
