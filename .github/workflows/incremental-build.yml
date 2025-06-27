@@ -189,24 +189,24 @@ jobs:
       - name: Test Summary
         uses: test-summary/action@v2
         with:
-          paths: "${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/run*/results.xml" # Path to your JUnit output file
-          output: "${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/test-summary.md"
+          paths: "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/run*/results.xml" # Path to your JUnit output file
+          output: "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/test-summary.md"
         if: always()
 
       - name: Upload test summary
         uses: actions/upload-artifact@v4
         with:
           name: test-summary
-          path: ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/test-summary.md
+          path: ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/test-summary.md
         if: always()
 
       - name: Generate test results dashboard
         if: always()
         run: |
-          mkdir -p ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard
+          mkdir -p ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard
           
           # Create comprehensive test dashboard
-          cat > ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard/test-dashboard.md << 'EOF'
+          cat > ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard/test-dashboard.md << 'EOF'
           # 🧪 Test Results Dashboard
           
           ## Summary
@@ -220,7 +220,7 @@ jobs:
           import glob
           from datetime import datetime
           
-          build_dir = "${{ env.OPENSTUDIO_BUILD_NAME }}"
+          build_dir = "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}"
           dashboard_file = f"{build_dir}/Testing/dashboard/test-dashboard.md"
           
           # Find all JUnit XML files
@@ -347,15 +347,15 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: test-results
-          path: ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard/test-dashboard.md
+          path: ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard/test-dashboard.md
 
       - name: Upload comprehensive test results
         uses: actions/upload-artifact@v4
         with:
           name: test-results-dashboard
           path: |
-            ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard/
-            ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/run*/
+            ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard/
+            ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/run*/
         if: always()
 
       - name: Upload build artifacts with metadata
@@ -363,7 +363,7 @@ jobs:
         with:
           name: ubuntu-2204-${{ github.head_ref || github.ref_name }}-${{ github.sha }}
           path: |
-            ${{ env.OPENSTUDIO_BUILD_NAME }}/*.deb
-            ${{ env.OPENSTUDIO_BUILD_NAME }}/_CPack_Packages/Linux/TGZ/*.tar.gz
+            ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/*.deb
+            ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/_CPack_Packages/Linux/TGZ/*.tar.gz
           retention-days: 30
         if: always()
