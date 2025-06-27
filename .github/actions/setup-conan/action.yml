@@ -19,11 +19,12 @@ runs:
     - name: Add Conan remotes
       shell: bash
       run: |
-        # Configure Conan to ignore SSL certificates
-        conan config set general.non_interactive=True
-        conan config set general.verify_ssl=False
-        conan remote add conancenter https://center.conan.io --force --insecure
-        conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force --insecure
+        # Configure Conan to ignore SSL certificates (Conan 2.x syntax)
+        mkdir -p "$CONAN_USER_HOME/.conan2"
+        echo "core.download:verify_ssl=False" >> "$CONAN_USER_HOME/.conan2/global.conf"
+        echo "core:non_interactive=True" >> "$CONAN_USER_HOME/.conan2/global.conf"
+        conan remote add conancenter https://center.conan.io --force
+        conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force
 
     - name: Setup Conan profile
       shell: bash
