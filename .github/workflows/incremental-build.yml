@@ -42,7 +42,7 @@ jobs:
       - name: Install ccache
         run: |
           # Fix Kitware GPG key issue
-          wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+          wget --no-check-certificate -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
           echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu jammy main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
           apt-get update && apt-get install -y ccache
 
@@ -82,11 +82,13 @@ jobs:
       - name: Install dependencies
         run: |
           conan remote add conancenter https://center.conan.io --force
+          conan remote update conancenter --insecure
           conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force
+          conan remote update nrel-v2 --insecure
           if [ ! -f "/github/home/.conan2/profiles/default" ]; then
             conan profile detect
           fi
-          conan install . --output-folder=${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release --verify ssl=no
+          conan install . --output-folder=${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release
 
       - name: Configure with CMake
         working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
