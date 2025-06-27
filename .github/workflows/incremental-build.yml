@@ -205,6 +205,7 @@ jobs:
           name: test-summary
           path: ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/test-summary.md
         if: always()
+        continue-on-error: true
 
       - name: Generate test results dashboard
         if: always()
@@ -363,6 +364,7 @@ jobs:
             ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard/
             ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/run*/
         if: always()
+        continue-on-error: true
 
       - name: Upload build artifacts with metadata
         uses: actions/upload-artifact@v4
@@ -373,3 +375,4 @@ jobs:
             ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/_CPack_Packages/Linux/TGZ/*.tar.gz
           retention-days: 30
         if: always()
+        continue-on-error: true
