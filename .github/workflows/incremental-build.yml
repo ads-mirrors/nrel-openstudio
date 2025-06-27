@@ -24,9 +24,9 @@ jobs:
       MAKEFLAGS: "-j$(( ($(nproc) * 90 + 50) / 100 ))"
       NODE_TLS_REJECT_UNAUTHORIZED: 0
       DOCKER_ROOT: /github/home
-      OPENSTUDIO_DOCKER_VOLUME: /github/home/OpenStudio
+      OPENSTUDIO_DOCKER_VOLUME: /github/home/Ubuntu
       OPENSTUDIO_SOURCE_NAME: OpenStudio
-      OPENSTUDIO_BUILD_NAME: OS-build-release-v2
+      OPENSTUDIO_BUILD_NAME: OS-build
       PR_NUMBER: ${{ github.event.pull_request.number || github.ref }}
 
     container: # Define the Docker container for the job. All subsequent steps run inside it.
@@ -34,7 +34,7 @@ jobs:
       options: -u root -e "LANG=en_US.UTF-8" # These options are passed to the 'docker run' command internally
       volumes: # envs don't work in volume definition for containers
         - "/srv/data/jenkins/docker-volumes/conan-data/.conan2:/github/home/.conan2" # Conan cache
-        - "/srv/data/jenkins/docker-volumes/ubuntu-2204:/github/home/OpenStudio"
+        - "/srv/data/jenkins/docker-volumes/ubuntu-2204:/github/home/Ubuntu"
 
     steps:
       - name: Checkout repository
