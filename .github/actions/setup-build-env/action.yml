@@ -7,11 +7,19 @@ runs:
     - name: Setup system dependencies
       shell: bash
       run: |
-        # Fix Kitware GPG key issue
-        wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | \
-          gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
-        echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu jammy main' | \
-          tee /etc/apt/sources.list.d/kitware.list >/dev/null
+        # Fix Kitware GPG key issue with retry logic
+        for i in {1..3}; do
+          if wget -O /tmp/kitware-key.asc https://apt.kitware.com/keys/kitware-archive-latest.asc; then
+            gpg --dearmor /tmp/kitware-key.asc > /usr/share/keyrings/kitware-archive-keyring.gpg
+            echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu jammy main' > /etc/apt/sources.list.d/kitware.list
+            break
+          else
+            echo "Attempt $i failed, retrying..."
+            sleep 2
+          fi
+        done
+        
+        # Update package list and install ccache
         apt-get update && apt-get install -y ccache
 
     - name: Setup compiler
