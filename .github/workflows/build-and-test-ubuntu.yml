@@ -15,7 +15,7 @@ env:
 jobs:
   setup:
     name: Setup Dependencies
-    runs-on: [self-hosted, linux-openstudio-1, Linux]
+    runs-on: linux-openstudio-1
     container:
       image: kuangwenyi/openstudio-cmake-tools:jammy
       options: -u root -e "LANG=en_US.UTF-8"
@@ -63,7 +63,7 @@ jobs:
 
   build:
     name: Build OpenStudio
-    runs-on: [self-hosted, linux-openstudio-1, Linux]
+    runs-on: linux-openstudio-1
     needs: setup
     container:
       image: kuangwenyi/openstudio-cmake-tools:jammy
@@ -142,7 +142,7 @@ jobs:
 
   test:
     name: Test OpenStudio
-    runs-on: [self-hosted, linux-openstudio-1, Linux]
+    runs-on: linux-openstudio-1
     needs: [setup, build]
     container:
       image: kuangwenyi/openstudio-cmake-tools:jammy
@@ -218,7 +218,7 @@ jobs:
 
   package:
     name: Package and Upload
-    runs-on: [self-hosted, linux-openstudio-1, Linux]
+    runs-on: linux-openstudio-1
     needs: [build, test]
     if: always() && needs.build.result == 'success'
 
