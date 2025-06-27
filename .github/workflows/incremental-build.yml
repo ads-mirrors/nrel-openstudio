@@ -60,6 +60,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ccache-
 
+      - name: Configure ccache
+        run: |
+          ccache --max-size=2G
+          ccache --set-config=compression=true
+          ccache --set-config=compression_level=1
+          ccache --show-stats
+
       - name: Cache Conan packages
         uses: actions/cache@v4
         with:
@@ -71,11 +78,16 @@ jobs:
       - name: Cache build directory
         uses: actions/cache@v4
         with:
-          path: ${{ env.OPENSTUDIO_BUILD_NAME }}
-          key: ${{ runner.os }}-build-${{ github.head_ref || github.ref_name }}-${{ hashFiles('**/*.cpp', '**/*.hpp', '**/CMakeLists.txt', 'src/**/*', 'conanfile.py') }}
+          path: |
+            ${{ env.OPENSTUDIO_BUILD_NAME }}/CMakeCache.txt
+            ${{ env.OPENSTUDIO_BUILD_NAME }}/cmake_install.cmake
+            ${{ env.OPENSTUDIO_BUILD_NAME }}/build.ninja
+            ${{ env.OPENSTUDIO_BUILD_NAME }}/conan_toolchain.cmake
+            ${{ env.OPENSTUDIO_BUILD_NAME }}/conanbuild.sh
+            ${{ env.OPENSTUDIO_BUILD_NAME }}/.ninja_*
+          key: ${{ runner.os }}-build-config-${{ hashFiles('CMakeLists.txt', 'conanfile.py', 'src/**/CMakeLists.txt', 'CMake/**/*') }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ github.head_ref || github.ref_name }}-
-            ${{ runner.os }}-build-
+            ${{ runner.os }}-build-config-${{ hashFiles('CMakeLists.txt', 'conanfile.py', 'src/**/CMakeLists.txt', 'CMake/**/*') }}-
 
       - name: Create build directory
         run: mkdir -p ${{ env.OPENSTUDIO_BUILD_NAME }}
@@ -114,6 +126,16 @@ jobs:
                 -DBUILD_RUBY_BINDINGS:BOOL=ON \
                 -DBUILD_CLI:BOOL=ON \
                 ..
+
+      - name: Verify build state
+        working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
+        run: |
+          if [ -f "build.ninja" ]; then
+            echo "Ninja build file found - checking what needs to be built"
+            ninja -n -j 1 package | head -20 || true
+          else
+            echo "No build.ninja found - full reconfiguration will be needed"
+          fi
 
       - name: Build with Ninja
         working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
