@@ -25,7 +25,9 @@ runs:
     - name: Setup Conan profile
       shell: bash
       run: |
-        if [ ! -f "${{ inputs.conan-user-home }}/.conan2/profiles/default" ]; then
+        # Use the container path for Conan
+        CONAN_HOME="/__w/OpenStudio/OpenStudio/.conan/.conan2"
+        if [ ! -f "$CONAN_HOME/profiles/default" ]; then
           conan profile detect
         fi
 

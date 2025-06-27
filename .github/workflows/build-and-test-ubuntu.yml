@@ -40,8 +40,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ${{ env.CONAN_USER_HOME }}
-            ${{ env.CCACHE_DIR }}
+            ${{ github.workspace }}/.conan
+            ${{ github.workspace }}/.ccache
           key: ${{ steps.cache-key.outputs.key }}
           restore-keys: |
             ${{ runner.os }}-deps-
@@ -61,7 +61,9 @@ jobs:
         with:
           build-type: ${{ env.BUILD_TYPE }}
           output-folder: ${{ env.OPENSTUDIO_BUILD_NAME }}
-          conan-user-home: ${{ env.CONAN_USER_HOME }}
+          conan-user-home: /__w/OpenStudio/OpenStudio/.conan
+        env:
+          CONAN_USER_HOME: /__w/OpenStudio/OpenStudio/.conan
 
   build:
     name: Build OpenStudio
