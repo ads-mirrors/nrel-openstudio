@@ -31,7 +31,6 @@ jobs:
       OPENSTUDIO_DOCKER_VOLUME: /github/home/Ubuntu
       OPENSTUDIO_SOURCE_NAME: OpenStudio
       OPENSTUDIO_BUILD_NAME: OS-build
-      PR_NUMBER: ${{ github.event.pull_request.number || github.ref }}
 
     container: # Define the Docker container for the job. All subsequent steps run inside it.
       image: nrel/openstudio-cmake-tools:jammy
@@ -88,7 +87,7 @@ jobs:
           git config user.name "ci-commercialbuildings" && \
           git fetch origin && \
           git fetch origin +refs/pull/*/head:refs/remotes/origin/pr/* && \
-          git checkout origin/pr/${{ env.PR_NUMBER }}
+          git checkout origin/pr/${{ github.event.pull_request.number || github.ref }}
 
       - name: Install dependencies
         run: |
