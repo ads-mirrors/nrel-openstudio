@@ -10,9 +10,7 @@ on:
 env:
   BUILD_TYPE: Release
   OPENSTUDIO_BUILD_NAME: OS-build-release-v2
-  CONAN_USER_HOME: ${{ github.workspace }}/.conan
   CMAKE_GENERATOR: Ninja
-  CCACHE_DIR: ${{ github.workspace }}/.ccache
 
 jobs:
   setup:
@@ -31,30 +29,28 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ runner.os }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
+
       - name: Generate cache key
         id: cache-key
         run: |
           echo "key=${{ runner.os }}-deps-${{ hashFiles('conanfile.py', 'CMakeLists.txt', 'src/**/*') }}" >> $GITHUB_OUTPUT
 
-      - name: Cache dependencies
+      - name: Cache Conan dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            ${{ github.workspace }}/.conan
-            ${{ github.workspace }}/.ccache
+          path: /__w/OpenStudio/OpenStudio/.conan
           key: ${{ steps.cache-key.outputs.key }}
           restore-keys: |
             ${{ runner.os }}-deps-
-
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-ccache-
-
-      - name: Setup build environment
-        uses: ./.github/actions/setup-build-env
 
       - name: Setup Conan dependencies
         uses: ./.github/actions/setup-conan
@@ -79,18 +75,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Restore dependencies cache
+      - name: Restore Conan dependencies cache
         uses: actions/cache@v4
         with:
-          path: |
-            ${{ env.CONAN_USER_HOME }}
-            ${{ env.CCACHE_DIR }}
+          path: /__w/OpenStudio/OpenStudio/.conan
           key: ${{ needs.setup.outputs.cache-key }}
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ github.sha }}
+          key: ${{ runner.os }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
 
       - name: Create build directory
         run: mkdir -p ${{ env.OPENSTUDIO_BUILD_NAME }}
@@ -152,12 +148,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Restore dependencies cache
+      - name: Restore Conan dependencies cache
         uses: actions/cache@v4
         with:
-          path: |
-            ${{ env.CONAN_USER_HOME }}
-            ${{ env.CCACHE_DIR }}
+          path: /__w/OpenStudio/OpenStudio/.conan
           key: ${{ needs.setup.outputs.cache-key }}
 
       - name: Download build artifacts
