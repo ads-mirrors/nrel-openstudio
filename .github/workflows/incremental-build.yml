@@ -22,6 +22,7 @@ jobs:
       MAX_SAFE_THREADS: $(( ($(nproc) * 80 + 50) / 100 ))
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
       MAKEFLAGS: "-j$(( ($(nproc) * 80 + 50) / 100 ))"
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
 
     container: # Define the Docker container for the job. All subsequent steps run inside it.
       image: kuangwenyi/openstudio-cmake-tools:jammy
