@@ -19,8 +19,11 @@ runs:
     - name: Add Conan remotes
       shell: bash
       run: |
-        conan remote add conancenter https://center.conan.io --force
-        conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force
+        # Configure Conan to ignore SSL certificates
+        conan config set general.non_interactive=True
+        conan config set general.verify_ssl=False
+        conan remote add conancenter https://center.conan.io --force --insecure
+        conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force --insecure
 
     - name: Setup Conan profile
       shell: bash
@@ -31,8 +34,14 @@ runs:
         
         # Check if profile exists in the workspace-specific location
         if [ ! -f "$CONAN_HOME/profiles/default" ]; then
-          # Force detection to workspace-specific location
+          # Set CONAN_HOME and force detection to workspace-specific location
+          export CONAN_HOME="$CONAN_HOME"
           conan profile detect --force
+          # Ensure profile was created in the right location
+          if [ ! -f "$CONAN_HOME/profiles/default" ] && [ -f "/github/home/.conan2/profiles/default" ]; then
+            mkdir -p "$CONAN_HOME/profiles"
+            cp "/github/home/.conan2/profiles/default" "$CONAN_HOME/profiles/default"
+          fi
         else
           echo "Using existing Conan profile at $CONAN_HOME/profiles/default"
         fi

@@ -7,9 +7,9 @@ runs:
     - name: Setup system dependencies
       shell: bash
       run: |
-        # Fix Kitware GPG key issue with retry logic
+        # Fix Kitware GPG key issue with retry logic and insecure connection
         for i in {1..3}; do
-          if wget -O /tmp/kitware-key.asc https://apt.kitware.com/keys/kitware-archive-latest.asc; then
+          if wget --no-check-certificate -O /tmp/kitware-key.asc https://apt.kitware.com/keys/kitware-archive-latest.asc; then
             gpg --dearmor /tmp/kitware-key.asc > /usr/share/keyrings/kitware-archive-keyring.gpg
             echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu jammy main' > /etc/apt/sources.list.d/kitware.list
             break
