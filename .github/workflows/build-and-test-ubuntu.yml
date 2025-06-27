@@ -88,6 +88,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ccache-
 
+      - name: Setup Conan dependencies
+        uses: ./.github/actions/setup-conan
+        with:
+          build-type: ${{ env.BUILD_TYPE }}
+          output-folder: ${{ env.OPENSTUDIO_BUILD_NAME }}
+          conan-user-home: /__w/OpenStudio/OpenStudio/.conan
+        env:
+          CONAN_USER_HOME: /__w/OpenStudio/OpenStudio/.conan
+
       - name: Create build directory
         run: mkdir -p ${{ env.OPENSTUDIO_BUILD_NAME }}
 
@@ -153,6 +162,15 @@ jobs:
         with:
           path: /__w/OpenStudio/OpenStudio/.conan
           key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Setup Conan dependencies
+        uses: ./.github/actions/setup-conan
+        with:
+          build-type: ${{ env.BUILD_TYPE }}
+          output-folder: ${{ env.OPENSTUDIO_BUILD_NAME }}
+          conan-user-home: /__w/OpenStudio/OpenStudio/.conan
+        env:
+          CONAN_USER_HOME: /__w/OpenStudio/OpenStudio/.conan
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
