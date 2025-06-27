@@ -52,18 +52,18 @@ jobs:
 
       - name: Install ccache
         run: |
-          # Update CA certificates and fix Kitware GPG key issue
+          # Update CA certificates first
           apt-get update && apt-get install -y ca-certificates curl
           
-          # Remove any existing duplicate Kitware sources
+          # Remove any existing Kitware sources that may cause conflicts
           rm -f /etc/apt/sources.list.d/archive_uri-https_apt_kitware_com_ubuntu_-jammy.list
+          rm -f /etc/apt/sources.list.d/kitware.list
           
-          # Properly configure Kitware repository with secure certificate verification
-          curl -fsSL https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor -o /usr/share/keyrings/kitware-archive-keyring.gpg
-          echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu jammy main' > /etc/apt/sources.list.d/kitware.list
-          
-          # Update package lists and install ccache
+          # Install ccache from Ubuntu repositories (avoiding Kitware SSL issues)
           apt-get update && apt-get install -y ccache
+          
+          # Verify ccache installation
+          ccache --version
 
       - name: Set default compiler
         run: |
