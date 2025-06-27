@@ -1,3 +1,4 @@
+# refer to workflow version from thursday june 26 at around 4 pm MT to copy back in required items
 name: Build and Test (Ubuntu 22.04)
 
 on:
@@ -28,6 +29,7 @@ jobs:
     container: # Define the Docker container for the job. All subsequent steps run inside it.
       image: nrel/openstudio-cmake-tools:jammy
       options: -u root -e "LANG=en_US.UTF-8" # These options are passed to the 'docker run' command internally
+      # add volume mounts back in
 
     steps:
       - name: Checkout repository
@@ -104,6 +106,7 @@ jobs:
           fi
           conan install . --output-folder=${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release
 
+        # wrap cmake with ccache using a flag or environment variable
       - name: Configure with CMake
         working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
         run: |
