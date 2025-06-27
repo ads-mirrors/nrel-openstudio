@@ -16,6 +16,7 @@ jobs:
       issues: read
       checks: write
       pull-requests: write
+      actions: read
 
     env:
       OPENSTUDIO_BUILD_NAME: OS-build-release-v2
@@ -196,6 +197,164 @@ jobs:
         with:
           name: test-summary
           path: ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/test-summary.md
+        if: always()
+
+      - name: Generate test results dashboard
+        if: always()
+        run: |
+          mkdir -p ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard
+          
+          # Create comprehensive test dashboard
+          cat > ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard/test-dashboard.md << 'EOF'
+          # 🧪 Test Results Dashboard
+          
+          ## Summary
+          
+          EOF
+          
+          # Process JUnit XML files and extract test information
+          python3 << 'PYTHON_EOF'
+          import xml.etree.ElementTree as ET
+          import os
+          import glob
+          from datetime import datetime
+          
+          build_dir = "${{ env.OPENSTUDIO_BUILD_NAME }}"
+          dashboard_file = f"{build_dir}/Testing/dashboard/test-dashboard.md"
+          
+          # Find all JUnit XML files
+          xml_files = glob.glob(f"{build_dir}/Testing/run*/results.xml")
+          
+          total_tests = 0
+          total_failures = 0
+          total_errors = 0
+          total_skipped = 0
+          failed_tests = []
+          
+          # Parse XML files
+          for xml_file in xml_files:
+              if os.path.exists(xml_file):
+                  try:
+                      tree = ET.parse(xml_file)
+                      root = tree.getroot()
+                      
+                      # Handle different JUnit XML formats
+                      if root.tag == 'testsuites':
+                          testsuites = root.findall('testsuite')
+                      else:
+                          testsuites = [root]
+                      
+                      for testsuite in testsuites:
+                          suite_name = testsuite.get('name', 'Unknown')
+                          tests = int(testsuite.get('tests', 0))
+                          failures = int(testsuite.get('failures', 0))
+                          errors = int(testsuite.get('errors', 0))
+                          skipped = int(testsuite.get('skipped', 0))
+                          
+                          total_tests += tests
+                          total_failures += failures
+                          total_errors += errors
+                          total_skipped += skipped
+                          
+                          # Get failed test details
+                          for testcase in testsuite.findall('testcase'):
+                              test_name = testcase.get('name', 'Unknown')
+                              classname = testcase.get('classname', suite_name)
+                              
+                              failure = testcase.find('failure')
+                              error = testcase.find('error')
+                              
+                              if failure is not None or error is not None:
+                                  failure_info = failure if failure is not None else error
+                                  message = failure_info.get('message', 'No message')
+                                  details = failure_info.text or 'No details available'
+                                  
+                                  failed_tests.append({
+                                      'suite': suite_name,
+                                      'class': classname,
+                                      'name': test_name,
+                                      'message': message,
+                                      'details': details,
+                                      'run': os.path.basename(os.path.dirname(xml_file))
+                                  })
+                  except Exception as e:
+                      print(f"Error parsing {xml_file}: {e}")
+          
+          # Generate dashboard content
+          with open(dashboard_file, 'a') as f:
+              # Summary section
+              success_rate = ((total_tests - total_failures - total_errors) / total_tests * 100) if total_tests > 0 else 0
+              
+              f.write(f"| Metric | Value |\n")
+              f.write(f"|--------|-------|\n")
+              f.write(f"| **Total Tests** | {total_tests} |\n")
+              f.write(f"| **Passed** | {total_tests - total_failures - total_errors} |\n")
+              f.write(f"| **Failed** | {total_failures} |\n")
+              f.write(f"| **Errors** | {total_errors} |\n")
+              f.write(f"| **Skipped** | {total_skipped} |\n")
+              f.write(f"| **Success Rate** | {success_rate:.1f}% |\n")
+              f.write(f"| **Generated** | {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')} |\n\n")
+              
+              if success_rate >= 100:
+                  f.write("## ✅ All Tests Passed!\n\n")
+              elif success_rate >= 95:
+                  f.write("## ⚠️ Minor Issues Detected\n\n")
+              else:
+                  f.write("## ❌ Significant Test Failures\n\n")
+              
+              # Failed tests section
+              if failed_tests:
+                  f.write(f"## 🔍 Failed Tests ({len(failed_tests)} failures)\n\n")
+                  
+                  # Group by test suite
+                  suites = {}
+                  for test in failed_tests:
+                      suite = test['suite']
+                      if suite not in suites:
+                          suites[suite] = []
+                      suites[suite].append(test)
+                  
+                  for suite_name, suite_tests in suites.items():
+                      f.write(f"### {suite_name} ({len(suite_tests)} failures)\n\n")
+                      
+                      for test in suite_tests:
+                          f.write(f"<details>\n")
+                          f.write(f"<summary><strong>{test['class']}.{test['name']}</strong> ({test['run']})</summary>\n\n")
+                          f.write(f"**Error Message:**\n")
+                          f.write(f"```\n{test['message']}\n```\n\n")
+                          f.write(f"**Full Details:**\n")
+                          f.write(f"```\n{test['details']}\n```\n\n")
+                          f.write(f"</details>\n\n")
+              
+              # Test run information
+              f.write("## 📊 Test Run Information\n\n")
+              f.write("| Run | XML File | Status |\n")
+              f.write("|-----|----------|--------|\n")
+              for i, xml_file in enumerate(xml_files, 1):
+                  status = "✅ Found" if os.path.exists(xml_file) else "❌ Missing"
+                  run_name = os.path.basename(os.path.dirname(xml_file))
+                  f.write(f"| {run_name} | `{os.path.basename(xml_file)}` | {status} |\n")
+              
+              if not xml_files:
+                  f.write("| - | No XML files found | ❌ Missing |\n")
+          
+          print(f"Dashboard generated with {total_tests} tests, {total_failures + total_errors} failures")
+          PYTHON_EOF
+
+      - name: Publish test results to PR
+        if: always() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: test-results
+          path: ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard/test-dashboard.md
+
+      - name: Upload comprehensive test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-dashboard
+          path: |
+            ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard/
+            ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/run*/
         if: always()
 
       - name: Upload build artifacts with metadata
