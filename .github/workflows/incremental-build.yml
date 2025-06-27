@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'Pull Request - Ready for CI')
@@ -42,12 +46,11 @@ jobs:
         with:
           fetch-depth: 0 # Fetch all history for all branches and tags
 
-      - name: Clean workspace
+      - name: Prepare workspace
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
           # make safe repository
           git config --global --add safe.directory "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}"
-          git clean -fdx
 
       - name: Install ccache
         run: |
@@ -75,11 +78,6 @@ jobs:
           ccache --set-config=compression=true
           ccache --set-config=compression_level=1
           ccache --show-stats
-
-      - name: Create build directory
-        run: |
-          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
-          mkdir -p ${{ env.OPENSTUDIO_BUILD_NAME }}
 
       - name: Git Setup
         run: |
