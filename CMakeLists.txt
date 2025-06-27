@@ -164,7 +164,19 @@ get_directory_property(hasParent PARENT_DIRECTORY)
 
 # TODO: Modify the more specific variables as needed to indicate prerelease, etc
 # Keep in beta in-between release cycles. Set to empty string (or comment out) for official)
-set(PROJECT_VERSION_PRERELEASE "")
+# Auto-detect prerelease tag for non-master branches
+if("${PROJECT_GIT_BRANCH}" STREQUAL "master" OR "${PROJECT_GIT_BRANCH}" STREQUAL "develop")
+  set(PROJECT_VERSION_PRERELEASE "")
+else()
+  # Set appropriate prerelease tag based on branch name
+  if("${PROJECT_GIT_BRANCH}" MATCHES "^release/.*")
+    set(PROJECT_VERSION_PRERELEASE "rc")
+  elseif("${PROJECT_GIT_BRANCH}" MATCHES "^hotfix/.*")
+    set(PROJECT_VERSION_PRERELEASE "hotfix")
+  else()
+    set(PROJECT_VERSION_PRERELEASE "dev")
+  endif()
+endif()
 
 # OpenStudio version: Only include Major.Minor.Patch, eg "3.0.0", even if you have a prerelease tag
 set(OPENSTUDIO_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
