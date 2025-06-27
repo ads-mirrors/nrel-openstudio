@@ -34,7 +34,10 @@ jobs:
           fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: Clean workspace
-        run: git clean -fdx
+        run: |
+          # make safe repository
+          git config --global --add safe.directory /__w/OpenStudio/OpenStudio
+          git clean -fdx
 
       - name: Install ccache
         run: apt-get update && apt-get install -y ccache
