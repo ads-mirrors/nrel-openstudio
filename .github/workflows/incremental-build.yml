@@ -108,6 +108,10 @@ jobs:
           # Ensure CA certificates are up to date
           update-ca-certificates
           
+          # Create the Conan CA certificate file that it expects
+          mkdir -p /home/root/.conan2
+          cp /etc/ssl/certs/ca-certificates.crt /home/root/.conan2/cacert.pem
+          
           conan remote add conancenter https://center.conan.io --force
           conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force
           if [ ! -f "${{ env.DOCKER_ROOT }}/.conan2/profiles/default" ]; then
