@@ -21,6 +21,7 @@ jobs:
       OPENSTUDIO_BUILD_NAME: OS-build-release-v2
       MAX_SAFE_THREADS: $(( ($(nproc) * 80 + 50) / 100 ))
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      MAKEFLAGS: "-j$(( ($(nproc) * 80 + 50) / 100 ))"
 
     container: # Define the Docker container for the job. All subsequent steps run inside it.
       image: kuangwenyi/openstudio-cmake-tools:jammy
@@ -59,6 +60,15 @@ jobs:
           key: ${{ runner.os }}-conan-${{ hashFiles('**/conanfile.py') }}
           restore-keys: |
             ${{ runner.os }}-conan-
+
+      - name: Cache build directory
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.OPENSTUDIO_BUILD_NAME }}
+          key: ${{ runner.os }}-build-${{ github.head_ref || github.ref_name }}-${{ hashFiles('**/*.cpp', '**/*.hpp', '**/CMakeLists.txt', 'src/**/*', 'conanfile.py') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ github.head_ref || github.ref_name }}-
+            ${{ runner.os }}-build-
 
       - name: Create build directory
         run: mkdir -p ${{ env.OPENSTUDIO_BUILD_NAME }}
@@ -100,13 +110,45 @@ jobs:
           . ./conanbuild.sh
           ninja -j ${{ env.MAX_SAFE_THREADS }} package
 
-      - name: Run CTests with retries
+      - name: Run CTests with enhanced error handling
         working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
         run: |
-          mkdir -p Testing/run1 Testing/run2 Testing/run3
-          ctest -j ${{ env.MAX_SAFE_THREADS }} --no-compress-output --output-on-failure --output-junit Testing/run1/results.xml || \
-          ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit Testing/run2/results.xml || \
-          ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit Testing/run3/results.xml
+          set +e  # Don't exit on first failure
+          mkdir -p Testing/run{1,2,3}
+          
+          echo "Starting first test run..."
+          ctest -j ${{ env.MAX_SAFE_THREADS }} --no-compress-output --output-on-failure --output-junit Testing/run1/results.xml
+          RESULT1=$?
+          
+          if [ $RESULT1 -ne 0 ]; then
+            echo "First test run failed (exit code: $RESULT1), retrying failed tests..."
+            ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit Testing/run2/results.xml
+            RESULT2=$?
+            
+            if [ $RESULT2 -ne 0 ]; then
+              echo "Second test run failed (exit code: $RESULT2), final attempt with verbose output..."
+              ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit Testing/run3/results.xml
+              RESULT3=$?
+            else
+              RESULT3=0
+            fi
+          else
+            echo "First test run passed"
+            RESULT2=0
+            RESULT3=0
+          fi
+          
+          # Report results
+          echo "Test run results: Run1=$RESULT1, Run2=$RESULT2, Run3=$RESULT3"
+          
+          # Set job status based on results
+          if [ $RESULT1 -eq 0 ] || [ $RESULT2 -eq 0 ] || [ $RESULT3 -eq 0 ]; then
+            echo "Tests passed (some may have required retries)"
+            exit 0
+          else
+            echo "All test attempts failed"
+            exit 1
+          fi
         continue-on-error: true
 
       - name: Test Summary
@@ -123,10 +165,12 @@ jobs:
           path: ${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/test-summary.md
         if: always()
 
-      - name: Upload build artifacts
+      - name: Upload build artifacts with metadata
         uses: actions/upload-artifact@v4
         with:
-          name: ubuntu-2204-artifacts
+          name: ubuntu-2204-${{ github.head_ref || github.ref_name }}-${{ github.sha }}
           path: |
             ${{ env.OPENSTUDIO_BUILD_NAME }}/*.deb
             ${{ env.OPENSTUDIO_BUILD_NAME }}/_CPack_Packages/Linux/TGZ/*.tar.gz
+          retention-days: 30
+        if: always()

@@ -34,3 +34,4 @@ junit.xml
 .cppcheck*/
 
 CMakeUserPresets.json
+.env
