@@ -99,6 +99,15 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
+          
+          # Configure Conan to use system CA certificates
+          export CONAN_CA_CERT_PATH=/etc/ssl/certs/ca-certificates.crt
+          export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+          export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+          
+          # Ensure CA certificates are up to date
+          update-ca-certificates
+          
           conan remote add conancenter https://center.conan.io --force
           conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force
           if [ ! -f "${{ env.DOCKER_ROOT }}/.conan2/profiles/default" ]; then
