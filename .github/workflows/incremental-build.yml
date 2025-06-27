@@ -82,7 +82,6 @@ jobs:
       - name: Install dependencies
         run: |
           conan remote add conancenter https://center.conan.io --force
-          conan remote add bincrafters https://bincrafters.jfrog.io/artifactory/api/conan/public-conan --force
           conan profile detect
           conan install . --output-folder=${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release
 
