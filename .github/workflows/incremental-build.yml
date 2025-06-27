@@ -1,4 +1,3 @@
-# refer to workflow version from thursday june 26 at around 4 pm MT to copy back in required items
 name: Build and Test (Ubuntu 22.04)
 
 on:
@@ -20,16 +19,22 @@ jobs:
       actions: read
 
     env:
-      OPENSTUDIO_BUILD_NAME: OS-build-release-v2
       MAX_SAFE_THREADS: $(( ($(nproc) * 90 + 50) / 100 ))
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
       MAKEFLAGS: "-j$(( ($(nproc) * 90 + 50) / 100 ))"
       NODE_TLS_REJECT_UNAUTHORIZED: 0
+      DOCKER_ROOT: /github/home
+      OPENSTUDIO_DOCKER_VOLUME: /github/home/OpenStudio
+      OPENSTUDIO_SOURCE_NAME: OpenStudio
+      OPENSTUDIO_BUILD_NAME: OS-build-release-v2
+      PR_NUMBER: ${{ github.event.pull_request.number || github.ref }}
 
     container: # Define the Docker container for the job. All subsequent steps run inside it.
       image: nrel/openstudio-cmake-tools:jammy
       options: -u root -e "LANG=en_US.UTF-8" # These options are passed to the 'docker run' command internally
-      # add volume mounts back in
+      volumes: # envs don't work in volume definition for containers
+        - "/srv/data/jenkins/docker-volumes/conan-data/.conan2:/github/home/.conan2" # Conan cache
+        - "/srv/data/jenkins/docker-volumes/ubuntu-2204:/github/home/OpenStudio"
 
     steps:
       - name: Checkout repository
@@ -39,8 +44,9 @@ jobs:
 
       - name: Clean workspace
         run: |
+          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
           # make safe repository
-          git config --global --add safe.directory /__w/OpenStudio/OpenStudio
+          git config --global --add safe.directory "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}"
           git clean -fdx
 
       - name: Install ccache
@@ -58,7 +64,7 @@ jobs:
       - name: Cache ccache
         uses: actions/cache@v4
         with:
-          path: /root/.ccache
+          path: ${{ env.DOCKER_ROOT }}/.ccache
           key: ${{ runner.os }}-ccache-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-ccache-
@@ -70,45 +76,37 @@ jobs:
           ccache --set-config=compression_level=1
           ccache --show-stats
 
-      - name: Cache Conan packages
-        uses: actions/cache@v4
-        with:
-          path: /github/home/.conan2
-          key: ${{ runner.os }}-conan-${{ hashFiles('**/conanfile.py') }}
-          restore-keys: |
-            ${{ runner.os }}-conan-
-
       - name: Create build directory
-        run: mkdir -p ${{ env.OPENSTUDIO_BUILD_NAME }}
+        run: |
+          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
+          mkdir -p ${{ env.OPENSTUDIO_BUILD_NAME }}
 
-      - name: Cache build directory
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ env.OPENSTUDIO_BUILD_NAME }}/CMakeCache.txt
-            ${{ env.OPENSTUDIO_BUILD_NAME }}/cmake_install.cmake
-            ${{ env.OPENSTUDIO_BUILD_NAME }}/build.ninja
-            ${{ env.OPENSTUDIO_BUILD_NAME }}/conan_toolchain.cmake
-            ${{ env.OPENSTUDIO_BUILD_NAME }}/conanbuild.sh
-            ${{ env.OPENSTUDIO_BUILD_NAME }}/.ninja_*
-          key: ${{ runner.os }}-build-config-${{ hashFiles('CMakeLists.txt', 'conanfile.py', 'src/**/CMakeLists.txt', 'CMake/**/*') }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-build-config-${{ hashFiles('CMakeLists.txt', 'conanfile.py', 'src/**/CMakeLists.txt', 'CMake/**/*') }}-
+      - name: Git Setup
+        run: |
+          # Set up git and fetch PR head, then detect conan profile and install dependencies
+          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
+          git config --global --add safe.directory "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}" && \
+          git config user.email "cicommercialbuilding@gmail.com" && \
+          git config user.name "ci-commercialbuildings" && \
+          git fetch origin && \
+          git fetch origin +refs/pull/*/head:refs/remotes/origin/pr/* && \
+          git checkout origin/pr/${{ env.PR_NUMBER }} && \
 
       - name: Install dependencies
         run: |
+          cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
           conan remote add conancenter https://center.conan.io --force
           conan remote update conancenter --insecure
           conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force
           conan remote update nrel-v2 --insecure
-          if [ ! -f "/github/home/.conan2/profiles/default" ]; then
+          if [ ! -f "${{ env.DOCKER_ROOT }}/.conan2/profiles/default" ]; then
             conan profile detect
           fi
           conan install . --output-folder=${{ env.OPENSTUDIO_BUILD_NAME }} --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release
 
         # wrap cmake with ccache using a flag or environment variable
       - name: Configure with CMake
-        working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
+        working-directory: ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
         run: |
           . ./conanbuild.sh
           cmake -G Ninja \
@@ -132,7 +130,7 @@ jobs:
                 ..
 
       - name: Verify build state
-        working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
+        working-directory: ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
         run: |
           if [ -f "build.ninja" ]; then
             echo "Ninja build file found - checking what needs to be built"
@@ -142,13 +140,13 @@ jobs:
           fi
 
       - name: Build with Ninja
-        working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
+        working-directory: ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
         run: |
           . ./conanbuild.sh
           ninja -j ${{ env.MAX_SAFE_THREADS }} package
 
       - name: Run CTests with enhanced error handling
-        working-directory: ${{ env.OPENSTUDIO_BUILD_NAME }}
+        working-directory: ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
         run: |
           set +e  # Don't exit on first failure
           mkdir -p Testing/run{1,2,3}
