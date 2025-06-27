@@ -90,7 +90,7 @@ jobs:
           git config user.name "ci-commercialbuildings" && \
           git fetch origin && \
           git fetch origin +refs/pull/*/head:refs/remotes/origin/pr/* && \
-          git checkout origin/pr/${{ env.PR_NUMBER }} && \
+          git checkout origin/pr/${{ env.PR_NUMBER }}
 
       - name: Install dependencies
         run: |
