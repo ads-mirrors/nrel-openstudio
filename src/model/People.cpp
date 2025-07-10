@@ -23,6 +23,7 @@
 
 #include <utilities/idd/OS_People_FieldEnums.hxx>
 #include <utilities/idd/IddEnums.hxx>
+#include <utilities/idd/IddFactory.hxx>
 
 #include "../utilities/core/Assert.hpp"
 
@@ -324,7 +325,7 @@ namespace model {
     }
 
     boost::optional<Schedule> People_Impl::clothingInsulationCalculationMethodSchedule() const {
-      return getObject<ModelObject>().getModelObjectTarget<Schedule>(OS_PeopleFields::ClothingInsulationCalculationMethodSchedule);
+      return getObject<ModelObject>().getModelObjectTarget<Schedule>(OS_PeopleFields::ClothingInsulationCalculationMethodScheduleName);
     }
 
     boost::optional<Schedule> People_Impl::clothingInsulationSchedule() const {
