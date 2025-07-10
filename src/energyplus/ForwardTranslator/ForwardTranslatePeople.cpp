@@ -114,6 +114,15 @@ namespace energyplus {
       }
     }
 
+    const std::string clothingInsulationCalculationMethod = modelObject.clothingInsulationCalculationMethod();
+    idfObject.setString(PeopleFields::ClothingInsulationCalculationMethod, clothingInsulationCalculationMethod);
+
+    if (boost::optional<Schedule> schedule_ = modelObject.clothingInsulationCalculationMethodSchedule()) {
+      if (auto idf_schedule_ = translateAndMapModelObject(schedule_.get())) {
+        idfObject.setString(PeopleFields::ClothingInsulationCalculationMethodScheduleName, idf_schedule_->nameString());
+      }
+    }
+
     if (boost::optional<Schedule> schedule_ = modelObject.clothingInsulationSchedule()) {
       if (auto idf_schedule_ = translateAndMapModelObject(schedule_.get())) {
         idfObject.setString(PeopleFields::ClothingInsulationScheduleName, idf_schedule_->nameString());
