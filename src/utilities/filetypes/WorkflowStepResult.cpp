@@ -682,7 +682,13 @@ namespace detail {
     }
 
     fmt::print("***Machine-Readable Attributes**\n");
-    fmt::print("[\n{}\n]\n", fmt::join(m_stepValues | std::views::transform([](const auto& v) { return v.string(); }), ","));
+    Json::Value top_root(Json::arrayValue);
+    for (const auto& stepValue : m_stepValues) {
+      top_root.append(stepValue.toJSON());  // This moves, calls `Value & append (Value &&value)`
+    }
+    Json::StreamWriterBuilder wbuilder;
+    wbuilder["indentation"] = "  ";
+    fmt::print("{}\n", Json::writeString(wbuilder, top_root));
 
     fmt::print("***Files Generated**\n");
     for (const auto& file_path : this->stepFiles()) {
