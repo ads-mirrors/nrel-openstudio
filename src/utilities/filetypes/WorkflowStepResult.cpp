@@ -7,10 +7,16 @@
 #include "WorkflowStepResult_Impl.hpp"
 
 #include "../../utilities/core/Assert.hpp"
+#include "../../utilities/core/Path.hpp"
 
 #include <json/json.h>
+#include <fmt/core.h>
+#include <fmt/ranges.h>
 
+#include <string>
+#include <ranges>
 #include <utility>
+#include <vector>
 
 namespace openstudio {
 namespace detail {
@@ -630,6 +636,62 @@ namespace detail {
     m_stdErr.reset();
   }
 
+  void WorkflowStepResult_Impl::showOutput() const {
+    fmt::print("**MEASURE APPLICABILITY**\n");
+    const int applicability = this->value().value();
+    switch (applicability) {
+      case StepResult::Skip:
+        fmt::print("{} = Skipped\n", applicability);
+        break;
+      case StepResult::NA:
+        fmt::print("{} = Not Applicable\n", applicability);
+        break;
+      case StepResult::Success:
+        fmt::print("{} = Success\n", applicability);
+        break;
+      case StepResult::Fail:
+        fmt::print("{} = Fail\n", applicability);
+        break;
+      default:
+        throw std::runtime_error(fmt::format("{} = Unknown Status", applicability));
+    }
+
+    fmt::print("**INITIAL CONDITION**\n");
+    if (m_stepInitialCondition) {
+      fmt::print("{}\n", *m_stepInitialCondition);
+    }
+
+    fmt::print("**FINAL CONDITION**\n");
+    if (m_stepFinalCondition) {
+      fmt::print("{}\n", *m_stepFinalCondition);
+    }
+
+    fmt::print("**INFO MESSAGES**\n");
+    for (const auto& msg : m_stepInfo) {
+      fmt::print("{}\n", msg);
+    }
+
+    fmt::print("**WARNING MESSAGES**\n");
+    for (const auto& msg : m_stepWarnings) {
+      fmt::print("{}\n", msg);
+    }
+
+    fmt::print("**ERROR MESSAGES**\n");
+    for (const auto& msg : m_stepErrors) {
+      fmt::print("{}\n", msg);
+    }
+
+    fmt::print("***Machine-Readable Attributes**\n");
+    fmt::print("[\n{}\n]\n", fmt::join(m_stepValues | std::views::transform([](const auto& v) { return v.string(); }), ","));
+
+    fmt::print("***Files Generated**\n");
+    for (const auto& file_path : this->stepFiles()) {
+      fmt::print("{}\n", openstudio::toString(file_path));
+    }
+
+    fmt::print("\n\n");
+  }
+
 }  // namespace detail
 
 WorkflowStepValue::WorkflowStepValue(const std::string& name, const Variant& value)
@@ -1225,6 +1287,10 @@ void WorkflowStepResult::setStdErr(const std::string& stdErr) {
 
 void WorkflowStepResult::resetStdErr() {
   getImpl<detail::WorkflowStepResult_Impl>()->resetStdErr();
+}
+
+void WorkflowStepResult::showOutput() const {
+  getImpl<detail::WorkflowStepResult_Impl>()->showOutput();
 }
 
 std::ostream& operator<<(std::ostream& os, const WorkflowStepResult& workflowStepResult) {
