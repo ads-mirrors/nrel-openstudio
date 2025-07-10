@@ -337,7 +337,8 @@ namespace model {
     }
 
     bool People_Impl::setClothingInsulationCalculationMethodSchedule(Schedule& schedule) {
-      return setSchedule(OS_PeopleFields::ClothingInsulationCalculationMethodScheduleName, "People", "Clothing Insulation Calculation Method", schedule);
+      return setSchedule(OS_PeopleFields::ClothingInsulationCalculationMethodScheduleName, "People", "Clothing Insulation Calculation Method",
+                         schedule);
     }
 
     void People_Impl::resetClothingInsulationCalculationMethodSchedule() {
