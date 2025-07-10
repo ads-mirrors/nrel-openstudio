@@ -710,7 +710,7 @@ namespace model {
     getImpl<detail::People_Impl>()->resetWorkEfficiencySchedule();
   }
 
-  std::string People_Impl::clothingInsulationCalculationMethod() const {
+  std::string People::clothingInsulationCalculationMethod() const {
     return getImpl<detail::People_Impl>()->clothingInsulationCalculationMethod();
   }
 
@@ -723,7 +723,7 @@ namespace model {
   }
 
   bool People::setClothingInsulationCalculationMethod(const std::string& clothingInsulationCalculationMethod) {
-    return getImpl<detail::ZoneHVACEvaporativeCoolerUnit_Impl>()->setClothingInsulationCalculationMethod(clothingInsulationCalculationMethod);
+    return getImpl<detail::People_Impl>()->setClothingInsulationCalculationMethod(clothingInsulationCalculationMethod);
   }
 
   bool People::setClothingInsulationCalculatiomMethodSchedule(Schedule& schedule) {
