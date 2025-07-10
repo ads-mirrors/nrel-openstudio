@@ -1,0 +1,27 @@
+
+OS:Version,
+  {e6ad51bf-ade5-406a-9757-dc139100de7c}, !- Handle
+  3.10.0;                                 !- Version Identifier
+
+OS:People:Definition,
+  {d45971d0-85c9-47a7-9287-0f023e54c394}, !- Handle
+  People Definition 1,                    !- Name
+  People,                                 !- Number of People Calculation Method
+  0,                                      !- Number of People {people}
+  ,                                       !- People per Space Floor Area {person/m2}
+  ,                                       !- Space Floor Area per Person {m2/person}
+  0.3;                                    !- Fraction Radiant
+
+OS:People,
+  {27c7d375-bb62-44b8-b135-96a4e807c424}, !- Handle
+  People 1,                               !- Name
+  {d45971d0-85c9-47a7-9287-0f023e54c394}, !- People Definition Name
+  ,                                       !- Space or SpaceType Name
+  ,                                       !- Number of People Schedule Name
+  ,                                       !- Activity Level Schedule Name
+  ,                                       !- Surface Name/Angle Factor List Name
+  ,                                       !- Work Efficiency Schedule Name
+  ,                                       !- Clothing Insulation Schedule Name
+  ,                                       !- Air Velocity Schedule Name
+  1;                                      !- Multiplier
+

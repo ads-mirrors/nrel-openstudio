@@ -4628,3 +4628,24 @@ TEST_F(OSVersionFixture, can_still_load_older_components) {
   EXPECT_EQ(1, model.getObjectsByType("OS:ComponentData").size());
   EXPECT_EQ(2, model.objects().size());
 }
+
+TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_People) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_People.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_People_updated.osm");
+  model->save(outPath, true);
+
+  std::vector<WorkspaceObject> ps = model->getObjectsByType("OS:People");
+  ASSERT_EQ(1u, ps.size());
+  const auto& p = ps.front();
+
+  EXPECT_TRUE(p.isEmpty(7));  // Work Efficiency Schedule Name
+  EXPECT_EQ("ClothingInsulationSchedule", p.getString(8).get());  // Clothing Insulation Calculation Method
+  EXPECT_TRUE(p.isEmpty(9));  // Clothing Insulation Calculation Method Schedule Name
+  EXPECT_TRUE(p.isEmpty(10));  // Clothing Insulation Schedule Name
+  EXPECT_TRUE(p.isEmpty(11));  // Air Velocity Schedule Name
+  EXPECT_EQ(1, si.getDouble(12).get());  // Multiplier
+}
