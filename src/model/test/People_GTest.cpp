@@ -16,6 +16,7 @@
 #include "../ScheduleRuleset.hpp"
 #include "../ScheduleDay.hpp"
 #include "../ScheduleTypeRegistry.hpp"
+#include "../ScheduleConstant.hpp"
 
 #include <utilities/idd/IddEnums.hxx>
 
@@ -34,6 +35,8 @@ TEST_F(ModelFixture, People_DefaultConstructor) {
   EXPECT_EQ(definition.handle(), person.peopleDefinition().handle());
   ASSERT_EQ(1u, definition.instances().size());
   EXPECT_EQ(person.handle(), definition.instances()[0].handle());
+  EXPECT_EQ(1.0, person.multiplier());
+  EXPECT_EQ("ClothingInsulationSchedule", person.clothingInsulationCalculationMethod());
 
   EXPECT_EQ("People", definition.numberofPeopleCalculationMethod());
   ASSERT_TRUE(definition.numberofPeople());
@@ -108,6 +111,47 @@ TEST_F(ModelFixture, People_DesignLevels) {
   EXPECT_EQ(1.0, definition.getPeoplePerFloorArea(100.0));
   EXPECT_EQ(1.0, definition.getFloorAreaPerPerson(0.0));
   EXPECT_EQ(1.0, definition.getFloorAreaPerPerson(100.0));
+}
+
+TEST_F(ModelFixture, People_DesignLevels) {
+  Model model;
+
+  // make a new People object
+  PeopleDefinition definition(model);
+  People person(definition);
+  
+  EXPECT_EQ("ClothingInsulationSchedule", person.clothingInsulationCalculationMethod());
+  EXPECT_FALSE(person.clothingInsulationCalculationMethodSchedule());
+  EXPECT_FALSE(person.clothingInsulationSchedule());
+  
+  ScheduleConstant cloSch(m);
+  EXPECT_TRUE(person.setClothingInsulationCalculationMethodSchedule(cloSch));
+  EXPECT_TRUE(person.setClothingInsulationSchedule(cloSch));
+  
+  // set clothing insulation schedule
+  EXPECT_TRUE(person.setClothingInsulationCalculationMethod("ClothingInsulationSchedule"));
+  EXPECT_EQ("ClothingInsulationSchedule", person.clothingInsulationCalculationMethod());
+  EXPECT_FALSE(person.clothingInsulationCalculationMethodSchedule());
+  ASSERT_TRUE(person.clothingInsulationSchedule());
+  EXPECT_EQ(cloSch, person.clothingInsulationSchedule().get());
+  person.resetClothingInsulationSchedule();
+  EXPECT_FALSE(person.clothingInsulationSchedule());
+  
+  // set dynamic clothing model ashrae 55
+  EXPECT_TRUE(person.setClothingInsulationCalculationMethod("DynamicClothingModelASHRAE55"));
+  EXPECT_EQ("DynamicClothingModelASHRAE55", person.clothingInsulationCalculationMethod());
+  EXPECT_FALSE(person.clothingInsulationCalculationMethodSchedule());
+  EXPECT_FALSE(person.clothingInsulationSchedule());
+  
+  // set calculation method schedule
+  EXPECT_TRUE(person.setClothingInsulationCalculationMethod("CalculationMethodSchedule"));
+  EXPECT_EQ("CalculationMethodSchedule", person.clothingInsulationCalculationMethod());
+  ASSERT_TRUE(person.clothingInsulationCalculationMethodSchedule());
+  EXPECT_EQ(cloSch, person.clothingInsulationCalculationMethodSchedule().get());
+  ASSERT_TRUE(person.clothingInsulationSchedule());
+  EXPECT_EQ(cloSch, person.clothingInsulationSchedule().get());
+  person.resetClothingInsulationCalculationMethodSchedule();
+  EXPECT_FALSE(person.clothingInsulationCalculationMethodSchedule());
 }
 
 TEST_F(ModelFixture, People_Remove) {
