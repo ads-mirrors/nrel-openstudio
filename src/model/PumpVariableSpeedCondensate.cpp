@@ -40,12 +40,14 @@ namespace model {
       OS_ASSERT(idfObject.iddObject().type() == PumpVariableSpeedCondensate::iddObjectType());
     }
 
-    PumpVariableSpeedCondensate_Impl::PumpVariableSpeedCondensate_Impl(const openstudio::detail::WorkspaceObject_Impl& other, Model_Impl* model, bool keepHandle)
+    PumpVariableSpeedCondensate_Impl::PumpVariableSpeedCondensate_Impl(const openstudio::detail::WorkspaceObject_Impl& other, Model_Impl* model,
+                                                                       bool keepHandle)
       : StraightComponent_Impl(other, model, keepHandle) {
       OS_ASSERT(other.iddObject().type() == PumpVariableSpeedCondensate::iddObjectType());
     }
 
-    PumpVariableSpeedCondensate_Impl::PumpVariableSpeedCondensate_Impl(const PumpVariableSpeedCondensate_Impl& other, Model_Impl* model, bool keepHandle)
+    PumpVariableSpeedCondensate_Impl::PumpVariableSpeedCondensate_Impl(const PumpVariableSpeedCondensate_Impl& other, Model_Impl* model,
+                                                                       bool keepHandle)
       : StraightComponent_Impl(other, model, keepHandle) {}
 
     const std::vector<std::string>& PumpVariableSpeedCondensate_Impl::outputVariableNames() const {
@@ -335,7 +337,8 @@ namespace model {
     }
 
     bool PumpVariableSpeedCondensate_Impl::setFractionofMotorInefficienciestoFluidStream(double fractionofMotorInefficienciestoFluidStream) {
-      bool result = setDouble(OS_Pump_VariableSpeed_CondensateFields::FractionofMotorInefficienciestoFluidStream, fractionofMotorInefficienciestoFluidStream);
+      bool result =
+        setDouble(OS_Pump_VariableSpeed_CondensateFields::FractionofMotorInefficienciestoFluidStream, fractionofMotorInefficienciestoFluidStream);
       return result;
     }
 
@@ -345,7 +348,8 @@ namespace model {
     }
 
     bool PumpVariableSpeedCondensate_Impl::setCoefficient1ofthePartLoadPerformanceCurve(double coefficient1ofthePartLoadPerformanceCurve) {
-      bool result = setDouble(OS_Pump_VariableSpeed_CondensateFields::Coefficient1ofthePartLoadPerformanceCurve, coefficient1ofthePartLoadPerformanceCurve);
+      bool result =
+        setDouble(OS_Pump_VariableSpeed_CondensateFields::Coefficient1ofthePartLoadPerformanceCurve, coefficient1ofthePartLoadPerformanceCurve);
       OS_ASSERT(result);
       return result;
     }
@@ -356,7 +360,8 @@ namespace model {
     }
 
     bool PumpVariableSpeedCondensate_Impl::setCoefficient2ofthePartLoadPerformanceCurve(double coefficient2ofthePartLoadPerformanceCurve) {
-      bool result = setDouble(OS_Pump_VariableSpeed_CondensateFields::Coefficient2ofthePartLoadPerformanceCurve, coefficient2ofthePartLoadPerformanceCurve);
+      bool result =
+        setDouble(OS_Pump_VariableSpeed_CondensateFields::Coefficient2ofthePartLoadPerformanceCurve, coefficient2ofthePartLoadPerformanceCurve);
       OS_ASSERT(result);
       return result;
     }
@@ -367,7 +372,8 @@ namespace model {
     }
 
     bool PumpVariableSpeedCondensate_Impl::setCoefficient3ofthePartLoadPerformanceCurve(double coefficient3ofthePartLoadPerformanceCurve) {
-      bool result = setDouble(OS_Pump_VariableSpeed_CondensateFields::Coefficient3ofthePartLoadPerformanceCurve, coefficient3ofthePartLoadPerformanceCurve);
+      bool result =
+        setDouble(OS_Pump_VariableSpeed_CondensateFields::Coefficient3ofthePartLoadPerformanceCurve, coefficient3ofthePartLoadPerformanceCurve);
       OS_ASSERT(result);
       return result;
     }
@@ -378,7 +384,8 @@ namespace model {
     }
 
     bool PumpVariableSpeedCondensate_Impl::setCoefficient4ofthePartLoadPerformanceCurve(double coefficient4ofthePartLoadPerformanceCurve) {
-      bool result = setDouble(OS_Pump_VariableSpeed_CondensateFields::Coefficient4ofthePartLoadPerformanceCurve, coefficient4ofthePartLoadPerformanceCurve);
+      bool result =
+        setDouble(OS_Pump_VariableSpeed_CondensateFields::Coefficient4ofthePartLoadPerformanceCurve, coefficient4ofthePartLoadPerformanceCurve);
       OS_ASSERT(result);
       return result;
     }
@@ -410,7 +417,8 @@ namespace model {
     }
 
     bool PumpVariableSpeedCondensate_Impl::setPumpFlowRateSchedule(Schedule& schedule) {
-      bool result = setSchedule(OS_Pump_VariableSpeed_CondensateFields::PumpFlowRateScheduleName, "PumpVariableSpeedCondensate", "Pump Flow Rate", schedule);
+      bool result =
+        setSchedule(OS_Pump_VariableSpeed_CondensateFields::PumpFlowRateScheduleName, "PumpVariableSpeedCondensate", "Pump Flow Rate", schedule);
       return result;
     }
 
@@ -472,7 +480,8 @@ namespace model {
     }
 
     bool PumpVariableSpeedCondensate_Impl::setMinimumPressureSchedule(Schedule& schedule) {
-      bool result = setSchedule(OS_Pump_VariableSpeed_CondensateFields::MinimumPressureSchedule, "PumpVariableSpeedCondensate", "Minimum Pressure", schedule);
+      bool result =
+        setSchedule(OS_Pump_VariableSpeed_CondensateFields::MinimumPressureSchedule, "PumpVariableSpeedCondensate", "Minimum Pressure", schedule);
       return result;
     }
 
@@ -482,7 +491,8 @@ namespace model {
     }
 
     bool PumpVariableSpeedCondensate_Impl::setMaximumPressureSchedule(Schedule& schedule) {
-      bool result = setSchedule(OS_Pump_VariableSpeed_CondensateFields::MaximumPressureSchedule, "PumpVariableSpeedCondensate", "Maximum Pressure", schedule);
+      bool result =
+        setSchedule(OS_Pump_VariableSpeed_CondensateFields::MaximumPressureSchedule, "PumpVariableSpeedCondensate", "Maximum Pressure", schedule);
       return result;
     }
 
@@ -747,7 +757,8 @@ namespace model {
     }
 
     bool PumpVariableSpeedCondensate_Impl::setDesignShaftPowerPerUnitFlowRatePerUnitHead(double designShaftPowerPerUnitFlowRatePerUnitHead) {
-      return setDouble(OS_Pump_VariableSpeed_CondensateFields::DesignShaftPowerperUnitFlowRateperUnitHead, designShaftPowerPerUnitFlowRatePerUnitHead);
+      return setDouble(OS_Pump_VariableSpeed_CondensateFields::DesignShaftPowerperUnitFlowRateperUnitHead,
+                       designShaftPowerPerUnitFlowRatePerUnitHead);
     }
 
     double PumpVariableSpeedCondensate_Impl::designMinimumFlowRateFraction() const {
@@ -1029,7 +1040,8 @@ namespace model {
   }
 
   bool PumpVariableSpeedCondensate::setFractionofMotorInefficienciestoFluidStream(double fractionofMotorInefficienciestoFluidStream) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setFractionofMotorInefficienciestoFluidStream(fractionofMotorInefficienciestoFluidStream);
+    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setFractionofMotorInefficienciestoFluidStream(
+      fractionofMotorInefficienciestoFluidStream);
   }
 
   void PumpVariableSpeedCondensate::resetFractionofMotorInefficienciestoFluidStream() {
@@ -1037,7 +1049,8 @@ namespace model {
   }
 
   bool PumpVariableSpeedCondensate::setCoefficient1ofthePartLoadPerformanceCurve(double coefficient1ofthePartLoadPerformanceCurve) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setCoefficient1ofthePartLoadPerformanceCurve(coefficient1ofthePartLoadPerformanceCurve);
+    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setCoefficient1ofthePartLoadPerformanceCurve(
+      coefficient1ofthePartLoadPerformanceCurve);
   }
 
   void PumpVariableSpeedCondensate::resetCoefficient1ofthePartLoadPerformanceCurve() {
@@ -1045,7 +1058,8 @@ namespace model {
   }
 
   bool PumpVariableSpeedCondensate::setCoefficient2ofthePartLoadPerformanceCurve(double coefficient2ofthePartLoadPerformanceCurve) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setCoefficient2ofthePartLoadPerformanceCurve(coefficient2ofthePartLoadPerformanceCurve);
+    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setCoefficient2ofthePartLoadPerformanceCurve(
+      coefficient2ofthePartLoadPerformanceCurve);
   }
 
   void PumpVariableSpeedCondensate::resetCoefficient2ofthePartLoadPerformanceCurve() {
@@ -1053,7 +1067,8 @@ namespace model {
   }
 
   bool PumpVariableSpeedCondensate::setCoefficient3ofthePartLoadPerformanceCurve(double coefficient3ofthePartLoadPerformanceCurve) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setCoefficient3ofthePartLoadPerformanceCurve(coefficient3ofthePartLoadPerformanceCurve);
+    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setCoefficient3ofthePartLoadPerformanceCurve(
+      coefficient3ofthePartLoadPerformanceCurve);
   }
 
   void PumpVariableSpeedCondensate::resetCoefficient3ofthePartLoadPerformanceCurve() {
@@ -1061,7 +1076,8 @@ namespace model {
   }
 
   bool PumpVariableSpeedCondensate::setCoefficient4ofthePartLoadPerformanceCurve(double coefficient4ofthePartLoadPerformanceCurve) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setCoefficient4ofthePartLoadPerformanceCurve(coefficient4ofthePartLoadPerformanceCurve);
+    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setCoefficient4ofthePartLoadPerformanceCurve(
+      coefficient4ofthePartLoadPerformanceCurve);
   }
 
   void PumpVariableSpeedCondensate::resetCoefficient4ofthePartLoadPerformanceCurve() {
@@ -1177,7 +1193,8 @@ namespace model {
   }
 
   bool PumpVariableSpeedCondensate::setDesignShaftPowerPerUnitFlowRatePerUnitHead(double designShaftPowerPerUnitFlowRatePerUnitHead) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setDesignShaftPowerPerUnitFlowRatePerUnitHead(designShaftPowerPerUnitFlowRatePerUnitHead);
+    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setDesignShaftPowerPerUnitFlowRatePerUnitHead(
+      designShaftPowerPerUnitFlowRatePerUnitHead);
   }
 
   boost::optional<ThermalZone> PumpVariableSpeedCondensate::zone() const {
@@ -1217,7 +1234,8 @@ namespace model {
   }
 
   /// @cond
-  PumpVariableSpeedCondensate::PumpVariableSpeed(std::shared_ptr<detail::PumpVariableSpeedCondensate_Impl> impl) : StraightComponent(std::move(impl)) {}
+  PumpVariableSpeedCondensate::PumpVariableSpeed(std::shared_ptr<detail::PumpVariableSpeedCondensate_Impl> impl)
+    : StraightComponent(std::move(impl)) {}
   /// @endcond
 
   boost::optional<double> PumpVariableSpeedCondensate::autosizedRatedFlowRate() const {
