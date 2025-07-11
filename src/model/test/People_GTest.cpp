@@ -124,7 +124,7 @@ TEST_F(ModelFixture, People_ClothingInsulation) {
   EXPECT_FALSE(person.clothingInsulationCalculationMethodSchedule());
   EXPECT_FALSE(person.clothingInsulationSchedule());
 
-  ScheduleConstant cloSch(m);
+  ScheduleConstant cloSch(model);
   EXPECT_TRUE(person.setClothingInsulationCalculationMethodSchedule(cloSch));
   EXPECT_TRUE(person.setClothingInsulationSchedule(cloSch));
 
