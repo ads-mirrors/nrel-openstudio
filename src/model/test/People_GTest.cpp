@@ -124,32 +124,36 @@ TEST_F(ModelFixture, People_ClothingInsulation) {
   EXPECT_FALSE(person.clothingInsulationCalculationMethodSchedule());
   EXPECT_FALSE(person.clothingInsulationSchedule());
 
-  ScheduleConstant cloSch(model);
-  EXPECT_TRUE(person.setClothingInsulationCalculationMethodSchedule(cloSch));
-  EXPECT_TRUE(person.setClothingInsulationSchedule(cloSch));
+  ScheduleConstant cloSch1(model);
+  EXPECT_TRUE(person.setClothingInsulationCalculationMethodSchedule(cloSch1));
+  ScheduleConstant cloSch2(model);
+  EXPECT_TRUE(person.setClothingInsulationSchedule(cloSch2));
 
   // set clothing insulation schedule
   EXPECT_TRUE(person.setClothingInsulationCalculationMethod("ClothingInsulationSchedule"));
   EXPECT_EQ("ClothingInsulationSchedule", person.clothingInsulationCalculationMethod());
   EXPECT_FALSE(person.clothingInsulationCalculationMethodSchedule());
   ASSERT_TRUE(person.clothingInsulationSchedule());
-  EXPECT_EQ(cloSch, person.clothingInsulationSchedule().get());
+  EXPECT_EQ(cloSch2, person.clothingInsulationSchedule().get());
   person.resetClothingInsulationSchedule();
   EXPECT_FALSE(person.clothingInsulationSchedule());
 
   // set dynamic clothing model ashrae 55
+  EXPECT_TRUE(person.setClothingInsulationCalculationMethodSchedule(cloSch1));
   EXPECT_TRUE(person.setClothingInsulationCalculationMethod("DynamicClothingModelASHRAE55"));
   EXPECT_EQ("DynamicClothingModelASHRAE55", person.clothingInsulationCalculationMethod());
   EXPECT_FALSE(person.clothingInsulationCalculationMethodSchedule());
   EXPECT_FALSE(person.clothingInsulationSchedule());
 
   // set calculation method schedule
+  EXPECT_TRUE(person.setClothingInsulationCalculationMethodSchedule(cloSch1));
+  EXPECT_TRUE(person.setClothingInsulationSchedule(cloSch2));
   EXPECT_TRUE(person.setClothingInsulationCalculationMethod("CalculationMethodSchedule"));
   EXPECT_EQ("CalculationMethodSchedule", person.clothingInsulationCalculationMethod());
   ASSERT_TRUE(person.clothingInsulationCalculationMethodSchedule());
-  EXPECT_EQ(cloSch, person.clothingInsulationCalculationMethodSchedule().get());
+  EXPECT_EQ(cloSch1, person.clothingInsulationCalculationMethodSchedule().get());
   ASSERT_TRUE(person.clothingInsulationSchedule());
-  EXPECT_EQ(cloSch, person.clothingInsulationSchedule().get());
+  EXPECT_EQ(cloSch2, person.clothingInsulationSchedule().get());
   person.resetClothingInsulationCalculationMethodSchedule();
   EXPECT_FALSE(person.clothingInsulationCalculationMethodSchedule());
 }
