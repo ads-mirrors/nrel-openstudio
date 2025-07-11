@@ -113,7 +113,7 @@ TEST_F(ModelFixture, People_DesignLevels) {
   EXPECT_EQ(1.0, definition.getFloorAreaPerPerson(100.0));
 }
 
-TEST_F(ModelFixture, People_DesignLevels) {
+TEST_F(ModelFixture, People_ClothingInsulation) {
   Model model;
 
   // make a new People object
