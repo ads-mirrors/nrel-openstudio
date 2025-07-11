@@ -119,15 +119,15 @@ TEST_F(ModelFixture, People_DesignLevels) {
   // make a new People object
   PeopleDefinition definition(model);
   People person(definition);
-  
+
   EXPECT_EQ("ClothingInsulationSchedule", person.clothingInsulationCalculationMethod());
   EXPECT_FALSE(person.clothingInsulationCalculationMethodSchedule());
   EXPECT_FALSE(person.clothingInsulationSchedule());
-  
+
   ScheduleConstant cloSch(m);
   EXPECT_TRUE(person.setClothingInsulationCalculationMethodSchedule(cloSch));
   EXPECT_TRUE(person.setClothingInsulationSchedule(cloSch));
-  
+
   // set clothing insulation schedule
   EXPECT_TRUE(person.setClothingInsulationCalculationMethod("ClothingInsulationSchedule"));
   EXPECT_EQ("ClothingInsulationSchedule", person.clothingInsulationCalculationMethod());
@@ -136,13 +136,13 @@ TEST_F(ModelFixture, People_DesignLevels) {
   EXPECT_EQ(cloSch, person.clothingInsulationSchedule().get());
   person.resetClothingInsulationSchedule();
   EXPECT_FALSE(person.clothingInsulationSchedule());
-  
+
   // set dynamic clothing model ashrae 55
   EXPECT_TRUE(person.setClothingInsulationCalculationMethod("DynamicClothingModelASHRAE55"));
   EXPECT_EQ("DynamicClothingModelASHRAE55", person.clothingInsulationCalculationMethod());
   EXPECT_FALSE(person.clothingInsulationCalculationMethodSchedule());
   EXPECT_FALSE(person.clothingInsulationSchedule());
-  
+
   // set calculation method schedule
   EXPECT_TRUE(person.setClothingInsulationCalculationMethod("CalculationMethodSchedule"));
   EXPECT_EQ("CalculationMethodSchedule", person.clothingInsulationCalculationMethod());
