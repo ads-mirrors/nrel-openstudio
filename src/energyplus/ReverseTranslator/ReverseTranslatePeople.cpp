@@ -194,8 +194,8 @@ namespace energyplus {
           Schedule schedule(*intermediate);
           bool ok = people.setClothingInsulationCalculationMethodSchedule(schedule);
           if (!ok) {
-            LOG(Warn, "Unable to set " << people.briefDescription() << "'s Clothing Insulation Calculation Method schedule to " << schedule.briefDescription()
-                                       << ", likely because of a ScheduleTypeLimits conflict.");
+            LOG(Warn, "Unable to set " << people.briefDescription() << "'s Clothing Insulation Calculation Method schedule to "
+                                       << schedule.briefDescription() << ", likely because of a ScheduleTypeLimits conflict.");
           }
         }
       }
