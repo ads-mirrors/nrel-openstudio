@@ -186,7 +186,7 @@ namespace model {
   };
 
   /** \relates PumpVariableSpeedCondensate*/
-  using OptionalPumpVariableSpeed = boost::optional<PumpVariableSpeedCondensate>;
+  using OptionalPumpVariableSpeedCondensate = boost::optional<PumpVariableSpeedCondensate>;
 
   /** \relates PumpVariableSpeedCondensate*/
   using PumpVariableSpeedCondensateVector = std::vector<PumpVariableSpeedCondensate>;

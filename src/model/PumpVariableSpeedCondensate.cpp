@@ -82,9 +82,7 @@ namespace model {
 
     std::vector<ModelObject> PumpVariableSpeedCondensate_Impl::children() const {
       ModelObjectVector result;
-      if (OptionalCurve curve = pumpCurve()) {
-        result.push_back(*curve);
-      }
+
       return result;
     }
 
@@ -489,7 +487,8 @@ namespace model {
 
   }  // namespace detail
 
-  PumpVariableSpeedCondensate::PumpVariableSpeed(const Model& model) : StraightComponent(PumpVariableSpeedCondensate::iddObjectType(), model) {
+  PumpVariableSpeedCondensate::PumpVariableSpeedCondensate(const Model& model)
+    : StraightComponent(PumpVariableSpeedCondensate::iddObjectType(), model) {
     OS_ASSERT(getImpl<detail::PumpVariableSpeedCondensate_Impl>());
 
     setSkinLossRadiativeFraction(0.5);
@@ -740,7 +739,7 @@ namespace model {
   }
 
   /// @cond
-  PumpVariableSpeedCondensate::PumpVariableSpeed(std::shared_ptr<detail::PumpVariableSpeedCondensate_Impl> impl)
+  PumpVariableSpeedCondensate::PumpVariableSpeedCondensate(std::shared_ptr<detail::PumpVariableSpeedCondensate_Impl> impl)
     : StraightComponent(std::move(impl)) {}
   /// @endcond
 
