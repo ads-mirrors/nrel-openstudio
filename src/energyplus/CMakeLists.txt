@@ -302,6 +302,7 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslatePortList.cpp
   ForwardTranslator/ForwardTranslatePumpConstantSpeed.cpp
   ForwardTranslator/ForwardTranslatePumpVariableSpeed.cpp
+  ForwardTranslator/ForwardTranslatePumpVariableSpeedCondensate.cpp
   ForwardTranslator/ForwardTranslatePythonPluginInstance.cpp
   ForwardTranslator/ForwardTranslatePythonPluginVariable.cpp
   ForwardTranslator/ForwardTranslatePythonPluginTrendVariable.cpp
@@ -444,6 +445,7 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslateZoneHVACBaseboardConvectiveWater.cpp
   ForwardTranslator/ForwardTranslateZoneHVACBaseboardRadiantConvectiveElectric.cpp
   ForwardTranslator/ForwardTranslateZoneHVACBaseboardRadiantConvectiveWater.cpp
+  ForwardTranslator/ForwardTranslateZoneHVACBaseboardRadiantConvectiveSteam.cpp
   ForwardTranslator/ForwardTranslateZoneHVACCoolingPanelRadiantConvectiveWater.cpp
   ForwardTranslator/ForwardTranslateZoneHVACDehumidifierDX.cpp
   ForwardTranslator/ForwardTranslateZoneHVACEnergyRecoveryVentilator.cpp
@@ -857,6 +859,7 @@ set(${target_name}_test_src
   Test/WaterUseConnections_GTest.cpp
   Test/ZoneAirHeatBalanceAlgorithm_GTest.cpp
   Test/ZoneHVACBaseboardRadiantConvectiveWater_GTest.cpp
+  Test/ZoneHVACBaseboardRadiantConvectiveSteam_GTest.cpp
   Test/ZoneHVACEvaporativeCoolerUnit_GTest.cpp
   Test/ZoneHVACLowTemperatureRadiantElectric_GTest.cpp
   Test/ZoneHVACLowTempRadiantConstFlow_GTest.cpp

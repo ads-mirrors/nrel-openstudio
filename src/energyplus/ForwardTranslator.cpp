@@ -2294,6 +2294,11 @@ namespace energyplus {
         retVal = translatePumpVariableSpeed(pump);
         break;
       }
+      case openstudio::IddObjectType::OS_Pump_VariableSpeed_Condensate: {
+        auto pump = modelObject.cast<PumpVariableSpeedCondensate>();
+        retVal = translatePumpVariableSpeedCondensate(pump);
+        break;
+      }
       case openstudio::IddObjectType::OS_OutputControl_Files: {
         auto outputControlFiles = modelObject.cast<OutputControlFiles>();
         retVal = translateOutputControlFiles(outputControlFiles);
@@ -3197,6 +3202,11 @@ namespace energyplus {
       case openstudio::IddObjectType::OS_ZoneHVAC_Baseboard_RadiantConvective_Water: {
         auto mo = modelObject.cast<ZoneHVACBaseboardRadiantConvectiveWater>();
         retVal = translateZoneHVACBaseboardRadiantConvectiveWater(mo);
+        break;
+      }
+      case openstudio::IddObjectType::OS_ZoneHVAC_Baseboard_RadiantConvective_Steam: {
+        auto mo = modelObject.cast<ZoneHVACBaseboardRadiantConvectiveSteam>();
+        retVal = translateZoneHVACBaseboardRadiantConvectiveSteam(mo);
         break;
       }
       case openstudio::IddObjectType::OS_ZoneHVAC_CoolingPanel_RadiantConvective_Water: {

@@ -337,6 +337,7 @@ namespace model {
   class PortList;
   class PumpConstantSpeed;
   class PumpVariableSpeed;
+  class PumpVariableSpeedCondensate;
   class PythonPluginInstance;
   class PythonPluginVariable;
   class PythonPluginTrendVariable;
@@ -481,6 +482,7 @@ namespace model {
   class ZoneHVACBaseboardConvectiveWater;
   class ZoneHVACBaseboardRadiantConvectiveElectric;
   class ZoneHVACBaseboardRadiantConvectiveWater;
+  class ZoneHVACBaseboardRadiantConvectiveSteam;
   class ZoneHVACCoolingPanelRadiantConvectiveWater;
   class ZoneHVACDehumidifierDX;
   class ZoneHVACEnergyRecoveryVentilator;
@@ -1274,6 +1276,8 @@ namespace energyplus {
 
     boost::optional<IdfObject> translatePumpVariableSpeed(model::PumpVariableSpeed& modelObject);
 
+    boost::optional<IdfObject> translatePumpVariableSpeedCondensate(model::PumpVariableSpeed& modelObject);
+
     boost::optional<IdfObject> translatePythonPluginInstance(model::PythonPluginInstance& modelObject);
 
     boost::optional<IdfObject> translatePythonPluginVariable(model::PythonPluginVariable& modelObject);
@@ -1570,6 +1574,8 @@ namespace energyplus {
     boost::optional<IdfObject> translateZoneHVACBaseboardRadiantConvectiveElectric(model::ZoneHVACBaseboardRadiantConvectiveElectric& modelObject);
 
     boost::optional<IdfObject> translateZoneHVACBaseboardRadiantConvectiveWater(model::ZoneHVACBaseboardRadiantConvectiveWater& modelObject);
+
+    boost::optional<IdfObject> translateZoneHVACBaseboardRadiantConvectiveSteam(model::ZoneHVACBaseboardRadiantConvectiveSteam& modelObject);
 
     boost::optional<IdfObject> translateZoneHVACCoolingPanelRadiantConvectiveWater(model::ZoneHVACCoolingPanelRadiantConvectiveWater& modelObject);
 
