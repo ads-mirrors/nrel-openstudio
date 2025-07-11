@@ -104,6 +104,9 @@ namespace model {
       if (std::find(b, e, OS_PeopleFields::WorkEfficiencyScheduleName) != e) {
         result.emplace_back("People", "Work Efficiency");
       }
+      if (std::find(b, e, OS_PeopleFields::ClothingInsulationCalculationMethodScheduleName) != e) {
+        result.emplace_back("People", "Clothing Insulation Calculation Method");
+      }
       if (std::find(b, e, OS_PeopleFields::ClothingInsulationScheduleName) != e) {
         result.emplace_back("People", "Clothing Insulation");
       }
@@ -334,6 +337,14 @@ namespace model {
 
     bool People_Impl::setClothingInsulationCalculationMethod(const std::string& clothingInsulationCalculationMethod) {
       const bool result = setString(OS_PeopleFields::ClothingInsulationCalculationMethod, clothingInsulationCalculationMethod);
+      if (result) {
+        if istringEqual ("ClothingInsulationSchedule", clothingInsulationCalculationMethod) {
+          resetClothingInsulationCalculationMethodSchedule();
+        } else if istringEqual ("DynamicClothingModelASHRAE55", clothingInsulationCalculationMethod) {
+          resetClothingInsulationCalculationMethodSchedule();
+          resetClothingInsulationSchedule();
+        }
+      }
       return result;
     }
 
@@ -726,12 +737,12 @@ namespace model {
     return getImpl<detail::People_Impl>()->setClothingInsulationCalculationMethod(clothingInsulationCalculationMethod);
   }
 
-  bool People::setClothingInsulationCalculatiomMethodSchedule(Schedule& schedule) {
-    return getImpl<detail::People_Impl>()->setClothingInsulationCalculatiomMethodSchedule(schedule);
+  bool People::setClothingInsulationCalculationMethodSchedule(Schedule& schedule) {
+    return getImpl<detail::People_Impl>()->setClothingInsulationCalculationMethodSchedule(schedule);
   }
 
-  void People::resetClothingInsulationCalculatiomMethodSchedule() {
-    getImpl<detail::People_Impl>()->resetClothingInsulationCalculatiomMethodSchedule();
+  void People::resetClothingInsulationCalculationMethodSchedule() {
+    getImpl<detail::People_Impl>()->resetClothingInsulationCalculationMethodSchedule();
   }
 
   bool People::setClothingInsulationSchedule(Schedule& schedule) {
