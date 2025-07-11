@@ -87,18 +87,6 @@ namespace model {
       return false;
     }
 
-    double CoilHeatingSteamBaseboardRadiant_Impl::ratedAverageSteamTemperature() const {
-      boost::optional<double> value = getDouble(OS_Coil_Heating_Steam_Baseboard_RadiantFields::RatedAverageSteamTemperature, true);
-      OS_ASSERT(value);
-      return value.get();
-    }
-
-    double CoilHeatingSteamBaseboardRadiant_Impl::ratedSteamMassFlowRate() const {
-      boost::optional<double> value = getDouble(OS_Coil_Heating_Steam_Baseboard_RadiantFields::RatedSteamMassFlowRate, true);
-      OS_ASSERT(value);
-      return value.get();
-    }
-
     std::string CoilHeatingSteamBaseboardRadiant_Impl::heatingDesignCapacityMethod() const {
       boost::optional<std::string> value = getString(OS_Coil_Heating_Steam_Baseboard_RadiantFields::HeatingDesignCapacityMethod, true);
       OS_ASSERT(value);
@@ -147,16 +135,6 @@ namespace model {
       boost::optional<double> value = getDouble(OS_Coil_Heating_Steam_Baseboard_RadiantFields::ConvergenceTolerance, true);
       OS_ASSERT(value);
       return value.get();
-    }
-
-    bool CoilHeatingSteamBaseboardRadiant_Impl::setRatedAverageSteamTemperature(double ratedAverageSteamTemperature) {
-      bool result = setDouble(OS_Coil_Heating_Steam_Baseboard_RadiantFields::RatedAverageSteamTemperature, ratedAverageSteamTemperature);
-      return result;
-    }
-
-    bool CoilHeatingSteamBaseboardRadiant_Impl::setRatedSteamMassFlowRate(double ratedSteamMassFlowRate) {
-      bool result = setDouble(OS_Coil_Heating_Steam_Baseboard_RadiantFields::RatedSteamMassFlowRate, ratedSteamMassFlowRate);
-      return result;
     }
 
     bool CoilHeatingSteamBaseboardRadiant_Impl::setHeatingDesignCapacityMethod(const std::string& heatingDesignCapacityMethod) {
@@ -274,10 +252,6 @@ namespace model {
     OS_ASSERT(getImpl<detail::CoilHeatingSteamBaseboardRadiant_Impl>());
 
     bool ok = true;
-    ok = setRatedAverageSteamTemperature(87.78);
-    OS_ASSERT(ok);
-    ok = setRatedSteamMassFlowRate(0.063);
-    OS_ASSERT(ok);
     ok = setHeatingDesignCapacityMethod("HeatingDesignCapacity");
     OS_ASSERT(ok);
     autosizeHeatingDesignCapacity();
@@ -297,14 +271,6 @@ namespace model {
   std::vector<std::string> CoilHeatingSteamBaseboardRadiant::heatingDesignCapacityMethodValues() {
     return getIddKeyNames(IddFactory::instance().getObject(iddObjectType()).get(),
                           OS_Coil_Heating_Steam_Baseboard_RadiantFields::HeatingDesignCapacityMethod);
-  }
-
-  double CoilHeatingSteamBaseboardRadiant::ratedAverageSteamTemperature() const {
-    return getImpl<detail::CoilHeatingSteamBaseboardRadiant_Impl>()->ratedAverageSteamTemperature();
-  }
-
-  double CoilHeatingSteamBaseboardRadiant::ratedSteamMassFlowRate() const {
-    return getImpl<detail::CoilHeatingSteamBaseboardRadiant_Impl>()->ratedSteamMassFlowRate();
   }
 
   std::string CoilHeatingSteamBaseboardRadiant::heatingDesignCapacityMethod() const {
@@ -337,14 +303,6 @@ namespace model {
 
   double CoilHeatingSteamBaseboardRadiant::convergenceTolerance() const {
     return getImpl<detail::CoilHeatingSteamBaseboardRadiant_Impl>()->convergenceTolerance();
-  }
-
-  bool CoilHeatingSteamBaseboardRadiant::setRatedAverageSteamTemperature(double ratedAverageSteamTemperature) {
-    return getImpl<detail::CoilHeatingSteamBaseboardRadiant_Impl>()->setRatedAverageSteamTemperature(ratedAverageSteamTemperature);
-  }
-
-  bool CoilHeatingSteamBaseboardRadiant::setRatedSteamMassFlowRate(double ratedSteamMassFlowRate) {
-    return getImpl<detail::CoilHeatingSteamBaseboardRadiant_Impl>()->setRatedSteamMassFlowRate(ratedSteamMassFlowRate);
   }
 
   bool CoilHeatingSteamBaseboardRadiant::setHeatingDesignCapacityMethod(const std::string& heatingDesignCapacityMethod) {

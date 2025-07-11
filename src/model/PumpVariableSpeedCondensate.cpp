@@ -73,21 +73,6 @@ namespace model {
       if (std::find(b, e, OS_Pump_VariableSpeed_CondensateFields::PumpFlowRateScheduleName) != e) {
         result.push_back(ScheduleTypeKey("PumpVariableSpeedCondensate", "Pump Flow Rate"));
       }
-      if (std::find(b, e, OS_Pump_VariableSpeed_CondensateFields::PumpRPMScheduleName) != e) {
-        result.push_back(ScheduleTypeKey("PumpVariableSpeedCondensate", "Pump RPM"));
-      }
-      if (std::find(b, e, OS_Pump_VariableSpeed_CondensateFields::MinimumPressureSchedule) != e) {
-        result.push_back(ScheduleTypeKey("PumpVariableSpeedCondensate", "Minimum Pressure"));
-      }
-      if (std::find(b, e, OS_Pump_VariableSpeed_CondensateFields::MaximumPressureSchedule) != e) {
-        result.push_back(ScheduleTypeKey("PumpVariableSpeedCondensate", "Maximum Pressure"));
-      }
-      if (std::find(b, e, OS_Pump_VariableSpeed_CondensateFields::MinimumRPMSchedule) != e) {
-        result.push_back(ScheduleTypeKey("PumpVariableSpeedCondensate", "Minimum RPM"));
-      }
-      if (std::find(b, e, OS_Pump_VariableSpeed_CondensateFields::MaximumRPMSchedule) != e) {
-        result.push_back(ScheduleTypeKey("PumpVariableSpeedCondensate", "Maximum RPM"));
-      }
       return result;
     }
 
@@ -111,17 +96,17 @@ namespace model {
       return OS_Pump_VariableSpeed_CondensateFields::OutletNodeName;
     }
 
-    boost::optional<double> PumpVariableSpeedCondensate_Impl::ratedFlowRate() const {
-      return getDouble(OS_Pump_VariableSpeed_CondensateFields::RatedFlowRate, true);
+    boost::optional<double> PumpVariableSpeedCondensate_Impl::ratedSteamVolumeFlowRate() const {
+      return getDouble(OS_Pump_VariableSpeed_CondensateFields::RatedSteamVolumeFlowRate, true);
     }
 
-    bool PumpVariableSpeedCondensate_Impl::isRatedFlowRateDefaulted() const {
-      return isEmpty(OS_Pump_VariableSpeed_CondensateFields::RatedFlowRate);
+    bool PumpVariableSpeedCondensate_Impl::isRatedSteamVolumeFlowRateDefaulted() const {
+      return isEmpty(OS_Pump_VariableSpeed_CondensateFields::RatedSteamVolumeFlowRate);
     }
 
-    bool PumpVariableSpeedCondensate_Impl::isRatedFlowRateAutosized() const {
+    bool PumpVariableSpeedCondensate_Impl::isRatedSteamVolumeFlowRateAutosized() const {
       bool result = false;
-      boost::optional<std::string> value = getString(OS_Pump_VariableSpeed_CondensateFields::RatedFlowRate, true);
+      boost::optional<std::string> value = getString(OS_Pump_VariableSpeed_CondensateFields::RatedSteamVolumeFlowRate, true);
       if (value) {
         result = openstudio::istringEqual(value.get(), "autosize");
       }
@@ -215,81 +200,29 @@ namespace model {
       return isEmpty(OS_Pump_VariableSpeed_CondensateFields::Coefficient4ofthePartLoadPerformanceCurve);
     }
 
-    double PumpVariableSpeedCondensate_Impl::minimumFlowRate() const {
-      boost::optional<double> value = getDouble(OS_Pump_VariableSpeed_CondensateFields::MinimumFlowRate, true);
-      OS_ASSERT(value);
-      return value.get();
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::isMinimumFlowRateDefaulted() const {
-      return isEmpty(OS_Pump_VariableSpeed_CondensateFields::MinimumFlowRate);
-    }
-
-    std::string PumpVariableSpeedCondensate_Impl::pumpControlType() const {
-      boost::optional<std::string> value = getString(OS_Pump_VariableSpeed_CondensateFields::PumpControlType, true);
-      OS_ASSERT(value);
-      return value.get();
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::isPumpControlTypeDefaulted() const {
-      return isEmpty(OS_Pump_VariableSpeed_CondensateFields::PumpControlType);
-    }
-
     boost::optional<Schedule> PumpVariableSpeedCondensate_Impl::pumpFlowRateSchedule() const {
       return getObject<ModelObject>().getModelObjectTarget<Schedule>(OS_Pump_VariableSpeed_CondensateFields::PumpFlowRateScheduleName);
     }
 
-    boost::optional<Curve> PumpVariableSpeedCondensate_Impl::pumpCurve() const {
-      return getObject<PumpVariableSpeed>().getModelObjectTarget<Curve>(OS_Pump_VariableSpeed_CondensateFields::PumpCurveName);
-    }
-
-    boost::optional<double> PumpVariableSpeedCondensate_Impl::impellerDiameter() const {
-      return getDouble(OS_Pump_VariableSpeed_CondensateFields::ImpellerDiameter, true);
-    }
-
-    boost::optional<std::string> PumpVariableSpeedCondensate_Impl::vFDControlType() const {
-      return getString(OS_Pump_VariableSpeed_CondensateFields::VFDControlType, true);
-    }
-
-    boost::optional<Schedule> PumpVariableSpeedCondensate_Impl::pumpRPMSchedule() const {
-      return getObject<PumpVariableSpeed>().getModelObjectTarget<Schedule>(OS_Pump_VariableSpeed_CondensateFields::PumpRPMScheduleName);
-    }
-
-    boost::optional<Schedule> PumpVariableSpeedCondensate_Impl::minimumPressureSchedule() const {
-      return getObject<PumpVariableSpeed>().getModelObjectTarget<Schedule>(OS_Pump_VariableSpeed_CondensateFields::MinimumPressureSchedule);
-    }
-
-    boost::optional<Schedule> PumpVariableSpeedCondensate_Impl::maximumPressureSchedule() const {
-      return getObject<PumpVariableSpeed>().getModelObjectTarget<Schedule>(OS_Pump_VariableSpeed_CondensateFields::MaximumPressureSchedule);
-    }
-
-    boost::optional<Schedule> PumpVariableSpeedCondensate_Impl::minimumRPMSchedule() const {
-      return getObject<PumpVariableSpeed>().getModelObjectTarget<Schedule>(OS_Pump_VariableSpeed_CondensateFields::MinimumRPMSchedule);
-    }
-
-    boost::optional<Schedule> PumpVariableSpeedCondensate_Impl::maximumRPMSchedule() const {
-      return getObject<PumpVariableSpeed>().getModelObjectTarget<Schedule>(OS_Pump_VariableSpeed_CondensateFields::MaximumRPMSchedule);
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setRatedFlowRate(boost::optional<double> ratedFlowRate) {
+    bool PumpVariableSpeedCondensate_Impl::setRatedSteamVolumeFlowRate(boost::optional<double> ratedSteamVolumeFlowRate) {
       bool result(false);
-      if (ratedFlowRate) {
-        result = setDouble(OS_Pump_VariableSpeed_CondensateFields::RatedFlowRate, ratedFlowRate.get());
+      if (ratedSteamVolumeFlowRate) {
+        result = setDouble(OS_Pump_VariableSpeed_CondensateFields::RatedSteamVolumeFlowRate, ratedSteamVolumeFlowRate.get());
       } else {
-        resetRatedFlowRate();
+        resetRatedSteamVolumeFlowRate();
         result = true;
       }
       OS_ASSERT(result);
       return result;
     }
 
-    void PumpVariableSpeedCondensate_Impl::resetRatedFlowRate() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::RatedFlowRate, "");
+    void PumpVariableSpeedCondensate_Impl::resetRatedSteamVolumeFlowRate() {
+      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::RatedSteamVolumeFlowRate, "");
       OS_ASSERT(result);
     }
 
-    void PumpVariableSpeedCondensate_Impl::autosizeRatedFlowRate() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::RatedFlowRate, "autosize");
+    void PumpVariableSpeedCondensate_Impl::autosizeRatedSteamVolumeFlowRate() {
+      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::RatedSteamVolumeFlowRate, "autosize");
       OS_ASSERT(result);
     }
 
@@ -395,27 +328,6 @@ namespace model {
       OS_ASSERT(result);
     }
 
-    bool PumpVariableSpeedCondensate_Impl::setMinimumFlowRate(double minimumFlowRate) {
-      bool result = setDouble(OS_Pump_VariableSpeed_CondensateFields::MinimumFlowRate, minimumFlowRate);
-      OS_ASSERT(result);
-      return result;
-    }
-
-    void PumpVariableSpeedCondensate_Impl::resetMinimumFlowRate() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::MinimumFlowRate, "");
-      OS_ASSERT(result);
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setPumpControlType(const std::string& pumpControlType) {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::PumpControlType, pumpControlType);
-      return result;
-    }
-
-    void PumpVariableSpeedCondensate_Impl::resetPumpControlType() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::PumpControlType, "");
-      OS_ASSERT(result);
-    }
-
     bool PumpVariableSpeedCondensate_Impl::setPumpFlowRateSchedule(Schedule& schedule) {
       bool result =
         setSchedule(OS_Pump_VariableSpeed_CondensateFields::PumpFlowRateScheduleName, "PumpVariableSpeedCondensate", "Pump Flow Rate", schedule);
@@ -427,100 +339,6 @@ namespace model {
       OS_ASSERT(result);
     }
 
-    bool PumpVariableSpeedCondensate_Impl::setPumpCurve(const Curve& curve) {
-      return setPointer(OS_Pump_VariableSpeed_CondensateFields::PumpCurveName, curve.handle());
-    }
-
-    void PumpVariableSpeedCondensate_Impl::resetPumpCurve() {
-      bool ok = setString(OS_Pump_VariableSpeed_CondensateFields::PumpCurveName, "");
-      OS_ASSERT(ok);
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setImpellerDiameter(boost::optional<double> impellerDiameter) {
-      bool result(false);
-      if (impellerDiameter) {
-        result = setDouble(OS_Pump_VariableSpeed_CondensateFields::ImpellerDiameter, impellerDiameter.get());
-      } else {
-        resetImpellerDiameter();
-        result = true;
-      }
-      OS_ASSERT(result);
-      return result;
-    }
-
-    void PumpVariableSpeedCondensate_Impl::resetImpellerDiameter() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::ImpellerDiameter, "");
-      OS_ASSERT(result);
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setVFDControlType(boost::optional<std::string> vFDControlType) {
-      bool result(false);
-      if (vFDControlType) {
-        result = setString(OS_Pump_VariableSpeed_CondensateFields::VFDControlType, vFDControlType.get());
-      } else {
-        resetVFDControlType();
-        result = true;
-      }
-      return result;
-    }
-
-    void PumpVariableSpeedCondensate_Impl::resetVFDControlType() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::VFDControlType, "");
-      OS_ASSERT(result);
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setPumpRPMSchedule(Schedule& schedule) {
-      bool result = setSchedule(OS_Pump_VariableSpeed_CondensateFields::PumpRPMScheduleName, "PumpVariableSpeedCondensate", "Pump RPM", schedule);
-      return result;
-    }
-
-    void PumpVariableSpeedCondensate_Impl::resetPumpRPMSchedule() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::PumpRPMScheduleName, "");
-      OS_ASSERT(result);
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setMinimumPressureSchedule(Schedule& schedule) {
-      bool result =
-        setSchedule(OS_Pump_VariableSpeed_CondensateFields::MinimumPressureSchedule, "PumpVariableSpeedCondensate", "Minimum Pressure", schedule);
-      return result;
-    }
-
-    void PumpVariableSpeedCondensate_Impl::resetMinimumPressureSchedule() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::MinimumPressureSchedule, "");
-      OS_ASSERT(result);
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setMaximumPressureSchedule(Schedule& schedule) {
-      bool result =
-        setSchedule(OS_Pump_VariableSpeed_CondensateFields::MaximumPressureSchedule, "PumpVariableSpeedCondensate", "Maximum Pressure", schedule);
-      return result;
-    }
-
-    void PumpVariableSpeedCondensate_Impl::resetMaximumPressureSchedule() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::MaximumPressureSchedule, "");
-      OS_ASSERT(result);
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setMinimumRPMSchedule(Schedule& schedule) {
-      bool result = setSchedule(OS_Pump_VariableSpeed_CondensateFields::MinimumRPMSchedule, "PumpVariableSpeedCondensate", "Minimum RPM", schedule);
-      return result;
-    }
-
-    void PumpVariableSpeedCondensate_Impl::resetMinimumRPMSchedule() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::MinimumRPMSchedule, "");
-      OS_ASSERT(result);
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setMaximumRPMSchedule(Schedule& schedule) {
-      bool result = setSchedule(OS_Pump_VariableSpeed_CondensateFields::MaximumRPMSchedule, "PumpVariableSpeedCondensate", "Maximum RPM", schedule);
-      return result;
-    }
-
-    void PumpVariableSpeedCondensate_Impl::resetMaximumRPMSchedule() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::MaximumRPMSchedule, "");
-      OS_ASSERT(result);
-    }
-
     bool PumpVariableSpeedCondensate_Impl::addToNode(Node& node) {
       if (node.plantLoop()) {
         return StraightComponent_Impl::addToNode(node);
@@ -529,71 +347,9 @@ namespace model {
       return false;
     }
 
-    std::vector<std::string> PumpVariableSpeedCondensate_Impl::pumpControlTypeValues() const {
-      return PumpVariableSpeedCondensate::pumpControlTypeValues();
-    }
-
-    std::vector<std::string> PumpVariableSpeedCondensate_Impl::vfdControlTypeValues() const {
-      return PumpVariableSpeedCondensate::vfdControlTypeValues();
-    }
-
     boost::optional<ModelObject> PumpVariableSpeedCondensate_Impl::pumpFlowRateScheduleAsModelObject() const {
       OptionalModelObject result;
       OptionalSchedule intermediate = pumpFlowRateSchedule();
-      if (intermediate) {
-        result = *intermediate;
-      }
-      return result;
-    }
-
-    boost::optional<ModelObject> PumpVariableSpeedCondensate_Impl::pumpCurveAsModelObject() const {
-      OptionalModelObject result;
-      OptionalCurve intermediate = pumpCurve();
-      if (intermediate) {
-        result = *intermediate;
-      }
-      return result;
-    }
-
-    boost::optional<ModelObject> PumpVariableSpeedCondensate_Impl::pumpRPMScheduleAsModelObject() const {
-      OptionalModelObject result;
-      OptionalSchedule intermediate = pumpRPMSchedule();
-      if (intermediate) {
-        result = *intermediate;
-      }
-      return result;
-    }
-
-    boost::optional<ModelObject> PumpVariableSpeedCondensate_Impl::minimumPressureScheduleAsModelObject() const {
-      OptionalModelObject result;
-      OptionalSchedule intermediate = minimumPressureSchedule();
-      if (intermediate) {
-        result = *intermediate;
-      }
-      return result;
-    }
-
-    boost::optional<ModelObject> PumpVariableSpeedCondensate_Impl::maximumPressureScheduleAsModelObject() const {
-      OptionalModelObject result;
-      OptionalSchedule intermediate = maximumPressureSchedule();
-      if (intermediate) {
-        result = *intermediate;
-      }
-      return result;
-    }
-
-    boost::optional<ModelObject> PumpVariableSpeedCondensate_Impl::minimumRPMScheduleAsModelObject() const {
-      OptionalModelObject result;
-      OptionalSchedule intermediate = minimumRPMSchedule();
-      if (intermediate) {
-        result = *intermediate;
-      }
-      return result;
-    }
-
-    boost::optional<ModelObject> PumpVariableSpeedCondensate_Impl::maximumRPMScheduleAsModelObject() const {
-      OptionalModelObject result;
-      OptionalSchedule intermediate = maximumRPMSchedule();
       if (intermediate) {
         result = *intermediate;
       }
@@ -615,97 +371,8 @@ namespace model {
       return true;
     }
 
-    bool PumpVariableSpeedCondensate_Impl::setPumpCurveAsModelObject(const boost::optional<ModelObject>& modelObject) {
-      if (modelObject) {
-        OptionalCurve intermediate = modelObject->optionalCast<Curve>();
-        if (intermediate) {
-          return setPumpCurve(*intermediate);
-        } else {
-          return false;
-        }
-      } else {
-        resetPumpCurve();
-      }
-      return true;
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setPumpRPMScheduleAsModelObject(const boost::optional<ModelObject>& modelObject) {
-      if (modelObject) {
-        OptionalSchedule intermediate = modelObject->optionalCast<Schedule>();
-        if (intermediate) {
-          Schedule schedule(*intermediate);
-          return setPumpRPMSchedule(schedule);
-        } else {
-          return false;
-        }
-      } else {
-        resetPumpRPMSchedule();
-      }
-      return true;
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setMinimumPressureScheduleAsModelObject(const boost::optional<ModelObject>& modelObject) {
-      if (modelObject) {
-        OptionalSchedule intermediate = modelObject->optionalCast<Schedule>();
-        if (intermediate) {
-          Schedule schedule(*intermediate);
-          return setMinimumPressureSchedule(schedule);
-        } else {
-          return false;
-        }
-      } else {
-        resetMinimumPressureSchedule();
-      }
-      return true;
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setMaximumPressureScheduleAsModelObject(const boost::optional<ModelObject>& modelObject) {
-      if (modelObject) {
-        OptionalSchedule intermediate = modelObject->optionalCast<Schedule>();
-        if (intermediate) {
-          Schedule schedule(*intermediate);
-          return setMaximumPressureSchedule(schedule);
-        } else {
-          return false;
-        }
-      } else {
-        resetMaximumPressureSchedule();
-      }
-      return true;
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setMinimumRPMScheduleAsModelObject(const boost::optional<ModelObject>& modelObject) {
-      if (modelObject) {
-        OptionalSchedule intermediate = modelObject->optionalCast<Schedule>();
-        if (intermediate) {
-          Schedule schedule(*intermediate);
-          return setMinimumRPMSchedule(schedule);
-        } else {
-          return false;
-        }
-      } else {
-        resetMinimumRPMSchedule();
-      }
-      return true;
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setMaximumRPMScheduleAsModelObject(const boost::optional<ModelObject>& modelObject) {
-      if (modelObject) {
-        OptionalSchedule intermediate = modelObject->optionalCast<Schedule>();
-        if (intermediate) {
-          Schedule schedule(*intermediate);
-          return setMaximumRPMSchedule(schedule);
-        } else {
-          return false;
-        }
-      } else {
-        resetMaximumRPMSchedule();
-      }
-      return true;
-    }
-
-    boost::optional<double> PumpVariableSpeedCondensate_Impl::autosizedRatedFlowRate() const {
-      return getAutosizedValue("Design Flow Rate", "m3/s");
+    boost::optional<double> PumpVariableSpeedCondensate_Impl::autosizedRatedSteamVolumeFlowRate() const {
+      return getAutosizedValue("Design Steam Volume Flow Rate", "m3/s");
     }
 
     boost::optional<double> PumpVariableSpeedCondensate_Impl::autosizedRatedPowerConsumption() const {
@@ -713,15 +380,15 @@ namespace model {
     }
 
     void PumpVariableSpeedCondensate_Impl::autosize() {
-      autosizeRatedFlowRate();
+      autosizeRatedSteamVolumeFlowRate();
       autosizeRatedPowerConsumption();
     }
 
     void PumpVariableSpeedCondensate_Impl::applySizingValues() {
       boost::optional<double> val;
-      val = autosizedRatedFlowRate();
+      val = autosizedRatedSteamVolumeFlowRate();
       if (val) {
-        setRatedFlowRate(val.get());
+        setRatedSteamVolumeFlowRate(val.get());
       }
 
       val = autosizedRatedPowerConsumption();
@@ -759,16 +426,6 @@ namespace model {
     bool PumpVariableSpeedCondensate_Impl::setDesignShaftPowerPerUnitFlowRatePerUnitHead(double designShaftPowerPerUnitFlowRatePerUnitHead) {
       return setDouble(OS_Pump_VariableSpeed_CondensateFields::DesignShaftPowerperUnitFlowRateperUnitHead,
                        designShaftPowerPerUnitFlowRatePerUnitHead);
-    }
-
-    double PumpVariableSpeedCondensate_Impl::designMinimumFlowRateFraction() const {
-      auto value = getDouble(OS_Pump_VariableSpeed_CondensateFields::DesignMinimumFlowRateFraction, true);
-      OS_ASSERT(value);
-      return value.get();
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::setDesignMinimumFlowRateFraction(double designMinimumFlowRateFraction) {
-      return setDouble(OS_Pump_VariableSpeed_CondensateFields::DesignMinimumFlowRateFraction, designMinimumFlowRateFraction);
     }
 
     double PumpVariableSpeedCondensate_Impl::skinLossRadiativeFraction() const {
@@ -835,13 +492,10 @@ namespace model {
   PumpVariableSpeedCondensate::PumpVariableSpeed(const Model& model) : StraightComponent(PumpVariableSpeedCondensate::iddObjectType(), model) {
     OS_ASSERT(getImpl<detail::PumpVariableSpeedCondensate_Impl>());
 
-    setPumpControlType("Intermittent");
-
     setSkinLossRadiativeFraction(0.5);
     setDesignPowerSizingMethod("PowerPerFlowPerPressure");
     setDesignElectricPowerPerUnitFlowRate(348701.1);
     setDesignShaftPowerPerUnitFlowRatePerUnitHead(1.282051282);
-    setDesignMinimumFlowRateFraction(0.0);
 
     setEndUseSubcategory("General");
   }
@@ -855,28 +509,16 @@ namespace model {
     return getIddKeyNames(IddFactory::instance().getObject(iddObjectType()).get(), OS_Pump_VariableSpeed_CondensateFields::DesignPowerSizingMethod);
   }
 
-  std::vector<std::string> PumpVariableSpeedCondensate::pumpControlTypeValues() {
-    return getIddKeyNames(IddFactory::instance().getObject(iddObjectType()).get(), OS_Pump_VariableSpeed_CondensateFields::PumpControlType);
+  boost::optional<double> PumpVariableSpeedCondensate::ratedSteamVolumeFlowRate() const {
+    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->ratedSteamVolumeFlowRate();
   }
 
-  std::vector<std::string> PumpVariableSpeedCondensate::validPumpControlTypeValues() {
-    return PumpVariableSpeedCondensate::pumpControlTypeValues();
+  bool PumpVariableSpeedCondensate::isRatedSteamVolumeFlowRateDefaulted() const {
+    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isRatedSteamVolumeFlowRateDefaulted();
   }
 
-  std::vector<std::string> PumpVariableSpeedCondensate::vfdControlTypeValues() {
-    return getIddKeyNames(IddFactory::instance().getObject(iddObjectType()).get(), OS_Pump_VariableSpeed_CondensateFields::VFDControlType);
-  }
-
-  boost::optional<double> PumpVariableSpeedCondensate::ratedFlowRate() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->ratedFlowRate();
-  }
-
-  bool PumpVariableSpeedCondensate::isRatedFlowRateDefaulted() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isRatedFlowRateDefaulted();
-  }
-
-  bool PumpVariableSpeedCondensate::isRatedFlowRateAutosized() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isRatedFlowRateAutosized();
+  bool PumpVariableSpeedCondensate::isRatedSteamVolumeFlowRateAutosized() const {
+    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isRatedSteamVolumeFlowRateAutosized();
   }
 
   double PumpVariableSpeedCondensate::ratedPumpHead() const {
@@ -947,68 +589,20 @@ namespace model {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isCoefficient4ofthePartLoadPerformanceCurveDefaulted();
   }
 
-  double PumpVariableSpeedCondensate::minimumFlowRate() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->minimumFlowRate();
-  }
-
-  bool PumpVariableSpeedCondensate::isMinimumFlowRateDefaulted() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isMinimumFlowRateDefaulted();
-  }
-
-  std::string PumpVariableSpeedCondensate::pumpControlType() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->pumpControlType();
-  }
-
-  bool PumpVariableSpeedCondensate::isPumpControlTypeDefaulted() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isPumpControlTypeDefaulted();
-  }
-
   boost::optional<Schedule> PumpVariableSpeedCondensate::pumpFlowRateSchedule() const {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->pumpFlowRateSchedule();
   }
 
-  boost::optional<Curve> PumpVariableSpeedCondensate::pumpCurve() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->pumpCurve();
+  bool PumpVariableSpeedCondensate::setRatedSteamVolumeFlowRate(double ratedSteamVolumeFlowRate) {
+    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setRatedSteamVolumeFlowRate(ratedSteamVolumeFlowRate);
   }
 
-  boost::optional<double> PumpVariableSpeedCondensate::impellerDiameter() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->impellerDiameter();
+  void PumpVariableSpeedCondensate::resetRatedSteamVolumeFlowRate() {
+    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetRatedSteamVolumeFlowRate();
   }
 
-  boost::optional<std::string> PumpVariableSpeedCondensate::vFDControlType() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->vFDControlType();
-  }
-
-  boost::optional<Schedule> PumpVariableSpeedCondensate::pumpRPMSchedule() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->pumpRPMSchedule();
-  }
-
-  boost::optional<Schedule> PumpVariableSpeedCondensate::minimumPressureSchedule() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->minimumPressureSchedule();
-  }
-
-  boost::optional<Schedule> PumpVariableSpeedCondensate::maximumPressureSchedule() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->maximumPressureSchedule();
-  }
-
-  boost::optional<Schedule> PumpVariableSpeedCondensate::minimumRPMSchedule() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->minimumRPMSchedule();
-  }
-
-  boost::optional<Schedule> PumpVariableSpeedCondensate::maximumRPMSchedule() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->maximumRPMSchedule();
-  }
-
-  bool PumpVariableSpeedCondensate::setRatedFlowRate(double ratedFlowRate) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setRatedFlowRate(ratedFlowRate);
-  }
-
-  void PumpVariableSpeedCondensate::resetRatedFlowRate() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetRatedFlowRate();
-  }
-
-  void PumpVariableSpeedCondensate::autosizeRatedFlowRate() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->autosizeRatedFlowRate();
+  void PumpVariableSpeedCondensate::autosizeRatedSteamVolumeFlowRate() {
+    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->autosizeRatedSteamVolumeFlowRate();
   }
 
   bool PumpVariableSpeedCondensate::setRatedPumpHead(double ratedPumpHead) {
@@ -1084,92 +678,12 @@ namespace model {
     getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetCoefficient4ofthePartLoadPerformanceCurve();
   }
 
-  bool PumpVariableSpeedCondensate::setMinimumFlowRate(double minimumFlowRate) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setMinimumFlowRate(minimumFlowRate);
-  }
-
-  void PumpVariableSpeedCondensate::resetMinimumFlowRate() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetMinimumFlowRate();
-  }
-
-  bool PumpVariableSpeedCondensate::setPumpControlType(const std::string& pumpControlType) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setPumpControlType(pumpControlType);
-  }
-
-  void PumpVariableSpeedCondensate::resetPumpControlType() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetPumpControlType();
-  }
-
   bool PumpVariableSpeedCondensate::setPumpFlowRateSchedule(Schedule& schedule) {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setPumpFlowRateSchedule(schedule);
   }
 
   void PumpVariableSpeedCondensate::resetPumpFlowRateSchedule() {
     getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetPumpFlowRateSchedule();
-  }
-
-  bool PumpVariableSpeedCondensate::setPumpCurve(const Curve& curve) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setPumpCurve(curve);
-  }
-
-  void PumpVariableSpeedCondensate::resetPumpCurve() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetPumpCurve();
-  }
-
-  bool PumpVariableSpeedCondensate::setImpellerDiameter(double impellerDiameter) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setImpellerDiameter(impellerDiameter);
-  }
-
-  void PumpVariableSpeedCondensate::resetImpellerDiameter() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetImpellerDiameter();
-  }
-
-  bool PumpVariableSpeedCondensate::setVFDControlType(const std::string& vFDControlType) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setVFDControlType(vFDControlType);
-  }
-
-  void PumpVariableSpeedCondensate::resetVFDControlType() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetVFDControlType();
-  }
-
-  bool PumpVariableSpeedCondensate::setPumpRPMSchedule(Schedule& schedule) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setPumpRPMSchedule(schedule);
-  }
-
-  void PumpVariableSpeedCondensate::resetPumpRPMSchedule() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetPumpRPMSchedule();
-  }
-
-  bool PumpVariableSpeedCondensate::setMinimumPressureSchedule(Schedule& schedule) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setMinimumPressureSchedule(schedule);
-  }
-
-  void PumpVariableSpeedCondensate::resetMinimumPressureSchedule() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetMinimumPressureSchedule();
-  }
-
-  bool PumpVariableSpeedCondensate::setMaximumPressureSchedule(Schedule& schedule) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setMaximumPressureSchedule(schedule);
-  }
-
-  void PumpVariableSpeedCondensate::resetMaximumPressureSchedule() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetMaximumPressureSchedule();
-  }
-
-  bool PumpVariableSpeedCondensate::setMinimumRPMSchedule(Schedule& schedule) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setMinimumRPMSchedule(schedule);
-  }
-
-  void PumpVariableSpeedCondensate::resetMinimumRPMSchedule() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetMinimumRPMSchedule();
-  }
-
-  bool PumpVariableSpeedCondensate::setMaximumRPMSchedule(Schedule& schedule) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setMaximumRPMSchedule(schedule);
-  }
-
-  void PumpVariableSpeedCondensate::resetMaximumRPMSchedule() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetMaximumRPMSchedule();
   }
 
   std::string PumpVariableSpeedCondensate::designPowerSizingMethod() const {
@@ -1217,14 +731,6 @@ namespace model {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setSkinLossRadiativeFraction(skinLossRadiativeFraction);
   }
 
-  double PumpVariableSpeedCondensate::designMinimumFlowRateFraction() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->designMinimumFlowRateFraction();
-  }
-
-  bool PumpVariableSpeedCondensate::setDesignMinimumFlowRateFraction(double designMinimumFlowRateFraction) {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setDesignMinimumFlowRateFraction(designMinimumFlowRateFraction);
-  }
-
   std::string PumpVariableSpeedCondensate::endUseSubcategory() const {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->endUseSubcategory();
   }
@@ -1238,8 +744,8 @@ namespace model {
     : StraightComponent(std::move(impl)) {}
   /// @endcond
 
-  boost::optional<double> PumpVariableSpeedCondensate::autosizedRatedFlowRate() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->autosizedRatedFlowRate();
+  boost::optional<double> PumpVariableSpeedCondensate::autosizedRatedSteamVolumeFlowRate() const {
+    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->autosizedRatedSteamVolumeFlowRate();
   }
 
   boost::optional<double> PumpVariableSpeedCondensate::autosizedRatedPowerConsumption() const {

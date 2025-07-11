@@ -44,10 +44,6 @@ namespace model {
     /** @name Getters */
     //@{
 
-    double ratedAverageSteamTemperature() const;
-
-    double ratedSteamMassFlowRate() const;
-
     std::string heatingDesignCapacityMethod() const;
 
     boost::optional<double> heatingDesignCapacity() const;
@@ -67,10 +63,6 @@ namespace model {
     //@}
     /** @name Setters */
     //@{
-
-    bool setRatedAverageSteamTemperature(double ratedAverageSteamTemperature);
-
-    bool setRatedSteamMassFlowRate(double ratedSteamMassFlowRate);
 
     bool setHeatingDesignCapacityMethod(const std::string& heatingDesignCapacityMethod);
 

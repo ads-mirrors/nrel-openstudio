@@ -68,11 +68,11 @@ namespace model {
       /** @name Getters */
       //@{
 
-      boost::optional<double> ratedFlowRate() const;
+      boost::optional<double> ratedSteamVolumeFlowRate() const;
 
-      bool isRatedFlowRateDefaulted() const;
+      bool isRatedSteamVolumeFlowRateDefaulted() const;
 
-      bool isRatedFlowRateAutosized() const;
+      bool isRatedSteamVolumeFlowRateAutosized() const;
 
       double ratedPumpHead() const;
 
@@ -108,33 +108,9 @@ namespace model {
 
       bool isCoefficient4ofthePartLoadPerformanceCurveDefaulted() const;
 
-      double minimumFlowRate() const;
-
-      bool isMinimumFlowRateDefaulted() const;
-
-      std::string pumpControlType() const;
-
-      bool isPumpControlTypeDefaulted() const;
-
       boost::optional<Schedule> pumpFlowRateSchedule() const;
 
-      boost::optional<Curve> pumpCurve() const;
-
-      boost::optional<double> impellerDiameter() const;
-
-      boost::optional<std::string> vFDControlType() const;
-
-      boost::optional<Schedule> pumpRPMSchedule() const;
-
-      boost::optional<Schedule> minimumPressureSchedule() const;
-
-      boost::optional<Schedule> maximumPressureSchedule() const;
-
-      boost::optional<Schedule> minimumRPMSchedule() const;
-
-      boost::optional<Schedule> maximumRPMSchedule() const;
-
-      boost::optional<double> autosizedRatedFlowRate() const;
+      boost::optional<double> autosizedRatedSteamVolumeFlowRate() const;
 
       boost::optional<double> autosizedRatedPowerConsumption() const;
 
@@ -144,11 +120,11 @@ namespace model {
       /** @name Setters */
       //@{
 
-      bool setRatedFlowRate(boost::optional<double> ratedFlowRate);
+      bool setRatedSteamVolumeFlowRate(boost::optional<double> ratedSteamVolumeFlowRate);
 
-      void resetRatedFlowRate();
+      void resetRatedSteamVolumeFlowRate();
 
-      void autosizeRatedFlowRate();
+      void autosizeRatedSteamVolumeFlowRate();
 
       bool setRatedPumpHead(double ratedPumpHead);
 
@@ -184,49 +160,9 @@ namespace model {
 
       void resetCoefficient4ofthePartLoadPerformanceCurve();
 
-      bool setMinimumFlowRate(double minimumFlowRate);
-
-      void resetMinimumFlowRate();
-
-      bool setPumpControlType(const std::string& pumpControlType);
-
-      void resetPumpControlType();
-
       bool setPumpFlowRateSchedule(Schedule& schedule);
 
       void resetPumpFlowRateSchedule();
-
-      bool setPumpCurve(const Curve& curve);
-
-      void resetPumpCurve();
-
-      bool setImpellerDiameter(boost::optional<double> impellerDiameter);
-
-      void resetImpellerDiameter();
-
-      bool setVFDControlType(boost::optional<std::string> vFDControlType);
-
-      void resetVFDControlType();
-
-      bool setPumpRPMSchedule(Schedule& schedule);
-
-      void resetPumpRPMSchedule();
-
-      bool setMinimumPressureSchedule(Schedule& schedule);
-
-      void resetMinimumPressureSchedule();
-
-      bool setMaximumPressureSchedule(Schedule& schedule);
-
-      void resetMaximumPressureSchedule();
-
-      bool setMinimumRPMSchedule(Schedule& schedule);
-
-      void resetMinimumRPMSchedule();
-
-      bool setMaximumRPMSchedule(Schedule& schedule);
-
-      void resetMaximumRPMSchedule();
 
       std::string designPowerSizingMethod() const;
 
@@ -250,10 +186,6 @@ namespace model {
 
       bool setSkinLossRadiativeFraction(double skinLossRadiativeFraction);
 
-      double designMinimumFlowRateFraction() const;
-
-      bool setDesignMinimumFlowRateFraction(double designMinimumFlowRateFraction);
-
       bool setEndUseSubcategory(const std::string& endUseSubcategory);
 
       //@}
@@ -264,20 +196,8 @@ namespace model {
       std::vector<std::string> vfdControlTypeValues() const;
 
       boost::optional<ModelObject> pumpFlowRateScheduleAsModelObject() const;
-      boost::optional<ModelObject> pumpCurveAsModelObject() const;
-      boost::optional<ModelObject> pumpRPMScheduleAsModelObject() const;
-      boost::optional<ModelObject> minimumPressureScheduleAsModelObject() const;
-      boost::optional<ModelObject> maximumPressureScheduleAsModelObject() const;
-      boost::optional<ModelObject> minimumRPMScheduleAsModelObject() const;
-      boost::optional<ModelObject> maximumRPMScheduleAsModelObject() const;
 
       bool setPumpFlowRateScheduleAsModelObject(const boost::optional<ModelObject>& modelObject);
-      bool setPumpCurveAsModelObject(const boost::optional<ModelObject>& modelObject);
-      bool setPumpRPMScheduleAsModelObject(const boost::optional<ModelObject>& modelObject);
-      bool setMinimumPressureScheduleAsModelObject(const boost::optional<ModelObject>& modelObject);
-      bool setMaximumPressureScheduleAsModelObject(const boost::optional<ModelObject>& modelObject);
-      bool setMinimumRPMScheduleAsModelObject(const boost::optional<ModelObject>& modelObject);
-      bool setMaximumRPMScheduleAsModelObject(const boost::optional<ModelObject>& modelObject);
     };
 
   }  // namespace detail

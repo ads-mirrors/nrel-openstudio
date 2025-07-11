@@ -43,31 +43,21 @@ namespace model {
 
     static IddObjectType iddObjectType();
 
-    static std::vector<std::string> pumpControlTypeValues();
-
     static std::vector<std::string> designPowerSizingMethodValues();
-
-    /** \deprecated */
-    static std::vector<std::string> validPumpControlTypeValues();
-
-    static std::vector<std::string> vfdControlTypeValues();
 
     /** @name Getters */
     //@{
 
-    /** In EnergyPlus 8.5.0 and above this property maps to the EnergyPlus field "Design Maximum Flow Rate" **/
-    boost::optional<double> ratedFlowRate() const;
+    boost::optional<double> ratedSteamVolumeFlowRate() const;
 
-    bool isRatedFlowRateDefaulted() const;
+    bool isRatedSteamVolumeFlowRateDefaulted() const;
 
-    bool isRatedFlowRateAutosized() const;
+    bool isRatedSteamVolumeFlowRateAutosized() const;
 
-    /** In EnergyPlus 8.5.0 and above this property maps to the EnergyPlus field "Design Pump Head" **/
     double ratedPumpHead() const;
 
     bool isRatedPumpHeadDefaulted() const;
 
-    /** In EnergyPlus 8.5.0 and above this property maps to the EnergyPlus field "Design Power Consumption" **/
     boost::optional<double> ratedPowerConsumption() const;
 
     bool isRatedPowerConsumptionDefaulted() const;
@@ -98,32 +88,7 @@ namespace model {
 
     bool isCoefficient4ofthePartLoadPerformanceCurveDefaulted() const;
 
-    /** In EnergyPlus 8.5.0 and above this property maps to the EnergyPlus field "Design Minimum Flow Rate" **/
-    double minimumFlowRate() const;
-
-    bool isMinimumFlowRateDefaulted() const;
-
-    std::string pumpControlType() const;
-
-    bool isPumpControlTypeDefaulted() const;
-
     boost::optional<Schedule> pumpFlowRateSchedule() const;
-
-    boost::optional<Curve> pumpCurve() const;
-
-    boost::optional<double> impellerDiameter() const;
-
-    boost::optional<std::string> vFDControlType() const;
-
-    boost::optional<Schedule> pumpRPMSchedule() const;
-
-    boost::optional<Schedule> minimumPressureSchedule() const;
-
-    boost::optional<Schedule> maximumPressureSchedule() const;
-
-    boost::optional<Schedule> minimumRPMSchedule() const;
-
-    boost::optional<Schedule> maximumRPMSchedule() const;
 
     std::string endUseSubcategory() const;
 
@@ -131,11 +96,11 @@ namespace model {
     /** @name Setters */
     //@{
 
-    bool setRatedFlowRate(double ratedFlowRate);
+    bool setRatedSteamVolumeFlowRate(double ratedSteamVolumeFlowRate);
 
-    void resetRatedFlowRate();
+    void resetRatedSteamVolumeFlowRate();
 
-    void autosizeRatedFlowRate();
+    void autosizeRatedSteamVolumeFlowRate();
 
     bool setRatedPumpHead(double ratedPumpHead);
 
@@ -171,52 +136,11 @@ namespace model {
 
     void resetCoefficient4ofthePartLoadPerformanceCurve();
 
-    bool setMinimumFlowRate(double minimumFlowRate);
-
-    void resetMinimumFlowRate();
-
-    bool setPumpControlType(const std::string& pumpControlType);
-
-    void resetPumpControlType();
-
     bool setPumpFlowRateSchedule(Schedule& schedule);
 
     void resetPumpFlowRateSchedule();
 
-    /** Returns false if curve is not a CurveLinear, CurveQuadratic, CurveCubic or CurveQuartic. */
-    bool setPumpCurve(const Curve& curve);
-
-    void resetPumpCurve();
-
-    bool setImpellerDiameter(double impellerDiameter);
-
-    void resetImpellerDiameter();
-
-    bool setVFDControlType(const std::string& vFDControlType);
-
-    void resetVFDControlType();
-
-    bool setPumpRPMSchedule(Schedule& schedule);
-
-    void resetPumpRPMSchedule();
-
-    bool setMinimumPressureSchedule(Schedule& schedule);
-
-    void resetMinimumPressureSchedule();
-
-    bool setMaximumPressureSchedule(Schedule& schedule);
-
-    void resetMaximumPressureSchedule();
-
-    bool setMinimumRPMSchedule(Schedule& schedule);
-
-    void resetMinimumRPMSchedule();
-
-    bool setMaximumRPMSchedule(Schedule& schedule);
-
-    void resetMaximumRPMSchedule();
-
-    boost::optional<double> autosizedRatedFlowRate() const;
+    boost::optional<double> autosizedRatedSteamVolumeFlowRate() const;
 
     boost::optional<double> autosizedRatedPowerConsumption() const;
 
@@ -241,10 +165,6 @@ namespace model {
     double skinLossRadiativeFraction() const;
 
     bool setSkinLossRadiativeFraction(double skinLossRadiativeFraction);
-
-    double designMinimumFlowRateFraction() const;
-
-    bool setDesignMinimumFlowRateFraction(double designMinimumFlowRateFraction);
 
     bool setEndUseSubcategory(const std::string& endUseSubcategory);
 
