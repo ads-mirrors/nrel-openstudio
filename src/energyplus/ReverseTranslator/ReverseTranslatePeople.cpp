@@ -183,7 +183,7 @@ namespace energyplus {
 
     s = workspaceObject.getString(openstudio::PeopleFields::ClothingInsulationCalculationMethod);
     if (s) {
-      definition.setClothingInsulationCalculationMethod(*s);
+      people.setClothingInsulationCalculationMethod(*s);
     }
 
     target = workspaceObject.getTarget(openstudio::PeopleFields::ClothingInsulationCalculationMethodScheduleName);
