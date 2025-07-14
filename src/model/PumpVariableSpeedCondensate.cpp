@@ -10,16 +10,6 @@
 #include "Schedule_Impl.hpp"
 #include "Node.hpp"
 #include "Node_Impl.hpp"
-#include "Curve.hpp"
-#include "Curve_Impl.hpp"
-#include "CurveLinear.hpp"
-#include "CurveLinear_Impl.hpp"
-#include "CurveQuadratic.hpp"
-#include "CurveQuadratic_Impl.hpp"
-#include "CurveCubic.hpp"
-#include "CurveCubic_Impl.hpp"
-#include "CurveQuartic.hpp"
-#include "CurveQuartic_Impl.hpp"
 #include "ThermalZone.hpp"
 #include "ThermalZone_Impl.hpp"
 
@@ -500,7 +490,7 @@ namespace model {
   }
 
   IddObjectType PumpVariableSpeedCondensate::iddObjectType() {
-    IddObjectType result(IddObjectType::OS_Pump_VariableSpeed);
+    IddObjectType result(IddObjectType::OS_Pump_VariableSpeed_Condensate);
     return result;
   }
 

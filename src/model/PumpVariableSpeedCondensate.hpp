@@ -13,7 +13,6 @@ namespace openstudio {
 namespace model {
 
   class Schedule;
-  class Curve;
   class ThermalZone;
 
   namespace detail {

@@ -26140,7 +26140,7 @@ ZoneHVAC:Baseboard:RadiantConvective:Water:Design,
   A1,  \field Name
        \required-field
        \type alpha
-       \reference BaseboardDesignObject
+       \reference BaseboardWaterDesignObject
   A2,  \field Heating Design Capacity Method
        \type choice
        \key HeatingDesignCapacity
@@ -26191,7 +26191,7 @@ ZoneHVAC:Baseboard:RadiantConvective:Water,
        \reference ZoneEquipmentNames
   A2,  \field Design Object
        \type object-list
-       \object-list BaseboardDesignObject
+       \object-list BaseboardWaterDesignObject
   A3,  \field Availability Schedule Name
        \note Availability schedule name for this system. Schedule value > 0 means the system is available.
        \note If this field is blank, the system is always available.
@@ -26251,12 +26251,11 @@ ZoneHVAC:Baseboard:RadiantConvective:Water,
 
 ZoneHVAC:Baseboard:RadiantConvective:Steam:Design,
        \min-fields 7
-  A1, \field Name
+  A1,  \field Name
        \required-field
-       \reference-class-name validBranchEquipmentTypes
-       \reference validBranchEquipmentNames
-       \reference ZoneEquipmentNames
-  A2, \field Heating Design Capacity Method
+       \type alpha
+       \reference BaseboardSteamDesignObject
+  A2,  \field Heating Design Capacity Method
        \type choice
        \key HeatingDesignCapacity
        \key CapacityPerFloorArea
@@ -26306,7 +26305,7 @@ ZoneHVAC:Baseboard:RadiantConvective:Steam,
        \reference ZoneEquipmentNames
   A2, \field Design Object
         \type object-list
-        \object-list RadiantDesignObject
+        \object-list RadiantSteamDesignObject
   A3,  \field Availability Schedule Name
        \note Availability schedule name for this system. Schedule value > 0 means the system is available.
        \note If this field is blank, the system is always available.

@@ -46,7 +46,6 @@ namespace energyplus {
     // Name
     IdfObject idfObject = createRegisterAndNameIdfObject(openstudio::IddObjectType::ZoneHVAC_Baseboard_RadiantConvective_Steam, modelObject);
 
-    // E+ 9.5.0: This object got broken into two: a zonehvac object, and a design object
     IdfObject designObject(openstudio::IddObjectType::ZoneHVAC_Baseboard_RadiantConvective_Steam_Design);
     m_idfObjects.push_back(designObject);
     designObject.setName(idfObject.nameString() + " Design");
