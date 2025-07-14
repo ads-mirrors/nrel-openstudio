@@ -89,14 +89,11 @@ TEST_F(EnergyPlusFixture, ZoneHVACBaseboardRadiantConvectiveSteam) {
   EXPECT_FALSE(idfBaseboard.getString(ZoneHVAC_Baseboard_RadiantConvective_SteamFields::InletNodeName).get().empty());
   // Outlet Node Name
   EXPECT_FALSE(idfBaseboard.getString(ZoneHVAC_Baseboard_RadiantConvective_SteamFields::OutletNodeName).get().empty());
-  // Rated Average Steam Temperature
-  EXPECT_EQ(coil.ratedAverageSteamTemperature(),
-            idfBaseboard.getDouble(ZoneHVAC_Baseboard_RadiantConvective_SteamFields::RatedAverageSteamTemperature).get());
-  // Rated Steam Mass Flow Rate
-  EXPECT_EQ(coil.ratedSteamMassFlowRate(), idfBaseboard.getDouble(ZoneHVAC_Baseboard_RadiantConvective_SteamFields::RatedSteamMassFlowRate).get());
   // Heating Design Capacity
   EXPECT_TRUE(
     openstudio::istringEqual("autosize", idfBaseboard.getString(ZoneHVAC_Baseboard_RadiantConvective_SteamFields::HeatingDesignCapacity).get()));
+  // Degree of SubCooling
+  EXPECT_EQ(coil.degreeofSubCooling(), idfBaseboard.getDouble(ZoneHVAC_Baseboard_RadiantConvective_SteamFields::DegreeofSubCooling).get());
   // Maximum Steam Flow Rate
   EXPECT_EQ(coil.maximumSteamFlowRate().get(), idfBaseboard.getDouble(ZoneHVAC_Baseboard_RadiantConvective_SteamFields::MaximumSteamFlowRate).get());
 

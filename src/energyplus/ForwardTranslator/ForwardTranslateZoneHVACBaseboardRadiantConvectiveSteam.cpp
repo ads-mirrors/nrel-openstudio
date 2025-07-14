@@ -73,21 +73,16 @@ namespace energyplus {
         idfObject.setString(ZoneHVAC_Baseboard_RadiantConvective_SteamFields::OutletNodeName, node->name().get());
       }
 
-      // RatedAverageSteamTemperature
-      if ((value = heatingCoil->ratedAverageSteamTemperature())) {
-        idfObject.setDouble(ZoneHVAC_Baseboard_RadiantConvective_SteamFields::RatedAverageSteamTemperature, value.get());
-      }
-
-      // RatedSteamMassFlowRate
-      if ((value = heatingCoil->ratedSteamMassFlowRate())) {
-        idfObject.setDouble(ZoneHVAC_Baseboard_RadiantConvective_SteamFields::RatedSteamMassFlowRate, value.get());
-      }
-
       // HeatingDesignCapacity
       if (heatingCoil->isHeatingDesignCapacityAutosized()) {
         idfObject.setString(ZoneHVAC_Baseboard_RadiantConvective_SteamFields::HeatingDesignCapacity, "AutoSize");
       } else if ((value = heatingCoil->heatingDesignCapacity())) {
         idfObject.setDouble(ZoneHVAC_Baseboard_RadiantConvective_SteamFields::HeatingDesignCapacity, value.get());
+      }
+
+      // DegreeofSubCooling
+      if ((value = heatingCoil->degreeofSubCooling())) {
+        idfObject.setDouble(ZoneHVAC_Baseboard_RadiantConvective_SteamFields::DegreeofSubCooling, value.get());
       }
 
       // MaximumSteamFlowRate

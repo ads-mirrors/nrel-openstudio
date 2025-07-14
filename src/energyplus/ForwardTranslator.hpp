@@ -1276,7 +1276,7 @@ namespace energyplus {
 
     boost::optional<IdfObject> translatePumpVariableSpeed(model::PumpVariableSpeed& modelObject);
 
-    boost::optional<IdfObject> translatePumpVariableSpeedCondensate(model::PumpVariableSpeed& modelObject);
+    boost::optional<IdfObject> translatePumpVariableSpeedCondensate(model::PumpVariableSpeedCondensate& modelObject);
 
     boost::optional<IdfObject> translatePythonPluginInstance(model::PythonPluginInstance& modelObject);
 

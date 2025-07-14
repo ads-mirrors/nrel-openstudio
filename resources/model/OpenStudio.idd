@@ -31397,20 +31397,13 @@ OS:ZoneHVAC:Baseboard:RadiantConvective:Water,
        \maximum 1
 
 OS:ZoneHVAC:Baseboard:RadiantConvective:Steam,
-       \min-fields 8
-       \extensible:2 - repeat last two fields, remembering to remove ; from "inner" fields.
-       \memo The number of surfaces can be expanded beyond 100, if necessary, by adding more
-       \memo groups to the end of the list.
-  A1 , \field Handle
+  A1,  \field Handle
        \type handle
        \required-field
-  A1,  \field Name
+  A2,  \field Name
        \required-field
        \type alpha
        \reference ConnectionObject
-  A2, \field Design Object
-        \type object-list
-        \object-list RadiantDesignObject
   A3,  \field Availability Schedule Name
        \note Availability schedule name for this system. Schedule value > 0 means the system is available.
        \note If this field is blank, the system is always available.

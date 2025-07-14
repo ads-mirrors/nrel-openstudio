@@ -118,6 +118,12 @@ namespace model {
       return value.get();
     }
 
+    double CoilHeatingSteamBaseboardRadiant_Impl::degreeofSubCooling() const {
+      boost::optional<double> value = getDouble(OS_Coil_Heating_Steam_Baseboard_RadiantFields::DegreeofSubCooling, true);
+      OS_ASSERT(value);
+      return value.get();
+    }
+
     boost::optional<double> CoilHeatingSteamBaseboardRadiant_Impl::maximumSteamFlowRate() const {
       return getDouble(OS_Coil_Heating_Steam_Baseboard_RadiantFields::MaximumSteamFlowRate, true);
     }
@@ -163,6 +169,12 @@ namespace model {
     bool CoilHeatingSteamBaseboardRadiant_Impl::setFractionofAutosizedHeatingDesignCapacity(double fractionofAutosizedHeatingDesignCapacity) {
       bool result =
         setDouble(OS_Coil_Heating_Steam_Baseboard_RadiantFields::FractionofAutosizedHeatingDesignCapacity, fractionofAutosizedHeatingDesignCapacity);
+      return result;
+    }
+
+    bool CoilHeatingSteamBaseboardRadiant_Impl::setDegreeofSubCooling(double degreeofSubCooling) {
+      bool result = setDouble(OS_Coil_Heating_Steam_Baseboard_RadiantFields::DegreeofSubCooling, degreeofSubCooling);
+      OS_ASSERT(result);
       return result;
     }
 
@@ -259,6 +271,7 @@ namespace model {
     OS_ASSERT(ok);
     ok = setFractionofAutosizedHeatingDesignCapacity(1.0);
     OS_ASSERT(ok);
+    ok = setDegreeofSubCooling(5.0);
     autosizeMaximumSteamFlowRate();
     ok = setConvergenceTolerance(0.001);
     OS_ASSERT(ok);
@@ -293,6 +306,10 @@ namespace model {
     return getImpl<detail::CoilHeatingSteamBaseboardRadiant_Impl>()->fractionofAutosizedHeatingDesignCapacity();
   }
 
+  double CoilHeatingSteamBaseboardRadiant::degreeofSubCooling() const {
+    return getImpl<detail::CoilHeatingSteamBaseboardRadiant_Impl>()->degreeofSubCooling();
+  }
+
   boost::optional<double> CoilHeatingSteamBaseboardRadiant::maximumSteamFlowRate() const {
     return getImpl<detail::CoilHeatingSteamBaseboardRadiant_Impl>()->maximumSteamFlowRate();
   }
@@ -324,6 +341,10 @@ namespace model {
   bool CoilHeatingSteamBaseboardRadiant::setFractionofAutosizedHeatingDesignCapacity(double fractionofAutosizedHeatingDesignCapacity) {
     return getImpl<detail::CoilHeatingSteamBaseboardRadiant_Impl>()->setFractionofAutosizedHeatingDesignCapacity(
       fractionofAutosizedHeatingDesignCapacity);
+  }
+
+  bool CoilHeatingSteamBaseboardRadiant::setDegreeofSubCooling(double degreeofSubCooling) {
+    return getImpl<detail::CoilHeatingSteamBaseboardRadiant_Impl>()->setDegreeofSubCooling(degreeofSubCooling);
   }
 
   bool CoilHeatingSteamBaseboardRadiant::setMaximumSteamFlowRate(double maximumSteamFlowRate) {

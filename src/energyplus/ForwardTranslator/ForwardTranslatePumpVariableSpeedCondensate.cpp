@@ -60,12 +60,12 @@ namespace energyplus {
       }
     }
 
-    // RatedFlowRate
+    // RatedSteamVolumeFlowRate
 
-    if (modelObject.isRatedFlowRateAutosized()) {
-      idfObject.setString(Pump_VariableSpeed_CondensateFields::DesignMaximumFlowRate, "Autosize");
-    } else if ((value = modelObject.ratedFlowRate())) {
-      idfObject.setDouble(Pump_VariableSpeed_CondensateFields::DesignMaximumFlowRate, value.get());
+    if (modelObject.isRatedSteamVolumeFlowRateAutosized()) {
+      idfObject.setString(Pump_VariableSpeed_CondensateFields::DesignSteamVolumeFlowRate, "Autosize");
+    } else if ((value = modelObject.ratedSteamVolumeFlowRate())) {
+      idfObject.setDouble(Pump_VariableSpeed_CondensateFields::DesignSteamVolumeFlowRate, value.get());
     }
 
     // RatedPumpHead
@@ -118,97 +118,41 @@ namespace energyplus {
       idfObject.setDouble(Pump_VariableSpeed_CondensateFields::Coefficient4ofthePartLoadPerformanceCurve, value.get());
     }
 
-    // MinimumFlowRate
-
-    if ((value = modelObject.minimumFlowRate())) {
-      idfObject.setDouble(Pump_VariableSpeed_CondensateFields::DesignMinimumFlowRate, value.get());
-    }
-
-    // PumpControlType
-
-    if ((s = modelObject.pumpControlType())) {
-      idfObject.setString(Pump_VariableSpeed_CondensateFields::PumpControlType, s.get());
-    }
-
     // PumpFlowRateSchedule
 
     if ((schedule = modelObject.pumpFlowRateSchedule())) {
       idfObject.setString(Pump_VariableSpeed_CondensateFields::PumpFlowRateScheduleName, schedule->name().get());
     }
 
-    // PumpCurve
-
-    if (OptionalCurve curve = modelObject.pumpCurve()) {
-      idfObject.setString(Pump_VariableSpeed_CondensateFields::PumpCurveName, curve->name().get());
-    }
-
-    // ImpellerDiameter
-
-    if ((value = modelObject.impellerDiameter())) {
-      idfObject.setDouble(Pump_VariableSpeed_CondensateFields::ImpellerDiameter, value.get());
-    }
-
-    // VFDControlType
-
-    if ((s = modelObject.vFDControlType())) {
-      idfObject.setString(Pump_VariableSpeed_CondensateFields::VFDControlType, s.get());
-    }
-
-    // PumpRPMSchedule
-
-    if ((schedule = modelObject.pumpRPMSchedule())) {
-      idfObject.setString(Pump_VariableSpeed_CondensateFields::PumpRPMScheduleName, schedule->name().get());
-    }
-
-    // MinimumPressureSchedule
-
-    if ((schedule = modelObject.minimumPressureSchedule())) {
-      idfObject.setString(Pump_VariableSpeed_CondensateFields::MinimumPressureSchedule, schedule->name().get());
-    }
-
-    // MaximumPressureSchedule
-
-    if ((schedule = modelObject.maximumPressureSchedule())) {
-      idfObject.setString(Pump_VariableSpeed_CondensateFields::MaximumPressureSchedule, schedule->name().get());
-    }
-
-    // MinimumRPMSchedule
-
-    if ((schedule = modelObject.minimumRPMSchedule())) {
-      idfObject.setString(Pump_VariableSpeed_CondensateFields::MinimumRPMSchedule, schedule->name().get());
-    }
-
-    // MaximumRPMSchedule
-
-    if ((schedule = modelObject.maximumRPMSchedule())) {
-      idfObject.setString(Pump_VariableSpeed_CondensateFields::MaximumRPMSchedule, schedule->name().get());
-    }
+    // SkinLossRadiativeFraction
 
     if ((value = modelObject.skinLossRadiativeFraction())) {
       idfObject.setDouble(Pump_VariableSpeed_CondensateFields::SkinLossRadiativeFraction, value.get());
     }
+
+    // DesignPowerSizingMethod
 
     {
       s = modelObject.designPowerSizingMethod();
       idfObject.setString(Pump_VariableSpeed_CondensateFields::DesignPowerSizingMethod, s.get());
     }
 
+    // DesignElectricPowerperUnitFlowRate
+
     {
       value = modelObject.designElectricPowerPerUnitFlowRate();
       idfObject.setDouble(Pump_VariableSpeed_CondensateFields::DesignElectricPowerperUnitFlowRate, value.get());
     }
+
+    // DesignShaftPowerperUnitFlowRateperUnitHead
 
     {
       value = modelObject.designShaftPowerPerUnitFlowRatePerUnitHead();
       idfObject.setDouble(Pump_VariableSpeed_CondensateFields::DesignShaftPowerperUnitFlowRateperUnitHead, value.get());
     }
 
-    {
-      value = modelObject.designMinimumFlowRateFraction();
-      idfObject.setDouble(Pump_VariableSpeed_CondensateFields::DesignMinimumFlowRateFraction, value.get());
-    }
+    // EndUseSubcategory
 
-    // End Use Subcategory
     idfObject.setString(Pump_VariableSpeed_CondensateFields::EndUseSubcategory, modelObject.endUseSubcategory());
 
     return idfObject;

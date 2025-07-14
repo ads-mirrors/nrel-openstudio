@@ -70,6 +70,8 @@ namespace model {
 
       bool isMaximumSteamFlowRateAutosized() const;
 
+      double degreeofSubCooling() const;
+
       double convergenceTolerance() const;
 
       boost::optional<double> autosizedHeatingDesignCapacity() const;
@@ -97,6 +99,8 @@ namespace model {
       bool setMaximumSteamFlowRate(boost::optional<double> maximumSteamFlowRate);
 
       void autosizeMaximumSteamFlowRate();
+
+      bool setDegreeofSubCooling(double degreeofSubCooling);
 
       bool setConvergenceTolerance(double convergenceTolerance);
 
