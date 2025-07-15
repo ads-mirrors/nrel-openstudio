@@ -48,33 +48,28 @@ namespace energyplus {
     bool hasWater = false;
     bool hasSteam = false;
 
-  std::vector<PlantLoop> plantLoops = modelObject.model().getConcreteModelObjects<PlantLoop>();
+    std::vector<PlantLoop> plantLoops = modelObject.model().getConcreteModelObjects<PlantLoop>();
     for (const auto& plantLoop : plantLoops) {
       std::vector<ModelObject> components = plantLoop.components();
       for (auto& component : components) {
         if (component.handle() == modelObject.handle()) {
 
           for (auto& component : components) {
-            if (component.optionalCast<PipeAdiabatic>()
-                || component.optionalCast<Node>()
-                || component.optionalCast<Mixer>()
+            if (component.optionalCast<PipeAdiabatic>() || component.optionalCast<Node>() || component.optionalCast<Mixer>()
                 || component.optionalCast<Splitter>()) {
-              // no-op        
-            } else if (component.optionalCast<BoilerSteam>()
-                || component.optionalCast<DistrictHeatingSteam>()
-                || component.optionalCast<PumpVariableSpeedCondensate>()
-                || component.optionalCast<CoilHeatingSteam>()
-                || component.optionalCast<CoilHeatingSteamBaseboardRadiant>()) {
+              // no-op
+            } else if (component.optionalCast<BoilerSteam>() || component.optionalCast<DistrictHeatingSteam>()
+                       || component.optionalCast<PumpVariableSpeedCondensate>() || component.optionalCast<CoilHeatingSteam>()
+                       || component.optionalCast<CoilHeatingSteamBaseboardRadiant>()) {
               hasSteam = true;
             } else {
               hasWater = true;
             }
           }
-
         }
       }
     }
- 
+
     boost::optional<IdfObject> idfObject;
     if (hasWater) {
       idfObject = IdfObject(IddObjectType::Pipe_Adiabatic);
