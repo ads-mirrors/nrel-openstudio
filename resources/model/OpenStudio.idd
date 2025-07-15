@@ -26612,23 +26612,6 @@ OS:Pipe:Adiabatic,
        \type object-list
        \object-list ConnectionNames
 
-OS:Pipe:Adiabatic:Steam,
-      \memo Passes Inlet Node state variables to Outlet Node state variables
-  A1, \field Handle
-       \type handle
-       \required-field
-  A2, \field Name
-       \required-field
-       \reference ConnectionObject
-  A3, \field Inlet Node Name
-       \required-field
-       \type object-list
-       \object-list ConnectionNames
-  A4; \field Outlet Node Name
-       \required-field
-       \type object-list
-       \object-list ConnectionNames
-
 OS:PlantLoop,
        \min-fields 25
   A1, \field Handle
@@ -27438,6 +27421,7 @@ OS:Pump:VariableSpeed:Condensate,
        \type object-list
        \object-list ThermalZoneNames
   N10, \field Skin Loss Radiative Fraction
+       \required-field
        \note optional. If zone identified in previous field then this determines
        \note the split between convection and radiation for the skin losses
        \type real
