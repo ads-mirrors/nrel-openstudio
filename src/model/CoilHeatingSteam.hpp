@@ -16,9 +16,9 @@ namespace model {
   class ControllerWaterCoil;
 
   namespace detail {
-    
+
     class CoilHeatingSteam_Impl;
-    
+
   }  // namespace detail
 
   /** CoilHeatingSteam is a WaterToAirComponent that wraps the IDD object named "OS:Coil:Heating:Steam". */
@@ -53,11 +53,11 @@ namespace model {
     bool isMaximumSteamFlowRateAutosized();
 
     double degreeofSubCooling() const;
-    
+
     double degreeofLoopSubCooling() const;
-    
+
     std::string coilControlType() const;
-    
+
     boost::optional<Node> temperatureSetpointNode() const;
 
     //@}

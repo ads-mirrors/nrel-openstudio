@@ -82,11 +82,11 @@ namespace model {
       bool isMaximumSteamFlowRateAutosized();
 
       double degreeofSubCooling() const;
-      
+
       double degreeofLoopSubCooling() const;
-      
+
       std::string coilControlType() const;
-      
+
       boost::optional<Node> temperatureSetpointNode() const;
 
       //@}

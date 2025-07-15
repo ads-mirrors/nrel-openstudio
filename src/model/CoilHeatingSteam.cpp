@@ -71,8 +71,8 @@ namespace model {
       : WaterToAirComponent_Impl(other, model, keepHandle) {}
 
     const std::vector<std::string>& CoilHeatingSteam_Impl::outputVariableNames() const {
-      static const std::vector<std::string> result{"Heating Coil Heating Energy", "Total Steam Coil Heating Rate",
-                                                   "Heating Coil Steam Trap Loss Rate", "Heating Coil Steam Inlet Temperature",
+      static const std::vector<std::string> result{"Heating Coil Heating Energy",           "Total Steam Coil Heating Rate",
+                                                   "Heating Coil Steam Trap Loss Rate",     "Heating Coil Steam Inlet Temperature",
                                                    "Heating Coil Steam Outlet Temperature", "Heating Coil Steam Mass Flow Rate"};
       return result;
     }
@@ -188,36 +188,36 @@ namespace model {
       OS_ASSERT(value);
       return value.get();
     }
-    
+
     bool CoilHeatingSteam_Impl::setDegreeofSubCooling(double degreeofSubCooling) {
       bool result = setDouble(OS_Coil_Heating_SteamFields::DegreeofSubCooling, degreeofSubCooling);
       OS_ASSERT(result);
       return result;
     }
-    
+
     double CoilHeatingSteam_Impl::degreeofLoopSubCooling() const {
       boost::optional<double> value = getDouble(OS_Coil_Heating_SteamFields::DegreeofLoopSubCooling, true);
       OS_ASSERT(value);
       return value.get();
     }
-    
+
     bool CoilHeatingSteam_Impl::setDegreeofLoopSubCooling(double degreeofLoopSubCooling) {
       bool result = setDouble(OS_Coil_Heating_SteamFields::DegreeofLoopSubCooling, degreeofLoopSubCooling);
       OS_ASSERT(result);
       return result;
     }
-    
+
     std::string CoilHeatingSteam_Impl::coilControlType() const {
       boost::optional<std::string> value = getString(OS_Coil_Heating_SteamFields::CoilControlType, true);
       OS_ASSERT(value);
       return value.get();
     }
-    
+
     bool CoilHeatingSteam_Impl::setCoilControlType(const std::string& coilControlType) {
-     const bool result = setString(OS_Coil_Heating_SteamFields::CoilControlType, coilControlType);
+      const bool result = setString(OS_Coil_Heating_SteamFields::CoilControlType, coilControlType);
       return result;
     }
-    
+
     boost::optional<Node> CoilHeatingSteam_Impl::temperatureSetpointNode() const {
       return getObject<ModelObject>().getModelObjectTarget<Node>(OS_Coil_Heating_SteamFields::TemperatureSetpointNodeName);
     }
@@ -589,27 +589,27 @@ namespace model {
   double CoilHeatingSteam::degreeofSubCooling() const {
     return getImpl<detail::CoilHeatingSteam_Impl>()->degreeofSubCooling();
   }
-  
+
   bool CoilHeatingSteam::setDegreeofSubCooling(double degreeofSubCooling) {
     return getImpl<detail::CoilHeatingSteam_Impl>()->setDegreeofSubCooling(degreeofSubCooling);
   }
-  
+
   double CoilHeatingSteam::degreeofLoopSubCooling() const {
     return getImpl<detail::CoilHeatingSteam_Impl>()->degreeofLoopSubCooling();
   }
-  
+
   bool CoilHeatingSteam::setDegreeofLoopSubCooling(double degreeofLoopSubCooling) {
     return getImpl<detail::CoilHeatingSteam_Impl>()->setDegreeofLoopSubCooling(degreeofLoopSubCooling);
   }
-  
+
   std::string CoilHeatingSteam::coilControlType() const {
     return getImpl<detail::CoilHeatingSteam_Impl>()->coilControlType();
   }
-  
+
   bool CoilHeatingSteam::setCoilControlType(const std::string& coilControlType) {
     return getImpl<detail::CoilHeatingSteam_Impl>()->setCoilControlType(coilControlType);
   }
-  
+
   boost::optional<Node> CoilHeatingSteam::temperatureSetpointNode() const {
     return getImpl<detail::CoilHeatingSteam_Impl>()->temperatureSetpointNode();
   }

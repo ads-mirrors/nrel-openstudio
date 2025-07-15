@@ -98,7 +98,7 @@ namespace energyplus {
     }
 
     // CoilControlType
-    
+
     if ((s = modelObject->coilControlType())) {
       designObject.setString(Coil_Heating_SteamFields::CoilControlType, s.get());
     }
