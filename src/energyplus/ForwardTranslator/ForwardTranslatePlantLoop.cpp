@@ -70,6 +70,8 @@
 #include "../../model/CoilHeatingWaterBaseboard_Impl.hpp"
 #include "../../model/CoilHeatingWaterBaseboardRadiant.hpp"
 #include "../../model/CoilHeatingWaterBaseboardRadiant_Impl.hpp"
+#include "../../model/CoilHeatingSteamBaseboardRadiant.hpp"
+#include "../../model/CoilHeatingSteamBaseboardRadiant_Impl.hpp"
 #include "../../model/CoilCoolingWaterPanelRadiant.hpp"
 #include "../../model/CoilCoolingWaterPanelRadiant_Impl.hpp"
 #include "../../model/CoilCoolingCooledBeam.hpp"
@@ -175,6 +177,21 @@ namespace energyplus {
           //has a child coil that goes onto the plantloop.  In order to get the correct translation to E+, we need
           //to put the name of the containing ZoneHVACBaseboardRadiantConvectiveWater onto the branch.
           if (auto coilBBRad = modelObject.optionalCast<CoilHeatingWaterBaseboardRadiant>()) {
+            if (auto contZnBBRad = coilBBRad->containingZoneHVACComponent()) {
+              //translate and map containingZoneHVACBBRadConvWater
+              if (auto idfContZnBBRad = this->translateAndMapModelObject(*contZnBBRad)) {
+                //Get the name and the idd object from the idf object version of this
+                objectName = idfContZnBBRad->name().get();
+                iddType = idfContZnBBRad->iddObject().name();
+              }
+            }
+          }
+          //special case for ZoneHVAC:Baseboard:RadiantConvective:Steam.  In E+, this object appears on both the
+          //zonehvac:equipmentlist and the branch.  In OpenStudio, this object was broken into 2 objects:
+          //ZoneHVACBaseboardRadiantConvectiveSteam and CoilHeatingSteamBaseboardRadiant.  The ZoneHVAC goes onto the zone and
+          //has a child coil that goes onto the plantloop.  In order to get the correct translation to E+, we need
+          //to put the name of the containing ZoneHVACBaseboardRadiantConvectiveSteam onto the branch.
+          if (auto coilBBRad = modelObject.optionalCast<CoilHeatingSteamBaseboardRadiant>()) {
             if (auto contZnBBRad = coilBBRad->containingZoneHVACComponent()) {
               //translate and map containingZoneHVACBBRadConvWater
               if (auto idfContZnBBRad = this->translateAndMapModelObject(*contZnBBRad)) {

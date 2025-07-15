@@ -94,6 +94,7 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslateCoilHeatingGas.cpp
   ForwardTranslator/ForwardTranslateCoilHeatingGasMultiStage.cpp
   ForwardTranslator/ForwardTranslateCoilHeatingWater.cpp
+  ForwardTranslator/ForwardTranslateCoilHeatingSteam.cpp
   ForwardTranslator/ForwardTranslateCoilHeatingWaterToAirHeatPumpEquationFit.cpp
   ForwardTranslator/ForwardTranslateCoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.cpp
   ForwardTranslator/ForwardTranslateCoilPerformanceDXCooling.cpp
@@ -284,6 +285,7 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslatePhotovoltaicPerformanceSandia.cpp
   ForwardTranslator/ForwardTranslatePhotovoltaicPerformanceSimple.cpp
   ForwardTranslator/ForwardTranslatePipeAdiabatic.cpp
+  ForwardTranslator/ForwardTranslatePipeAdiabaticSteam.cpp
   ForwardTranslator/ForwardTranslatePipeIndoor.cpp
   ForwardTranslator/ForwardTranslatePipeOutdoor.cpp
   ForwardTranslator/ForwardTranslatePlantLoop.cpp

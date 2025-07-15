@@ -130,6 +130,7 @@ namespace model {
   class CoilHeatingGas;
   class CoilHeatingGasMultiStage;
   class CoilHeatingWater;
+  class CoilHeatingSteam;
   class CoilHeatingWaterToAirHeatPumpEquationFit;
   class CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit;
   class CoilPerformanceDXCooling;
@@ -320,6 +321,7 @@ namespace model {
   class PhotovoltaicPerformanceSimple;
   class PhotovoltaicPerformanceSandia;
   class PipeAdiabatic;
+  class PipeAdiabaticSteam;
   class PipeIndoor;
   class PipeOutdoor;
   class PlantLoop;
@@ -843,6 +845,8 @@ namespace energyplus {
 
     boost::optional<IdfObject> translateCoilHeatingWater(model::CoilHeatingWater& modelObject);
 
+    boost::optional<IdfObject> translateCoilHeatingSteam(model::CoilHeatingSteam& modelObject);
+
     boost::optional<IdfObject> translateCoilHeatingWaterToAirHeatPumpEquationFit(model::CoilHeatingWaterToAirHeatPumpEquationFit& modelObject);
 
     boost::optional<IdfObject>
@@ -1235,6 +1239,8 @@ namespace energyplus {
     boost::optional<IdfObject> translatePhotovoltaicPerformanceSandia(model::PhotovoltaicPerformanceSandia& modelObject);
 
     boost::optional<IdfObject> translatePipeAdiabatic(model::PipeAdiabatic& modelObject);
+
+    boost::optional<IdfObject> translatePipeAdiabaticSteam(model::PipeAdiabaticSteam& modelObject);
 
     boost::optional<IdfObject> translatePipeIndoor(model::PipeIndoor& modelObject);
 

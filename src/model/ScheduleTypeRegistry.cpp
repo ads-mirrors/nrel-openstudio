@@ -223,6 +223,7 @@ namespace model {
       {"CoilHeatingLowTempRadiantVarFlow", "Heating Control Temperature", "heatingControlTemperature", true, "Temperature", OptionalDouble(),
        OptionalDouble()},
       {"CoilHeatingWater", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},
+      {"CoilHeatingSteam", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},
       {"CoilHeatingWaterBaseboard", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},
       {"CoilSystemCoolingWater", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},
       {"CoilWaterHeatingDesuperheater", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},

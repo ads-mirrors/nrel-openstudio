@@ -4028,6 +4028,7 @@ namespace model {
     REGISTER_CONSTRUCTOR(CoilHeatingDXVariableSpeed);
     REGISTER_CONSTRUCTOR(CoilHeatingDXVariableSpeedSpeedData);
     REGISTER_CONSTRUCTOR(CoilHeatingWater);
+    REGISTER_CONSTRUCTOR(CoilHeatingSteam);
     REGISTER_CONSTRUCTOR(CoilHeatingWaterToAirHeatPumpEquationFit);
     REGISTER_CONSTRUCTOR(CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit);
     REGISTER_CONSTRUCTOR(CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFitSpeedData);
@@ -4255,6 +4256,7 @@ namespace model {
     REGISTER_CONSTRUCTOR(PhotovoltaicPerformanceSimple);
     REGISTER_CONSTRUCTOR(PhotovoltaicPerformanceSandia);
     REGISTER_CONSTRUCTOR(PipeAdiabatic);
+    REGISTER_CONSTRUCTOR(PipeAdiabaticSteam);
     REGISTER_CONSTRUCTOR(PipeIndoor);
     REGISTER_CONSTRUCTOR(PipeOutdoor);
     REGISTER_CONSTRUCTOR(PlantComponentTemperatureSource);
@@ -4610,6 +4612,7 @@ namespace model {
     REGISTER_COPYCONSTRUCTORS(CoilHeatingDXVariableSpeed);
     REGISTER_COPYCONSTRUCTORS(CoilHeatingDXVariableSpeedSpeedData);
     REGISTER_COPYCONSTRUCTORS(CoilHeatingWater);
+    REGISTER_COPYCONSTRUCTORS(CoilHeatingSteam);
     REGISTER_COPYCONSTRUCTORS(CoilHeatingWaterToAirHeatPumpEquationFit);
     REGISTER_COPYCONSTRUCTORS(CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit);
     REGISTER_COPYCONSTRUCTORS(CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFitSpeedData);
@@ -4837,6 +4840,7 @@ namespace model {
     REGISTER_COPYCONSTRUCTORS(PhotovoltaicPerformanceSimple);
     REGISTER_COPYCONSTRUCTORS(PhotovoltaicPerformanceSandia);
     REGISTER_COPYCONSTRUCTORS(PipeAdiabatic);
+    REGISTER_COPYCONSTRUCTORS(PipeAdiabaticSteam);
     REGISTER_COPYCONSTRUCTORS(PipeIndoor);
     REGISTER_COPYCONSTRUCTORS(PipeOutdoor);
     REGISTER_COPYCONSTRUCTORS(PlantComponentTemperatureSource);

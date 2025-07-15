@@ -21345,6 +21345,64 @@ OS:Coil:Heating:Water,
        \minimum> 0
        \default 0.5
 
+OS:Coil:Heating:Steam,
+      \memo Steam heating coil. Condenses and sub-cools steam at loop pressure and discharges
+      \memo condensate through steam traps to low pressure condensate line.
+  A1, \field Handle
+      \type handle
+      \required-field
+  A2, \field Name
+      \type alpha
+      \required-field
+      \reference HeatingCoilName
+      \reference ConnectionObject
+  A3, \field Availability Schedule Name
+      \type object-list
+      \object-list ScheduleNames
+  N1, \field Maximum Steam Flow Rate
+      \type real
+      \autosizable
+      \units m3/s
+      \ip-units gal/min
+      \required-field
+  N2, \field Degree of SubCooling
+      \units C
+      \minimum 1.0
+      \maximum 5.0
+      \required-field
+  N3, \field Degree of Loop SubCooling
+      \units C
+      \minimum 10.0
+      \required-field
+  A4, \field Water Inlet Node Name
+      \type object-list
+      \required-field
+      \object-list ConnectionNames
+  A5, \field Water Outlet Node Name
+      \type object-list
+      \required-field
+      \object-list ConnectionNames
+  A6, \field Air Inlet Node Name
+      \type object-list
+      \required-field
+      \object-list ConnectionNames
+  A7, \field Air Outlet Node Name
+      \type object-list
+      \required-field
+      \object-list ConnectionNames
+  A8, \field Coil Control Type
+      \note Use ZoneLoadControl if the coil is contained within another component such as an air
+      \note terminal unit, zone HVAC equipment, or unitary system. Use TemperatureSetpointControl
+      \note if the coil is located directly in an air loop branch or outdoor air equipment list.
+      \type choice
+      \key TemperatureSetpointControl
+      \key ZoneLoadControl
+      \required-field
+  A9; \field Temperature Setpoint Node Name
+      \type object-list
+      \note Required if Coil Control Type is TemperatureSetpointControl
+      \object-list Node
+
 OS:Coil:Heating:Water:Baseboard,
   A1, \field Handle
       \type handle
@@ -26538,6 +26596,23 @@ OS:PortList,
        \object-list ConnectionNames
 
 OS:Pipe:Adiabatic,
+      \memo Passes Inlet Node state variables to Outlet Node state variables
+  A1, \field Handle
+       \type handle
+       \required-field
+  A2, \field Name
+       \required-field
+       \reference ConnectionObject
+  A3, \field Inlet Node Name
+       \required-field
+       \type object-list
+       \object-list ConnectionNames
+  A4; \field Outlet Node Name
+       \required-field
+       \type object-list
+       \object-list ConnectionNames
+
+OS:Pipe:Adiabatic:Steam,
       \memo Passes Inlet Node state variables to Outlet Node state variables
   A1, \field Handle
        \type handle

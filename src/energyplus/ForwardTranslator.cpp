@@ -1180,6 +1180,11 @@ namespace energyplus {
         retVal = translateCoilHeatingWater(coil);
         break;
       }
+      case openstudio::IddObjectType::OS_Coil_Heating_Steam: {
+        auto coil = modelObject.cast<CoilHeatingSteam>();
+        retVal = translateCoilHeatingSteam(coil);
+        break;
+      }
       case openstudio::IddObjectType::OS_Coil_Heating_WaterToAirHeatPump_EquationFit: {
         auto coil = modelObject.cast<CoilHeatingWaterToAirHeatPumpEquationFit>();
         retVal = translateCoilHeatingWaterToAirHeatPumpEquationFit(coil);
@@ -2416,6 +2421,11 @@ namespace energyplus {
       case openstudio::IddObjectType::OS_Pipe_Adiabatic: {
         auto pipe = modelObject.cast<PipeAdiabatic>();
         retVal = translatePipeAdiabatic(pipe);
+        break;
+      }
+      case openstudio::IddObjectType::OS_Pipe_Adiabatic_Steam: {
+        auto pipe = modelObject.cast<PipeAdiabaticSteam>();
+        retVal = translatePipeAdiabaticSteam(pipe);
         break;
       }
       case openstudio::IddObjectType::OS_Pipe_Indoor: {
