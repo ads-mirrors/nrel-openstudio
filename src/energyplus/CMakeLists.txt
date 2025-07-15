@@ -285,7 +285,6 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslatePhotovoltaicPerformanceSandia.cpp
   ForwardTranslator/ForwardTranslatePhotovoltaicPerformanceSimple.cpp
   ForwardTranslator/ForwardTranslatePipeAdiabatic.cpp
-  ForwardTranslator/ForwardTranslatePipeAdiabaticSteam.cpp
   ForwardTranslator/ForwardTranslatePipeIndoor.cpp
   ForwardTranslator/ForwardTranslatePipeOutdoor.cpp
   ForwardTranslator/ForwardTranslatePlantLoop.cpp
@@ -748,6 +747,9 @@ set(${target_name}_test_src
   Test/DaylightingDeviceLightWell_GTest.cpp
   Test/DesignDay_GTest.cpp
   Test/DesignSpecificationOutdoorAir_GTest.cpp
+  Test/DistrictCooling_GTest.cpp
+  Test/DistrictHeatingWater_GTest.cpp
+  Test/DistrictHeatingSteam_GTest.cpp
   Test/ElectricEquipment_GTest.cpp
   Test/ElectricEquipmentITEAirCooled_GTest.cpp
   Test/ElectricLoadCenterDistribution_GTest.cpp
