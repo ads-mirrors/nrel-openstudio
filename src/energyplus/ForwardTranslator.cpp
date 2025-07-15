@@ -2423,11 +2423,6 @@ namespace energyplus {
         retVal = translatePipeAdiabatic(pipe);
         break;
       }
-      case openstudio::IddObjectType::OS_Pipe_Adiabatic_Steam: {
-        auto pipe = modelObject.cast<PipeAdiabaticSteam>();
-        retVal = translatePipeAdiabaticSteam(pipe);
-        break;
-      }
       case openstudio::IddObjectType::OS_Pipe_Indoor: {
         auto pipe = modelObject.cast<PipeIndoor>();
         retVal = translatePipeIndoor(pipe);

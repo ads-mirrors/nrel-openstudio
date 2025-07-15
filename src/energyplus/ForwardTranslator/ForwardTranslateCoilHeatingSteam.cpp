@@ -39,7 +39,7 @@ namespace energyplus {
       idfObject.setName(*s);
     }
 
-    Schedule sched = modelObject.availableSchedule();
+    Schedule sched = modelObject.availabilitySchedule();
     boost::optional<IdfObject> _sched = translateAndMapModelObject(sched);
     if (_sched) {
       idfObject.setString(Coil_Heating_SteamFields::AvailabilityScheduleName, _sched->name().get());
@@ -55,13 +55,13 @@ namespace energyplus {
 
     // DegreeofSubCooling
 
-    if ((value = modelObject->degreeofSubCooling())) {
+    if (value = modelObject.degreeofSubCooling()) {
       idfObject.setDouble(Coil_Heating_SteamFields::DegreeofSubCooling, value.get());
     }
 
     // DegreeofLoopSubCooling
 
-    if ((value = modelObject->degreeofLoopSubCooling())) {
+    if (value = modelObject.degreeofLoopSubCooling()) {
       idfObject.setDouble(Coil_Heating_SteamFields::DegreeofLoopSubCooling, value.get());
     }
 
@@ -99,8 +99,8 @@ namespace energyplus {
 
     // CoilControlType
 
-    if ((s = modelObject->coilControlType())) {
-      designObject.setString(Coil_Heating_SteamFields::CoilControlType, s.get());
+    if (s = modelObject.coilControlType()) {
+      idfObject.setString(Coil_Heating_SteamFields::CoilControlType, s.get());
     }
 
     // TemperatureSetpointNodeName

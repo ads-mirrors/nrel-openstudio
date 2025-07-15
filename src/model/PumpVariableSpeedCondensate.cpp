@@ -88,10 +88,6 @@ namespace model {
       return getDouble(OS_Pump_VariableSpeed_CondensateFields::RatedSteamVolumeFlowRate, true);
     }
 
-    bool PumpVariableSpeedCondensate_Impl::isRatedSteamVolumeFlowRateDefaulted() const {
-      return isEmpty(OS_Pump_VariableSpeed_CondensateFields::RatedSteamVolumeFlowRate);
-    }
-
     bool PumpVariableSpeedCondensate_Impl::isRatedSteamVolumeFlowRateAutosized() const {
       bool result = false;
       boost::optional<std::string> value = getString(OS_Pump_VariableSpeed_CondensateFields::RatedSteamVolumeFlowRate, true);
@@ -107,16 +103,8 @@ namespace model {
       return value.get();
     }
 
-    bool PumpVariableSpeedCondensate_Impl::isRatedPumpHeadDefaulted() const {
-      return isEmpty(OS_Pump_VariableSpeed_CondensateFields::RatedPumpHead);
-    }
-
     boost::optional<double> PumpVariableSpeedCondensate_Impl::ratedPowerConsumption() const {
       return getDouble(OS_Pump_VariableSpeed_CondensateFields::RatedPowerConsumption, true);
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::isRatedPowerConsumptionDefaulted() const {
-      return isEmpty(OS_Pump_VariableSpeed_CondensateFields::RatedPowerConsumption);
     }
 
     bool PumpVariableSpeedCondensate_Impl::isRatedPowerConsumptionAutosized() const {
@@ -134,18 +122,10 @@ namespace model {
       return value.get();
     }
 
-    bool PumpVariableSpeedCondensate_Impl::isMotorEfficiencyDefaulted() const {
-      return isEmpty(OS_Pump_VariableSpeed_CondensateFields::MotorEfficiency);
-    }
-
     double PumpVariableSpeedCondensate_Impl::fractionofMotorInefficienciestoFluidStream() const {
       boost::optional<double> value = getDouble(OS_Pump_VariableSpeed_CondensateFields::FractionofMotorInefficienciestoFluidStream, true);
       OS_ASSERT(value);
       return value.get();
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::isFractionofMotorInefficienciestoFluidStreamDefaulted() const {
-      return isEmpty(OS_Pump_VariableSpeed_CondensateFields::FractionofMotorInefficienciestoFluidStream);
     }
 
     double PumpVariableSpeedCondensate_Impl::coefficient1ofthePartLoadPerformanceCurve() const {
@@ -154,18 +134,10 @@ namespace model {
       return value.get();
     }
 
-    bool PumpVariableSpeedCondensate_Impl::isCoefficient1ofthePartLoadPerformanceCurveDefaulted() const {
-      return isEmpty(OS_Pump_VariableSpeed_CondensateFields::Coefficient1ofthePartLoadPerformanceCurve);
-    }
-
     double PumpVariableSpeedCondensate_Impl::coefficient2ofthePartLoadPerformanceCurve() const {
       boost::optional<double> value = getDouble(OS_Pump_VariableSpeed_CondensateFields::Coefficient2ofthePartLoadPerformanceCurve, true);
       OS_ASSERT(value);
       return value.get();
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::isCoefficient2ofthePartLoadPerformanceCurveDefaulted() const {
-      return isEmpty(OS_Pump_VariableSpeed_CondensateFields::Coefficient2ofthePartLoadPerformanceCurve);
     }
 
     double PumpVariableSpeedCondensate_Impl::coefficient3ofthePartLoadPerformanceCurve() const {
@@ -174,18 +146,10 @@ namespace model {
       return value.get();
     }
 
-    bool PumpVariableSpeedCondensate_Impl::isCoefficient3ofthePartLoadPerformanceCurveDefaulted() const {
-      return isEmpty(OS_Pump_VariableSpeed_CondensateFields::Coefficient3ofthePartLoadPerformanceCurve);
-    }
-
     double PumpVariableSpeedCondensate_Impl::coefficient4ofthePartLoadPerformanceCurve() const {
       boost::optional<double> value = getDouble(OS_Pump_VariableSpeed_CondensateFields::Coefficient4ofthePartLoadPerformanceCurve, true);
       OS_ASSERT(value);
       return value.get();
-    }
-
-    bool PumpVariableSpeedCondensate_Impl::isCoefficient4ofthePartLoadPerformanceCurveDefaulted() const {
-      return isEmpty(OS_Pump_VariableSpeed_CondensateFields::Coefficient4ofthePartLoadPerformanceCurve);
     }
 
     boost::optional<Schedule> PumpVariableSpeedCondensate_Impl::pumpFlowRateSchedule() const {
@@ -220,11 +184,6 @@ namespace model {
       return result;
     }
 
-    void PumpVariableSpeedCondensate_Impl::resetRatedPumpHead() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::RatedPumpHead, "");
-      OS_ASSERT(result);
-    }
-
     bool PumpVariableSpeedCondensate_Impl::setRatedPowerConsumption(boost::optional<double> ratedPowerConsumption) {
       bool result(false);
       if (ratedPowerConsumption) {
@@ -252,20 +211,10 @@ namespace model {
       return result;
     }
 
-    void PumpVariableSpeedCondensate_Impl::resetMotorEfficiency() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::MotorEfficiency, "");
-      OS_ASSERT(result);
-    }
-
     bool PumpVariableSpeedCondensate_Impl::setFractionofMotorInefficienciestoFluidStream(double fractionofMotorInefficienciestoFluidStream) {
       bool result =
         setDouble(OS_Pump_VariableSpeed_CondensateFields::FractionofMotorInefficienciestoFluidStream, fractionofMotorInefficienciestoFluidStream);
       return result;
-    }
-
-    void PumpVariableSpeedCondensate_Impl::resetFractionofMotorInefficienciestoFluidStream() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::FractionofMotorInefficienciestoFluidStream, "");
-      OS_ASSERT(result);
     }
 
     bool PumpVariableSpeedCondensate_Impl::setCoefficient1ofthePartLoadPerformanceCurve(double coefficient1ofthePartLoadPerformanceCurve) {
@@ -275,21 +224,11 @@ namespace model {
       return result;
     }
 
-    void PumpVariableSpeedCondensate_Impl::resetCoefficient1ofthePartLoadPerformanceCurve() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::Coefficient1ofthePartLoadPerformanceCurve, "");
-      OS_ASSERT(result);
-    }
-
     bool PumpVariableSpeedCondensate_Impl::setCoefficient2ofthePartLoadPerformanceCurve(double coefficient2ofthePartLoadPerformanceCurve) {
       bool result =
         setDouble(OS_Pump_VariableSpeed_CondensateFields::Coefficient2ofthePartLoadPerformanceCurve, coefficient2ofthePartLoadPerformanceCurve);
       OS_ASSERT(result);
       return result;
-    }
-
-    void PumpVariableSpeedCondensate_Impl::resetCoefficient2ofthePartLoadPerformanceCurve() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::Coefficient2ofthePartLoadPerformanceCurve, "");
-      OS_ASSERT(result);
     }
 
     bool PumpVariableSpeedCondensate_Impl::setCoefficient3ofthePartLoadPerformanceCurve(double coefficient3ofthePartLoadPerformanceCurve) {
@@ -299,21 +238,11 @@ namespace model {
       return result;
     }
 
-    void PumpVariableSpeedCondensate_Impl::resetCoefficient3ofthePartLoadPerformanceCurve() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::Coefficient3ofthePartLoadPerformanceCurve, "");
-      OS_ASSERT(result);
-    }
-
     bool PumpVariableSpeedCondensate_Impl::setCoefficient4ofthePartLoadPerformanceCurve(double coefficient4ofthePartLoadPerformanceCurve) {
       bool result =
         setDouble(OS_Pump_VariableSpeed_CondensateFields::Coefficient4ofthePartLoadPerformanceCurve, coefficient4ofthePartLoadPerformanceCurve);
       OS_ASSERT(result);
       return result;
-    }
-
-    void PumpVariableSpeedCondensate_Impl::resetCoefficient4ofthePartLoadPerformanceCurve() {
-      bool result = setString(OS_Pump_VariableSpeed_CondensateFields::Coefficient4ofthePartLoadPerformanceCurve, "");
-      OS_ASSERT(result);
     }
 
     bool PumpVariableSpeedCondensate_Impl::setPumpFlowRateSchedule(Schedule& schedule) {
@@ -481,11 +410,19 @@ namespace model {
     : StraightComponent(PumpVariableSpeedCondensate::iddObjectType(), model) {
     OS_ASSERT(getImpl<detail::PumpVariableSpeedCondensate_Impl>());
 
+    autosizeRatedSteamVolumeFlowRate();
+    setRatedPumpHead(179352);
+    autosizeRatedPowerConsumption();
+    setMotorEfficiency(0.9);
+    setFractionofMotorInefficienciestoFluidStream(0.0);
+    setCoefficient1ofthePartLoadPerformanceCurve(0.0);
+    setCoefficient2ofthePartLoadPerformanceCurve(1.0);
+    setCoefficient3ofthePartLoadPerformanceCurve(0.0);
+    setCoefficient4ofthePartLoadPerformanceCurve(0.0);
     setSkinLossRadiativeFraction(0.5);
     setDesignPowerSizingMethod("PowerPerFlowPerPressure");
     setDesignElectricPowerPerUnitFlowRate(348701.1);
     setDesignShaftPowerPerUnitFlowRatePerUnitHead(1.282051282);
-
     setEndUseSubcategory("General");
   }
 
@@ -502,10 +439,6 @@ namespace model {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->ratedSteamVolumeFlowRate();
   }
 
-  bool PumpVariableSpeedCondensate::isRatedSteamVolumeFlowRateDefaulted() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isRatedSteamVolumeFlowRateDefaulted();
-  }
-
   bool PumpVariableSpeedCondensate::isRatedSteamVolumeFlowRateAutosized() const {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isRatedSteamVolumeFlowRateAutosized();
   }
@@ -514,16 +447,8 @@ namespace model {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->ratedPumpHead();
   }
 
-  bool PumpVariableSpeedCondensate::isRatedPumpHeadDefaulted() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isRatedPumpHeadDefaulted();
-  }
-
   boost::optional<double> PumpVariableSpeedCondensate::ratedPowerConsumption() const {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->ratedPowerConsumption();
-  }
-
-  bool PumpVariableSpeedCondensate::isRatedPowerConsumptionDefaulted() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isRatedPowerConsumptionDefaulted();
   }
 
   bool PumpVariableSpeedCondensate::isRatedPowerConsumptionAutosized() const {
@@ -534,48 +459,24 @@ namespace model {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->motorEfficiency();
   }
 
-  bool PumpVariableSpeedCondensate::isMotorEfficiencyDefaulted() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isMotorEfficiencyDefaulted();
-  }
-
   double PumpVariableSpeedCondensate::fractionofMotorInefficienciestoFluidStream() const {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->fractionofMotorInefficienciestoFluidStream();
-  }
-
-  bool PumpVariableSpeedCondensate::isFractionofMotorInefficienciestoFluidStreamDefaulted() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isFractionofMotorInefficienciestoFluidStreamDefaulted();
   }
 
   double PumpVariableSpeedCondensate::coefficient1ofthePartLoadPerformanceCurve() const {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->coefficient1ofthePartLoadPerformanceCurve();
   }
 
-  bool PumpVariableSpeedCondensate::isCoefficient1ofthePartLoadPerformanceCurveDefaulted() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isCoefficient1ofthePartLoadPerformanceCurveDefaulted();
-  }
-
   double PumpVariableSpeedCondensate::coefficient2ofthePartLoadPerformanceCurve() const {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->coefficient2ofthePartLoadPerformanceCurve();
-  }
-
-  bool PumpVariableSpeedCondensate::isCoefficient2ofthePartLoadPerformanceCurveDefaulted() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isCoefficient2ofthePartLoadPerformanceCurveDefaulted();
   }
 
   double PumpVariableSpeedCondensate::coefficient3ofthePartLoadPerformanceCurve() const {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->coefficient3ofthePartLoadPerformanceCurve();
   }
 
-  bool PumpVariableSpeedCondensate::isCoefficient3ofthePartLoadPerformanceCurveDefaulted() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isCoefficient3ofthePartLoadPerformanceCurveDefaulted();
-  }
-
   double PumpVariableSpeedCondensate::coefficient4ofthePartLoadPerformanceCurve() const {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->coefficient4ofthePartLoadPerformanceCurve();
-  }
-
-  bool PumpVariableSpeedCondensate::isCoefficient4ofthePartLoadPerformanceCurveDefaulted() const {
-    return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->isCoefficient4ofthePartLoadPerformanceCurveDefaulted();
   }
 
   boost::optional<Schedule> PumpVariableSpeedCondensate::pumpFlowRateSchedule() const {
@@ -598,10 +499,6 @@ namespace model {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setRatedPumpHead(ratedPumpHead);
   }
 
-  void PumpVariableSpeedCondensate::resetRatedPumpHead() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetRatedPumpHead();
-  }
-
   bool PumpVariableSpeedCondensate::setRatedPowerConsumption(double ratedPowerConsumption) {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setRatedPowerConsumption(ratedPowerConsumption);
   }
@@ -618,17 +515,9 @@ namespace model {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setMotorEfficiency(motorEfficiency);
   }
 
-  void PumpVariableSpeedCondensate::resetMotorEfficiency() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetMotorEfficiency();
-  }
-
   bool PumpVariableSpeedCondensate::setFractionofMotorInefficienciestoFluidStream(double fractionofMotorInefficienciestoFluidStream) {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setFractionofMotorInefficienciestoFluidStream(
       fractionofMotorInefficienciestoFluidStream);
-  }
-
-  void PumpVariableSpeedCondensate::resetFractionofMotorInefficienciestoFluidStream() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetFractionofMotorInefficienciestoFluidStream();
   }
 
   bool PumpVariableSpeedCondensate::setCoefficient1ofthePartLoadPerformanceCurve(double coefficient1ofthePartLoadPerformanceCurve) {
@@ -636,17 +525,9 @@ namespace model {
       coefficient1ofthePartLoadPerformanceCurve);
   }
 
-  void PumpVariableSpeedCondensate::resetCoefficient1ofthePartLoadPerformanceCurve() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetCoefficient1ofthePartLoadPerformanceCurve();
-  }
-
   bool PumpVariableSpeedCondensate::setCoefficient2ofthePartLoadPerformanceCurve(double coefficient2ofthePartLoadPerformanceCurve) {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setCoefficient2ofthePartLoadPerformanceCurve(
       coefficient2ofthePartLoadPerformanceCurve);
-  }
-
-  void PumpVariableSpeedCondensate::resetCoefficient2ofthePartLoadPerformanceCurve() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetCoefficient2ofthePartLoadPerformanceCurve();
   }
 
   bool PumpVariableSpeedCondensate::setCoefficient3ofthePartLoadPerformanceCurve(double coefficient3ofthePartLoadPerformanceCurve) {
@@ -654,17 +535,9 @@ namespace model {
       coefficient3ofthePartLoadPerformanceCurve);
   }
 
-  void PumpVariableSpeedCondensate::resetCoefficient3ofthePartLoadPerformanceCurve() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetCoefficient3ofthePartLoadPerformanceCurve();
-  }
-
   bool PumpVariableSpeedCondensate::setCoefficient4ofthePartLoadPerformanceCurve(double coefficient4ofthePartLoadPerformanceCurve) {
     return getImpl<detail::PumpVariableSpeedCondensate_Impl>()->setCoefficient4ofthePartLoadPerformanceCurve(
       coefficient4ofthePartLoadPerformanceCurve);
-  }
-
-  void PumpVariableSpeedCondensate::resetCoefficient4ofthePartLoadPerformanceCurve() {
-    getImpl<detail::PumpVariableSpeedCondensate_Impl>()->resetCoefficient4ofthePartLoadPerformanceCurve();
   }
 
   bool PumpVariableSpeedCondensate::setPumpFlowRateSchedule(Schedule& schedule) {

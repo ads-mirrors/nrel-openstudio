@@ -17,8 +17,8 @@
 #include "ZoneHVACPackagedTerminalAirConditioner_Impl.hpp"
 #include "ZoneHVACPackagedTerminalHeatPump.hpp"
 #include "ZoneHVACPackagedTerminalHeatPump_Impl.hpp"
-#include "ZoneHVACSteamToAirHeatPump.hpp"
-#include "ZoneHVACSteamToAirHeatPump_Impl.hpp"
+#include "ZoneHVACWaterToAirHeatPump.hpp"
+#include "ZoneHVACWaterToAirHeatPump_Impl.hpp"
 #include "ZoneHVACUnitHeater.hpp"
 #include "ZoneHVACUnitHeater_Impl.hpp"
 #include "ZoneHVACUnitVentilator.hpp"
@@ -82,7 +82,7 @@ namespace model {
 
       if (success && (!containingHVACComponent()) && (!containingZoneHVACComponent())) {
         if (boost::optional<ModelObject> _waterInletModelObject = waterInletModelObject()) {
-          if (auto oldController = ControllerWaterCoil()) {
+          if (auto oldController = controllerWaterCoil()) {
             if (!openstudio::istringEqual(oldController->action().get(), "Normal")) {
               LOG(Warn, briefDescription()
                           << " has an existing ControllerWaterCoil with action set to something else than 'Normal'. Make sure this is what you want");
@@ -90,7 +90,7 @@ namespace model {
           } else {
             Model t_model = model();
             ControllerWaterCoil controller(t_model);
-            controller.getImpl<ControllerWaterCoil_Impl>()->setSteamCoil(getObject<HVACComponent>());
+            controller.getImpl<ControllerWaterCoil_Impl>()->setWaterCoil(getObject<HVACComponent>());
             controller.setAction("Normal");
           }
         }
@@ -100,7 +100,7 @@ namespace model {
     }
 
     bool CoilHeatingSteam_Impl::removeFromPlantLoop() {
-      if (boost::optional<ControllerWaterCoil> controller = this->ControllerWaterCoil()) {
+      if (boost::optional<ControllerWaterCoil> controller = this->controllerWaterCoil()) {
         controller->remove();
       }
 
@@ -125,9 +125,6 @@ namespace model {
 
     std::vector<ModelObject> CoilHeatingSteam_Impl::children() const {
       std::vector<ModelObject> result;
-      std::vector<AirflowNetworkEquivalentDuct> myAFNItems =
-        getObject<ModelObject>().getModelObjectSources<AirflowNetworkEquivalentDuct>(AirflowNetworkEquivalentDuct::iddObjectType());
-      result.insert(result.end(), myAFNItems.begin(), myAFNItems.end());
       return result;
     }
 
@@ -240,11 +237,11 @@ namespace model {
     }
 
     unsigned CoilHeatingSteam_Impl::waterInletPort() const {
-      return OS_Coil_Heating_SteamFields::SteamInletNodeName;
+      return OS_Coil_Heating_SteamFields::WaterInletNodeName;
     }
 
     unsigned CoilHeatingSteam_Impl::waterOutletPort() const {
-      return OS_Coil_Heating_SteamFields::SteamOutletNodeName;
+      return OS_Coil_Heating_SteamFields::WaterOutletNodeName;
     }
 
     boost::optional<HVACComponent> CoilHeatingSteam_Impl::containingHVACComponent() const {
@@ -434,16 +431,16 @@ namespace model {
         }
       }
 
-      // ZoneHVACSteamToAirHeatPump
+      // ZoneHVACWaterToAirHeatPump
 
-      std::vector<ZoneHVACSteamToAirHeatPump> zoneHVACSteamToAirHeatPumps;
+      std::vector<ZoneHVACWaterToAirHeatPump> zoneHVACWaterToAirHeatPumps;
 
-      zoneHVACSteamToAirHeatPumps = this->model().getConcreteModelObjects<ZoneHVACSteamToAirHeatPump>();
+      zoneHVACWaterToAirHeatPumps = this->model().getConcreteModelObjects<ZoneHVACWaterToAirHeatPump>();
 
-      for (const auto& zoneHVACSteamToAirHeatPump : zoneHVACSteamToAirHeatPumps) {
-        if (boost::optional<HVACComponent> coil = zoneHVACSteamToAirHeatPump.supplementalHeatingCoil()) {
+      for (const auto& zoneHVACWaterToAirHeatPump : zoneHVACWaterToAirHeatPumps) {
+        if (boost::optional<HVACComponent> coil = zoneHVACWaterToAirHeatPump.supplementalHeatingCoil()) {
           if (coil->handle() == this->handle()) {
-            return zoneHVACSteamToAirHeatPump;
+            return zoneHVACWaterToAirHeatPump;
           }
         }
       }
@@ -535,7 +532,7 @@ namespace model {
 
   }  // namespace detail
 
-  CoilHeatingSteam::CoilHeatingSteam(const Model& model, Schedule& schedule) : StraightComponent(CoilHeatingSteam::iddObjectType(), model) {
+  CoilHeatingSteam::CoilHeatingSteam(const Model& model, Schedule& schedule) : WaterToAirComponent(CoilHeatingSteam::iddObjectType(), model) {
     OS_ASSERT(getImpl<detail::CoilHeatingSteam_Impl>());
 
     setAvailabilitySchedule(schedule);
@@ -559,10 +556,6 @@ namespace model {
   CoilHeatingSteam::CoilHeatingSteam(std::shared_ptr<detail::CoilHeatingSteam_Impl> p) : WaterToAirComponent(std::move(p)) {}
 
   Schedule CoilHeatingSteam::availabilitySchedule() const {
-    return getImpl<detail::CoilHeatingSteam_Impl>()->availabilitySchedule();
-  }
-
-  Schedule CoilHeatingSteam::availableSchedule() const {
     return getImpl<detail::CoilHeatingSteam_Impl>()->availabilitySchedule();
   }
 
@@ -627,8 +620,8 @@ namespace model {
     return result;
   }
 
-  boost::optional<ControllerWaterCoil> CoilHeatingSteam::ControllerWaterCoil() {
-    return getImpl<detail::CoilHeatingSteam_Impl>()->ControllerWaterCoil();
+  boost::optional<ControllerWaterCoil> CoilHeatingSteam::controllerWaterCoil() {
+    return getImpl<detail::CoilHeatingSteam_Impl>()->controllerWaterCoil();
   }
 
   boost::optional<double> CoilHeatingSteam::autosizedMaximumSteamFlowRate() const {

@@ -60,6 +60,8 @@ namespace model {
 
     boost::optional<Node> temperatureSetpointNode() const;
 
+    boost::optional<ControllerWaterCoil> controllerWaterCoil();
+
     //@}
     /** @name Setters */
     //@{

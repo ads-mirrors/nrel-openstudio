@@ -1168,9 +1168,6 @@ set(${target_name}_src
   PipeAdiabatic.hpp
   PipeAdiabatic_Impl.hpp
   PipeAdiabatic.cpp
-  PipeAdiabaticSteam.hpp
-  PipeAdiabaticSteam_Impl.hpp
-  PipeAdiabaticSteam.cpp
   PipeIndoor.hpp
   PipeIndoor_Impl.hpp
   PipeIndoor.cpp
@@ -2245,7 +2242,6 @@ set(${target_name}_test_src
   test/PhotovoltaicPerformanceSimple_GTest.cpp
   test/PhotovoltaicPerformanceSandia_GTest.cpp
   test/PipeAdiabatic_GTest.cpp
-  test/PipeAdiabaticSteam_GTest.cpp
   test/PipeIndoor_GTest.cpp
   test/PipeOutdoor_GTest.cpp
   test/PlanarSurface_GTest.cpp

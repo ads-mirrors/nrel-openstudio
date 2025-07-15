@@ -26,8 +26,16 @@
 #include "../../model/PumpVariableSpeed.hpp"
 #include "../../model/Schedule.hpp"
 #include "../../model/Schedule_Impl.hpp"
-#include "../../model/BoilerHotWater.hpp"
-#include "../../model/BoilerHotWater_Impl.hpp"
+#include "../../model/PipeAdiabatic.hpp"
+#include "../../model/PipeAdiabatic_Impl.hpp"
+#include "../../model/BoilerSteam.hpp"
+#include "../../model/BoilerSteam_Impl.hpp"
+#include "../../model/DistrictHeatingSteam.hpp"
+#include "../../model/DistrictHeatingSteam_Impl.hpp"
+#include "../../model/PumpVariableSpeedCondensate.hpp"
+#include "../../model/PumpVariableSpeedCondensate_Impl.hpp"
+#include "../../model/CoilHeatingSteam.hpp"
+#include "../../model/CoilHeatingSteam_Impl.hpp"
 #include "../../model/CentralHeatPumpSystem.hpp"
 #include "../../model/CentralHeatPumpSystem_Impl.hpp"
 #include "../../model/ChillerElectricASHRAE205.hpp"
@@ -70,6 +78,8 @@
 #include "../../model/CoilHeatingWaterBaseboard_Impl.hpp"
 #include "../../model/CoilHeatingWaterBaseboardRadiant.hpp"
 #include "../../model/CoilHeatingWaterBaseboardRadiant_Impl.hpp"
+#include "../../model/CoilHeatingSteamBaseboardRadiant.hpp"
+#include "../../model/CoilHeatingSteamBaseboardRadiant_Impl.hpp"
 #include "../../model/CoilCoolingWaterPanelRadiant.hpp"
 #include "../../model/CoilCoolingWaterPanelRadiant_Impl.hpp"
 #include "../../model/CoilCoolingCooledBeam.hpp"
@@ -175,6 +185,21 @@ namespace energyplus {
           //has a child coil that goes onto the plantloop.  In order to get the correct translation to E+, we need
           //to put the name of the containing ZoneHVACBaseboardRadiantConvectiveWater onto the branch.
           if (auto coilBBRad = modelObject.optionalCast<CoilHeatingWaterBaseboardRadiant>()) {
+            if (auto contZnBBRad = coilBBRad->containingZoneHVACComponent()) {
+              //translate and map containingZoneHVACBBRadConvWater
+              if (auto idfContZnBBRad = this->translateAndMapModelObject(*contZnBBRad)) {
+                //Get the name and the idd object from the idf object version of this
+                objectName = idfContZnBBRad->name().get();
+                iddType = idfContZnBBRad->iddObject().name();
+              }
+            }
+          }
+          //special case for ZoneHVAC:Baseboard:RadiantConvective:Steam.  In E+, this object appears on both the
+          //zonehvac:equipmentlist and the branch.  In OpenStudio, this object was broken into 2 objects:
+          //ZoneHVACBaseboardRadiantConvectiveSteam and CoilHeatingSteamBaseboardRadiant.  The ZoneHVAC goes onto the zone and
+          //has a child coil that goes onto the plantloop.  In order to get the correct translation to E+, we need
+          //to put the name of the containing ZoneHVACBaseboardRadiantConvectiveSteam onto the branch.
+          if (auto coilBBRad = modelObject.optionalCast<CoilHeatingSteamBaseboardRadiant>()) {
             if (auto contZnBBRad = coilBBRad->containingZoneHVACComponent()) {
               //translate and map containingZoneHVACBBRadConvWater
               if (auto idfContZnBBRad = this->translateAndMapModelObject(*contZnBBRad)) {
@@ -564,7 +589,28 @@ namespace energyplus {
     idfObject.setString(PlantLoopFields::DemandSideInletNodeName, plantLoop.demandInletNode().name().get());
     idfObject.setString(PlantLoopFields::DemandSideOutletNodeName, plantLoop.demandOutletNode().name().get());
 
-    auto supplyComponents = plantLoop.supplyComponents();
+    std::vector<ModelObject> components = plantLoop.components();
+
+    // PipeAdiabatic or PipeAdiabaticSteam
+    bool hasWater = false;
+    bool hasSteam = false;
+
+    for (auto& component : components) {
+      if (component.optionalCast<PipeAdiabatic>() || component.optionalCast<Node>() || component.optionalCast<Mixer>()
+          || component.optionalCast<Splitter>()) {
+        // no-op
+      } else if (component.optionalCast<BoilerSteam>() || component.optionalCast<DistrictHeatingSteam>()
+                 || component.optionalCast<PumpVariableSpeedCondensate>() || component.optionalCast<CoilHeatingSteam>()
+                 || component.optionalCast<CoilHeatingSteamBaseboardRadiant>()) {
+        hasSteam = true;
+      } else {
+        hasWater = true;
+      }
+    }
+
+    if (hasWater && hasSteam) {
+      LOG(Error, "Did not translate " << plantLoop.briefDescription() << " because there is a mix of Water and Steam components.");
+    }
 
     SizingPlant sizingPlant = plantLoop.sizingPlant();
     translateAndMapModelObject(sizingPlant);
@@ -633,19 +679,24 @@ namespace energyplus {
     if (supplyInletModelObjects.size() > 2u) {
       populateBranch(_supplyInletBranch, supplyInletModelObjects, plantLoop, true);
     } else {
-      IdfObject pipe(IddObjectType::Pipe_Adiabatic);
-      pipe.setName(plantLoop.name().get() + " Supply Inlet Pipe");
-      m_idfObjects.push_back(pipe);
+      boost::optional<IdfObject> pipe;
+      if (hasWater) {
+        pipe = IdfObject(IddObjectType::Pipe_Adiabatic);
+      } else if (hasSteam) {
+        pipe = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
+      }
+      pipe->setName(plantLoop.name().get() + " Supply Inlet Pipe");
+      m_idfObjects.push_back(*pipe);
 
       std::string inletNodeName = plantLoop.supplyInletNode().name().get();
       std::string outletNodeName = plantLoop.name().get() + " Supply Inlet Pipe Node";
 
-      pipe.setString(Pipe_AdiabaticFields::InletNodeName, inletNodeName);
-      pipe.setString(Pipe_AdiabaticFields::OutletNodeName, outletNodeName);
+      pipe->setString(Pipe_AdiabaticFields::InletNodeName, inletNodeName);
+      pipe->setString(Pipe_AdiabaticFields::OutletNodeName, outletNodeName);
 
       IdfExtensibleGroup eg = _supplyInletBranch.pushExtensibleGroup();
-      eg.setString(BranchExtensibleFields::ComponentObjectType, pipe.iddObject().name());
-      eg.setString(BranchExtensibleFields::ComponentName, pipe.name().get());
+      eg.setString(BranchExtensibleFields::ComponentObjectType, pipe->iddObject().name());
+      eg.setString(BranchExtensibleFields::ComponentName, pipe->name().get());
       eg.setString(BranchExtensibleFields::ComponentInletNodeName, inletNodeName);
       eg.setString(BranchExtensibleFields::ComponentOutletNodeName, outletNodeName);
     }
@@ -686,19 +737,24 @@ namespace energyplus {
       if (allComponents.size() > 2u) {
         populateBranch(_equipmentBranch, allComponents, plantLoop, true);
       } else {
-        IdfObject pipe(IddObjectType::Pipe_Adiabatic);
-        pipe.setName(plantLoop.name().get() + " Supply Branch " + istring + " Pipe");
-        m_idfObjects.push_back(pipe);
+        boost::optional<IdfObject> pipe;
+        if (hasWater) {
+          pipe = IdfObject(IddObjectType::Pipe_Adiabatic);
+        } else if (hasSteam) {
+          pipe = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
+        }
+        pipe->setName(plantLoop.name().get() + " Supply Branch " + istring + " Pipe");
+        m_idfObjects.push_back(*pipe);
 
-        std::string inletNodeName = pipe.name().get() + " Inlet Node";
-        std::string outletNodeName = pipe.name().get() + " Outlet Node";
+        std::string inletNodeName = pipe->name().get() + " Inlet Node";
+        std::string outletNodeName = pipe->name().get() + " Outlet Node";
 
-        pipe.setString(Pipe_AdiabaticFields::InletNodeName, inletNodeName);
-        pipe.setString(Pipe_AdiabaticFields::OutletNodeName, outletNodeName);
+        pipe->setString(Pipe_AdiabaticFields::InletNodeName, inletNodeName);
+        pipe->setString(Pipe_AdiabaticFields::OutletNodeName, outletNodeName);
 
         IdfExtensibleGroup eg = _equipmentBranch.pushExtensibleGroup();
-        eg.setString(BranchExtensibleFields::ComponentObjectType, pipe.iddObject().name());
-        eg.setString(BranchExtensibleFields::ComponentName, pipe.name().get());
+        eg.setString(BranchExtensibleFields::ComponentObjectType, pipe->iddObject().name());
+        eg.setString(BranchExtensibleFields::ComponentName, pipe->name().get());
         eg.setString(BranchExtensibleFields::ComponentInletNodeName, inletNodeName);
         eg.setString(BranchExtensibleFields::ComponentOutletNodeName, outletNodeName);
       }
@@ -726,19 +782,24 @@ namespace energyplus {
     if (supplyOutletModelObjects.size() > 2u) {
       populateBranch(_supplyOutletBranch, supplyOutletModelObjects, plantLoop, true);
     } else {
-      IdfObject pipe(IddObjectType::Pipe_Adiabatic);
-      pipe.setName(plantLoop.name().get() + " Supply Outlet Pipe");
-      m_idfObjects.push_back(pipe);
+      boost::optional<IdfObject> pipe;
+      if (hasWater) {
+        pipe = IdfObject(IddObjectType::Pipe_Adiabatic);
+      } else if (hasSteam) {
+        pipe = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
+      }
+      pipe->setName(plantLoop.name().get() + " Supply Outlet Pipe");
+      m_idfObjects.push_back(*pipe);
 
       std::string inletNodeName = plantLoop.name().get() + " Supply Outlet Pipe Node";
       std::string outletNodeName = plantLoop.supplyOutletNode().name().get();
 
-      pipe.setString(Pipe_AdiabaticFields::InletNodeName, inletNodeName);
-      pipe.setString(Pipe_AdiabaticFields::OutletNodeName, outletNodeName);
+      pipe->setString(Pipe_AdiabaticFields::InletNodeName, inletNodeName);
+      pipe->setString(Pipe_AdiabaticFields::OutletNodeName, outletNodeName);
 
       IdfExtensibleGroup eg = _supplyOutletBranch.pushExtensibleGroup();
-      eg.setString(BranchExtensibleFields::ComponentObjectType, pipe.iddObject().name());
-      eg.setString(BranchExtensibleFields::ComponentName, pipe.name().get());
+      eg.setString(BranchExtensibleFields::ComponentObjectType, pipe->iddObject().name());
+      eg.setString(BranchExtensibleFields::ComponentName, pipe->name().get());
       eg.setString(BranchExtensibleFields::ComponentInletNodeName, inletNodeName);
       eg.setString(BranchExtensibleFields::ComponentOutletNodeName, outletNodeName);
     }
@@ -803,19 +864,24 @@ namespace energyplus {
     if (demandInletModelObjects.size() > 2u) {
       populateBranch(_demandInletBranch, demandInletModelObjects, plantLoop, false);
     } else {
-      IdfObject pipe(IddObjectType::Pipe_Adiabatic);
-      pipe.setName(plantLoop.name().get() + " Demand Inlet Pipe");
-      m_idfObjects.push_back(pipe);
+      boost::optional<IdfObject> pipe;
+      if (hasWater) {
+        pipe = IdfObject(IddObjectType::Pipe_Adiabatic);
+      } else if (hasSteam) {
+        pipe = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
+      }
+      pipe->setName(plantLoop.name().get() + " Demand Inlet Pipe");
+      m_idfObjects.push_back(*pipe);
 
       std::string inletNodeName = plantLoop.demandInletNode().name().get();
       std::string outletNodeName = plantLoop.name().get() + " Demand Inlet Pipe Node";
 
-      pipe.setString(Pipe_AdiabaticFields::InletNodeName, inletNodeName);
-      pipe.setString(Pipe_AdiabaticFields::OutletNodeName, outletNodeName);
+      pipe->setString(Pipe_AdiabaticFields::InletNodeName, inletNodeName);
+      pipe->setString(Pipe_AdiabaticFields::OutletNodeName, outletNodeName);
 
       IdfExtensibleGroup eg = _demandInletBranch.pushExtensibleGroup();
-      eg.setString(BranchExtensibleFields::ComponentObjectType, pipe.iddObject().name());
-      eg.setString(BranchExtensibleFields::ComponentName, pipe.name().get());
+      eg.setString(BranchExtensibleFields::ComponentObjectType, pipe->iddObject().name());
+      eg.setString(BranchExtensibleFields::ComponentName, pipe->name().get());
       eg.setString(BranchExtensibleFields::ComponentInletNodeName, inletNodeName);
       eg.setString(BranchExtensibleFields::ComponentOutletNodeName, outletNodeName);
     }
@@ -856,19 +922,24 @@ namespace energyplus {
       if (allComponents.size() > 2u) {
         populateBranch(_equipmentBranch, allComponents, plantLoop, false);
       } else {
-        IdfObject pipe(IddObjectType::Pipe_Adiabatic);
-        pipe.setName(plantLoop.name().get() + " Demand Branch " + istring + " Pipe");
-        m_idfObjects.push_back(pipe);
+        boost::optional<IdfObject> pipe;
+        if (hasWater) {
+          pipe = IdfObject(IddObjectType::Pipe_Adiabatic);
+        } else if (hasSteam) {
+          pipe = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
+        }
+        pipe->setName(plantLoop.name().get() + " Demand Branch " + istring + " Pipe");
+        m_idfObjects.push_back(*pipe);
 
-        std::string inletNodeName = pipe.name().get() + " Inlet Node";
-        std::string outletNodeName = pipe.name().get() + " Outlet Node";
+        std::string inletNodeName = pipe->name().get() + " Inlet Node";
+        std::string outletNodeName = pipe->name().get() + " Outlet Node";
 
-        pipe.setString(Pipe_AdiabaticFields::InletNodeName, inletNodeName);
-        pipe.setString(Pipe_AdiabaticFields::OutletNodeName, outletNodeName);
+        pipe->setString(Pipe_AdiabaticFields::InletNodeName, inletNodeName);
+        pipe->setString(Pipe_AdiabaticFields::OutletNodeName, outletNodeName);
 
         IdfExtensibleGroup eg = _equipmentBranch.pushExtensibleGroup();
-        eg.setString(BranchExtensibleFields::ComponentObjectType, pipe.iddObject().name());
-        eg.setString(BranchExtensibleFields::ComponentName, pipe.name().get());
+        eg.setString(BranchExtensibleFields::ComponentObjectType, pipe->iddObject().name());
+        eg.setString(BranchExtensibleFields::ComponentName, pipe->name().get());
         eg.setString(BranchExtensibleFields::ComponentInletNodeName, inletNodeName);
         eg.setString(BranchExtensibleFields::ComponentOutletNodeName, outletNodeName);
       }
@@ -893,19 +964,24 @@ namespace energyplus {
       eg = _demandBranchList.pushExtensibleGroup();
       eg.setString(BranchListExtensibleFields::BranchName, _equipmentBranch.name().get());
 
-      IdfObject pipe(IddObjectType::Pipe_Adiabatic);
-      pipe.setName(plantLoop.name().get() + " Demand Bypass Pipe");
-      m_idfObjects.push_back(pipe);
+      boost::optional<IdfObject> pipe;
+      if (hasWater) {
+        pipe = IdfObject(IddObjectType::Pipe_Adiabatic);
+      } else if (hasSteam) {
+        pipe = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
+      }
+      pipe->setName(plantLoop.name().get() + " Demand Bypass Pipe");
+      m_idfObjects.push_back(*pipe);
 
-      std::string inletNodeName = pipe.name().get() + " Inlet Node";
-      std::string outletNodeName = pipe.name().get() + " Outlet Node";
+      std::string inletNodeName = pipe->name().get() + " Inlet Node";
+      std::string outletNodeName = pipe->name().get() + " Outlet Node";
 
-      pipe.setString(Pipe_AdiabaticFields::InletNodeName, inletNodeName);
-      pipe.setString(Pipe_AdiabaticFields::OutletNodeName, outletNodeName);
+      pipe->setString(Pipe_AdiabaticFields::InletNodeName, inletNodeName);
+      pipe->setString(Pipe_AdiabaticFields::OutletNodeName, outletNodeName);
 
       IdfExtensibleGroup eg = _equipmentBranch.pushExtensibleGroup();
-      eg.setString(BranchExtensibleFields::ComponentObjectType, pipe.iddObject().name());
-      eg.setString(BranchExtensibleFields::ComponentName, pipe.name().get());
+      eg.setString(BranchExtensibleFields::ComponentObjectType, pipe->iddObject().name());
+      eg.setString(BranchExtensibleFields::ComponentName, pipe->name().get());
       eg.setString(BranchExtensibleFields::ComponentInletNodeName, inletNodeName);
       eg.setString(BranchExtensibleFields::ComponentOutletNodeName, outletNodeName);
     }
@@ -930,19 +1006,24 @@ namespace energyplus {
     if (demandOutletModelObjects.size() > 2u) {
       populateBranch(_demandOutletBranch, demandOutletModelObjects, plantLoop, false);
     } else {
-      IdfObject pipe(IddObjectType::Pipe_Adiabatic);
-      pipe.setName(plantLoop.name().get() + " Demand Outlet Pipe");
-      m_idfObjects.push_back(pipe);
+      boost::optional<IdfObject> pipe;
+      if (hasWater) {
+        pipe = IdfObject(IddObjectType::Pipe_Adiabatic);
+      } else if (hasSteam) {
+        pipe = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
+      }
+      pipe->setName(plantLoop.name().get() + " Demand Outlet Pipe");
+      m_idfObjects.push_back(*pipe);
 
       std::string inletNodeName = plantLoop.name().get() + " Demand Outlet Pipe Node";
       std::string outletNodeName = plantLoop.demandOutletNode().name().get();
 
-      pipe.setString(Pipe_AdiabaticFields::InletNodeName, inletNodeName);
-      pipe.setString(Pipe_AdiabaticFields::OutletNodeName, outletNodeName);
+      pipe->setString(Pipe_AdiabaticFields::InletNodeName, inletNodeName);
+      pipe->setString(Pipe_AdiabaticFields::OutletNodeName, outletNodeName);
 
       IdfExtensibleGroup eg = _demandOutletBranch.pushExtensibleGroup();
-      eg.setString(BranchExtensibleFields::ComponentObjectType, pipe.iddObject().name());
-      eg.setString(BranchExtensibleFields::ComponentName, pipe.name().get());
+      eg.setString(BranchExtensibleFields::ComponentObjectType, pipe->iddObject().name());
+      eg.setString(BranchExtensibleFields::ComponentName, pipe->name().get());
       eg.setString(BranchExtensibleFields::ComponentInletNodeName, inletNodeName);
       eg.setString(BranchExtensibleFields::ComponentOutletNodeName, outletNodeName);
     }

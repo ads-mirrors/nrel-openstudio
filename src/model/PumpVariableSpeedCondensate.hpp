@@ -49,45 +49,37 @@ namespace model {
 
     boost::optional<double> ratedSteamVolumeFlowRate() const;
 
-    bool isRatedSteamVolumeFlowRateDefaulted() const;
-
     bool isRatedSteamVolumeFlowRateAutosized() const;
 
     double ratedPumpHead() const;
 
-    bool isRatedPumpHeadDefaulted() const;
-
     boost::optional<double> ratedPowerConsumption() const;
-
-    bool isRatedPowerConsumptionDefaulted() const;
 
     bool isRatedPowerConsumptionAutosized() const;
 
     double motorEfficiency() const;
 
-    bool isMotorEfficiencyDefaulted() const;
-
     double fractionofMotorInefficienciestoFluidStream() const;
-
-    bool isFractionofMotorInefficienciestoFluidStreamDefaulted() const;
 
     double coefficient1ofthePartLoadPerformanceCurve() const;
 
-    bool isCoefficient1ofthePartLoadPerformanceCurveDefaulted() const;
-
     double coefficient2ofthePartLoadPerformanceCurve() const;
-
-    bool isCoefficient2ofthePartLoadPerformanceCurveDefaulted() const;
 
     double coefficient3ofthePartLoadPerformanceCurve() const;
 
-    bool isCoefficient3ofthePartLoadPerformanceCurveDefaulted() const;
-
     double coefficient4ofthePartLoadPerformanceCurve() const;
 
-    bool isCoefficient4ofthePartLoadPerformanceCurveDefaulted() const;
-
     boost::optional<Schedule> pumpFlowRateSchedule() const;
+
+    boost::optional<ThermalZone> zone() const;
+
+    double skinLossRadiativeFraction() const;
+
+    std::string designPowerSizingMethod() const;
+
+    double designElectricPowerPerUnitFlowRate() const;
+
+    double designShaftPowerPerUnitFlowRatePerUnitHead() const;
 
     std::string endUseSubcategory() const;
 
@@ -103,8 +95,6 @@ namespace model {
 
     bool setRatedPumpHead(double ratedPumpHead);
 
-    void resetRatedPumpHead();
-
     bool setRatedPowerConsumption(double ratedPowerConsumption);
 
     void resetRatedPowerConsumption();
@@ -113,59 +103,41 @@ namespace model {
 
     bool setMotorEfficiency(double motorEfficiency);
 
-    void resetMotorEfficiency();
-
     bool setFractionofMotorInefficienciestoFluidStream(double fractionofMotorInefficienciestoFluidStream);
-
-    void resetFractionofMotorInefficienciestoFluidStream();
 
     bool setCoefficient1ofthePartLoadPerformanceCurve(double coefficient1ofthePartLoadPerformanceCurve);
 
-    void resetCoefficient1ofthePartLoadPerformanceCurve();
-
     bool setCoefficient2ofthePartLoadPerformanceCurve(double coefficient2ofthePartLoadPerformanceCurve);
-
-    void resetCoefficient2ofthePartLoadPerformanceCurve();
 
     bool setCoefficient3ofthePartLoadPerformanceCurve(double coefficient3ofthePartLoadPerformanceCurve);
 
-    void resetCoefficient3ofthePartLoadPerformanceCurve();
-
     bool setCoefficient4ofthePartLoadPerformanceCurve(double coefficient4ofthePartLoadPerformanceCurve);
-
-    void resetCoefficient4ofthePartLoadPerformanceCurve();
 
     bool setPumpFlowRateSchedule(Schedule& schedule);
 
     void resetPumpFlowRateSchedule();
 
-    boost::optional<double> autosizedRatedSteamVolumeFlowRate() const;
-
-    boost::optional<double> autosizedRatedPowerConsumption() const;
-
-    std::string designPowerSizingMethod() const;
-
     bool setDesignPowerSizingMethod(const std::string& designPowerSizingMethod);
-
-    double designElectricPowerPerUnitFlowRate() const;
 
     bool setDesignElectricPowerPerUnitFlowRate(double designElectricPowerPerUnitFlowRate);
 
-    double designShaftPowerPerUnitFlowRatePerUnitHead() const;
-
     bool setDesignShaftPowerPerUnitFlowRatePerUnitHead(double designShaftPowerPerUnitFlowRatePerUnitHead);
-
-    boost::optional<ThermalZone> zone() const;
 
     bool setZone(const ThermalZone& thermalZone);
 
     void resetZone();
 
-    double skinLossRadiativeFraction() const;
-
     bool setSkinLossRadiativeFraction(double skinLossRadiativeFraction);
 
     bool setEndUseSubcategory(const std::string& endUseSubcategory);
+
+    //@}
+    /** @name Other */
+    //@{
+
+    boost::optional<double> autosizedRatedSteamVolumeFlowRate() const;
+
+    boost::optional<double> autosizedRatedPowerConsumption() const;
 
     //@}
    protected:
