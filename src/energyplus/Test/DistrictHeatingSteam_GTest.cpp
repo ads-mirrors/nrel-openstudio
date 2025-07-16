@@ -10,6 +10,8 @@
 
 #include "../../model/Model.hpp"
 #include "../../model/DistrictHeatingSteam.hpp"
+#include "../../model/PlantLoop.hpp"
+#include "../../model/ScheduleConstant.hpp"
 
 #include <utilities/idd/DistrictHeating_Steam_FieldEnums.hxx>
 #include <utilities/idd/Pipe_Adiabatic_FieldEnums.hxx>

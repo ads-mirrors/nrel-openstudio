@@ -10,6 +10,7 @@
 
 #include "../../model/Model.hpp"
 #include "../../model/DistrictHeatingWater.hpp"
+#include "../../model/PlantLoop.hpp"
 #include "../../model/ScheduleConstant.hpp"
 
 #include <utilities/idd/DistrictHeating_Water_FieldEnums.hxx>
