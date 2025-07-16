@@ -39,43 +39,28 @@ namespace openstudio {
 
 namespace energyplus {
 
+  boost::optional<IdfObject> ForwardTranslator::createPipeAdiabatic(bool hasSteam) {
+    // PipeAdiabatic or PipeAdiabaticSteam
+
+    boost::optional<IdfObject> idfObject;
+    idfObject = IdfObject(IddObjectType::Pipe_Adiabatic);
+    if (hasSteam) {
+      idfObject = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
+    } else {
+      idfObject = IdfObject(IddObjectType::Pipe_Adiabatic);
+    }
+
+    return idfObject;
+  }
+
   boost::optional<IdfObject> ForwardTranslator::translatePipeAdiabatic(PipeAdiabatic& modelObject) {
     OptionalString s;
     OptionalDouble d;
     OptionalModelObject temp;
 
-    // PipeAdiabatic or PipeAdiabaticSteam
-    bool hasWater = false;
-    bool hasSteam = false;
-
-    std::vector<PlantLoop> plantLoops = modelObject.model().getConcreteModelObjects<PlantLoop>();
-    for (const auto& plantLoop : plantLoops) {
-      std::vector<ModelObject> components = plantLoop.components();
-      for (auto& component : components) {
-        if (component.handle() == modelObject.handle()) {
-
-          for (auto& component : components) {
-            if (component.optionalCast<PipeAdiabatic>() || component.optionalCast<Node>() || component.optionalCast<Mixer>()
-                || component.optionalCast<Splitter>()) {
-              // no-op
-            } else if (component.optionalCast<BoilerSteam>() || component.optionalCast<DistrictHeatingSteam>()
-                       || component.optionalCast<PumpVariableSpeedCondensate>() || component.optionalCast<CoilHeatingSteam>()
-                       || component.optionalCast<CoilHeatingSteamBaseboardRadiant>()) {
-              hasSteam = true;
-            } else {
-              hasWater = true;
-            }
-          }
-        }
-      }
-    }
-
-    boost::optional<IdfObject> idfObject;
-    if (hasWater) {
-      idfObject = IdfObject(IddObjectType::Pipe_Adiabatic);
-    } else if (hasSteam) {
-      idfObject = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
-    }
+    boost::optional<PlantLoop> plantLoop = modelObject.plantLoop();
+    auto [hasWater, hasSteam] = hasWaterAndSteam(*plantLoop);
+    boost::optional<IdfObject> idfObject = createPipeAdiabatic(hasSteam);
 
     m_idfObjects.push_back(*idfObject);
 

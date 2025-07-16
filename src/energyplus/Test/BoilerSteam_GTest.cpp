@@ -11,6 +11,8 @@
 #include "../../model/Model.hpp"
 #include "../../model/BoilerSteam.hpp"
 #include "../../model/PlantLoop.hpp"
+#include "../../model/CoilHeatingWater.hpp"
+#include "../../model/PipeAdiabatic.hpp"
 
 #include <utilities/idd/Boiler_Steam_FieldEnums.hxx>
 #include <utilities/idd/Pipe_Adiabatic_FieldEnums.hxx>
@@ -74,4 +76,29 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_BoilerSteam) {
   EXPECT_EQ(bs.outletModelObject().get().nameString(), idf_bs.getString(Boiler_SteamFields::SteamOutletNodeName, false).get());
   EXPECT_EQ(0.5, idf_bs.getDouble(Boiler_SteamFields::SizingFactor, false).get());
   EXPECT_EQ("SteamBoiler", idf_bs.getString(Boiler_SteamFields::EndUseSubcategory, false).get());
+}
+
+TEST_F(EnergyPlusFixture, ForwardTranslator_WaterAndSteam) {
+  Model m;
+
+  PlantLoop plant_loop(m);
+  PipeAdiabatic pipe(m);
+  EXPECT_TRUE(plant_loop.addSupplyBranchForComponent(pipe));
+
+  BoilerSteam bs(m);
+  CoilHeatingWater chw(m);
+
+  EXPECT_TRUE(plant_loop.addSupplyBranchForComponent(bs));
+  EXPECT_TRUE(plant_loop.addDemandBranchForComponent(chw));
+
+  ForwardTranslator ft;
+  Workspace w = ft.translateModel(m);
+
+  EXPECT_EQ(2u, ft.errors().size());
+  EXPECT_EQ("Did not translate Object of type 'OS:PlantLoop' and named 'Plant Loop 1' because there is a mix of Water and Steam components.",
+            ft.errors().front().logMessage());
+
+  EXPECT_EQ(0u, w.getObjectsByType(IddObjectType::PlantLoop).size());
+  ASSERT_EQ(0u, w.getObjectsByType(IddObjectType::Pipe_Adiabatic).size());
+  ASSERT_EQ(0u, w.getObjectsByType(IddObjectType::Pipe_Adiabatic_Steam).size());
 }

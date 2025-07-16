@@ -468,7 +468,36 @@ namespace energyplus {
     return branchIdfObject;
   }
 
+  std::pair<bool, bool> ForwardTranslator::hasWaterAndSteam(Loop& loop) {
+    bool hasWater = false;
+    bool hasSteam = false;
+
+    std::vector<ModelObject> components = loop.components();
+
+    for (auto& component : components) {
+      if (component.optionalCast<PipeAdiabatic>() || component.optionalCast<Node>() || component.optionalCast<Mixer>()
+          || component.optionalCast<Splitter>()) {  // these are components associated with either Water or Steam
+        // no-op
+      } else if (component.optionalCast<BoilerSteam>() || component.optionalCast<DistrictHeatingSteam>()
+                 || component.optionalCast<PumpVariableSpeedCondensate>() || component.optionalCast<CoilHeatingSteam>()
+                 || component.optionalCast<CoilHeatingSteamBaseboardRadiant>()) {
+        hasSteam = true;
+      } else {
+        hasWater = true;
+      }
+    }
+
+    return std::pair<bool, bool>{hasWater, hasSteam};
+  }
+
   boost::optional<IdfObject> ForwardTranslator::translatePlantLoop(PlantLoop& plantLoop) {
+    // First check that the plant loop does not have both Water AND Steam components
+    auto [hasWater, hasSteam] = hasWaterAndSteam(plantLoop);
+    if (hasWater && hasSteam) {
+      LOG(Error, "Did not translate " << plantLoop.briefDescription() << " because there is a mix of Water and Steam components.");
+      return boost::none;
+    }
+
     // Create a new IddObjectType::PlantLoop
     IdfObject idfObject(IddObjectType::PlantLoop);
     m_idfObjects.push_back(idfObject);
@@ -589,29 +618,6 @@ namespace energyplus {
     idfObject.setString(PlantLoopFields::DemandSideInletNodeName, plantLoop.demandInletNode().name().get());
     idfObject.setString(PlantLoopFields::DemandSideOutletNodeName, plantLoop.demandOutletNode().name().get());
 
-    std::vector<ModelObject> components = plantLoop.components();
-
-    // PipeAdiabatic or PipeAdiabaticSteam
-    bool hasWater = false;
-    bool hasSteam = false;
-
-    for (auto& component : components) {
-      if (component.optionalCast<PipeAdiabatic>() || component.optionalCast<Node>() || component.optionalCast<Mixer>()
-          || component.optionalCast<Splitter>()) {
-        // no-op
-      } else if (component.optionalCast<BoilerSteam>() || component.optionalCast<DistrictHeatingSteam>()
-                 || component.optionalCast<PumpVariableSpeedCondensate>() || component.optionalCast<CoilHeatingSteam>()
-                 || component.optionalCast<CoilHeatingSteamBaseboardRadiant>()) {
-        hasSteam = true;
-      } else {
-        hasWater = true;
-      }
-    }
-
-    if (hasWater && hasSteam) {
-      LOG(Error, "Did not translate " << plantLoop.briefDescription() << " because there is a mix of Water and Steam components.");
-    }
-
     SizingPlant sizingPlant = plantLoop.sizingPlant();
     translateAndMapModelObject(sizingPlant);
 
@@ -679,12 +685,7 @@ namespace energyplus {
     if (supplyInletModelObjects.size() > 2u) {
       populateBranch(_supplyInletBranch, supplyInletModelObjects, plantLoop, true);
     } else {
-      boost::optional<IdfObject> pipe;
-      if (hasWater) {
-        pipe = IdfObject(IddObjectType::Pipe_Adiabatic);
-      } else if (hasSteam) {
-        pipe = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
-      }
+      boost::optional<IdfObject> pipe = createPipeAdiabatic(hasSteam);
       pipe->setName(plantLoop.name().get() + " Supply Inlet Pipe");
       m_idfObjects.push_back(*pipe);
 
@@ -737,12 +738,7 @@ namespace energyplus {
       if (allComponents.size() > 2u) {
         populateBranch(_equipmentBranch, allComponents, plantLoop, true);
       } else {
-        boost::optional<IdfObject> pipe;
-        if (hasWater) {
-          pipe = IdfObject(IddObjectType::Pipe_Adiabatic);
-        } else if (hasSteam) {
-          pipe = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
-        }
+        boost::optional<IdfObject> pipe = createPipeAdiabatic(hasSteam);
         pipe->setName(plantLoop.name().get() + " Supply Branch " + istring + " Pipe");
         m_idfObjects.push_back(*pipe);
 
@@ -782,12 +778,7 @@ namespace energyplus {
     if (supplyOutletModelObjects.size() > 2u) {
       populateBranch(_supplyOutletBranch, supplyOutletModelObjects, plantLoop, true);
     } else {
-      boost::optional<IdfObject> pipe;
-      if (hasWater) {
-        pipe = IdfObject(IddObjectType::Pipe_Adiabatic);
-      } else if (hasSteam) {
-        pipe = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
-      }
+      boost::optional<IdfObject> pipe = createPipeAdiabatic(hasSteam);
       pipe->setName(plantLoop.name().get() + " Supply Outlet Pipe");
       m_idfObjects.push_back(*pipe);
 
@@ -864,12 +855,7 @@ namespace energyplus {
     if (demandInletModelObjects.size() > 2u) {
       populateBranch(_demandInletBranch, demandInletModelObjects, plantLoop, false);
     } else {
-      boost::optional<IdfObject> pipe;
-      if (hasWater) {
-        pipe = IdfObject(IddObjectType::Pipe_Adiabatic);
-      } else if (hasSteam) {
-        pipe = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
-      }
+      boost::optional<IdfObject> pipe = createPipeAdiabatic(hasSteam);
       pipe->setName(plantLoop.name().get() + " Demand Inlet Pipe");
       m_idfObjects.push_back(*pipe);
 
@@ -922,12 +908,7 @@ namespace energyplus {
       if (allComponents.size() > 2u) {
         populateBranch(_equipmentBranch, allComponents, plantLoop, false);
       } else {
-        boost::optional<IdfObject> pipe;
-        if (hasWater) {
-          pipe = IdfObject(IddObjectType::Pipe_Adiabatic);
-        } else if (hasSteam) {
-          pipe = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
-        }
+        boost::optional<IdfObject> pipe = createPipeAdiabatic(hasSteam);
         pipe->setName(plantLoop.name().get() + " Demand Branch " + istring + " Pipe");
         m_idfObjects.push_back(*pipe);
 
@@ -964,12 +945,7 @@ namespace energyplus {
       eg = _demandBranchList.pushExtensibleGroup();
       eg.setString(BranchListExtensibleFields::BranchName, _equipmentBranch.name().get());
 
-      boost::optional<IdfObject> pipe;
-      if (hasWater) {
-        pipe = IdfObject(IddObjectType::Pipe_Adiabatic);
-      } else if (hasSteam) {
-        pipe = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
-      }
+      boost::optional<IdfObject> pipe = createPipeAdiabatic(hasSteam);
       pipe->setName(plantLoop.name().get() + " Demand Bypass Pipe");
       m_idfObjects.push_back(*pipe);
 
@@ -1006,12 +982,7 @@ namespace energyplus {
     if (demandOutletModelObjects.size() > 2u) {
       populateBranch(_demandOutletBranch, demandOutletModelObjects, plantLoop, false);
     } else {
-      boost::optional<IdfObject> pipe;
-      if (hasWater) {
-        pipe = IdfObject(IddObjectType::Pipe_Adiabatic);
-      } else if (hasSteam) {
-        pipe = IdfObject(IddObjectType::Pipe_Adiabatic_Steam);
-      }
+      boost::optional<IdfObject> pipe = createPipeAdiabatic(hasSteam);
       pipe->setName(plantLoop.name().get() + " Demand Outlet Pipe");
       m_idfObjects.push_back(*pipe);
 
