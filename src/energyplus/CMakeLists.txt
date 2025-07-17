@@ -728,6 +728,7 @@ set(${target_name}_test_src
   Test/CoilHeatingGasMultiStage_GTest.cpp
   Test/CoilHeatingWaterToAirHeatPumpEquationFit_GTest.cpp
   Test/CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit_GTest.cpp
+  Test/CoilHeatingSteam_GTest.cpp
   Test/CoilSystemCoolingWater_GTest.cpp
   Test/CoilSystemCoolingWaterHeatExchangerAssisted_GTest.cpp
   Test/CoilSystemIntegratedHeatPumpAirSource_GTest.cpp

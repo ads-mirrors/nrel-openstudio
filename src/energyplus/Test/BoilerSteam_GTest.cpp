@@ -11,19 +11,8 @@
 #include "../../model/Model.hpp"
 #include "../../model/BoilerSteam.hpp"
 #include "../../model/PlantLoop.hpp"
-#include "../../model/CoilHeatingWater.hpp"
-#include "../../model/CoilHeatingSteam.hpp"
-#include "../../model/PipeAdiabatic.hpp"
-#include "../../model/AirTerminalSingleDuctVAVReheat.hpp"
-#include "../../model/Schedule.hpp"
-#include "../../model/ThermalZone.hpp"
-#include "../../model/Space.hpp"
-#include "../../model/AirLoopHVAC.hpp"
 
 #include <utilities/idd/Boiler_Steam_FieldEnums.hxx>
-#include <utilities/idd/Pipe_Adiabatic_FieldEnums.hxx>
-#include <utilities/idd/Pipe_Adiabatic_Steam_FieldEnums.hxx>
-#include <utilities/idd/AirTerminal_SingleDuct_VAV_Reheat_FieldEnums.hxx>
 
 #include <utilities/idd/IddEnums.hxx>
 #include "../../utilities/idf/IdfObject.hpp"
@@ -83,58 +72,4 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_BoilerSteam) {
   EXPECT_EQ(bs.outletModelObject().get().nameString(), idf_bs.getString(Boiler_SteamFields::SteamOutletNodeName, false).get());
   EXPECT_EQ(0.5, idf_bs.getDouble(Boiler_SteamFields::SizingFactor, false).get());
   EXPECT_EQ("SteamBoiler", idf_bs.getString(Boiler_SteamFields::EndUseSubcategory, false).get());
-}
-
-TEST_F(EnergyPlusFixture, ForwardTranslator_WaterAndSteam) {
-  Model m;
-
-  PlantLoop plant_loop(m);
-  PipeAdiabatic pipe(m);
-  EXPECT_TRUE(plant_loop.addSupplyBranchForComponent(pipe));
-
-  BoilerSteam bs(m);
-  CoilHeatingWater chw(m);
-
-  EXPECT_TRUE(plant_loop.addSupplyBranchForComponent(bs));
-  EXPECT_TRUE(plant_loop.addDemandBranchForComponent(chw));
-
-  ForwardTranslator ft;
-  Workspace w = ft.translateModel(m);
-
-  EXPECT_EQ(2u, ft.errors().size());
-  EXPECT_EQ("Did not translate Object of type 'OS:PlantLoop' and named 'Plant Loop 1' because there is a mix of Water and Steam components.",
-            ft.errors().front().logMessage());
-
-  EXPECT_EQ(0u, w.getObjectsByType(IddObjectType::PlantLoop).size());
-  ASSERT_EQ(0u, w.getObjectsByType(IddObjectType::Pipe_Adiabatic).size());
-  ASSERT_EQ(0u, w.getObjectsByType(IddObjectType::Pipe_Adiabatic_Steam).size());
-}
-
-TEST_F(EnergyPlusFixture, ForwardTranslator_CoilHeatingSteam) {
-  Model m;
-
-  ThermalZone z(m);
-  Space s(m);
-  s.setThermalZone(z);
-
-  Schedule sch = m.alwaysOnDiscreteSchedule();
-  CoilHeatingSteam coil = CoilHeatingSteam(m, sch);
-  AirTerminalSingleDuctVAVReheat atu(m, sch, coil);
-
-  AirLoopHVAC a(m);
-  a.addBranchForZone(z, atu);
-
-  ForwardTranslator ft;
-  Workspace w = ft.translateModel(m);
-
-  WorkspaceObjectVector idf_atus(w.getObjectsByType(IddObjectType::AirTerminal_SingleDuct_VAV_Reheat));
-  ASSERT_EQ(1u, idf_atus.size());
-  WorkspaceObject idf_atu(idf_atus[0]);
-
-  EXPECT_EQ("Coil:Heating:Steam", idf_atu.getString(AirTerminal_SingleDuct_VAV_ReheatFields::ReheatCoilObjectType).get());
-
-  boost::optional<WorkspaceObject> woReheatCoil(idf_atu.getTarget(AirTerminal_SingleDuct_VAV_ReheatFields::ReheatCoilName));
-  EXPECT_TRUE(woReheatCoil);
-  EXPECT_EQ(woReheatCoil->iddObject().type(), IddObjectType::Coil_Heating_Steam);
-  EXPECT_EQ("Coil Heating Steam 1", woReheatCoil->nameString());
 }
