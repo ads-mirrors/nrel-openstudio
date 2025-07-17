@@ -389,20 +389,6 @@ namespace model {
     }
 
     boost::optional<ZoneHVACComponent> CoilHeatingSteam_Impl::containingZoneHVACComponent() const {
-      // ZoneHVACFourPipeFanCoil
-
-      std::vector<ZoneHVACFourPipeFanCoil> zoneHVACFourPipeFanCoils;
-
-      zoneHVACFourPipeFanCoils = this->model().getConcreteModelObjects<ZoneHVACFourPipeFanCoil>();
-
-      for (const auto& zoneHVACFourPipeFanCoil : zoneHVACFourPipeFanCoils) {
-        if (boost::optional<HVACComponent> coil = zoneHVACFourPipeFanCoil.heatingCoil()) {
-          if (coil->handle() == this->handle()) {
-            return zoneHVACFourPipeFanCoil;
-          }
-        }
-      }
-
       // ZoneHVACPackagedTerminalAirConditioner
 
       std::vector<ZoneHVACPackagedTerminalAirConditioner> zoneHVACPackagedTerminalAirConditioners;
@@ -472,6 +458,9 @@ namespace model {
           }
         }
       }
+
+      // ZoneHVACTerminalUnitVariableRefrigerantFlow
+      // TODO?
 
       return boost::none;
     }
