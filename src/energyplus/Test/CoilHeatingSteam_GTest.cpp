@@ -16,6 +16,8 @@
 #include "../../model/CoilHeatingGasMultiStage.hpp"
 #include "../../model/CoilHeatingWaterToAirHeatPumpEquationFit.hpp"
 #include "../../model/CoilCoolingWaterToAirHeatPumpEquationFit.hpp"
+#include "../../model/CoilCoolingDXVariableRefrigerantFlow.hpp"
+#include "../../model/CoilHeatingDXVariableRefrigerantFlow.hpp"
 #include "../../model/Schedule.hpp"
 #include "../../model/ThermalZone.hpp"
 #include "../../model/Space.hpp"
@@ -36,6 +38,7 @@
 #include "../../model/AirTerminalSingleDuctConstantVolumeFourPipeInduction.hpp"
 #include "../../model/ZoneHVACPackagedTerminalAirConditioner.hpp"
 #include "../../model/ZoneHVACPackagedTerminalHeatPump.hpp"
+#include "../../model/ZoneHVACTerminalUnitVariableRefrigerantFlow.hpp"
 #include "../../model/ZoneHVACWaterToAirHeatPump.hpp"
 #include "../../model/ZoneHVACUnitHeater.hpp"
 #include "../../model/ZoneHVACUnitVentilator.hpp"
@@ -52,6 +55,7 @@
 #include <utilities/idd/AirTerminal_SingleDuct_ConstantVolume_FourPipeInduction_FieldEnums.hxx>
 #include <utilities/idd/ZoneHVAC_PackagedTerminalAirConditioner_FieldEnums.hxx>
 #include <utilities/idd/ZoneHVAC_PackagedTerminalHeatPump_FieldEnums.hxx>
+#include <utilities/idd/ZoneHVAC_TerminalUnit_VariableRefrigerantFlow_FieldEnums.hxx>
 #include <utilities/idd/ZoneHVAC_WaterToAirHeatPump_FieldEnums.hxx>
 #include <utilities/idd/ZoneHVAC_UnitHeater_FieldEnums.hxx>
 #include <utilities/idd/ZoneHVAC_UnitVentilator_FieldEnums.hxx>
@@ -480,7 +484,40 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilHeatingSteam_Equipment) {
   }
 
   // ZoneHVAC:TerminalUnit:VariableRefrigerantFlow
-  // TODO?
+  {
+    Model m;
+
+    ThermalZone z(m);
+    Space s(m);
+    s.setThermalZone(z);
+
+    Schedule sch = m.alwaysOnDiscreteSchedule();
+    FanOnOff fan(m);
+    CoilCoolingDXVariableRefrigerantFlow c(m);
+    CoilHeatingDXVariableRefrigerantFlow h(m);
+    CoilHeatingSteam sh = CoilHeatingSteam(m, sch);
+    ZoneHVACTerminalUnitVariableRefrigerantFlow zh(m, c, h, fan);
+    EXPECT_TRUE(zh.setSupplementalHeatingCoil(sh));
+
+    zh.addToThermalZone(z);
+
+    ForwardTranslator ft;
+    Workspace w = ft.translateModel(m);
+
+    EXPECT_EQ(1u, w.getObjectsByType(IddObjectType::Coil_Heating_Steam).size());
+    WorkspaceObjectVector idf_zhs(w.getObjectsByType(IddObjectType::ZoneHVAC_TerminalUnit_VariableRefrigerantFlow));
+    ASSERT_EQ(1u, idf_zhs.size());
+    WorkspaceObject idf_zh(idf_zhs[0]);
+
+    EXPECT_EQ("Coil:Heating:Steam", idf_zh.getString(ZoneHVAC_TerminalUnit_VariableRefrigerantFlowFields::SupplementalHeatingCoilObjectType).get());
+    boost::optional<WorkspaceObject> woSuppHeatCoil(
+      idf_zh.getTarget(ZoneHVAC_TerminalUnit_VariableRefrigerantFlowFields::SupplementalHeatingCoilName));
+    EXPECT_TRUE(woSuppHeatCoil);
+    EXPECT_EQ(woSuppHeatCoil->iddObject().type(), IddObjectType::Coil_Heating_Steam);
+    EXPECT_EQ("Coil Heating Steam 1", woSuppHeatCoil->nameString());
+    EXPECT_EQ(zh.nameString() + " Fan Outlet Node", woSuppHeatCoil->getString(Coil_Heating_SteamFields::AirInletNodeName).get());
+    EXPECT_EQ(zh.outletNode()->nameString(), woSuppHeatCoil->getString(Coil_Heating_SteamFields::AirOutletNodeName).get());
+  }
 
   // ZoneHVAC:WaterToAirHeatPump
   {
