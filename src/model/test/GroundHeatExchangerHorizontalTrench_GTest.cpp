@@ -243,7 +243,7 @@ TEST_F(ModelFixture, GroundHeatExchangerHorizontalTrench_Clone) {
     EXPECT_EQ(0u, m.getConcreteModelObjects<GroundHeatExchangerHorizontalTrench>().size());
     EXPECT_EQ(1u, m.getConcreteModelObjects<SiteGroundTemperatureUndisturbedXing>().size());
   }
-  
+
   //clone into another model
   {
     Model m;
