@@ -367,11 +367,12 @@ namespace model {
       return false;
     }
 
-    //clone object
     ModelObject GroundHeatExchangerVertical_Impl::clone(Model model) const {
-      auto newGroundHeatExchanger = StraightComponent_Impl::clone(model).cast<GroundHeatExchangerVertical>();
+      auto groundHeatExchangerClone = StraightComponent_Impl::clone(model).cast<GroundHeatExchangerVertical>();
 
-      return std::move(newGroundHeatExchanger);
+      groundHeatExchangerClone.setUndisturbedGroundTemperatureModel(undisturbedGroundTemperatureModel().clone(model));
+
+      return std::move(groundHeatExchangerClone);
     }
 
     bool GroundHeatExchangerVertical_Impl::addGFunction(double gFunctionLN, double gFunctionGValue) {

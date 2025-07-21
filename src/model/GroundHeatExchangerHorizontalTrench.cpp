@@ -259,6 +259,14 @@ namespace model {
       return false;
     }
 
+    ModelObject GroundHeatExchangerHorizontalTrench_Impl::clone(Model model) const {
+      auto groundHeatExchangerClone = StraightComponent_Impl::clone(model).cast<GroundHeatExchangerHorizontalTrench>();
+
+      groundHeatExchangerClone.setUndisturbedGroundTemperatureModel(undisturbedGroundTemperatureModel().clone(model));
+
+      return std::move(groundHeatExchangerClone);
+    }
+
     ComponentType GroundHeatExchangerHorizontalTrench_Impl::componentType() const {
       return ComponentType::Both;
     }
