@@ -9,6 +9,8 @@
 #include "PlantLoop_Impl.hpp"
 #include "Node.hpp"
 #include "Node_Impl.hpp"
+#include "Model.hpp"
+#include "Model_Impl.hpp"
 #include "SiteGroundTemperatureUndisturbedKusudaAchenbach.hpp"
 #include "SiteGroundTemperatureUndisturbedKusudaAchenbach_Impl.hpp"
 
