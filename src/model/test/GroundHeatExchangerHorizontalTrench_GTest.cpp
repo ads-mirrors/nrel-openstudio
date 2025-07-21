@@ -11,6 +11,10 @@
 #include "../SiteGroundTemperatureUndisturbedKusudaAchenbach_Impl.hpp"
 #include "../SiteGroundTemperatureUndisturbedXing.hpp"
 #include "../SiteGroundTemperatureUndisturbedXing_Impl.hpp"
+#include "../AirLoopHVAC.hpp"
+#include "../PlantLoop.hpp"
+#include "../Node.hpp"
+#include "../Node_Impl.hpp"
 
 using namespace openstudio;
 using namespace openstudio::model;
