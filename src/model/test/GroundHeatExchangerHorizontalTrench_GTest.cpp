@@ -189,7 +189,7 @@ TEST_F(ModelFixture, GroundHeatExchangerHorizontalTrench_Clone) {
 
     auto ghClone = gh.clone(m).cast<GroundHeatExchangerHorizontalTrench>();
     EXPECT_EQ(2u, m.getConcreteModelObjects<GroundHeatExchangerHorizontalTrench>().size());
-    EXPECT_EQ(1u, m.getConcreteModelObjects<SiteGroundTemperatureUndisturbedKusudaAchenbach>().size());
+    EXPECT_EQ(2u, m.getConcreteModelObjects<SiteGroundTemperatureUndisturbedKusudaAchenbach>().size());
 
     ModelObject undisturbedGroundTemperatureModel = gh.undisturbedGroundTemperatureModel();
     boost::optional<SiteGroundTemperatureUndisturbedKusudaAchenbach> uka =
@@ -201,7 +201,7 @@ TEST_F(ModelFixture, GroundHeatExchangerHorizontalTrench_Clone) {
     boost::optional<SiteGroundTemperatureUndisturbedKusudaAchenbach> ukaClone =
       undisturbedGroundTemperatureModelClone.optionalCast<SiteGroundTemperatureUndisturbedKusudaAchenbach>();
     ASSERT_TRUE(ukaClone);
-    EXPECT_EQ(sgt, ukaClone.get());
+    EXPECT_NE(sgt, ukaClone.get());
 
     gh.remove();
     EXPECT_EQ(1u, m.getConcreteModelObjects<GroundHeatExchangerHorizontalTrench>().size());
