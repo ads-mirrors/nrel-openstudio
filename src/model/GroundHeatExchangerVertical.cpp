@@ -375,6 +375,14 @@ namespace model {
       return std::move(groundHeatExchangerClone);
     }
 
+    std::vector<ModelObject> GroundHeatExchangerVertical_Impl::children() const {
+      std::vector<ModelObject> result;
+
+      result.push_back(undisturbedGroundTemperatureModel());
+
+      return result;
+    }
+
     bool GroundHeatExchangerVertical_Impl::addGFunction(double gFunctionLN, double gFunctionGValue) {
       auto eg = getObject<ModelObject>().pushExtensibleGroup().cast<WorkspaceExtensibleGroup>();
 

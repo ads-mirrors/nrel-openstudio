@@ -269,6 +269,14 @@ namespace model {
       return std::move(groundHeatExchangerClone);
     }
 
+    std::vector<ModelObject> GroundHeatExchangerHorizontalTrench_Impl::children() const {
+      std::vector<ModelObject> result;
+
+      result.push_back(undisturbedGroundTemperatureModel());
+
+      return result;
+    }
+
     ComponentType GroundHeatExchangerHorizontalTrench_Impl::componentType() const {
       return ComponentType::Both;
     }
