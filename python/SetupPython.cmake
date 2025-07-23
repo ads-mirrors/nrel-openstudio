@@ -35,9 +35,19 @@ else()
   endif()
 endif()
 
-execute_process(COMMAND ${CMAKE_COMMAND} -E env --unset=PIP_REQUIRE_VIRTUALENV ${Python_EXECUTABLE}
-  -m pip install --target=${ENERGYPLUS_DIR}/python_standard_lib --upgrade -r ${PROJECT_SOURCE_DIR}/python/requirements.txt
+execute_process(COMMAND ${Python_EXECUTABLE} -c "import requests; print(requests.__version__)"
+  RESULT_VARIABLE _PyRequests_STATUS
+      OUTPUT_VARIABLE PyRequests_Version
+      ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+if(_PyRequests_STATUS AND NOT _PyRequests_STATUS EQUAL 0)
+  message(AUTHOR_WARNING "requests isn't installed on your system python, so some tests won't be run. Run `pip install requests`")
+  set(PyRequests_AVAILABLE OFF)
+else()
+  message("Found Python requests: ${PyRequests_Version}")
+  set(PyRequests_AVAILABLE ON)
+endif()
 
 get_filename_component(Python_PROGRAM_NAME ${Python_EXECUTABLE} NAME)
 

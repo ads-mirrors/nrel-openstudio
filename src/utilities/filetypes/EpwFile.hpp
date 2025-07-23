@@ -126,7 +126,7 @@ OPENSTUDIO_ENUM(EpwComputedField,
   ((Density)(Density))
   ((SpecificVolume)(Specific Volume))
 );
-// cppcheck-suppress unknownMacro
+// cppcheck-suppress [unknownMacro, syntaxError]
 OPENSTUDIO_ENUM(EpwDesignField,
   ((TitleOfDesignCondition)(Title of Design Condition)(0))
   ((Blank)(Blank))
@@ -197,6 +197,25 @@ OPENSTUDIO_ENUM(EpwDesignField,
   ((ExtremeN50YearsMinDryBulb)(Extreme N50 Years Min Dry Bulb))
   ((ExtremeN50YearsMaxDryBulb)(Extreme N50 Years Max Dry Bulb))
 );
+// cppcheck-suppress [unknownMacro, syntaxError]
+OPENSTUDIO_ENUM(EpwDepthField,
+  ((GroundTemperatureDepth)(Ground Temperature Depth)(0))
+  ((SoilConductivity)(Soil Conductivity))
+  ((SoilDensity)(Soil Density))
+  ((SoilSpecificHeat)(Soil Specific Heat))
+  ((JanGroundTemperature)(January Ground Temperature))
+  ((FebGroundTemperature)(February Ground Temperature))
+  ((MarGroundTemperature)(March Ground Temperature))
+  ((AprGroundTemperature)(April Ground Temperature))
+  ((MayGroundTemperature)(May Ground Temperature))
+  ((JunGroundTemperature)(June Ground Temperature))
+  ((JulGroundTemperature)(July Ground Temperature))
+  ((AugGroundTemperature)(August Ground Temperature))
+  ((SepGroundTemperature)(September Ground Temperature))
+  ((OctGroundTemperature)(October Ground Temperature))
+  ((NovGroundTemperature)(November Ground Temperature))
+  ((DecGroundTemperature)(December Ground Temperature))
+);
 
 // clang-format on
 
@@ -207,7 +226,7 @@ class UTILITIES_API EpwDataPoint
 {
  public:
   /** Create an empty EpwDataPoint object */
-  EpwDataPoint();
+  EpwDataPoint() = default;
   /** Create an EpwDataPoint object with specified properties */
   EpwDataPoint(int year, int month, int day, int hour, int minute, const std::string& dataSourceandUncertaintyFlags, double dryBulbTemperature,
                double dewPointTemperature, double relativeHumidity, double atmosphericStationPressure, double extraterrestrialHorizontalRadiation,
@@ -417,41 +436,42 @@ class UTILITIES_API EpwDataPoint
   void setLiquidPrecipitationQuantity(double liquidPrecipitationQuantity);
   bool setLiquidPrecipitationQuantity(const std::string& liquidPrecipitationQuantity);
 
-  int m_year;
-  int m_month;
-  int m_day;
-  int m_hour;
-  int m_minute;
+  int m_year = 1;
+  int m_month = 1;
+  int m_day = 1;
+  int m_hour = 1;
+  int m_minute = 0;
   std::string m_dataSourceandUncertaintyFlags;
-  std::string m_dryBulbTemperature;                     // units C, minimum> -70, maximum< 70, missing 99.9
-  std::string m_dewPointTemperature;                    // units C, minimum> -70, maximum< 70, missing 99.9
-  std::string m_relativeHumidity;                       // missing 999., minimum 0, maximum 110
-  std::string m_atmosphericStationPressure;             // units Pa, missing 999999.,  minimum> 31000, maximum< 120000
-  std::string m_extraterrestrialHorizontalRadiation;    // units Wh/m2, missing 9999., minimum 0
-  std::string m_extraterrestrialDirectNormalRadiation;  //units Wh/m2, missing 9999., minimum 0
-  std::string m_horizontalInfraredRadiationIntensity;   // units Wh/m2, missing 9999., minimum 0
-  std::string m_globalHorizontalRadiation;              // units Wh/m2, missing 9999., minimum 0
-  std::string m_directNormalRadiation;                  // units Wh/m2, missing 9999., minimum 0
-  std::string m_diffuseHorizontalRadiation;             // units Wh/m2, missing 9999., minimum 0
-  std::string m_globalHorizontalIlluminance;            // units lux, missing 999999., will be missing if >= 999900, minimum 0
-  std::string m_directNormalIlluminance;                // units lux, missing 999999., will be missing if >= 999900, minimum 0
-  std::string m_diffuseHorizontalIlluminance;           // units lux, missing 999999., will be missing if >= 999900, minimum 0
-  std::string m_zenithLuminance;                        // units Cd/m2, missing 9999., will be missing if >= 9999, minimum 0
-  std::string m_windDirection;                          // units degrees, missing 999., minimum 0, maximum 360
-  std::string m_windSpeed;                              // units m/s, missing 999., minimum 0, maximum 40
-  int m_totalSkyCover;                                  // missing 99, minimum 0, maximum 10
-  int m_opaqueSkyCover;                                 // used if Horizontal IR Intensity missing, missing 99, minimum 0, maximum 10
-  std::string m_visibility;                             // units km, missing 9999
-  std::string m_ceilingHeight;                          // units m, missing 99999
-  int m_presentWeatherObservation;
-  int m_presentWeatherCodes;
-  std::string m_precipitableWater;            // units mm, missing 999
-  std::string m_aerosolOpticalDepth;          // units thousandths, missing .999
-  std::string m_snowDepth;                    // units cm, missing 999
-  std::string m_daysSinceLastSnowfall;        // missing 99
-  std::string m_albedo;                       //missing 999
-  std::string m_liquidPrecipitationDepth;     // units mm, missing 999
-  std::string m_liquidPrecipitationQuantity;  // units hr, missing 99
+  // Note: all numeric fields should be stored as optional<T> instead of being string based
+  std::string m_dryBulbTemperature = "99.9";                     // units C, minimum> -70, maximum< 70, missing 99.9
+  std::string m_dewPointTemperature = "99.9";                    // units C, minimum> -70, maximum< 70, missing 99.9
+  std::string m_relativeHumidity = "999";                        // missing 999., minimum 0, maximum 110
+  std::string m_atmosphericStationPressure = "999999";           // units Pa, missing 999999.,  minimum> 31000, maximum< 120000
+  std::string m_extraterrestrialHorizontalRadiation = "9999";    // units Wh/m2, missing 9999., minimum 0
+  std::string m_extraterrestrialDirectNormalRadiation = "9999";  //units Wh/m2, missing 9999., minimum 0
+  std::string m_horizontalInfraredRadiationIntensity = "9999";   // units Wh/m2, missing 9999., minimum 0
+  std::string m_globalHorizontalRadiation = "9999";              // units Wh/m2, missing 9999., minimum 0
+  std::string m_directNormalRadiation = "9999";                  // units Wh/m2, missing 9999., minimum 0
+  std::string m_diffuseHorizontalRadiation = "9999";             // units Wh/m2, missing 9999., minimum 0
+  std::string m_globalHorizontalIlluminance = "999999";          // units lux, missing 999999., will be missing if >= 999900, minimum 0
+  std::string m_directNormalIlluminance = "999999";              // units lux, missing 999999., will be missing if >= 999900, minimum 0
+  std::string m_diffuseHorizontalIlluminance = "999999";         // units lux, missing 999999., will be missing if >= 999900, minimum 0
+  std::string m_zenithLuminance = "9999";                        // units Cd/m2, missing 9999., will be missing if >= 9999, minimum 0
+  std::string m_windDirection = "999";                           // units degrees, missing 999., minimum 0, maximum 360
+  std::string m_windSpeed = "999";                               // units m/s, missing 999., minimum 0, maximum 40
+  int m_totalSkyCover = 99;                                      // missing 99, minimum 0, maximum 10
+  int m_opaqueSkyCover = 99;                                     // used if Horizontal IR Intensity missing, missing 99, minimum 0, maximum 10
+  std::string m_visibility = "9999";                             // units km, missing 9999
+  std::string m_ceilingHeight = "99999";                         // units m, missing 99999
+  int m_presentWeatherObservation = 0;                           // TODO: this should be a bool, in EPW 0 = present, 9 = missing
+  int m_presentWeatherCodes = 0;                                 // TODO: this should be a struct, it stores 9 integer fields, only if prev field is 0
+  std::string m_precipitableWater = "999";                       // units mm, missing 999
+  std::string m_aerosolOpticalDepth = ".999";                    // units thousandths, missing .999
+  std::string m_snowDepth = "999";                               // units cm, missing 999
+  std::string m_daysSinceLastSnowfall = "99";                    // missing 99
+  std::string m_albedo = "999";                                  // missing 999
+  std::string m_liquidPrecipitationDepth = "999";                // units mm, missing 999
+  std::string m_liquidPrecipitationQuantity = "99";              // units hr, missing 99
 };
 
 class UTILITIES_API EpwHoliday
@@ -480,7 +500,7 @@ class UTILITIES_API EpwDesignCondition
 {
  public:
   /** Create an empty EpwDesignCondition object */
-  EpwDesignCondition();
+  EpwDesignCondition() = default;
   /** Create an EpwDesignCondition object with specified properties */
   EpwDesignCondition(
     const std::string& titleOfDesignCondition, int heatingColdestMonth, double heatingDryBulb99pt6, double heatingDryBulb99,
@@ -521,131 +541,131 @@ class UTILITIES_API EpwDesignCondition
   /** Returns the title of design condition */
   std::string titleOfDesignCondition() const;
   /** Returns the heating coldest month */
-  int heatingColdestMonth() const;
+  boost::optional<int> heatingColdestMonth() const;
   /** Returns the heating dry bulb temperature 99.6% in degrees C*/
-  double heatingDryBulb99pt6() const;
+  boost::optional<double> heatingDryBulb99pt6() const;
   /** Returns the heating dry bulb temperature 99% in degrees C*/
-  double heatingDryBulb99() const;
+  boost::optional<double> heatingDryBulb99() const;
   /** Returns the heating humidification dew point temperature 99.6% in degrees C*/
-  double heatingHumidificationDewPoint99pt6() const;
+  boost::optional<double> heatingHumidificationDewPoint99pt6() const;
   /** Returns the heating humidification humidity ratio 99.6% in g of moisture per kg of dry air */
-  double heatingHumidificationHumidityRatio99pt6() const;
+  boost::optional<double> heatingHumidificationHumidityRatio99pt6() const;
   /** Returns the heating humidification mean coincident dry bulb temperature 99.6% in degrees C*/
-  double heatingHumidificationMeanCoincidentDryBulb99pt6() const;
+  boost::optional<double> heatingHumidificationMeanCoincidentDryBulb99pt6() const;
   /** Returns the heating humidification dew point temperature 99% in degrees C*/
-  double heatingHumidificationDewPoint99() const;
+  boost::optional<double> heatingHumidificationDewPoint99() const;
   /** Returns the heating humidification humidity ratio 99% in g of moisture per kg of dry air */
-  double heatingHumidificationHumidityRatio99() const;
+  boost::optional<double> heatingHumidificationHumidityRatio99() const;
   /** Returns the heating humidification mean coincient dry bulb temperature 99% in degrees C */
-  double heatingHumidificationMeanCoincidentDryBulb99() const;
+  boost::optional<double> heatingHumidificationMeanCoincidentDryBulb99() const;
   /** Returns the heating coldest month wind speed 0.4% in m/s */
-  double heatingColdestMonthWindSpeed0pt4() const;
+  boost::optional<double> heatingColdestMonthWindSpeed0pt4() const;
   /** Returns the heating coldest month mean coincident dry bulb temperature 0.4% in degrees C*/
-  double heatingColdestMonthMeanCoincidentDryBulb0pt4() const;
+  boost::optional<double> heatingColdestMonthMeanCoincidentDryBulb0pt4() const;
   /** Returns the heating coldest month wind speed 1% in m/s */
-  double heatingColdestMonthWindSpeed1() const;
+  boost::optional<double> heatingColdestMonthWindSpeed1() const;
   /** Returns the heating coldest month mean coincident dry bulb temperature 1% in degrees C */
-  double heatingColdestMonthMeanCoincidentDryBulb1() const;
+  boost::optional<double> heatingColdestMonthMeanCoincidentDryBulb1() const;
   /** Returns the heating mean coincident wind speed 99.6% in m/s */
-  double heatingMeanCoincidentWindSpeed99pt6() const;
+  boost::optional<double> heatingMeanCoincidentWindSpeed99pt6() const;
   /** Returns the heating prevailing coincident wind direction 99.6% in degrees */
-  int heatingPrevailingCoincidentWindDirection99pt6() const;
+  boost::optional<int> heatingPrevailingCoincidentWindDirection99pt6() const;
   /** Returns the cooling hottest month */
-  int coolingHottestMonth() const;
+  boost::optional<int> coolingHottestMonth() const;
   /** Returns the cooling dry bulb temperature range in degrees C */
-  double coolingDryBulbRange() const;
+  boost::optional<double> coolingDryBulbRange() const;
   /** Returns the cooling dry bulb temperature 0.4% in degrees C */
-  double coolingDryBulb0pt4() const;
+  boost::optional<double> coolingDryBulb0pt4() const;
   /** Returns the cooling mean coincident wet bulb temperature in degrees C */
-  double coolingMeanCoincidentWetBulb0pt4() const;
+  boost::optional<double> coolingMeanCoincidentWetBulb0pt4() const;
   /** Returns the cooling dry bulb temperature 1% in degrees C */
-  double coolingDryBulb1() const;
+  boost::optional<double> coolingDryBulb1() const;
   /** Returns the cooling mean coincident wet bulb temperature 1% in degrees C */
-  double coolingMeanCoincidentWetBulb1() const;
+  boost::optional<double> coolingMeanCoincidentWetBulb1() const;
   /** Returns the cooling dry bulb temperature 2% in degrees C */
-  double coolingDryBulb2() const;
+  boost::optional<double> coolingDryBulb2() const;
   /** Returns the cooling mean coincident wet bulb temperature 2% in degrees C */
-  double coolingMeanCoincidentWetBulb2() const;
+  boost::optional<double> coolingMeanCoincidentWetBulb2() const;
   /** Returns the cooling evaporation wet bulb temperature 0.4% in degrees C */
-  double coolingEvaporationWetBulb0pt4() const;
+  boost::optional<double> coolingEvaporationWetBulb0pt4() const;
   /** Returns the cooling evaporation mean coincident dry bulb temperature 0.4% in degrees C */
-  double coolingEvaporationMeanCoincidentDryBulb0pt4() const;
+  boost::optional<double> coolingEvaporationMeanCoincidentDryBulb0pt4() const;
   /** Returns the cooling evaporation wet bulb temperature 1% in degrees C */
-  double coolingEvaporationWetBulb1() const;
+  boost::optional<double> coolingEvaporationWetBulb1() const;
   /** Returns the cooling evaporation mean coincident dry bulb temperature 1% in degrees C */
-  double coolingEvaporationMeanCoincidentDryBulb1() const;
+  boost::optional<double> coolingEvaporationMeanCoincidentDryBulb1() const;
   /** Returns the cooling evaporation wet bulb temperature 2% in degrees C */
-  double coolingEvaporationWetBulb2() const;
+  boost::optional<double> coolingEvaporationWetBulb2() const;
   /** Returns the cooling evaporation mean coincident dry bulb temperature 2% in degrees C */
-  double coolingEvaporationMeanCoincidentDryBulb2() const;
+  boost::optional<double> coolingEvaporationMeanCoincidentDryBulb2() const;
   /** Returns the cooling mean coincident wind speed 0.4% in m/s */
-  double coolingMeanCoincidentWindSpeed0pt4() const;
+  boost::optional<double> coolingMeanCoincidentWindSpeed0pt4() const;
   /** Returns the cooling prevailing coincident wind direction 0.4% in degrees */
-  int coolingPrevailingCoincidentWindDirection0pt4() const;
+  boost::optional<int> coolingPrevailingCoincidentWindDirection0pt4() const;
   /** Returns the cooling dehumidification dew point temperature 0.4% in degrees C */
-  double coolingDehumidificationDewPoint0pt4() const;
+  boost::optional<double> coolingDehumidificationDewPoint0pt4() const;
   /** Returns the cooling dehumidification humidity ratio 0.4% in g of moisture per kg of dry air */
-  double coolingDehumidificationHumidityRatio0pt4() const;
+  boost::optional<double> coolingDehumidificationHumidityRatio0pt4() const;
   /** Returns the cooling dehumidification mean coincident dry bulb temperature 0.4% in degrees C */
-  double coolingDehumidificationMeanCoincidentDryBulb0pt4() const;
+  boost::optional<double> coolingDehumidificationMeanCoincidentDryBulb0pt4() const;
   /** Returns the cooling dehumidification dew point temperature 1% in degrees C */
-  double coolingDehumidificationDewPoint1() const;
+  boost::optional<double> coolingDehumidificationDewPoint1() const;
   /** Returns the cooling dehumidification humidity ratio 1% in g of moisture per kg of dry air */
-  double coolingDehumidificationHumidityRatio1() const;
+  boost::optional<double> coolingDehumidificationHumidityRatio1() const;
   /** Returns the cooling dehumidification mean coincident dry bulb temperature 1% in degrees C */
-  double coolingDehumidificationMeanCoincidentDryBulb1() const;
+  boost::optional<double> coolingDehumidificationMeanCoincidentDryBulb1() const;
   /** Returns the cooling dehumidification dew point temperature 2% in degrees C */
-  double coolingDehumidificationDewPoint2() const;
+  boost::optional<double> coolingDehumidificationDewPoint2() const;
   /** Returns the cooling dehumidification humidity ratio 2% in g of moisture per kg of dry air */
-  double coolingDehumidificationHumidityRatio2() const;
+  boost::optional<double> coolingDehumidificationHumidityRatio2() const;
   /** Returns the cooling dehumidification mean coincident dry bulb temperature 2% in degrees C */
-  double coolingDehumidificationMeanCoincidentDryBulb2() const;
+  boost::optional<double> coolingDehumidificationMeanCoincidentDryBulb2() const;
   /** Returns the cooling enthalpy 0.4% in kJ/kg */
-  double coolingEnthalpy0pt4() const;
+  boost::optional<double> coolingEnthalpy0pt4() const;
   /** Returns the cooling enthalpy mean coincident dry bulb temperature 0.4% in degrees C */
-  double coolingEnthalpyMeanCoincidentDryBulb0pt4() const;
+  boost::optional<double> coolingEnthalpyMeanCoincidentDryBulb0pt4() const;
   /** Returns the cooling enthalpy 1% in kJ/kg */
-  double coolingEnthalpy1() const;
+  boost::optional<double> coolingEnthalpy1() const;
   /** Returns the cooling enthalpy mean coincident dry bulb temperature 1% in degrees C */
-  double coolingEnthalpyMeanCoincidentDryBulb1() const;
+  boost::optional<double> coolingEnthalpyMeanCoincidentDryBulb1() const;
   /** Returns the cooling enthalpy 2% in kJ/kg */
-  double coolingEnthalpy2() const;
+  boost::optional<double> coolingEnthalpy2() const;
   /** Returns the cooling enthalpy mean coincident dry bulb temperature 2% in degrees C */
-  double coolingEnthalpyMeanCoincidentDryBulb2() const;
+  boost::optional<double> coolingEnthalpyMeanCoincidentDryBulb2() const;
   /** Returns the number of cooling hours between 8am and 4pm with dry bulb temperature between 12.8 and 20.6 degrees C */
-  int coolingHours8To4AndDryBulb12pt8To20pt6() const;
+  boost::optional<int> coolingHours8To4AndDryBulb12pt8To20pt6() const;
   /** Returns the extreme wind speed 1% in m/s */
-  double extremeWindSpeed1() const;
+  boost::optional<double> extremeWindSpeed1() const;
   /** Returns the extreme wind speed 2.5% in m/s */
-  double extremeWindSpeed2pt5() const;
+  boost::optional<double> extremeWindSpeed2pt5() const;
   /** Returns the extreme wind speed 5% in m/s */
-  double extremeWindSpeed5() const;
+  boost::optional<double> extremeWindSpeed5() const;
   /** Returns the extreme maximum wet bulb temperature in degrees C */
-  double extremeMaxWetBulb() const;
+  boost::optional<double> extremeMaxWetBulb() const;
   /** Returns the extreme mean minimum dry bulb temperature in degrees C */
-  double extremeMeanMinDryBulb() const;
+  boost::optional<double> extremeMeanMinDryBulb() const;
   /** Returns the extreme mean maximum dry bulb temperature in degrees C */
-  double extremeMeanMaxDryBulb() const;
+  boost::optional<double> extremeMeanMaxDryBulb() const;
   /** Returns the extreme standard deviation minimum dry bulb temperature in degrees C */
-  double extremeStdDevMinDryBulb() const;
+  boost::optional<double> extremeStdDevMinDryBulb() const;
   /** Returns the extreme standard deviation maximum dry bulb temperature in degrees C */
-  double extremeStdDevMaxDryBulb() const;
+  boost::optional<double> extremeStdDevMaxDryBulb() const;
   /** Returns the extreme n=5 years minimum dry bulb temperature in degrees C */
-  double extremeN5YearsMinDryBulb() const;
+  boost::optional<double> extremeN5YearsMinDryBulb() const;
   /** Returns the extreme n=5 years maximum dry bulb temperature in degrees C */
-  double extremeN5YearsMaxDryBulb() const;
+  boost::optional<double> extremeN5YearsMaxDryBulb() const;
   /** Returns the extreme n=10 years minimum dry bulb temperature in degrees C */
-  double extremeN10YearsMinDryBulb() const;
+  boost::optional<double> extremeN10YearsMinDryBulb() const;
   /** Returns the extreme n=10 years maximum dry bulb temperature in degrees C */
-  double extremeN10YearsMaxDryBulb() const;
+  boost::optional<double> extremeN10YearsMaxDryBulb() const;
   /** Returns the extreme n=20 years minimum dry bulb temperature in degrees C */
-  double extremeN20YearsMinDryBulb() const;
+  boost::optional<double> extremeN20YearsMinDryBulb() const;
   /** Returns the extreme n=20 years maximum dry bulb temperature in degrees C */
-  double extremeN20YearsMaxDryBulb() const;
+  boost::optional<double> extremeN20YearsMaxDryBulb() const;
   /** Returns the extreme n=50 years minimum dry bulb temperature in degrees C */
-  double extremeN50YearsMinDryBulb() const;
+  boost::optional<double> extremeN50YearsMinDryBulb() const;
   /** Returns the extreme n=50 years maximum dry bulb temperature in degrees C */
-  double extremeN50YearsMaxDryBulb() const;
+  boost::optional<double> extremeN50YearsMaxDryBulb() const;
 
  private:
   // Setters
@@ -778,69 +798,187 @@ class UTILITIES_API EpwDesignCondition
   void setExtremeN50YearsMaxDryBulb(double extremeN50YearsMaxDryBulb);
 
   std::string m_titleOfDesignCondition;
-  int m_heatingColdestMonth;
-  double m_heatingDryBulb99pt6;
-  double m_heatingDryBulb99;
-  double m_heatingHumidificationDewPoint99pt6;
-  double m_heatingHumidificationHumidityRatio99pt6;
-  double m_heatingHumidificationMeanCoincidentDryBulb99pt6;
-  double m_heatingHumidificationDewPoint99;
-  double m_heatingHumidificationHumidityRatio99;
-  double m_heatingHumidificationMeanCoincidentDryBulb99;
-  double m_heatingColdestMonthWindSpeed0pt4;
-  double m_heatingColdestMonthMeanCoincidentDryBulb0pt4;
-  double m_heatingColdestMonthWindSpeed1;
-  double m_heatingColdestMonthMeanCoincidentDryBulb1;
-  double m_heatingMeanCoincidentWindSpeed99pt6;
-  int m_heatingPrevailingCoincidentWindDirection99pt6;
-  int m_coolingHottestMonth;
-  double m_coolingDryBulbRange;
-  double m_coolingDryBulb0pt4;
-  double m_coolingMeanCoincidentWetBulb0pt4;
-  double m_coolingDryBulb1;
-  double m_coolingMeanCoincidentWetBulb1;
-  double m_coolingDryBulb2;
-  double m_coolingMeanCoincidentWetBulb2;
-  double m_coolingEvaporationWetBulb0pt4;
-  double m_coolingEvaporationMeanCoincidentDryBulb0pt4;
-  double m_coolingEvaporationWetBulb1;
-  double m_coolingEvaporationMeanCoincidentDryBulb1;
-  double m_coolingEvaporationWetBulb2;
-  double m_coolingEvaporationMeanCoincidentDryBulb2;
-  double m_coolingMeanCoincidentWindSpeed0pt4;
-  int m_coolingPrevailingCoincidentWindDirection0pt4;
-  double m_coolingDehumidificationDewPoint0pt4;
-  double m_coolingDehumidificationHumidityRatio0pt4;
-  double m_coolingDehumidificationMeanCoincidentDryBulb0pt4;
-  double m_coolingDehumidificationDewPoint1;
-  double m_coolingDehumidificationHumidityRatio1;
-  double m_coolingDehumidificationMeanCoincidentDryBulb1;
-  double m_coolingDehumidificationDewPoint2;
-  double m_coolingDehumidificationHumidityRatio2;
-  double m_coolingDehumidificationMeanCoincidentDryBulb2;
-  double m_coolingEnthalpy0pt4;
-  double m_coolingEnthalpyMeanCoincidentDryBulb0pt4;
-  double m_coolingEnthalpy1;
-  double m_coolingEnthalpyMeanCoincidentDryBulb1;
-  double m_coolingEnthalpy2;
-  double m_coolingEnthalpyMeanCoincidentDryBulb2;
-  int m_coolingHours8To4AndDryBulb12pt8To20pt6;
-  double m_extremeWindSpeed1;
-  double m_extremeWindSpeed2pt5;
-  double m_extremeWindSpeed5;
-  double m_extremeMaxWetBulb;
-  double m_extremeMeanMinDryBulb;
-  double m_extremeMeanMaxDryBulb;
-  double m_extremeStdDevMinDryBulb;
-  double m_extremeStdDevMaxDryBulb;
-  double m_extremeN5YearsMinDryBulb;
-  double m_extremeN5YearsMaxDryBulb;
-  double m_extremeN10YearsMinDryBulb;
-  double m_extremeN10YearsMaxDryBulb;
-  double m_extremeN20YearsMinDryBulb;
-  double m_extremeN20YearsMaxDryBulb;
-  double m_extremeN50YearsMinDryBulb;
-  double m_extremeN50YearsMaxDryBulb;
+  boost::optional<int> m_heatingColdestMonth;
+  boost::optional<double> m_heatingDryBulb99pt6;
+  boost::optional<double> m_heatingDryBulb99;
+  boost::optional<double> m_heatingHumidificationDewPoint99pt6;
+  boost::optional<double> m_heatingHumidificationHumidityRatio99pt6;
+  boost::optional<double> m_heatingHumidificationMeanCoincidentDryBulb99pt6;
+  boost::optional<double> m_heatingHumidificationDewPoint99;
+  boost::optional<double> m_heatingHumidificationHumidityRatio99;
+  boost::optional<double> m_heatingHumidificationMeanCoincidentDryBulb99;
+  boost::optional<double> m_heatingColdestMonthWindSpeed0pt4;
+  boost::optional<double> m_heatingColdestMonthMeanCoincidentDryBulb0pt4;
+  boost::optional<double> m_heatingColdestMonthWindSpeed1;
+  boost::optional<double> m_heatingColdestMonthMeanCoincidentDryBulb1;
+  boost::optional<double> m_heatingMeanCoincidentWindSpeed99pt6;
+  boost::optional<int> m_heatingPrevailingCoincidentWindDirection99pt6;
+  boost::optional<int> m_coolingHottestMonth;
+  boost::optional<double> m_coolingDryBulbRange;
+  boost::optional<double> m_coolingDryBulb0pt4;
+  boost::optional<double> m_coolingMeanCoincidentWetBulb0pt4;
+  boost::optional<double> m_coolingDryBulb1;
+  boost::optional<double> m_coolingMeanCoincidentWetBulb1;
+  boost::optional<double> m_coolingDryBulb2;
+  boost::optional<double> m_coolingMeanCoincidentWetBulb2;
+  boost::optional<double> m_coolingEvaporationWetBulb0pt4;
+  boost::optional<double> m_coolingEvaporationMeanCoincidentDryBulb0pt4;
+  boost::optional<double> m_coolingEvaporationWetBulb1;
+  boost::optional<double> m_coolingEvaporationMeanCoincidentDryBulb1;
+  boost::optional<double> m_coolingEvaporationWetBulb2;
+  boost::optional<double> m_coolingEvaporationMeanCoincidentDryBulb2;
+  boost::optional<double> m_coolingMeanCoincidentWindSpeed0pt4;
+  boost::optional<int> m_coolingPrevailingCoincidentWindDirection0pt4;
+  boost::optional<double> m_coolingDehumidificationDewPoint0pt4;
+  boost::optional<double> m_coolingDehumidificationHumidityRatio0pt4;
+  boost::optional<double> m_coolingDehumidificationMeanCoincidentDryBulb0pt4;
+  boost::optional<double> m_coolingDehumidificationDewPoint1;
+  boost::optional<double> m_coolingDehumidificationHumidityRatio1;
+  boost::optional<double> m_coolingDehumidificationMeanCoincidentDryBulb1;
+  boost::optional<double> m_coolingDehumidificationDewPoint2;
+  boost::optional<double> m_coolingDehumidificationHumidityRatio2;
+  boost::optional<double> m_coolingDehumidificationMeanCoincidentDryBulb2;
+  boost::optional<double> m_coolingEnthalpy0pt4;
+  boost::optional<double> m_coolingEnthalpyMeanCoincidentDryBulb0pt4;
+  boost::optional<double> m_coolingEnthalpy1;
+  boost::optional<double> m_coolingEnthalpyMeanCoincidentDryBulb1;
+  boost::optional<double> m_coolingEnthalpy2;
+  boost::optional<double> m_coolingEnthalpyMeanCoincidentDryBulb2;
+  boost::optional<int> m_coolingHours8To4AndDryBulb12pt8To20pt6;
+  boost::optional<double> m_extremeWindSpeed1;
+  boost::optional<double> m_extremeWindSpeed2pt5;
+  boost::optional<double> m_extremeWindSpeed5;
+  boost::optional<double> m_extremeMaxWetBulb;
+  boost::optional<double> m_extremeMeanMinDryBulb;
+  boost::optional<double> m_extremeMeanMaxDryBulb;
+  boost::optional<double> m_extremeStdDevMinDryBulb;
+  boost::optional<double> m_extremeStdDevMaxDryBulb;
+  boost::optional<double> m_extremeN5YearsMinDryBulb;
+  boost::optional<double> m_extremeN5YearsMaxDryBulb;
+  boost::optional<double> m_extremeN10YearsMinDryBulb;
+  boost::optional<double> m_extremeN10YearsMaxDryBulb;
+  boost::optional<double> m_extremeN20YearsMinDryBulb;
+  boost::optional<double> m_extremeN20YearsMaxDryBulb;
+  boost::optional<double> m_extremeN50YearsMinDryBulb;
+  boost::optional<double> m_extremeN50YearsMaxDryBulb;
+};
+
+/** EpwGroundTemperatureDepth is one line from the EPW file. All floating point numbers are stored as strings,
+* but are checked as numbers.
+*/
+class UTILITIES_API EpwGroundTemperatureDepth
+{
+ public:
+  /** Create an empty EpwGroundTemperatureDepth object */
+  EpwGroundTemperatureDepth() = default;
+  /** Create an EpwGroundTemperatureDepth object with specified properties */
+  EpwGroundTemperatureDepth(double groundTemperatureDepth, double janGroundTemperature, double febGroundTemperature, double marGroundTemperature,
+                            double aprGroundTemperature, double mayGroundTemperature, double junGroundTemperature, double julGroundTemperature,
+                            double augGroundTemperature, double sepGroundTemperature, double octGroundTemperature, double novGroundTemperature,
+                            double decGroundTemperature,
+                            // Optional parameters
+                            boost::optional<double> soilConductivity_ = boost::none, boost::optional<double> soilDensity_ = boost::none,
+                            boost::optional<double> soilSpecificHeat_ = boost::none);
+  // Static
+  /** Returns the units of the named field */
+  static boost::optional<std::string> getUnitsByName(const std::string& name);
+  /** Returns the units of the field specified by enumeration value */
+  static std::string getUnits(EpwDepthField field);
+  // Data retrieval
+  /** Returns the double value of the named field if possible */
+  boost::optional<double> getFieldByName(const std::string& name);
+  /** Returns the dobule value of the field specified by enumeration value */
+  boost::optional<double> getField(EpwDepthField id);
+  // Conversion
+  /** Create an EpwGroundTemperatureDepth from an EPW-formatted string */
+  static boost::optional<EpwGroundTemperatureDepth> fromGroundTemperatureDepthsString(const std::string& line);
+  /** Create an EpwGroundTemperatureDepth from a list of EPW depths as strings */
+  static boost::optional<EpwGroundTemperatureDepth> fromGroundTemperatureDepthsStrings(const std::vector<std::string>& strings);
+  // Getters
+  /** Returns the depth of ground temperature in m*/
+  double groundTemperatureDepth() const;
+  /** Returns the soil conductivity in W/m-K*/
+  boost::optional<double> soilConductivity() const;
+  /** Returns the soil density in kg/m3*/
+  boost::optional<double> soilDensity() const;
+  /** Returns the soil specific heat in J/kg-K*/
+  boost::optional<double> soilSpecificHeat() const;
+  /** Returns the Jan undisturbed ground temperature in degrees C*/
+  double janGroundTemperature() const;
+  /** Returns the Feb undisturbed ground temperature in degrees C*/
+  double febGroundTemperature() const;
+  /** Returns the Mar undisturbed ground temperature in degrees C*/
+  double marGroundTemperature() const;
+  /** Returns the Apr undisturbed ground temperature in degrees C*/
+  double aprGroundTemperature() const;
+  /** Returns the May undisturbed ground temperature in degrees C*/
+  double mayGroundTemperature() const;
+  /** Returns the Jun undisturbed ground temperature in degrees C*/
+  double junGroundTemperature() const;
+  /** Returns the Jul undisturbed ground temperature in degrees C*/
+  double julGroundTemperature() const;
+  /** Returns the Aug undisturbed ground temperature in degrees C*/
+  double augGroundTemperature() const;
+  /** Returns the Sep undisturbed ground temperature in degrees C*/
+  double sepGroundTemperature() const;
+  /** Returns the Oct undisturbed ground temperature in degrees C*/
+  double octGroundTemperature() const;
+  /** Returns the Nov undisturbed ground temperature in degrees C*/
+  double novGroundTemperature() const;
+  /** Returns the Dec undisturbed ground temperature in degrees C*/
+  double decGroundTemperature() const;
+
+ private:
+  // Setters
+  void setGroundTemperatureDepth(double groundTemperatureDepth);
+  void setSoilConductivity(double soilConductivity);
+  void setSoilDensity(double soilDensity);
+  void setSoilSpecificHeat(double soilSpecificHeat);
+  void setJanGroundTemperature(double janGroundTemperature);
+  void setFebGroundTemperature(double febGroundTemperature);
+  void setMarGroundTemperature(double marGroundTemperature);
+  void setAprGroundTemperature(double aprGroundTemperature);
+  void setMayGroundTemperature(double mayGroundTemperature);
+  void setJunGroundTemperature(double junGroundTemperature);
+  void setJulGroundTemperature(double julGroundTemperature);
+  void setAugGroundTemperature(double augGroundTemperature);
+  void setSepGroundTemperature(double sepGroundTemperature);
+  void setOctGroundTemperature(double octGroundTemperature);
+  void setNovGroundTemperature(double novGroundTemperature);
+  void setDecGroundTemperature(double decGroundTemperature);
+  bool setGroundTemperatureDepth(const std::string& groundTemperatureDepth);
+  bool setSoilConductivity(const std::string& soilConductivity);
+  bool setSoilDensity(const std::string& soilDensity);
+  bool setSoilSpecificHeat(const std::string& soilSpecificHeat);
+  bool setJanGroundTemperature(const std::string& janGroundTemperature);
+  bool setFebGroundTemperature(const std::string& febGroundTemperature);
+  bool setMarGroundTemperature(const std::string& marGroundTemperature);
+  bool setAprGroundTemperature(const std::string& aprGroundTemperature);
+  bool setMayGroundTemperature(const std::string& mayGroundTemperature);
+  bool setJunGroundTemperature(const std::string& junGroundTemperature);
+  bool setJulGroundTemperature(const std::string& julGroundTemperature);
+  bool setAugGroundTemperature(const std::string& augGroundTemperature);
+  bool setSepGroundTemperature(const std::string& sepGroundTemperature);
+  bool setOctGroundTemperature(const std::string& octGroundTemperature);
+  bool setNovGroundTemperature(const std::string& novGroundTemperature);
+  bool setDecGroundTemperature(const std::string& decGroundTemperature);
+
+  double m_groundTemperatureDepth = -9999;
+  boost::optional<double> m_soilConductivity_;
+  boost::optional<double> m_soilDensity_;
+  boost::optional<double> m_soilSpecificHeat_;
+  double m_janGroundTemperature = -9999;
+  double m_febGroundTemperature = -9999;
+  double m_marGroundTemperature = -9999;
+  double m_aprGroundTemperature = -9999;
+  double m_mayGroundTemperature = -9999;
+  double m_junGroundTemperature = -9999;
+  double m_julGroundTemperature = -9999;
+  double m_augGroundTemperature = -9999;
+  double m_sepGroundTemperature = -9999;
+  double m_octGroundTemperature = -9999;
+  double m_novGroundTemperature = -9999;
+  double m_decGroundTemperature = -9999;
 };
 
 /** EpwFile parses a weather file in EPW format.  Later it may provide
@@ -919,6 +1057,9 @@ class UTILITIES_API EpwFile
   /// get the design conditions
   std::vector<EpwDesignCondition> designConditions();
 
+  /// get the ground temperature depths
+  std::vector<EpwGroundTemperatureDepth> groundTemperatureDepths();
+
   /// get a time series of a particular weather field
   // This will probably need to include the period at some point, but for now just dump everything into a time series
   boost::optional<TimeSeries> getTimeSeries(const std::string& field);
@@ -945,6 +1086,7 @@ class UTILITIES_API EpwFile
   bool parseDesignConditions(const std::string& line);
   bool parseDataPeriod(const std::string& line);
   bool parseHolidaysDaylightSavings(const std::string& line);
+  bool parseGroundTemperatures(const std::string& line);
 
   // configure logging
   REGISTER_LOGGER("openstudio.EpwFile");
@@ -968,6 +1110,7 @@ class UTILITIES_API EpwFile
   boost::optional<int> m_endDateActualYear;
   std::vector<EpwDataPoint> m_data;
   std::vector<EpwDesignCondition> m_designs;
+  std::vector<EpwGroundTemperatureDepth> m_depths;
 
   bool m_leapYearObserved;
   boost::optional<Date> m_daylightSavingStartDate;

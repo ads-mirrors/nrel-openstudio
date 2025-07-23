@@ -138,9 +138,15 @@ class UTILITIES_API WorkflowJSON
   openstudio::path rootDir() const;
   openstudio::path absoluteRootDir() const;
 
+  /** Sets the rootDir */
+  bool setRootDir(const openstudio::path& path);
+
   /** Returns the run directory, default value is './run'. Evaluated relative to rootDir if not absolute. */
   openstudio::path runDir() const;
   openstudio::path absoluteRunDir() const;
+
+  /** Sets the runDir */
+  bool setRunDir(const openstudio::path& path);
 
   /** Returns the path to write output OSW, default value is 'out.osw'. Evaluated relative to oswDir to ensure relative paths remain valid. */
   openstudio::path outPath() const;
@@ -232,6 +238,9 @@ class UTILITIES_API WorkflowJSON
 
   /** Reset RunOptions for this workflow. */
   void resetRunOptions();
+
+  /** Checks that all measures in the Workflow can be found, and are in the correct order (ModelMeasure > EnergyPlusMeasure > ReportingMeasure) */
+  bool validateMeasures() const;
 
  protected:
   // get the impl

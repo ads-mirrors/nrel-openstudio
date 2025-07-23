@@ -1207,6 +1207,11 @@ namespace energyplus {
         retVal = translateCoilPerformanceDXCooling(mo);
         break;
       }
+      case openstudio::IddObjectType::OS_CoilSystem_Cooling_Water: {
+        auto mo = modelObject.cast<CoilSystemCoolingWater>();
+        retVal = translateCoilSystemCoolingWater(mo);
+        break;
+      }
       case openstudio::IddObjectType::OS_CoilSystem_Cooling_Water_HeatExchangerAssisted: {
         auto mo = modelObject.cast<CoilSystemCoolingWaterHeatExchangerAssisted>();
         retVal = translateCoilSystemCoolingWaterHeatExchangerAssisted(mo);
@@ -1497,9 +1502,8 @@ namespace energyplus {
         return retVal;
       }
       case openstudio::IddObjectType::OS_DesignSpecification_OutdoorAir: {
-        auto designSpecificationOutdoorAir = modelObject.cast<DesignSpecificationOutdoorAir>();
-        retVal = translateDesignSpecificationOutdoorAir(designSpecificationOutdoorAir);
-        break;
+        LOG_AND_THROW("Shouldn't get there");
+        return retVal;
       }
       case openstudio::IddObjectType::OS_DesignSpecification_ZoneAirDistribution: {
         // DLM: appears to be translated in SizingZone
@@ -2300,6 +2304,11 @@ namespace energyplus {
         retVal = translateOutputControlReportingTolerances(outputControlReportingTolerances);
         break;
       }
+      case openstudio::IddObjectType::OS_OutputControl_ResilienceSummaries: {
+        auto outputControlResilienceSummaries = modelObject.cast<OutputControlResilienceSummaries>();
+        retVal = translateOutputControlResilienceSummaries(outputControlResilienceSummaries);
+        break;
+      }
       case openstudio::IddObjectType::OS_OutputControl_Table_Style: {
         auto outputControlTableStyle = modelObject.cast<OutputControlTableStyle>();
         retVal = translateOutputControlTableStyle(outputControlTableStyle);
@@ -2375,6 +2384,16 @@ namespace energyplus {
         retVal = translateOutputTableSummaryReports(summaryReports);
         break;
       }
+      case openstudio::IddObjectType::OS_Output_Table_Annual: {
+        auto mo = modelObject.cast<OutputTableAnnual>();
+        retVal = translateOutputTableAnnual(mo);
+        break;
+      }
+      case openstudio::IddObjectType::OS_Output_Table_Monthly: {
+        auto mo = modelObject.cast<OutputTableMonthly>();
+        retVal = translateOutputTableMonthly(mo);
+        break;
+      }
       case openstudio::IddObjectType::OS_People: {
         auto people = modelObject.cast<People>();
         retVal = translatePeople(people);
@@ -2431,6 +2450,11 @@ namespace energyplus {
       case openstudio::IddObjectType::OS_PythonPlugin_OutputVariable: {
         auto obj = modelObject.cast<PythonPluginOutputVariable>();
         retVal = translatePythonPluginOutputVariable(obj);
+        break;
+      }
+      case openstudio::IddObjectType::OS_PythonPlugin_SearchPaths: {
+        auto obj = modelObject.cast<PythonPluginSearchPaths>();
+        retVal = translatePythonPluginSearchPaths(obj);
         break;
       }
       case openstudio::IddObjectType::OS_RadianceParameters: {
@@ -3107,7 +3131,8 @@ namespace energyplus {
         break;
       }
       case openstudio::IddObjectType::OS_WindowMaterial_GlazingGroup_Thermochromic: {
-        LOG(Warn, "OS_WindowMaterial_GlazingGroup_Thermochromic is not currently translated");
+        auto glazing = modelObject.cast<ThermochromicGlazing>();
+        retVal = translateThermochromicGlazing(glazing);
         break;
       }
       case openstudio::IddObjectType::OS_WindowProperty_FrameAndDivider: {
@@ -3197,6 +3222,11 @@ namespace energyplus {
       case openstudio::IddObjectType::OS_ZoneHVAC_EquipmentList: {
         auto mo = modelObject.cast<ZoneHVACEquipmentList>();
         retVal = translateZoneHVACEquipmentList(mo);
+        break;
+      }
+      case openstudio::IddObjectType::OS_ZoneHVAC_EvaporativeCoolerUnit: {
+        auto mo = modelObject.cast<ZoneHVACEvaporativeCoolerUnit>();
+        retVal = translateZoneHVACEvaporativeCoolerUnit(mo);
         break;
       }
       case openstudio::IddObjectType::OS_ZoneHVAC_FourPipeFanCoil: {
@@ -3356,6 +3386,7 @@ namespace energyplus {
       IddObjectType::OS_ZoneCapacitanceMultiplier_ResearchSpecial,
       IddObjectType::OS_OutputControl_Files,
       IddObjectType::OS_OutputControl_ReportingTolerances,
+      IddObjectType::OS_OutputControl_ResilienceSummaries,
       IddObjectType::OS_OutputControl_Table_Style,
       IddObjectType::OS_OutputControl_Timestamp,
       IddObjectType::OS_Output_Constructions,
@@ -3371,6 +3402,9 @@ namespace energyplus {
       // IddObjectType::OS_FuelFactors,
 
       IddObjectType::OS_Output_Table_SummaryReports,
+      IddObjectType::OS_Output_Table_Annual,
+      IddObjectType::OS_Output_Table_Monthly,
+
       IddObjectType::OS_PerformancePrecisionTradeoffs,
 
       IddObjectType::OS_Site,
@@ -3602,6 +3636,8 @@ namespace energyplus {
       IddObjectType::OS_ExternalInterface_FunctionalMockupUnitImport_To_Schedule,
       IddObjectType::OS_ExternalInterface_FunctionalMockupUnitImport_To_Variable,
 
+      IddObjectType::
+        OS_PythonPlugin_SearchPaths,  // this FT intentionally happens before PythonPlugin_Instance so that we can't end up with two PythonPlugin_SearchPaths objects
       IddObjectType::OS_PythonPlugin_Instance,
       IddObjectType::OS_PythonPlugin_Variable,
       IddObjectType::OS_PythonPlugin_TrendVariable,
@@ -3997,6 +4033,8 @@ namespace energyplus {
     m_idfObjects.clear();
 
     m_map.clear();
+
+    m_zoneDSOAsMap.clear();
 
     m_anyNumberScheduleTypeLimits.reset();
 

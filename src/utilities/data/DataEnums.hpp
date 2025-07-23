@@ -192,6 +192,7 @@ OPENSTUDIO_ENUM(EndUseType,
   ((Baseboard))
   ((HeatRecoveryForCooling))
   ((HeatRecoveryForHeating))
+  ((Chillers))
 );
  *  \endcode */
 OPENSTUDIO_ENUM(EndUseType,
@@ -215,6 +216,7 @@ OPENSTUDIO_ENUM(EndUseType,
   ((Baseboard))
   ((HeatRecoveryForCooling))
   ((HeatRecoveryForHeating))
+  ((Chillers))
 );
 
 /** \class BuildingSector
@@ -289,6 +291,32 @@ using OptionalComponentType = boost::optional<ComponentType>;
 
 /** \relates ComponentType */
 using ComponentTypeVector = std::vector<ComponentType>;
+
+
+OPENSTUDIO_ENUM(AlfalfaComponentCapability,
+  ((Input))
+  ((Output))
+  ((Bidirectional))
+)
+/** \relates AlfalfaComponentCapability */
+using OptionalAlfalfaComponentCapability = boost::optional<AlfalfaComponentCapability>;
+
+/** \relates AlfalfaComponentCapability */
+using AlfalfaComponentCapabilityVector = std::vector<AlfalfaComponentCapability>;
+
+
+OPENSTUDIO_ENUM(AlfalfaComponentType,
+  ((Actuator))
+  ((Constant))
+  ((Meter))
+  ((OutputVariable))
+  ((GlobalVariable))
+)
+/** \relates AlfalfaComponentType */
+using OptionalAlfalfaComponentType = boost::optional<AlfalfaComponentType>;
+
+/** \relates AlfalfaComponentType */
+using AlfalfaComponentTypeVector = std::vector<AlfalfaComponentType>;
 
 // clang-format on
 

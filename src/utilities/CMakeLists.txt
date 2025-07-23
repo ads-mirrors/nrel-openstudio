@@ -519,7 +519,7 @@ if(HAVE_UNISTD_H)
 endif()
 
 if(BUILD_TESTING)
-  CREATE_TEST_TARGETS(${target_name} "${${target_name}_test_src}" openstudiolib openstudio_model_resources openstudio_energyplus_resources fmt::fmt)
+  CREATE_TEST_TARGETS(${target_name} "${${target_name}_test_src}" openstudio_utilities openstudio_model_resources openstudio_energyplus_resources fmt::fmt)
 endif()
 
 if(BUILD_BENCHMARK)

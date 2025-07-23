@@ -18,7 +18,7 @@ if(CCACHE_PROGRAM)
 endif()
 
 # Project macro can only take digits in the version, it splits these out to specific variables
-project(OpenStudio VERSION 3.8.0)
+project(OpenStudio VERSION 3.10.0)
 
 include(CMake/compiler_flags.cmake)
 
@@ -58,6 +58,9 @@ if(POLICY CMP0054)
 endif()
 if(POLICY CMP0077)
   cmake_policy(SET CMP0077 NEW)
+endif()
+if(POLICY CMP0177)
+  cmake_policy(SET CMP0177 NEW) # ``install()`` ``DESTINATION`` paths are normalized.
 endif()
 
 ###############################################################################
@@ -191,16 +194,16 @@ if(hasParent)
 endif()
 
 # EnergyPlus Idd version
-set(ENERGYPLUS_VERSION_MAJOR 24)
+set(ENERGYPLUS_VERSION_MAJOR 25)
 set(ENERGYPLUS_VERSION_MINOR 1)
 set(ENERGYPLUS_VERSION_PATCH 0)
 set(ENERGYPLUS_VERSION "${ENERGYPLUS_VERSION_MAJOR}.${ENERGYPLUS_VERSION_MINOR}.${ENERGYPLUS_VERSION_PATCH}")
 # Build SHA is not required to have a value, but if it does OpenStudio will require this build.
-set(ENERGYPLUS_BUILD_SHA "9d7789a3ac")
+set(ENERGYPLUS_BUILD_SHA "1c11a3d85f")
 
 # ENERGYPLUS_RELEASE_NAME is used to locate the E+ download
 # from the github releases
-set(ENERGYPLUS_RELEASE_NAME "v24.1.0")
+set(ENERGYPLUS_RELEASE_NAME "v25.1.0-WithDSOASpaceListFixes")
 
 set(ENERGYPLUS_REPO "NREL")
 
@@ -438,6 +441,9 @@ find_package(jsoncpp)
 find_package(fmt)
 find_package(SQLite3)
 find_package(cpprestsdk)
+# TODO: this is a workaround for #5398, it should not be there for ever
+configure_file("${PROJECT_SOURCE_DIR}/dependencies/cpprestsdk_char_traits_workaround.hpp" "${PROJECT_BINARY_DIR}/src/cpprestsdk_char_traits_workaround.hpp" COPYONLY)
+
 find_package(websocketpp)
 find_package(Boost)
 find_package(geographiclib)
@@ -541,6 +547,9 @@ if(UNIX)
   # Note: CMAKE_CXX_STANDARD (with no extensions) already sets -std=c++17 (or std=c++1z).
   if(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+    # TODO: workaround for #5398, remove when updating boost
+    AddCXXFlagIfSupported(-Wno-enum-constexpr-conversion COMPILER_SUPPORTS_enum_constexpr_conversion) # Clang 16.0+ and Apple Clang 15+ only
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
   endif()
 endif()
 
@@ -639,26 +648,33 @@ endif()
 if(UNIX)
   if(APPLE)
     if (ARCH MATCHES "arm64")
-      set(ENERGYPLUS_EXPECTED_HASH 3b465e87fc07e18db458e1d058da447b)
-      set(ENERGYPLUS_PLATFORM "Darwin-macOS12.1-arm64")
+      set(ENERGYPLUS_EXPECTED_HASH f2fce0c8883d057dae498d1a0a717a80)
+      set(ENERGYPLUS_PLATFORM "Darwin-macOS13-arm64")
     else()
-      set(ENERGYPLUS_EXPECTED_HASH 4f15adccac3df1e699d26f815800c783)
-      set(ENERGYPLUS_PLATFORM "Darwin-macOS11.6-x86_64")
+      set(ENERGYPLUS_EXPECTED_HASH f3bd66b9555d86e7330f6bb86f18eb89)
+      set(ENERGYPLUS_PLATFORM "Darwin-macOS12.1-x86_64")
     endif()
   elseif(LSB_RELEASE_ID_SHORT MATCHES "CentOS")
-    set(ENERGYPLUS_EXPECTED_HASH c31dfb86d8967636fca0a1ecf4052f22)
+    set(ENERGYPLUS_EXPECTED_HASH 6fb9360c50ca797d16f74e167dd8b7ce)
     set(ENERGYPLUS_PLATFORM "Linux-CentOS7.9.2009-x86_64")
+  elseif(LSB_RELEASE_ID_SHORT MATCHES "AlmaLinux")
+    set(ENERGYPLUS_EXPECTED_HASH 67f00826449aad725a5a5b56fe0ec76a)
+    set(ENERGYPLUS_PLATFORM "Linux-AlmaLinux9.6-x86_64")
   else()
-    if(LSB_RELEASE_VERSION_SHORT MATCHES "22.04")
+    if(LSB_RELEASE_VERSION_SHORT MATCHES "24.04")
       if (ARCH MATCHES "arm64")
-        set(ENERGYPLUS_EXPECTED_HASH 2e1e9516b39ca8046b7cf79ad3a81fa7)
+        set(ENERGYPLUS_EXPECTED_HASH dbe28aebdbfc28ee8538cabb2dd15305)
       else()
-        set(ENERGYPLUS_EXPECTED_HASH fb171a5da7d41da80da7868686b41126)
+        set(ENERGYPLUS_EXPECTED_HASH af8ee54182777923fa4154b122c39447)
       endif()
-    elseif(LSB_RELEASE_VERSION_SHORT MATCHES "20.04")
-      set(ENERGYPLUS_EXPECTED_HASH 4ea21126c3989cad35078a711573572e)
-    else() # 18.04
-      message(FATAL_ERROR "EnergyPlus no longer provides packages for Ubuntu 18.04")
+    elseif(LSB_RELEASE_VERSION_SHORT MATCHES "22.04")
+      if (ARCH MATCHES "arm64")
+        set(ENERGYPLUS_EXPECTED_HASH 2ddd6ddb854cc3957943a9dd396c2dce)
+      else()
+        set(ENERGYPLUS_EXPECTED_HASH 7700f3f7865e36e442b7d171c2e2f96a)
+      endif()
+    else() # e.g., 18.04, 20.04
+      message(FATAL_ERROR "EnergyPlus no longer provides packages for Ubuntu < 22.04")
     endif()
     set(ENERGYPLUS_PLATFORM "Linux${ENERGYPLUS_SYSTEM_VERSION}-${ARCH}")
   endif()
@@ -685,19 +701,18 @@ if(UNIX)
     endif()
 
     execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory "${PROJECT_BINARY_DIR}/${ENERGYPLUS_PATH}")
-
+    file(REMOVE "${PROJECT_BINARY_DIR}/python/engine/pip_install_done.stamp")
   endif()
 
 elseif(WIN32)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8) # 64 bit
     set(ENERGYPLUS_PATH "EnergyPlus-${ENERGYPLUS_VERSION}-${ENERGYPLUS_BUILD_SHA}-Windows-x86_64")
     set(ENERGYPLUS_ARCH 64)
-    set(ENERGYPLUS_EXPECTED_HASH c9dd8a23b64d1327d00c5d85896b46bb)
+    set(ENERGYPLUS_EXPECTED_HASH 630e0b8de20dea68185224072c079d90)
   else()
     set(ENERGYPLUS_PATH "EnergyPlus-${ENERGYPLUS_VERSION}-${ENERGYPLUS_BUILD_SHA}-Windows-i386")
     set(ENERGYPLUS_ARCH 32)
-    set(ENERGYPLUS_EXPECTED_HASH 766cf42388ca5b682800fe6ded8ac3ee)
-    set(ENERGYPLUS_REPO "jmarrec")
+    set(ENERGYPLUS_EXPECTED_HASH e26ed12ee4df8dafa3d34a3340a9b780)
   endif()
   if(EXISTS "${PROJECT_BINARY_DIR}/${ENERGYPLUS_PATH}.zip")
     file(MD5 "${PROJECT_BINARY_DIR}/${ENERGYPLUS_PATH}.zip" ENERGYPLUS_HASH)
@@ -711,7 +726,7 @@ elseif(WIN32)
          EXPECTED_MD5 ${ENERGYPLUS_EXPECTED_HASH})
 
     execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory "${PROJECT_BINARY_DIR}/${ENERGYPLUS_PATH}")
-
+    file(REMOVE "${PROJECT_BINARY_DIR}/python/engine/pip_install_done.stamp")
   endif()
 
 endif()
@@ -766,7 +781,7 @@ if(UNIX)
     set(RADIANCE_PLATFORM "Darwin")
   elseif(EXISTS "/etc/redhat-release")
     # DLM: note that the installer expects the extracted directory to be named radiance-5.0.a.12-Linux
-    set(RADIANCE_EXPECTED_HASH f75898bbfd238a740c1902d385c42b92)
+    set(RADIANCE_EXPECTED_HASH 1e0ef7909c99cd353191d63b085dc6a9)
     set(RADIANCE_PLATFORM "Redhat")
   else()
     set(RADIANCE_EXPECTED_HASH 7b9e4df2b6050fe51c6e138e4c0e6a5a)
@@ -840,7 +855,7 @@ if(BUILD_CLI)
   set(OPENSTUDIO_GEMS_BASEURL "http://openstudio-resources.s3.amazonaws.com/dependencies")
 
   # TODO: temp
-  set(OPENSTUDIO_GEMS_BASEURL "https://github.com/NREL/openstudio-gems/releases/download/v3.8.0")
+  set(OPENSTUDIO_GEMS_BASEURL "https://github.com/NREL/openstudio-gems/releases/download/v3.10.0-2")
 
   # To use the package produced by a PR to https://github.com/NREL/openstudio-gems
   set(USE_OPENSTUDIO_GEMS_PR FALSE)
@@ -852,19 +867,19 @@ if(BUILD_CLI)
   if(UNIX)
      if(APPLE)
        if (ARCH MATCHES arm64)
-         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20240517-darwin_arm64-3.2.2.tar.gz")
-         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "7d50adacb69fc2ff86f3f38048a910ca")
+         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20250618-darwin_arm64-3.2.2.tar.gz")
+         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "d70de801baa266d5cb7f624c3590f895")
        else()
-         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20240517-darwin-3.2.2.tar.gz")
-         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "a5962ec229ed45af4570ff3c60c31b2d")
+         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20250618-darwin-3.2.2.tar.gz")
+         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "cad8324c268781fb3454c25aa49bdb92")
        endif()
      else()
        if (ARCH MATCHES "arm64")
-         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20240517-linux_arm64-3.2.2.tar.gz")
-         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "f6d094a3bdaf1476ce7911e74276993b")
+         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20250618-linux_arm64-3.2.2.tar.gz")
+         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "20d05d01880be1e3d133a52a6d2905b2")
        else()
-         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20240517-linux-3.2.2.tar.gz")
-         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "b0201a70c96d343b2d1408897f39514f")
+         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20250618-linux-3.2.2.tar.gz")
+         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "c904d3bef3b000875a88058677bd6e9f")
        endif()
        if (USE_OPENSTUDIO_GEMS_PR)
          set(OPENSTUDIO_GEMS_BASEURL "${OPENSTUDIO_GEMS_BASEURL}/openstudio-gems-linux/${OPENSTUDIO_GEMS_PR_NUMBER}")
@@ -872,8 +887,8 @@ if(BUILD_CLI)
      endif()
   elseif(WIN32)
     # OpenStudio gems are only supported on 64 bit windows
-    set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20240517-windows-3.2.2.tar.gz")
-    set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "4dc746b1fa79dd0044f4066527824193")
+    set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20250618-windows-3.2.2.tar.gz")
+    set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "d1f1b46b30f43c8bfe086ade5134d8f9")
     if (USE_OPENSTUDIO_GEMS_PR)
       set(OPENSTUDIO_GEMS_BASEURL "${OPENSTUDIO_GEMS_BASEURL}/openstudio-gems-windows/${OPENSTUDIO_GEMS_PR_NUMBER}")
     endif()
@@ -1038,6 +1053,7 @@ set(project_directories
   airflow
   isomodel
   osversion
+  alfalfa
   measure
   sdd
   lib
@@ -1232,7 +1248,7 @@ else()
 endif()
 
 # Install additional Documents, such as release notes
-install(FILES "${PROJECT_SOURCE_DIR}/developer/doc/ReleaseNotes/OpenStudio_Release_Notes_3_7_0_20231117.pdf" DESTINATION .)
+install(FILES "${PROJECT_SOURCE_DIR}/developer/doc/ReleaseNotes/OpenStudio_Release_Notes_3_10_0_20250618.pdf" DESTINATION .)
 install(FILES "${PROJECT_SOURCE_DIR}/LICENSE.md" DESTINATION .)
 install(FILES "${PROJECT_SOURCE_DIR}/copyright.txt" DESTINATION .)
 
@@ -1358,7 +1374,7 @@ install(FILES "${ENERGYPLUS_EPJSON_SCHEMA}" DESTINATION ./EnergyPlus/ COMPONENT 
 install(PROGRAMS ${ENERGYPLUS_FILES} DESTINATION ./EnergyPlus/ COMPONENT EnergyPlus)
 install(PROGRAMS ${ENERGYPLUS_LIB_FILES} DESTINATION ./EnergyPlus/ COMPONENT EnergyPlus)
 install(PROGRAMS "${EXPAND_OBJECTS}" DESTINATION ./EnergyPlus/ COMPONENT EnergyPlus)
-install(DIRECTORY "${ENERGYPLUS_DIR}/python_standard_lib" DESTINATION ./EnergyPlus/ COMPONENT EnergyPlus)
+install(DIRECTORY "${ENERGYPLUS_DIR}/python_lib" DESTINATION ./EnergyPlus/ COMPONENT EnergyPlus)
 install(DIRECTORY "${ENERGYPLUS_DIR}/pyenergyplus" DESTINATION ./EnergyPlus/ COMPONENT EnergyPlus)
 
 if(APPLE)

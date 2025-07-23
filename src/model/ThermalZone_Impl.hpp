@@ -46,7 +46,7 @@ namespace model {
 
       ThermalZone_Impl(const ThermalZone_Impl& other, Model_Impl* model, bool keepHandle);
 
-      virtual ~ThermalZone_Impl() = default;
+      virtual ~ThermalZone_Impl() override = default;
 
       //@}
 
@@ -240,6 +240,9 @@ namespace model {
 
       /// returns all spaces in this thermal zone
       std::vector<Space> spaces() const;
+
+      /// return all spaces that have a design specification outdoor air assigned
+      std::vector<Space> spacesWithDesignSpecificationOutdoorAir() const;
 
       /** Accumulates the floorArea of spaces. Does not include space multiplier. */
       double floorArea() const;

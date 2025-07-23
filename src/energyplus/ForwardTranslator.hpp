@@ -134,6 +134,7 @@ namespace model {
   class CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit;
   class CoilPerformanceDXCooling;
   class CoilSystemCoolingDXHeatExchangerAssisted;
+  class CoilSystemCoolingWater;
   class CoilSystemCoolingWaterHeatExchangerAssisted;
   class CoilSystemIntegratedHeatPumpAirSource;
   class CoilUserDefined;
@@ -295,6 +296,7 @@ namespace model {
   class OutsideSurfaceConvectionAlgorithm;
   class OutputControlFiles;
   class OutputControlReportingTolerances;
+  class OutputControlResilienceSummaries;
   class OutputControlTableStyle;
   class OutputControlTimestamp;
   class OutputDebuggingData;
@@ -309,6 +311,8 @@ namespace model {
   class OutputMeter;
   class OutputVariable;
   class OutputEnergyManagementSystem;
+  class OutputTableAnnual;
+  class OutputTableMonthly;
   class OutputTableSummaryReports;
   class People;
   class PerformancePrecisionTradeoffs;
@@ -337,6 +341,7 @@ namespace model {
   class PythonPluginVariable;
   class PythonPluginTrendVariable;
   class PythonPluginOutputVariable;
+  class PythonPluginSearchPaths;
   class RefractionExtinctionGlazing;
   class RefrigerationAirChiller;
   class RefrigerationCase;
@@ -452,6 +457,7 @@ namespace model {
   class ThermalZone;
   class ThermalStorageIceDetailed;
   class ThermalStorageChilledWaterStratified;
+  class ThermochromicGlazing;
   class ThermostatSetpointDualSetpoint;
   class Timestep;
   class UnitarySystemPerformanceMultispeed;
@@ -480,6 +486,7 @@ namespace model {
   class ZoneHVACEnergyRecoveryVentilator;
   class ZoneHVACEnergyRecoveryVentilatorController;
   class ZoneHVACEquipmentList;
+  class ZoneHVACEvaporativeCoolerUnit;
   class ZoneHVACFourPipeFanCoil;
   class ZoneHVACHighTemperatureRadiant;
   class ZoneHVACIdealLoadsAirSystem;
@@ -502,9 +509,13 @@ namespace energyplus {
 
   namespace detail {
     struct ForwardTranslatorInitializer;
-  };
 
-#define ENERGYPLUS_VERSION "24.1"
+    // TODO: I have to put this back because of AirTerminalDualDuctVAV which should be using Control for Outdoor Air
+    // I'm setting it up as a free function in detail:: though, so you know you shouldn't call it!
+    boost::optional<IdfObject> translateDesignSpecificationOutdoorAir(model::DesignSpecificationOutdoorAir& modelObject);
+  };  // namespace detail
+
+#define ENERGYPLUS_VERSION "25.1"
 
   class ENERGYPLUS_API ForwardTranslator
   {
@@ -839,6 +850,8 @@ namespace energyplus {
 
     boost::optional<IdfObject> translateCoilSystemCoolingDXHeatExchangerAssisted(model::CoilSystemCoolingDXHeatExchangerAssisted& modelObject);
 
+    boost::optional<IdfObject> translateCoilSystemCoolingWater(model::CoilSystemCoolingWater& modelObject);
+
     boost::optional<IdfObject> translateCoilSystemCoolingWaterHeatExchangerAssisted(model::CoilSystemCoolingWaterHeatExchangerAssisted& modelObject);
 
     boost::optional<IdfObject> translateCoilSystemIntegratedHeatPumpAirSource(model::CoilSystemIntegratedHeatPumpAirSource& modelObject);
@@ -930,7 +943,14 @@ namespace energyplus {
 
     boost::optional<IdfObject> translateDesignDay(model::DesignDay& modelObject);
 
-    boost::optional<IdfObject> translateDesignSpecificationOutdoorAir(model::DesignSpecificationOutdoorAir& modelObject);
+    // Construct (or fetch if already created) a DesignSpecificationOutdoorAir (DSOA) or DSOA:SpaceList
+    // * if there are no spaces with a DSOA assigned: return empty
+    // * otherwise:
+    // * otherwise:
+    //      * if we translated to E+ with spaces:
+    //          * If a single one: DSOA, otherwise create a DSOA:SpaceList
+    //      * if we do not use E+ spaces: create DSOA
+    boost::optional<IdfObject> getOrCreateThermalZoneDSOA(const model::ThermalZone& z);
 
     boost::optional<IdfObject> translateDistrictCooling(model::DistrictCooling& modelObject);
 
@@ -1166,6 +1186,8 @@ namespace energyplus {
 
     boost::optional<IdfObject> translateOutputControlReportingTolerances(model::OutputControlReportingTolerances& modelObject);
 
+    boost::optional<IdfObject> translateOutputControlResilienceSummaries(model::OutputControlResilienceSummaries& modelObject);
+
     boost::optional<IdfObject> translateOutputControlTableStyle(model::OutputControlTableStyle& modelObject);
 
     boost::optional<IdfObject> translateOutputControlTimestamp(model::OutputControlTimestamp& modelObject);
@@ -1195,6 +1217,10 @@ namespace energyplus {
     boost::optional<IdfObject> translateOutputEnergyManagementSystem(model::OutputEnergyManagementSystem& modelObject);
 
     boost::optional<IdfObject> translateOutputTableSummaryReports(model::OutputTableSummaryReports& modelObject);
+
+    boost::optional<IdfObject> translateOutputTableAnnual(model::OutputTableAnnual& modelObject);
+
+    boost::optional<IdfObject> translateOutputTableMonthly(model::OutputTableMonthly& modelObject);
 
     boost::optional<IdfObject> translatePeople(model::People& modelObject);
 
@@ -1255,6 +1281,8 @@ namespace energyplus {
     boost::optional<IdfObject> translatePythonPluginTrendVariable(model::PythonPluginTrendVariable& modelObject);
 
     boost::optional<IdfObject> translatePythonPluginOutputVariable(model::PythonPluginOutputVariable& modelObject);
+
+    boost::optional<IdfObject> translatePythonPluginSearchPaths(model::PythonPluginSearchPaths& modelObject);
 
     boost::optional<IdfObject> translateRefractionExtinctionGlazing(model::RefractionExtinctionGlazing& modelObject);
 
@@ -1491,6 +1519,11 @@ namespace energyplus {
     boost::optional<IdfObject> translateThermalZone(model::ThermalZone& modelObject);
     void translateThermalZoneSpacesWhenCombinedSpaces(model::ThermalZone& modelObject, IdfObject& idfObject);
     void translateThermalZoneSpacesToEnergyPlusSpaces(model::ThermalZone& modelObject, IdfObject& idfObject);
+    // Helper for the DesignSpecification:ZoneAirDistribution, returns empty when the DSZAD is not needed,
+    // which is when fields on Sizing:Zone related to it are all defaulted (Implemeted in ForwardTranslateSizingZone)
+    boost::optional<std::string> zoneDSZADName(const model::ThermalZone& zone);
+
+    boost::optional<IdfObject> translateThermochromicGlazing(model::ThermochromicGlazing& modelObject);
 
     boost::optional<IdfObject> translateThermostatSetpointDualSetpoint(model::ThermostatSetpointDualSetpoint& tsds);
 
@@ -1547,6 +1580,8 @@ namespace energyplus {
     boost::optional<IdfObject> translateZoneHVACEnergyRecoveryVentilatorController(model::ZoneHVACEnergyRecoveryVentilatorController& modelObject);
 
     boost::optional<IdfObject> translateZoneHVACEquipmentList(model::ZoneHVACEquipmentList& modelObject);
+
+    boost::optional<IdfObject> translateZoneHVACEvaporativeCoolerUnit(model::ZoneHVACEvaporativeCoolerUnit& modelObject);
 
     boost::optional<IdfObject> translateZoneHVACFourPipeFanCoil(model::ZoneHVACFourPipeFanCoil& modelObject);
 
@@ -1679,6 +1714,9 @@ namespace energyplus {
     FluidPropertiesMap m_fluidPropertiesMap;
 
     ModelObjectMap m_map;
+
+    using ZoneToMaybeDSOA = std::map<const openstudio::Handle, boost::optional<IdfObject>>;
+    ZoneToMaybeDSOA m_zoneDSOAsMap;
 
     std::vector<IdfObject> m_idfObjects;
 

@@ -32,6 +32,10 @@
   %ignore openstudio::model::Space::setThermalZone;
   %ignore openstudio::model::Space::waterUseEquipment;
 
+  %ignore openstudio::model::Space::zoneMixing;
+  %ignore openstudio::model::Space::supplyZoneMixing;
+  %ignore openstudio::model::Space::exhaustZoneMixing;
+
   %ignore openstudio::model::DaylightingDeviceTubular::transitionZones;
   %ignore openstudio::model::DaylightingDeviceTubular::addTransitionZone;
   %ignore openstudio::model::DaylightingDeviceTubular::addTransitionZones;
@@ -360,7 +364,11 @@ SWIG_MODELOBJECT(ExteriorWaterEquipment, 1);
           return sc.setSubSurfaces(subSurfaces);
         }
 
-        // EMS Actuator setter for Space (reimplemented from ModelCore.i)
+        // EMS Actuator getter/setter for Space (reimplemented from ModelCore.i)
+        boost::optional<Space> getSpaceForEMSActuator(const openstudio::model::EnergyManagementSystemActuator& actuator) {
+          return actuator.space();
+        }
+
         bool setSpaceForEMSActuator(openstudio::model::EnergyManagementSystemActuator actuator, openstudio::model::Space space) {
           return actuator.setSpace(space);
         }
@@ -450,6 +458,11 @@ SWIG_MODELOBJECT(ExteriorWaterEquipment, 1);
     }
 
     public partial class EnergyManagementSystemActuator : ModelObject {
+
+      public OptionalSpace space() {
+        return OpenStudio.OpenStudioModelGeometry.getSpaceForEMSActuator(this);
+      }
+
       public bool setSpace(OpenStudio.Space space) {
         return OpenStudio.OpenStudioModelGeometry.setSpaceForEMSActuator(this, space);
       }

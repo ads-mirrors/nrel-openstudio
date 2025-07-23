@@ -4,8 +4,8 @@
 ***********************************************************************************************************************/
 
 #include "RubyEngine.hpp"
-#include "InitRubyBindings.hpp"
-#include "RubyException.hpp"
+#include "../bindings/InitRubyBindings.hpp"
+#include "../interpreter/RubyException.hpp"
 #include <embedded_files.hxx>
 #include <csignal>
 #include <stdexcept>
@@ -78,7 +78,7 @@ RubyEngine::~RubyEngine() {
   // ruby_cleanup calls ruby_finalize
   int ex = ruby_cleanup(0);
   if (ex != 0) {
-    fmt::print("RubyEngine return code was {}\n", ex);
+    // fmt::print("RubyEngine return code was {}\n", ex);
     exit(ex);
   }
   //ruby_finalize();
@@ -235,6 +235,25 @@ int RubyEngine::numberOfArguments(ScriptObject& methodObject, std::string_view m
   // def f(a, c = nil) => -2
   // def f(a, b = nil, c = nil) => also -2
   return rb_obj_method_arity(val, method_id);
+}
+
+bool RubyEngine::hasMethod(ScriptObject& methodObject, std::string_view methodName, bool overriden_only) {
+  auto val = std::any_cast<VALUE>(methodObject.object);
+  ID method_id = rb_intern(methodName.data());
+  if (rb_respond_to(val, method_id) == 0) {
+    return false;
+  }
+  if (!overriden_only) {
+    return true;
+  }
+
+  // I'd have prefered to do the equivalent of `instance_obj.method(:methodName).owner == instance_obj.class` but that is borderline impossible
+  // Instead, this is equivalent to `instance_obj.class.instance_methods(false).include?(:methodName)`
+  VALUE klass = rb_obj_class(val);
+  // include_methods_from_ancestors: false;
+  VALUE args[1] = {Qfalse};
+  VALUE methods_without_ancestors = rb_class_instance_methods(1, args, klass);
+  return rb_ary_includes(methods_without_ancestors, ID2SYM(method_id)) == Qtrue;
 }
 
 }  // namespace openstudio

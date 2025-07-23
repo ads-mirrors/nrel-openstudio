@@ -27,7 +27,7 @@ namespace model {
    public:
     explicit ControllerMechanicalVentilation(const Model& model);
 
-    virtual ~ControllerMechanicalVentilation() = default;
+    virtual ~ControllerMechanicalVentilation() override = default;
     // Default the copy and move operators because the virtual dtor is explicit
     ControllerMechanicalVentilation(const ControllerMechanicalVentilation& other) = default;
     ControllerMechanicalVentilation(ControllerMechanicalVentilation&& other) = default;
@@ -60,7 +60,16 @@ namespace model {
 
     void resetSystemOutdoorAirMethod();
 
+    //@}
+    /** @name Other */
+    //@{
+
     ControllerOutdoorAir controllerOutdoorAir() const;
+
+    // Convenience method to check whether it links to zones that have DesignSpecificationOutdoorAir(s) assigned
+    bool hasZonesWithDesignSpecificationOutdoorAir() const;
+
+    //@}
 
    protected:
     /// @cond

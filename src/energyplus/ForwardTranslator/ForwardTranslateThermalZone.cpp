@@ -683,7 +683,7 @@ namespace energyplus {
       };
 
       auto illuminanceMapObject = translateIlluminanceMap(illuminanceMap.get());
-      illuminanceMapObject.setString(Output_IlluminanceMapFields::ZoneName, tzName);
+      illuminanceMapObject.setString(Output_IlluminanceMapFields::ZoneorSpaceName, tzName);
     }
 
     // TODO: this is definitely shared between both paths
@@ -924,110 +924,17 @@ namespace energyplus {
         OS_ASSERT(sizingZoneIdf);
       }
 
-      boost::optional<IdfObject> dsoaList;
-      bool needToRegisterDSOAList = false;
-      bool atLeastOneDSOAWasWritten = true;
-
-      if (!m_forwardTranslatorOptions.excludeSpaceTranslation() && sizingZoneIdf) {
-        // DO not register it yet! E+ will crash if the DSOA Space List ends up empty
-        dsoaList = IdfObject(openstudio::IddObjectType::DesignSpecification_OutdoorAir_SpaceList);
-        needToRegisterDSOAList = true;
-        atLeastOneDSOAWasWritten = false;
-        dsoaList->setName(tzName + " DSOA Space List");
-      }
-
-      // map the design specification outdoor air
-      boost::optional<DesignSpecificationOutdoorAir> designSpecificationOutdoorAir;
-
       // For the ZoneVentilation workaround
       bool createZvs = false;
-      double zvRateForPeople = 0.0;
-      double zvRateForArea = 0.0;
-      double zvRate = 0.0;
-      double zvRateForVolume = 0.0;
-      double totVolume = 0.0;
 
-      for (const Space& space : spaces) {
-        designSpecificationOutdoorAir = space.designSpecificationOutdoorAir();
-        if (designSpecificationOutdoorAir) {
-
-          // TODO: We definitely need to do something here...
-          // TODO: this isn't good. We also need to check the SpaceType-level DSOA...
-          boost::optional<IdfObject> thisDSOA = translateAndMapModelObject(*designSpecificationOutdoorAir);
-          if (sizingZoneIdf) {
-            if (m_forwardTranslatorOptions.excludeSpaceTranslation()) {
-              // point the sizing object to the outdoor air spec
-              sizingZoneIdf->setString(Sizing_ZoneFields::DesignSpecificationOutdoorAirObjectName, designSpecificationOutdoorAir->nameString());
-            } else {
-              if (needToRegisterDSOAList) {
-                m_idfObjects.emplace_back(dsoaList.get());
-                sizingZoneIdf->setString(Sizing_ZoneFields::DesignSpecificationOutdoorAirObjectName, dsoaList->nameString());
-                needToRegisterDSOAList = false;
-              }
-
-              // push an extensible group on the DSOA:SpaceList
-              dsoaList->pushExtensibleGroup(std::vector<std::string>{space.nameString(), thisDSOA->nameString()});
-              atLeastOneDSOAWasWritten = true;
-            }
-          }
-
-          // create zone ventilation if needed
-          // TODO: we could remove all this code if we used ZoneHVAC:IdealLoadsAirSystem instead of HVACTemplate:Zone:IdealLoadsAirSystem
-          // We have space level stuff, that we need to write at Zone-level. So we compute the rate for each component (per Person, Floor Area,
-          // absolute and ACH) by looping on spaces. Then we'll write that by dividing by the total zone number of people, floor area, 1, and volume
-          // This amount to computing a weighted average
-          if (zoneEquipment.empty()) {
-            createZvs = true;
-
-            totVolume += space.volume();
-
-            double rateForPeople = space.numberOfPeople() * designSpecificationOutdoorAir->outdoorAirFlowperPerson();
-            double rateForArea = space.floorArea() * designSpecificationOutdoorAir->outdoorAirFlowperFloorArea();
-            double rate = designSpecificationOutdoorAir->outdoorAirFlowRate();
-            // ACH * volume = m3/hour, divide by 3600 s/hr to get m3/s
-            double rateForVolume = space.volume() * designSpecificationOutdoorAir->outdoorAirFlowAirChangesperHour() / 3600.0;
-
-            std::string outdoorAirMethod = designSpecificationOutdoorAir->outdoorAirMethod();
-            if (istringEqual(outdoorAirMethod, "Maximum")) {
-
-              double biggestRate = std::max({rateForPeople, rateForArea, rate, rateForVolume});
-
-              if (rateForPeople == biggestRate) {
-                //rateForPeople = 0.0;
-                rateForArea = 0.0;
-                rate = 0.0;
-                rateForVolume = 0.0;
-              } else if (rateForArea == biggestRate) {
-                rateForPeople = 0.0;
-                //rateForArea = 0.0;
-                rate = 0.0;
-                rateForVolume = 0.0;
-              } else if (rate == biggestRate) {
-                rateForPeople = 0.0;
-                rateForArea = 0.0;
-                //rate = 0.0;
-                rateForVolume = 0.0;
-              } else {
-                //rateForVolume == biggestRate
-                rateForPeople = 0.0;
-                rateForArea = 0.0;
-                rate = 0.0;
-                //rateForVolume = 0.0;
-              }
-
-            } else {
-              // sum
-            }
-
-            zvRateForPeople += rateForPeople;
-            zvRateForArea += rateForArea;
-            zvRate += rate;
-            zvRateForVolume += rateForVolume;
-          }  // if zoneEquipment.empty()
-        }    // if dsoa
-      }      // loop on spaces
-
-      if (!atLeastOneDSOAWasWritten && sizingZoneIdf) {
+      if (auto dsoaOrList_ = getOrCreateThermalZoneDSOA(modelObject.cast<ThermalZone>())) {
+        if (sizingZoneIdf) {
+          sizingZoneIdf->setString(Sizing_ZoneFields::DesignSpecificationOutdoorAirObjectName, dsoaOrList_->nameString());
+        }
+        if (zoneEquipment.empty()) {  // We know this is useIdealAirLoads
+          createZvs = true;
+        }
+      } else if (sizingZoneIdf) {
         // Controller:MechnicalVentilation: Design Specification Outdoor Air Object Name <x>
         // > If this field is blank, the corresponding DesignSpecification:OutdoorAir object for the zone will come from
         // > the DesignSpecification:OutdoorAir object referenced by the Sizing:Zone object for the same zone.
@@ -1047,6 +954,68 @@ namespace energyplus {
       }
 
       if (createZvs) {
+        double zvRateForPeople = 0.0;
+        double zvRateForArea = 0.0;
+        double zvRate = 0.0;
+        double zvRateForVolume = 0.0;
+        double totVolume = 0.0;
+        for (const Space& space : modelObject.spacesWithDesignSpecificationOutdoorAir()) {
+          auto dsoa = space.designSpecificationOutdoorAir().get();
+
+          // create zone ventilation if needed
+          // TODO: we could remove all this code if we used ZoneHVAC:IdealLoadsAirSystem instead of HVACTemplate:Zone:IdealLoadsAirSystem
+          // We have space level stuff, that we need to write at Zone-level. So we compute the rate for each component (per Person, Floor Area,
+          // absolute and ACH) by looping on spaces. Then we'll write that by dividing by the total zone number of people, floor area, 1, and volume
+          // This amount to computing a weighted average
+
+          // TODO: do we need the multiplier here?!
+
+          totVolume += space.volume();
+
+          double rateForPeople = space.numberOfPeople() * dsoa.outdoorAirFlowperPerson();
+          double rateForArea = space.floorArea() * dsoa.outdoorAirFlowperFloorArea();
+          double rate = dsoa.outdoorAirFlowRate();
+          // ACH * volume = m3/hour, divide by 3600 s/hr to get m3/s
+          double rateForVolume = space.volume() * dsoa.outdoorAirFlowAirChangesperHour() / 3600.0;
+
+          std::string outdoorAirMethod = dsoa.outdoorAirMethod();
+          if (istringEqual(outdoorAirMethod, "Maximum")) {
+
+            double biggestRate = std::max({rateForPeople, rateForArea, rate, rateForVolume});
+
+            if (rateForPeople == biggestRate) {
+              //rateForPeople = 0.0;
+              rateForArea = 0.0;
+              rate = 0.0;
+              rateForVolume = 0.0;
+            } else if (rateForArea == biggestRate) {
+              rateForPeople = 0.0;
+              //rateForArea = 0.0;
+              rate = 0.0;
+              rateForVolume = 0.0;
+            } else if (rate == biggestRate) {
+              rateForPeople = 0.0;
+              rateForArea = 0.0;
+              //rate = 0.0;
+              rateForVolume = 0.0;
+            } else {
+              //rateForVolume == biggestRate
+              rateForPeople = 0.0;
+              rateForArea = 0.0;
+              rate = 0.0;
+              //rateForVolume = 0.0;
+            }
+
+          } else {
+            // sum
+          }
+
+          zvRateForPeople += rateForPeople;
+          zvRateForArea += rateForArea;
+          zvRate += rate;
+          zvRateForVolume += rateForVolume;
+        }
+
         if (zvRateForPeople > 0) {
           // TODO: improve this?
           // find first people schedule
@@ -1111,7 +1080,7 @@ namespace energyplus {
           zoneVentilation.setDouble(ZoneVentilation_DesignFlowRateFields::AirChangesperHour, 3600.0 * zvRateForVolume / totVolume);
         }
       }  // zone.equipment().emptpy()
-    }    // End Sizing:Zone / ZV block
+    }  // End Sizing:Zone / ZV block
 
     return idfObject;
   }

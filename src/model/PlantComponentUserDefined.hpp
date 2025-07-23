@@ -21,6 +21,7 @@ namespace model {
   class EnergyManagementSystemProgramCallingManager;
   class EnergyManagementSystemProgram;
   class EnergyManagementSystemActuator;
+  class EnergyManagementSystemMeteredOutputVariable;
   class Connection;
   class Node;
   class ThermalZone;
@@ -40,7 +41,7 @@ namespace model {
 
     explicit PlantComponentUserDefined(const Model& model);
 
-    virtual ~PlantComponentUserDefined() = default;
+    virtual ~PlantComponentUserDefined() override = default;
     // Default the copy and move operators because the virtual dtor is explicit
     PlantComponentUserDefined(const PlantComponentUserDefined& other) = default;
     PlantComponentUserDefined(PlantComponentUserDefined&& other) = default;
@@ -155,6 +156,9 @@ namespace model {
     //@}
     /** @name Other */
     //@{
+
+    // Will look into the MainModelProgram and the PlantSimulationProgram 's linked EMS Metered Output Variables
+    std::vector<EnergyManagementSystemMeteredOutputVariable> energyManagementSystemMeteredOutputVariables() const;
 
     //@}
    protected:

@@ -18,6 +18,9 @@
 #include "../SubSurface_Impl.hpp"
 #include "../ConstructionAirBoundary.hpp"
 #include "../Construction.hpp"
+#include "../AirLoopHVAC.hpp"
+#include "../RenderingColor.hpp"
+#include "../RenderingColor_Impl.hpp"
 #include "../../osversion/VersionTranslator.hpp"
 #include "../../utilities/geometry/ThreeJS.hpp"
 
@@ -377,4 +380,53 @@ TEST_F(ModelFixture, ThreeJSForwardTranslator_ConstructionAirBoundary) {
   EXPECT_TRUE(checkIfMaterialExist(materials, "RegularConstruction"));
   EXPECT_FALSE(checkIfMaterialExist(materials, "Construction_Air_Boundary"));  // Instead it should have been skipped to be replace by "AirWall"
   EXPECT_TRUE(checkIfMaterialExist(materials, "AirWall"));
+}
+
+TEST_F(ModelFixture, ThreeJSForwardTranslator_AirLoopHVAC_RenderingColors) {
+
+  // Test for #5309
+  ThreeJSForwardTranslator ft;
+
+  // Materials are named like "prefix_" + <object.name>
+  auto checkIfMaterialExist = [](const auto& materials, const std::string& mat_name) {
+    return std::find_if(materials.cbegin(), materials.cend(), [&mat_name](const auto& mat) { return mat.name() == mat_name; }) != materials.cend();
+  };
+
+  Model m;
+  AirLoopHVAC a(m);
+  a.setName("MyAirLoop");
+  const std::string& expectedColorName = openstudio::getObjectThreeMaterialName(a.iddObjectType().valueDescription(), a.nameString());
+  EXPECT_EQ("AirLoopHVAC_MyAirLoop", expectedColorName);
+
+  EXPECT_EQ(0, m.getConcreteModelObjects<RenderingColor>().size());
+
+  {
+    ThreeScene scene = ft.modelToThreeJS(m, false);
+    ASSERT_EQ(1, m.getConcreteModelObjects<RenderingColor>().size());
+    EXPECT_EQ(expectedColorName, m.getConcreteModelObjects<RenderingColor>()[0].nameString());
+
+    // Ensure we get no errors or warnings, generally speaking.
+    EXPECT_EQ(0, ft.errors().size());
+    EXPECT_EQ(0, ft.warnings().size());
+
+    for (const auto& error : ft.errors()) {
+      EXPECT_TRUE(false) << "Error: " << error.logMessage();
+    }
+
+    for (const auto& warning : ft.warnings()) {
+      EXPECT_TRUE(false) << "Warning: " << warning.logMessage();
+    }
+
+    auto materials = scene.materials();
+    EXPECT_TRUE(checkIfMaterialExist(materials, expectedColorName));
+  }
+
+  // Do it a second time, it shouldn't add a RenderingColor again
+  {
+    ThreeScene scene = ft.modelToThreeJS(m, false);
+    ASSERT_EQ(1, m.getConcreteModelObjects<RenderingColor>().size());
+    EXPECT_EQ(expectedColorName, m.getConcreteModelObjects<RenderingColor>()[0].nameString());
+    auto materials = scene.materials();
+    EXPECT_TRUE(checkIfMaterialExist(materials, expectedColorName));
+  }
 }

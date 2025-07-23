@@ -36,6 +36,7 @@
   %ignore openstudio::model::Model::lightingSimulationControl;
   %ignore openstudio::model::Model::outputControlFiles;
   %ignore openstudio::model::Model::outputControlReportingTolerances;
+  %ignore openstudio::model::Model::outputControlResilienceSummaries;
   %ignore openstudio::model::Model::outputControlTableStyle;
   %ignore openstudio::model::Model::outputControlTimestamp;
   %ignore openstudio::model::Model::outputDebuggingData;
@@ -74,14 +75,18 @@
   // Ignore hvac objects for now, add back in with partial classes in ModelHVAC.i
   %ignore openstudio::model::Model::outdoorAirNode;
 
-  // Ignore hvac objects for now, add back in with partial classes in ModelAirflow.i
+  // Ignore airflow objects for now, add back in with partial classes in ModelAirflow.i
   %ignore openstudio::model::Model::airflowNetworkSimulationControl;
+
+  // Ignore resources objects for now, add back in with partial classes in ModelResources.i
+  %ignore openstudio::model::Model::pythonPluginSearchPaths;
 
   // EnergyManagementSystemActuator: depends on Space (ModelGeometry.i),
   %ignore openstudio::model::EnergyManagementSystemActuator::EnergyManagementSystemActuator(const ModelObject& modelObject,
                                                                                             const std::string& actuatedComponentType,
                                                                                             const std::string& actuatedComponentControlType,
                                                                                             const Space& space);
+  %ignore openstudio::model::EnergyManagementSystemActuator::space;
   %ignore openstudio::model::EnergyManagementSystemActuator::setSpace;
 
   // depends on ThermalZone (ModelHVAC.i)
@@ -89,6 +94,7 @@
                                                                                             const std::string& actuatedComponentType,
                                                                                             const std::string& actuatedComponentControlType,
                                                                                             const ThermalZone& thermalZone);
+  %ignore openstudio::model::EnergyManagementSystemActuator::thermalZone;
   %ignore openstudio::model::EnergyManagementSystemActuator::setThermalZone;
 
 
@@ -299,6 +305,25 @@ namespace model {
   }
 };
 
+%extend openstudio::model::AnnualVariableGroup {
+  // Use the overloaded operator<< for string representation
+  std::string __str__() {
+    std::ostringstream os;
+    os << *$self;
+    return os.str();
+  }
+};
+
+%extend openstudio::model::MonthlyVariableGroup {
+  // Use the overloaded operator<< for string representation
+  std::string __str__() {
+    std::ostringstream os;
+    os << *$self;
+    return os.str();
+  }
+};
+
+
 //MODELOBJECT_TEMPLATES(ModelObject); // swig preprocessor did not seem to see these for other objects so these are defined above
 MODELOBJECT_TEMPLATES(ScheduleTypeKey);
 MODELOBJECT_TEMPLATES(EMSActuatorNames);
@@ -324,6 +349,10 @@ MODELOBJECT_TEMPLATES(ScheduleYear);
 MODELOBJECT_TEMPLATES(ScheduleRule);
 MODELOBJECT_TEMPLATES(ScheduleRuleset);
 MODELOBJECT_TEMPLATES(OutputVariable);
+MODELOBJECT_TEMPLATES(AnnualVariableGroup); // helper for extensible fields for OutputTableAnnual
+MODELOBJECT_TEMPLATES(OutputTableAnnual);
+MODELOBJECT_TEMPLATES(MonthlyVariableGroup); // helper for extensible fields for OutputTableMonthly
+MODELOBJECT_TEMPLATES(OutputTableMonthly);
 MODELOBJECT_TEMPLATES(AdditionalProperties);
 MODELOBJECT_TEMPLATES(GenericModelObject);
 MODELOBJECT_TEMPLATES(ModelObjectList);
@@ -377,6 +406,8 @@ SWIG_MODELOBJECT(ScheduleYear, 1);
 SWIG_MODELOBJECT(ScheduleRule, 1);
 SWIG_MODELOBJECT(ScheduleRuleset, 1);
 SWIG_MODELOBJECT(OutputVariable, 1);
+SWIG_MODELOBJECT(OutputTableAnnual, 1);
+SWIG_MODELOBJECT(OutputTableMonthly, 1);
 SWIG_MODELOBJECT(AdditionalProperties, 1);
 SWIG_MODELOBJECT(GenericModelObject, 0);
 SWIG_MODELOBJECT(ModelObjectList, 1);

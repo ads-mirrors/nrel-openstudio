@@ -225,6 +225,8 @@ namespace energyplus {
 
     boost::optional<model::ModelObject> translateOutputControlReportingTolerances(const WorkspaceObject& workspaceObject);
 
+    boost::optional<model::ModelObject> translateOutputControlResilienceSummaries(const WorkspaceObject& workspaceObject);
+
     boost::optional<model::ModelObject> translateOutputControlTableStyle(const WorkspaceObject& workspaceObject);
 
     boost::optional<model::ModelObject> translateOutputControlTimestamp(const WorkspaceObject& workspaceObject);
@@ -248,6 +250,10 @@ namespace energyplus {
     boost::optional<model::ModelObject> translateFuelFactors(const WorkspaceObject& workspaceObject);
 
     boost::optional<model::ModelObject> translateOutputTableSummaryReports(const WorkspaceObject& workspaceObject);
+
+    boost::optional<model::ModelObject> translateOutputTableAnnual(const WorkspaceObject& workspaceObject);
+
+    boost::optional<model::ModelObject> translateOutputTableMonthly(const WorkspaceObject& workspaceObject);
 
     boost::optional<model::ModelObject> translateOtherEquipment(const WorkspaceObject& workspaceObject);
 
@@ -370,6 +376,8 @@ namespace energyplus {
     boost::optional<model::ModelObject> translateWindowMaterialGas(const WorkspaceObject& workspaceObject);
 
     boost::optional<model::ModelObject> translateWindowMaterialGlazing(const WorkspaceObject& workspaceObject);
+
+    boost::optional<model::ModelObject> translateWindowMaterialGlazingGroupThermochromic(const WorkspaceObject& workspaceObject);
 
     boost::optional<model::ModelObject> translateWindowMaterialSimpleGlazingSystem(const WorkspaceObject& workspaceObject);
 

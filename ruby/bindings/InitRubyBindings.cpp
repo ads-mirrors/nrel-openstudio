@@ -4,7 +4,7 @@
 ***********************************************************************************************************************/
 
 #include "InitRubyBindings.hpp"
-#include "RubyEval.hpp"
+#include "../interpreter/RubyEval.hpp"
 
 // #define HAVE_ISFINITE 1
 #include <ruby.h>
@@ -68,6 +68,7 @@ extern "C"
   void Init_openstudiomodelresources(void);
   void Init_openstudioutilitiesidf(void);
   void Init_openstudioutilitiesxml(void);
+  void Init_openstudioalfalfa(void);
 
   ////void Init_openstudiomodeleditor(void); # happens separately in openstudio.so only, for SketchUp plug-in
 }
@@ -75,130 +76,133 @@ extern "C"
 namespace openstudio {
 namespace ruby {
 
-void initBasicRubyBindings() {
-  rb_provide("openstudio");
-  rb_provide("openstudio.so");
+  void initBasicRubyBindings() {
+    rb_provide("openstudio");
+    rb_provide("openstudio.so");
 
-  Init_openstudioutilitiescore();
-  rb_provide("openstudioutilitiescore");
-  rb_provide("openstudioutilitiescore.so");
-  Init_openstudioutilitiestime();
-  rb_provide("openstudioutilitiestime");
-  rb_provide("openstudioutilitiestime.so");
-  Init_openstudioutilitiesdata();
-  rb_provide("openstudioutilitiesdata");
-  rb_provide("openstudioutilitiesdata.so");
-  Init_openstudioutilitiesplot();
-  rb_provide("openstudioutilitiesplot");
-  rb_provide("openstudioutilitiesplot.so");
-  Init_openstudioutilitiesgeometry();
-  rb_provide("openstudioutilitiesgeometry");
-  rb_provide("openstudioutilitiesgeometry.so");
-  Init_openstudioutilitiessql();
-  rb_provide("openstudioutilitiessql");
-  rb_provide("openstudioutilitiessql.so");
-  Init_openstudioutilitiesbcl();
-  rb_provide("openstudioutilitiesbcl");
-  rb_provide("openstudioutilitiesbcl.so");
-  Init_openstudioutilitiesunits();
-  rb_provide("openstudioutilitiesunits");
-  rb_provide("openstudioutilitiesunits.so");
-  Init_openstudioutilitiesidd();
-  rb_provide("openstudioutilitiesidd");
-  rb_provide("openstudioutilitiesidd.so");
-  Init_openstudioutilitiesidf();
-  rb_provide("openstudioutilitiesidf");
-  rb_provide("openstudioutilitiesidf.so");
-  Init_openstudioutilitiesfiletypes();
-  rb_provide("openstudioutilitiesfiletypes");
-  rb_provide("openstudioutilitiesfiletypes.so");
-  Init_openstudioutilitiesxml();
-  rb_provide("openstudioutilitiesxml");
-  rb_provide("openstudioutilitiesxml.so");
-  Init_openstudioutilities();
-  rb_provide("openstudioutilities");
-  rb_provide("openstudioutilities.so");
-}
+    Init_openstudioutilitiescore();
+    rb_provide("openstudioutilitiescore");
+    rb_provide("openstudioutilitiescore.so");
+    Init_openstudioutilitiestime();
+    rb_provide("openstudioutilitiestime");
+    rb_provide("openstudioutilitiestime.so");
+    Init_openstudioutilitiesdata();
+    rb_provide("openstudioutilitiesdata");
+    rb_provide("openstudioutilitiesdata.so");
+    Init_openstudioutilitiesplot();
+    rb_provide("openstudioutilitiesplot");
+    rb_provide("openstudioutilitiesplot.so");
+    Init_openstudioutilitiesgeometry();
+    rb_provide("openstudioutilitiesgeometry");
+    rb_provide("openstudioutilitiesgeometry.so");
+    Init_openstudioutilitiessql();
+    rb_provide("openstudioutilitiessql");
+    rb_provide("openstudioutilitiessql.so");
+    Init_openstudioutilitiesbcl();
+    rb_provide("openstudioutilitiesbcl");
+    rb_provide("openstudioutilitiesbcl.so");
+    Init_openstudioutilitiesunits();
+    rb_provide("openstudioutilitiesunits");
+    rb_provide("openstudioutilitiesunits.so");
+    Init_openstudioutilitiesidd();
+    rb_provide("openstudioutilitiesidd");
+    rb_provide("openstudioutilitiesidd.so");
+    Init_openstudioutilitiesidf();
+    rb_provide("openstudioutilitiesidf");
+    rb_provide("openstudioutilitiesidf.so");
+    Init_openstudioutilitiesfiletypes();
+    rb_provide("openstudioutilitiesfiletypes");
+    rb_provide("openstudioutilitiesfiletypes.so");
+    Init_openstudioutilitiesxml();
+    rb_provide("openstudioutilitiesxml");
+    rb_provide("openstudioutilitiesxml.so");
+    Init_openstudioalfalfa();
+    rb_provide("openstudioalfalfa");
+    rb_provide("openstudioalfalfa.so");
+    Init_openstudioutilities();
+    rb_provide("openstudioutilities");
+    rb_provide("openstudioutilities.so");
+  }
 
-void initExtendedRubyBindings() {
-  Init_openstudiomodel();
-  rb_provide("openstudiomodel");
-  rb_provide("openstudiomodel.so");
-  Init_openstudiomodelcore();
-  rb_provide("openstudiomodelcore");
-  rb_provide("openstudiomodelcore.so");
-  Init_openstudiomodelsimulation();
-  rb_provide("openstudiomodelsimulation");
-  rb_provide("openstudiomodelsimulation.so");
-  Init_openstudiomodelresources();
-  rb_provide("openstudiomodelresources");
-  rb_provide("openstudiomodelresources.so");
-  Init_openstudiomodelgeometry();
-  rb_provide("openstudiomodelgeometry");
-  rb_provide("openstudiomodelgeometry.so");
-  Init_openstudiomodelhvac();
-  rb_provide("openstudiomodelhvac");
-  rb_provide("openstudiomodelhvac.so");
-  Init_openstudiomodelzonehvac();
-  rb_provide("openstudiomodelzonehvac");
-  rb_provide("openstudiomodelzonehvac.so");
-  Init_openstudiomodelavailabilitymanager();
-  rb_provide("openstudiomodelavailabilitymanager");
-  rb_provide("openstudiomodelavailabilitymanager.so");
-  Init_openstudiomodelplantequipmentoperationscheme();
-  rb_provide("openstudiomodelplantequipmentoperationscheme");
-  rb_provide("openstudiomodelplantequipmentoperationscheme.so");
-  Init_openstudiomodelstraightcomponent();
-  rb_provide("openstudiomodelstraightcomponent");
-  rb_provide("openstudiomodelstraightcomponent.so");
-  Init_openstudiomodelairflow();
-  rb_provide("openstudiomodelairflow");
-  rb_provide("openstudiomodelairflow.so");
-  Init_openstudiomodelrefrigeration();
-  rb_provide("openstudiomodelrefrigeration");
-  rb_provide("openstudiomodelrefrigeration.so");
-  Init_openstudiomodelgenerators();
-  rb_provide("openstudiomodelgenerators");
-  rb_provide("openstudiomodelgenerators.so");
+  void initExtendedRubyBindings() {
+    Init_openstudiomodel();
+    rb_provide("openstudiomodel");
+    rb_provide("openstudiomodel.so");
+    Init_openstudiomodelcore();
+    rb_provide("openstudiomodelcore");
+    rb_provide("openstudiomodelcore.so");
+    Init_openstudiomodelsimulation();
+    rb_provide("openstudiomodelsimulation");
+    rb_provide("openstudiomodelsimulation.so");
+    Init_openstudiomodelresources();
+    rb_provide("openstudiomodelresources");
+    rb_provide("openstudiomodelresources.so");
+    Init_openstudiomodelgeometry();
+    rb_provide("openstudiomodelgeometry");
+    rb_provide("openstudiomodelgeometry.so");
+    Init_openstudiomodelhvac();
+    rb_provide("openstudiomodelhvac");
+    rb_provide("openstudiomodelhvac.so");
+    Init_openstudiomodelzonehvac();
+    rb_provide("openstudiomodelzonehvac");
+    rb_provide("openstudiomodelzonehvac.so");
+    Init_openstudiomodelavailabilitymanager();
+    rb_provide("openstudiomodelavailabilitymanager");
+    rb_provide("openstudiomodelavailabilitymanager.so");
+    Init_openstudiomodelplantequipmentoperationscheme();
+    rb_provide("openstudiomodelplantequipmentoperationscheme");
+    rb_provide("openstudiomodelplantequipmentoperationscheme.so");
+    Init_openstudiomodelstraightcomponent();
+    rb_provide("openstudiomodelstraightcomponent");
+    rb_provide("openstudiomodelstraightcomponent.so");
+    Init_openstudiomodelairflow();
+    rb_provide("openstudiomodelairflow");
+    rb_provide("openstudiomodelairflow.so");
+    Init_openstudiomodelrefrigeration();
+    rb_provide("openstudiomodelrefrigeration");
+    rb_provide("openstudiomodelrefrigeration.so");
+    Init_openstudiomodelgenerators();
+    rb_provide("openstudiomodelgenerators");
+    rb_provide("openstudiomodelgenerators.so");
 
-  Init_openstudioenergyplus();
-  rb_provide("openstudioenergyplus");
-  rb_provide("openstudioenergyplus.so");
-  Init_openstudioepjson();
-  rb_provide("openstudioepjson");
-  rb_provide("openstudioepjson.so");
-  Init_openstudioradiance();
-  rb_provide("openstudioradiance");
-  rb_provide("openstudioradiance.so");
-  Init_openstudiogbxml();
-  rb_provide("openstudiogbxml");
-  rb_provide("openstudiogbxml.so");
-  Init_openstudiogltf();
-  rb_provide("openstudiogltf");
-  rb_provide("openstudiogltf.so");
-  Init_openstudioairflow();
-  rb_provide("openstudioairflow");
-  rb_provide("openstudioairflow.so");
-  Init_openstudioosversion();
-  rb_provide("openstudioversion");
-  rb_provide("openstudioversion.so");
-  Init_openstudiomeasure();
-  rb_provide("openstudiomeasure");
-  rb_provide("openstudiomeasure.so");
-  Init_openstudioisomodel();
-  rb_provide("openstudioisomodel");
-  rb_provide("openstudioisomodel.so");
-  Init_openstudiosdd();
-  rb_provide("openstudiosdd");
-  rb_provide("openstudiosdd.so");
+    Init_openstudioenergyplus();
+    rb_provide("openstudioenergyplus");
+    rb_provide("openstudioenergyplus.so");
+    Init_openstudioepjson();
+    rb_provide("openstudioepjson");
+    rb_provide("openstudioepjson.so");
+    Init_openstudioradiance();
+    rb_provide("openstudioradiance");
+    rb_provide("openstudioradiance.so");
+    Init_openstudiogbxml();
+    rb_provide("openstudiogbxml");
+    rb_provide("openstudiogbxml.so");
+    Init_openstudiogltf();
+    rb_provide("openstudiogltf");
+    rb_provide("openstudiogltf.so");
+    Init_openstudioairflow();
+    rb_provide("openstudioairflow");
+    rb_provide("openstudioairflow.so");
+    Init_openstudioosversion();
+    rb_provide("openstudioversion");
+    rb_provide("openstudioversion.so");
+    Init_openstudiomeasure();
+    rb_provide("openstudiomeasure");
+    rb_provide("openstudiomeasure.so");
+    Init_openstudioisomodel();
+    rb_provide("openstudioisomodel");
+    rb_provide("openstudioisomodel.so");
+    Init_openstudiosdd();
+    rb_provide("openstudiosdd");
+    rb_provide("openstudiosdd.so");
 
-  //Init_openstudiomodeleditor(); # happens separately in openstudio.so only, for SketchUp plug-in
-  //rb_provide("openstudiomodeleditor");
-  //rb_provide("openstudiomodeleditor.so");
+    //Init_openstudiomodeleditor(); # happens separately in openstudio.so only, for SketchUp plug-in
+    //rb_provide("openstudiomodeleditor");
+    //rb_provide("openstudiomodeleditor.so");
 
-  // "typedefs" for backwards compatibility
-  // keep synchronized with \openstudiocore\src\utilities\core\RubyInterpreter.hpp
-  std::string ruby_typedef_script = R"ruby(
+    // "typedefs" for backwards compatibility
+    // keep synchronized with \openstudiocore\src\utilities\core\RubyInterpreter.hpp
+    std::string ruby_typedef_script = R"ruby(
 module OpenStudio
 module Ruleset
 
@@ -441,16 +445,16 @@ end # module OpenStudio
 
 )ruby";
 
-  openstudio::evalString(ruby_typedef_script);
-}
+    openstudio::evalString(ruby_typedef_script);
+  }
 
-void initEmbeddedGems() {
+  void initEmbeddedGems() {
 
-  // Note: We instantiate a global $logger here
-  // It used to be a ruby Logger (require 'logger'), and we would have needed to set the log level based on the CLI parameters passed
-  // Instead, I mimic it by providing a convenience class that forwards to the OpenStudio logger, which takes care of the log level
+    // Note: We instantiate a global $logger here
+    // It used to be a ruby Logger (require 'logger'), and we would have needed to set the log level based on the CLI parameters passed
+    // Instead, I mimic it by providing a convenience class that forwards to the OpenStudio logger, which takes care of the log level
 
-  std::string initScript = R"ruby(
+    std::string initScript = R"ruby(
 # This is the save puts to use to catch EPIPE. Uses `puts` on the given IO object and safely ignores any Errno::EPIPE
 #
 # @param [String] message Message to output
@@ -530,18 +534,32 @@ if RbConfig::CONFIG['arch'] =~ /x64-mswin64/
 end
 
 # load embedded ruby gems
+# This loads :/ruby/gems/3.2.0/specifications/default
 require 'rubygems'
 require 'rubygems/version'
 Gem::Platform.local
+
+# Note that we have three standard locations where we have gemspecs
+#
+# 1. This is the Ruby-built in stuff (eg; csv, fileutils, irb, json, reline, etc)
+#':/ruby/gems/3.2.0/specifications/default',
+#
+# 2. This is the Ruby-built in stuff that's brought in via gems/bundled_gems (https://github.com/ruby/ruby/blob/f91480d7a671b1b114270a4b5e4d3c5aa6dabce9/gems/bundled_gems)
+# (rbs, debug, matrix, rexml, etc)
+#  ':/ruby/gems/3.2.0/specifications',
+#
+# 3. Where we have the openstudio-gems gemspecs (openstudio-standards, etc)
+#':/ruby/3.2.0/specifications',
 
 if original_arch
   RbConfig::CONFIG['arch'] = original_arch
 end
   )ruby";
 
-  openstudio::evalString(initScript);
+    openstudio::evalString(initScript);
 
-  const std::string irbPatch = R"ruby(if $logger.trace?
+#ifndef _WIN32  // no io/console available
+    const std::string irbPatch = R"ruby(if $logger.trace?
 require 'irb'
 require 'irb/lc/error'
 
@@ -626,7 +644,7 @@ module IRB # :nodoc:
 
     @CONF[:IRB_RC].call(irb.context) if @CONF[:IRB_RC]
     # puts @CONF[:PROMPT_MODE]
-    os_version = "3.8.0" # OpenStudio::openStudioVersion
+    os_version = "3.10.0" # OpenStudio::openStudioVersion
     @CONF[:PROMPT][:OPENSTUDIO] = {
       :PROMPT_I=>"(os #{os_version}) :%03n > ",
       :PROMPT_S=>"(os #{os_version}) :%03n%l> ",
@@ -650,93 +668,98 @@ module IRB # :nodoc:
 end
 end)ruby";
 
-  openstudio::evalString(irbPatch);
-}
+    openstudio::evalString(irbPatch);
+#endif
+  }
 
-void setupEmbeddedGemsClearEnvVars() {
+  void setupEmbeddedGemsClearEnvVars() {
 
-  // in hash.c there's lot of env-related functions, but all private, aside from rb_env_clear();
-  const std::string clearEnvs = R"ruby(
+    // in hash.c there's lot of env-related functions, but all private, aside from rb_env_clear();
+    const std::string clearEnvs = R"ruby(
 ENV.reject! { |k, _| ['GEM', 'BUNDLE'].any? { |x| k.start_with?(x) } }
+# No env variable isn't the same as empty. Gem::PathSupport does stuff like @home = env["GEM_HOME"] || Gem.default_dir
+ENV['GEM_HOME'] = ''
+ENV['GEM_PATH'] = ''
+ENV['GEM_SPEC_CACHE'] = ''
   )ruby";
 
-  openstudio::evalString(clearEnvs);
-};
+    openstudio::evalString(clearEnvs);
+  };
 
-void addIncludeDirsToLoadPaths(const std::vector<openstudio::path>& includeDirs) {
-  if (includeDirs.empty()) {
-    return;
+  void addIncludeDirsToLoadPaths(const std::vector<openstudio::path>& includeDirs) {
+    if (includeDirs.empty()) {
+      return;
+    }
+
+    VALUE load_path = rb_gv_get("$LOAD_PATH");
+
+    // Apparently this isn't exposed: `ary_resize_capa(rb_array_len(load_path) + includeDirs.size())``
+
+    // Can't use ranges! starts at clang 15.0, damn.
+    // for (const auto& dirPath : includeDirs | std::views::reverse) {
+    for (const auto& dirPath : includeDirs | boost::adaptors::reversed) {
+      // Insert at 0, in reverse order. Same a includeDirs.concat($LOAD_PATH) in ruby
+      rb_ary_unshift(load_path, rb_str_new2(dirPath.generic_string().c_str()));
+    }
   }
 
-  VALUE load_path = rb_gv_get("$LOAD_PATH");
+  void setRubyEnvVarStr(std::string_view name, std::string_view val) {
 
-  // Apparently this isn't exposed: `ary_resize_capa(rb_array_len(load_path) + includeDirs.size())``
+    if (val.empty()) {
+      return;
+    }
 
-  // Can't use ranges! starts at clang 15.0, damn.
-  // for (const auto& dirPath : includeDirs | std::views::reverse) {
-  for (const auto& dirPath : includeDirs | boost::adaptors::reversed) {
-    // Insert at 0, in reverse order. Same a includeDirs.concat($LOAD_PATH) in ruby
-    rb_ary_unshift(load_path, rb_str_new2(dirPath.generic_string().c_str()));
-  }
-}
+    //   const auto envVarCmd = fmt::format(
+    //     R"ruby(
+    // $logger.info "Setting {0} to {1}"
+    // ENV['{0}'] = '{1}'
+    // )ruby",
+    //     name, val);
 
-void setRubyEnvVarStr(std::string_view name, std::string_view val) {
-
-  if (val.empty()) {
-    return;
-  }
-
-  //   const auto envVarCmd = fmt::format(
-  //     R"ruby(
-  // $logger.info "Setting {0} to {1}"
-  // ENV['{0}'] = '{1}'
-  // )ruby",
-  //     name, val);
-
-  std::stringstream ss;
-  ss << "$logger.info \"Setting " << name << " to " << val << "\"\n"
-     << "ENV['" << name << "'] = '" << val << "'\n";
-  openstudio::evalString(ss.str());
-}
-
-void setRubyEnvVarPath(std::string_view name, const openstudio::path& p) {
-
-  if (p.empty()) {
-    return;
+    std::stringstream ss;
+    ss << "$logger.info \"Setting " << name << " to " << val << "\"\n"
+       << "ENV['" << name << "'] = '" << val << "'\n";
+    openstudio::evalString(ss.str());
   }
 
-  setRubyEnvVarStr(name, p.generic_string());
-}
+  void setRubyEnvVarPath(std::string_view name, const openstudio::path& p) {
 
-void setGemPathDir(const std::vector<openstudio::path>& gemPathDirs) {
-  if (gemPathDirs.empty()) {
-    return;
+    if (p.empty()) {
+      return;
+    }
+
+    setRubyEnvVarStr(name, p.generic_string());
   }
 
-  std::string result;
-  for (const auto& gemDirPath : gemPathDirs) {
-    const auto& s = gemDirPath.generic_string();
-    result += result.empty() ? s : std::string{openstudio::path::preferred_separator} + s;
+  void setGemPathDir(const std::vector<openstudio::path>& gemPathDirs) {
+    if (gemPathDirs.empty()) {
+      return;
+    }
+
+    std::string result;
+    for (const auto& gemDirPath : gemPathDirs) {
+      const auto& s = gemDirPath.generic_string();
+      result += result.empty() ? s : std::string{openstudio::path::preferred_separator} + s;
+    }
+    setRubyEnvVarStr("GEM_PATH", result);
   }
-  setRubyEnvVarStr("GEM_PATH", result);
-}
 
-void locateEmbeddedGems(bool use_bundler) {
-  // It is important to find, eval, and call add_spec for all of the gemspecs
-  // that are in the embedded file system. The rubgems find/load mechanims will
-  // attempt to use a number of Ruby file, directory, and path operations that
-  // are not compaitable with the embdded file system. By doing the find, eval,
-  // add_spec routine up front, rubygems will avoid trying to load things off of
-  // the embedded file system itself.
-  //
-  // A previous version of this routine added embedded file paths to the gem
-  // path, such as Gem.paths.path << ':/ruby/3.2.0/gems/'. This is not
-  // sustainable because it requires shims for many of the Ruby file operations
-  // so that they work with embedded files. The solution here avoids File
-  // operations on embdded file system with the exception of our own
-  // EmbeddedScripting::getFileAsString
+  void locateEmbeddedGems(bool use_bundler) {
+    // It is important to find, eval, and call add_spec for all of the gemspecs
+    // that are in the embedded file system. The rubgems find/load mechanims will
+    // attempt to use a number of Ruby file, directory, and path operations that
+    // are not compaitable with the embdded file system. By doing the find, eval,
+    // add_spec routine up front, rubygems will avoid trying to load things off of
+    // the embedded file system itself.
+    //
+    // A previous version of this routine added embedded file paths to the gem
+    // path, such as Gem.paths.path << ':/ruby/3.2.0/gems/'. This is not
+    // sustainable because it requires shims for many of the Ruby file operations
+    // so that they work with embedded files. The solution here avoids File
+    // operations on embdded file system with the exception of our own
+    // EmbeddedScripting::getFileAsString
 
-  std::string initCmd = R"ruby(
+    std::string initCmd = R"ruby(
 
   # This prevents default system paths from creeping in
   class Gem::PathSupport
@@ -745,6 +768,21 @@ void locateEmbeddedGems(bool use_bundler) {
     end
   end
 
+#  module Gem
+#    def self.default_dir
+#      @default_dir = ""
+#    end
+#
+#    def self.find_home
+#      ""
+#    end
+#
+#    def self.default_specifications_dir
+#      @default_specifications_dir = ""
+#    end
+#  end
+#
+  Gem.clear_paths
   Gem::Deprecate.skip = true
 
   # find all the embedded gems
@@ -845,8 +883,10 @@ void locateEmbeddedGems(bool use_bundler) {
   end
 )ruby";
 
-  if (use_bundler) {
-    initCmd += R"ruby(
+    if (use_bundler) {
+      initCmd += R"ruby(
+  $logger.trace "embedded_gems_to_activate=#{embedded_gems_to_activate.map{ |s| s.name} }"
+
   # Load the bundle before activating any embedded gems
   embedded_gems_to_activate.each do |spec|
     if spec.name == "bundler"
@@ -880,53 +920,54 @@ void locateEmbeddedGems(bool use_bundler) {
     RbConfig::CONFIG['arch'] = 'x64-mingw32'
   end
 
-    # require bundler
-    # have to do some forward declaration and pre-require to get around autoload cycles
-    require 'bundler/errors'
-    #require 'bundler/environment_preserver'
-    require 'bundler/plugin'
-    #require 'bundler/rubygems_ext'
-    require 'bundler/rubygems_integration'
+  $logger.trace "Requiring bundler"
+  # require bundler
+  # have to do some forward declaration and pre-require to get around autoload cycles
+  require 'bundler/errors'
+  #require 'bundler/environment_preserver'
+  require 'bundler/plugin'
+  #require 'bundler/rubygems_ext'
+  require 'bundler/rubygems_integration'
 
-    # Global list, to be populated below
-    $ignore_native_gem_names = []
+  # Global list, to be populated below
+  $ignore_native_gem_names = []
 
-    module Bundler
-      class RubygemsIntegration
+  module Bundler
+    class RubygemsIntegration
 
-        alias :ori_spec_missing_extensions? :spec_missing_extensions?
+      alias :ori_spec_missing_extensions? :spec_missing_extensions?
 
-        def spec_missing_extensions?(spec, default = true)
+      def spec_missing_extensions?(spec, default = true)
 
-          # This avoids getting an annoying message for no reason
-          if $ignore_native_gem_names.any? {|name| name == spec.name }
-            return false
-          end
-
-          return ori_spec_missing_extensions?(spec, default)
+        # This avoids getting an annoying message for no reason
+        if $ignore_native_gem_names.any? {|name| name == spec.name }
+          return false
         end
+
+        return ori_spec_missing_extensions?(spec, default)
       end
     end
+  end
 
-    require 'bundler/version'
-    require 'bundler/ruby_version'
-    #require 'bundler/constants'
-    #require 'bundler/current_ruby'
-    require 'bundler/gem_helpers'
-    #require 'bundler/plugin'
-    require 'bundler/source'
-    require 'bundler/definition'
-    require 'bundler/dsl'
-    require 'bundler/uri_credentials_filter'
-    require 'bundler/uri_normalizer'
-    require 'bundler/index'
-    require 'bundler/digest'
-    require 'bundler/source/git'
-    require 'bundler/source/git/git_proxy'
-    require 'bundler/match_remote_metadata'
-    require 'bundler/remote_specification'
-    require 'bundler/stub_specification'
-    require 'bundler'
+  require 'bundler/version'
+  require 'bundler/ruby_version'
+  #require 'bundler/constants'
+  #require 'bundler/current_ruby'
+  require 'bundler/gem_helpers'
+  #require 'bundler/plugin'
+  require 'bundler/source'
+  require 'bundler/definition'
+  require 'bundler/dsl'
+  require 'bundler/uri_credentials_filter'
+  require 'bundler/uri_normalizer'
+  require 'bundler/index'
+  require 'bundler/digest'
+  require 'bundler/source/git'
+  require 'bundler/source/git/git_proxy'
+  require 'bundler/match_remote_metadata'
+  require 'bundler/remote_specification'
+  require 'bundler/stub_specification'
+  require 'bundler'
 
   begin
     # activate bundled gems
@@ -957,10 +998,20 @@ void locateEmbeddedGems(bool use_bundler) {
     # Filter out dependencies with native extensions that we already have embedded in the CLI and that satisfy the requirements
     locked_specs = Bundler.definition.instance_variable_get(:@locked_specs)
 
-    embedded_gems_to_activate.each do |spec|
-      next if spec.extensions.empty?
+    extra_load_paths = []
 
-      next unless locked_specs.any? {|locked_spec| locked_spec.name == spec.name}
+    embedded_gems_to_activate.each do |spec|
+      if spec.extensions.empty?
+        # $logger.trace "Spec #{spec.name} has no extensions"
+        next
+      end
+
+      unless locked_specs.any? {|locked_spec| locked_spec.name == spec.name}
+        # $logger.trace "#{spec.name} not in locked_specs"
+        next
+      end
+
+      $logger.trace "embedded_gems_to_activate.each: spec: #{spec.name}"
 
       dep_to_requirements = {}
       locked_specs.each do |locked_spec|
@@ -971,27 +1022,67 @@ void locateEmbeddedGems(bool use_bundler) {
         end
       end
 
-
       if locked_specs.none? { |locked_spec| locked_spec.dependencies.any? {|x| x.name == spec.name} }
-        locked_spec_v = locked_specs.select{|locked_spec| locked_spec.name == spec.name}.first.version
-        $logger.debug("Removing native gem #{spec.name} from Bundler locked_specs (version #{locked_spec_v}), using the embedded dependency (CLI one has version #{spec.version})")
+        locked_spec = locked_specs.select{|locked_spec| locked_spec.name == spec.name}.first
+        $logger.debug("Removing native gem #{spec.name} from Bundler locked_specs (version #{locked_spec.version}), using the embedded dependency (CLI one has version #{spec.version})")
         $logger.trace("Gems having #{spec.name} as a dependency: #{dep_to_requirements}")
+        locked_spec.dependencies.each do |dep|
+          $logger.trace("Activating dependency #{dep.name} first")
+          found_spec = embedded_gems_to_activate.find { |x| x.name == dep.name }
+          raise "Can't find #{dep.name}" unless found_spec
+
+          next if found_spec.activated
+
+          # found_spec.load_paths.reject {|path| $LOAD_PATH.include?(path) }
+          Gem::Specification.add_spec(found_spec)  # Will add it to Gem::Specification.stubs too
+          raise "Failed to activate #{spec.name}" unless found_spec.activate
+          Bundler.rubygems.mark_loaded(found_spec)
+          stub = Gem::Specification.stubs_for(found_spec.name).first
+          bundler_stub = Bundler::StubSpecification.from_stub(stub)
+          if !locked_specs[dep].nil?
+            x = locked_specs[dep].first
+            x.instance_variable_set(:@version, found_spec.version)
+            class <<x
+              private
+              def use_exact_resolved_specifications?
+                @use_exact_resolved_specifications = false
+              end
+            end
+            #  locked_specs.delete_by_name(dep.name)
+            # locked_specs[dep] = bundler_stub
+            extra_load_paths += found_spec.full_require_paths
+          end
+        end
+
+        Gem::Specification.add_spec(spec)
         raise "Failed to activate #{spec.name}" unless spec.activate
+        Bundler.rubygems.mark_loaded(spec)
+        stub = Gem::Specification.stubs_for(spec.name).first
+        bundler_stub = Bundler::StubSpecification.from_stub(stub)
+        raise "That shouldn't happen" if locked_specs[spec.name].nil?
+        # locked_specs.delete_by_name(spec.name)
+        # locked_specs[spec.name] = bundler_stub
+
+        extra_load_paths += spec.full_require_paths
+
         $ignore_native_gem_names << spec.name
-        locked_specs.delete_by_name(spec.name)
       end
     end
 
+
     # I am pretty sure sure we don't need this. Because internally Bundler.definition.filter_specs will ignore it from the dependencies if it's there as well
-    # Bundler.definition.instance_variable_set(:@dependencies,  Bundler.definition.dependencies.select { |dep| $ignore_native_gem_names.include?(dep.name) } )
+    # Bundler.definition.instance_variable_set(:@dependencies,  Bundler.definition.dependencies.select { |dep| !$ignore_native_gem_names.include?(dep.name) } )
 
     remaining_specs = []
     Bundler.definition.specs_for(keep_groups).each {|s| remaining_specs << s.name}
 
     $logger.info "Specs to be included [#{remaining_specs.join(',')}]"
 
-
+    # This is going to remove some stuff from the LOAD_PATH that we already loaded, when we really don't want to, so we readd them...
     Bundler.setup(*keep_groups)
+
+    Bundler.rubygems.add_to_load_path(extra_load_paths - $LOAD_PATH)
+
   ensure
 
     if original_arch
@@ -1005,9 +1096,9 @@ void locateEmbeddedGems(bool use_bundler) {
     $ignore_native_gem_names = nil
   end
   )ruby";
-  }
+    }
 
-  initCmd += R"ruby(
+    initCmd += R"ruby(
 
   original_load_path = $LOAD_PATH.clone
 
@@ -1033,46 +1124,46 @@ void locateEmbeddedGems(bool use_bundler) {
   $LOAD_PATH.reject! {|p| not original_load_path.any? p}
   )ruby";
 
-  openstudio::evalString(initCmd);
-}
-
-void setupEmbeddedGems(const std::vector<openstudio::path>& includeDirs, const std::vector<openstudio::path>& gemPathDirs,
-                       const openstudio::path& gemHomeDir, const openstudio::path& bundleGemFilePath, const openstudio::path& bundleGemDirPath,
-                       const std::string& bundleWithoutGroups) {
-
-  setupEmbeddedGemsClearEnvVars();
-  initEmbeddedGems();
-
-  addIncludeDirsToLoadPaths(includeDirs);
-  setGemPathDir(gemPathDirs);
-  setRubyEnvVarPath("GEM_HOME", gemHomeDir);
-  bool use_bundler = false;
-  if (!bundleGemFilePath.empty()) {
-    setRubyEnvVarPath("BUNDLE_GEMFILE", bundleGemFilePath);
-    use_bundler = true;
-  }
-  if (!bundleGemDirPath.empty()) {
-    setRubyEnvVarPath("BUNDLE_PATH", bundleGemDirPath);
-  } else if (use_bundler) {
-    // bundle was requested but bundle_path was not provided
-    std::cout << "Warn: Bundle activated but ENV['BUNDLE_PATH'] is not set" << '\n' << "Info: Setting BUNDLE_PATH to ':/ruby/3.2.0/'" << std::endl;
+    openstudio::evalString(initCmd);
   }
 
-  if (!bundleWithoutGroups.empty()) {
-    setRubyEnvVarPath("BUNDLE_WITHOUT", bundleWithoutGroups);
-  } else if (use_bundler) {
-    // bundle was requested but bundle_path was not provided
-    std::cout << "Warn: Bundle activated but ENV['BUNDLE_WITHOUT'] is not set" << '\n' << "Info: Setting BUNDLE_WITHOUT to 'test'" << std::endl;
-    setRubyEnvVarPath("BUNDLE_WITHOUT", "test");
+  void setupEmbeddedGems(const std::vector<openstudio::path>& includeDirs, const std::vector<openstudio::path>& gemPathDirs,
+                         const openstudio::path& gemHomeDir, const openstudio::path& bundleGemFilePath, const openstudio::path& bundleGemDirPath,
+                         const std::string& bundleWithoutGroups) {
+
+    setupEmbeddedGemsClearEnvVars();
+    initEmbeddedGems();
+
+    addIncludeDirsToLoadPaths(includeDirs);
+    setGemPathDir(gemPathDirs);
+    setRubyEnvVarPath("GEM_HOME", gemHomeDir);
+    bool use_bundler = false;
+    if (!bundleGemFilePath.empty()) {
+      setRubyEnvVarPath("BUNDLE_GEMFILE", bundleGemFilePath);
+      use_bundler = true;
+    }
+    if (!bundleGemDirPath.empty()) {
+      setRubyEnvVarPath("BUNDLE_PATH", bundleGemDirPath);
+    } else if (use_bundler) {
+      // bundle was requested but bundle_path was not provided
+      std::cout << "Warn: Bundle activated but ENV['BUNDLE_PATH'] is not set" << '\n' << "Info: Setting BUNDLE_PATH to ':/ruby/3.2.0/'" << std::endl;
+    }
+
+    if (!bundleWithoutGroups.empty()) {
+      setRubyEnvVarPath("BUNDLE_WITHOUT", bundleWithoutGroups);
+    } else if (use_bundler) {
+      // bundle was requested but bundle_path was not provided
+      std::cout << "Warn: Bundle activated but ENV['BUNDLE_WITHOUT'] is not set" << '\n' << "Info: Setting BUNDLE_WITHOUT to 'test'" << std::endl;
+      setRubyEnvVarPath("BUNDLE_WITHOUT", "test");
+    }
+
+    locateEmbeddedGems(use_bundler);
   }
 
-  locateEmbeddedGems(use_bundler);
-}
-
-void initRubyBindings() {
-  initBasicRubyBindings();
-  initExtendedRubyBindings();
-}
+  void initRubyBindings() {
+    initBasicRubyBindings();
+    initExtendedRubyBindings();
+  }
 
 }  // namespace ruby
 }  // namespace openstudio

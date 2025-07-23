@@ -12,6 +12,8 @@
 namespace openstudio {
 namespace model {
 
+  class EnergyManagementSystemMeteredOutputVariable;
+
   namespace detail {
 
     class EnergyManagementSystemProgram_Impl;
@@ -27,7 +29,7 @@ namespace model {
 
     explicit EnergyManagementSystemProgram(const Model& model);
 
-    virtual ~EnergyManagementSystemProgram() = default;
+    virtual ~EnergyManagementSystemProgram() override = default;
     // Default the copy and move operators because the virtual dtor is explicit
     EnergyManagementSystemProgram(const EnergyManagementSystemProgram& other) = default;
     EnergyManagementSystemProgram(EnergyManagementSystemProgram&& other) = default;
@@ -64,6 +66,9 @@ namespace model {
     //@}
     /** @name Other */
     //@{
+
+    // Convenience method to return all EnergyManagementSystemMeteredOutputVariable that refer to this Program
+    std::vector<EnergyManagementSystemMeteredOutputVariable> energyManagementSystemMeteredOutputVariables() const;
 
     //@}
    protected:

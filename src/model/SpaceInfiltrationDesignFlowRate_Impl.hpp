@@ -30,7 +30,7 @@ namespace model {
 
       SpaceInfiltrationDesignFlowRate_Impl(const SpaceInfiltrationDesignFlowRate_Impl& other, Model_Impl* model, bool keepHandle);
 
-      virtual ~SpaceInfiltrationDesignFlowRate_Impl() = default;
+      virtual ~SpaceInfiltrationDesignFlowRate_Impl() override = default;
 
       //@}
       /** @name Virtual Methods */
@@ -91,6 +91,8 @@ namespace model {
 
       virtual std::vector<std::string> emsInternalVariableNames() const override;
 
+      std::string densityBasis() const;
+
       //@}
       /** @name Setters */
       //@{
@@ -126,6 +128,8 @@ namespace model {
       bool setVelocitySquaredTermCoefficient(double velocitySquaredTermCoefficient);
 
       void resetVelocitySquaredTermCoefficient();
+
+      bool setDensityBasis(const std::string& densityBasis);
 
       //@}
       /** @name Other */

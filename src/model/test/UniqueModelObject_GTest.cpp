@@ -34,6 +34,8 @@
 #include "../OutputControlFiles_Impl.hpp"
 #include "../OutputControlReportingTolerances.hpp"
 #include "../OutputControlReportingTolerances_Impl.hpp"
+#include "../OutputControlResilienceSummaries.hpp"
+#include "../OutputControlResilienceSummaries_Impl.hpp"
 #include "../OutputControlTableStyle.hpp"
 #include "../OutputControlTableStyle_Impl.hpp"
 #include "../OutputControlTimestamp.hpp"
@@ -54,6 +56,8 @@
 #include "../OutputConstructions_Impl.hpp"
 #include "../PerformancePrecisionTradeoffs.hpp"
 #include "../PerformancePrecisionTradeoffs_Impl.hpp"
+#include "../PythonPluginSearchPaths.hpp"
+#include "../PythonPluginSearchPaths_Impl.hpp"
 #include "../RadianceParameters.hpp"
 #include "../RadianceParameters_Impl.hpp"
 #include "../RunPeriod.hpp"
@@ -375,6 +379,31 @@ TEST_F(ModelFixture, OutputControlReportingTolerances_UniqueModelObject_Clone) {
   EXPECT_EQ("! Custom Object", outputControlReportingTolerancesClone2.comment());
 }
 
+TEST_F(ModelFixture, OutputControlResilienceSummaries_UniqueModelObject_Clone) {
+  // create a model to use
+  Model model;
+
+  // Get the Unique ModelObject
+  EXPECT_FALSE(model.getOptionalUniqueModelObject<OutputControlResilienceSummaries>());
+  auto outputControlResilienceSummaries = model.getUniqueModelObject<OutputControlResilienceSummaries>();
+  EXPECT_TRUE(model.getOptionalUniqueModelObject<OutputControlResilienceSummaries>());
+  // We use a comment to see if cloning to another model works
+  outputControlResilienceSummaries.setComment("Custom Object");
+
+  // clone it into the same model
+  auto outputControlResilienceSummariesClone = outputControlResilienceSummaries.clone(model).cast<OutputControlResilienceSummaries>();
+  // UniqueModelObject: should be the same as the original
+  EXPECT_EQ(outputControlResilienceSummaries, outputControlResilienceSummariesClone);
+  EXPECT_EQ("! Custom Object", outputControlResilienceSummariesClone.comment());
+
+  // clone it into a different model
+  Model model2;
+  EXPECT_FALSE(model2.getOptionalUniqueModelObject<OutputControlResilienceSummaries>());
+  auto outputControlResilienceSummariesClone2 = outputControlResilienceSummaries.clone(model2).cast<OutputControlResilienceSummaries>();
+  EXPECT_TRUE(model2.getOptionalUniqueModelObject<OutputControlResilienceSummaries>());
+  EXPECT_EQ("! Custom Object", outputControlResilienceSummariesClone2.comment());
+}
+
 TEST_F(ModelFixture, OutputControlTableStyle_UniqueModelObject_Clone) {
   // create a model to use
   Model model;
@@ -623,6 +652,31 @@ TEST_F(ModelFixture, PerformancePrecisionTradeoffs_UniqueModelObject_Clone) {
   auto performancePrecisionTradeoffsClone2 = performancePrecisionTradeoffs.clone(model2).cast<PerformancePrecisionTradeoffs>();
   EXPECT_TRUE(model2.getOptionalUniqueModelObject<PerformancePrecisionTradeoffs>());
   EXPECT_EQ("! Custom Object", performancePrecisionTradeoffsClone2.comment());
+}
+
+TEST_F(ModelFixture, PythonPluginSearchPaths_UniqueModelObject_Clone) {
+  // create a model to use
+  Model model;
+
+  // Get the Unique ModelObject
+  EXPECT_FALSE(model.getOptionalUniqueModelObject<PythonPluginSearchPaths>());
+  auto pythonPluginSearchPaths = model.getUniqueModelObject<PythonPluginSearchPaths>();
+  EXPECT_TRUE(model.getOptionalUniqueModelObject<PythonPluginSearchPaths>());
+  // We use a comment to see if cloning to another model works
+  pythonPluginSearchPaths.setComment("Custom Object");
+
+  // clone it into the same model
+  auto pythonPluginSearchPathsClone = pythonPluginSearchPaths.clone(model).cast<PythonPluginSearchPaths>();
+  // UniqueModelObject: should be the same as the original
+  EXPECT_EQ(pythonPluginSearchPaths, pythonPluginSearchPathsClone);
+  EXPECT_EQ("! Custom Object", pythonPluginSearchPathsClone.comment());
+
+  // clone it into a different model
+  Model model2;
+  EXPECT_FALSE(model2.getOptionalUniqueModelObject<PythonPluginSearchPaths>());
+  auto pythonPluginSearchPathsClone2 = pythonPluginSearchPaths.clone(model2).cast<PythonPluginSearchPaths>();
+  EXPECT_TRUE(model2.getOptionalUniqueModelObject<PythonPluginSearchPaths>());
+  EXPECT_EQ("! Custom Object", pythonPluginSearchPathsClone2.comment());
 }
 
 TEST_F(ModelFixture, RadianceParameters_UniqueModelObject_Clone) {

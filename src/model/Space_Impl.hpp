@@ -71,7 +71,7 @@ namespace model {
 
       Space_Impl(const Space_Impl& other, Model_Impl* model, bool keepHandle);
 
-      virtual ~Space_Impl() = default;
+      virtual ~Space_Impl() override = default;
 
       //@}
 
@@ -411,30 +411,33 @@ namespace model {
 
       bool setGasEquipmentPowerPerPerson(double gasEquipmentPowerPerPerson, const boost::optional<GasEquipment>& templateGasEquipment);
 
-      /** Returns the infiltration design flow rate (m^3/s) in the space. Ignores
-     *  SpaceInfiltrationEffectiveLeakageArea and SpaceInfiltrationFlowCoefficient objects. */
-      /// Does not include space multiplier in calculation.
       double infiltrationDesignFlowRate() const;
 
-      /** Returns the infiltration design flow per space floor area (m^3/m^2*s) in the space.
-     *  Ignores SpaceInfiltrationEffectiveLeakageArea and SpaceInfiltrationFlowCoefficient objects. */
-      /// Does not include space multiplier in calculation.
       double infiltrationDesignFlowPerSpaceFloorArea() const;
 
-      /** Returns the infiltration design flow per exterior surface area (m^3/m^2*s) in the space.
-     *  Ignores SpaceInfiltrationEffectiveLeakageArea and SpaceInfiltrationFlowCoefficient objects. */
-      /// Does not include space multiplier in calculation.
       double infiltrationDesignFlowPerExteriorSurfaceArea() const;
 
-      /** Returns the infiltration design flow per exterior wall area (m^3/m^2*s) in the space.
-     *  Ignores SpaceInfiltrationEffectiveLeakageArea and SpaceInfiltrationFlowCoefficient objects. */
-      /// Does not include space multiplier in calculation.
       double infiltrationDesignFlowPerExteriorWallArea() const;
 
-      /** Returns the infiltration design air changes per hour (1/h) in the space.
-     *  Ignores SpaceInfiltrationEffectiveLeakageArea and SpaceInfiltrationFlowCoefficient objects. */
-      /// Does not include space multiplier in calculation.
       double infiltrationDesignAirChangesPerHour() const;
+
+      // Make the SpaceType unique if it already has SpaceInfiltrationDesignFlowRate (spi) objects AND it's used by more than 1 ParentObject
+      // (Building, Space)
+      // Then return a SpaceInfiltrationDesignObject already assigned to the space
+      // * Create one if the space has none
+      // * Return the first found otherwise and remove all other ones
+      // By the end of this function, Space has ONLY ONE spi assigned (incl. on SpaceType)
+      SpaceInfiltrationDesignFlowRate setInfiltrationDesignFlowRateHelper();
+
+      bool setInfiltrationDesignFlowRate(double infiltrationDesignFlowRate);
+
+      bool setInfiltrationDesignFlowPerSpaceFloorArea(double infiltrationDesignFlowPerSpaceFloorArea);
+
+      bool setInfiltrationDesignFlowPerExteriorSurfaceArea(double infiltrationDesignFlowPerExteriorSurfaceArea);
+
+      bool setInfiltrationDesignFlowPerExteriorWallArea(double infiltrationDesignFlowPerExteriorWallArea);
+
+      bool setInfiltrationDesignAirChangesPerHour(double infiltrationDesignAirChangesPerHour);
 
       /** The following functionality is used by the EnergyPlus translator, the primary aim
      *  is to preserve information while putting the space into a state where it can easily

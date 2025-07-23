@@ -83,7 +83,7 @@ endif()
 
 if(BUILD_TESTING)
   # openstudio_tests is a test target for C++ based tests that extend across multiple
-  # compiled units such as the case for openstudio cli. 
+  # compiled units such as the case for openstudio cli.
   # For example, here is a good place to test issues that are concerned with
   # the complexities of sharing data between the Python and Ruby script engines.
   set(openstudio_tests_src
@@ -120,11 +120,15 @@ if(BUILD_TESTING)
     COMMAND $<TARGET_FILE:openstudio> ruby_version
   )
 
+  add_test(NAME OpenStudioCLI.ruby_version_trace
+    COMMAND $<TARGET_FILE:openstudio> --loglevel Trace ruby_version
+  )
+
   add_test(NAME OpenStudioCLI.python_version
     COMMAND $<TARGET_FILE:openstudio> python_version
   )
   set_tests_properties(OpenStudioCLI.python_version PROPERTIES
-    PASS_REGULAR_EXPRESSION "3\.8\.1[0-9]"
+    PASS_REGULAR_EXPRESSION "3\.12\.[0-9]+"
   )
 
   add_test(NAME OpenStudioCLI.ruby_execute_line
@@ -203,6 +207,11 @@ if(BUILD_TESTING)
     PASS_REGULAR_EXPRESSION "Hello from -x, at National Renewable Energy Laboratory"
   )
 
+  # Test for 5315
+  add_test(NAME OpenStudioCLI.EmbeddedScripting.uuid
+    COMMAND $<TARGET_FILE:openstudio> ${CMAKE_CURRENT_SOURCE_DIR}/test/ensure_uuid_can_be_loaded.rb
+  )
+
   add_test(NAME OpenStudioCLI.Classic.Run_RubyOnly
     COMMAND $<TARGET_FILE:openstudio> classic run -w compact_ruby_only.osw
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/Examples/compact_osw/"
@@ -253,6 +262,14 @@ if(BUILD_TESTING)
   )
   set_tests_properties(OpenStudioCLI.Run_PythonRuby PROPERTIES RESOURCE_LOCK "compact_osw")
 
+  add_test(NAME OpenStudioCLI.Run_AlfalfaWorkflow
+    COMMAND ${CMAKE_COMMAND} "-DCMD1=$<TARGET_FILE:openstudio> run -m -w compact_alfalfa.osw"
+    "-DCMD2=${CMAKE_COMMAND} -E cat run/alfalfa.json"
+    -P ${CMAKE_SOURCE_DIR}/CMake/RunCommands.cmake
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/Examples/compact_osw"
+  )
+  set_tests_properties(OpenStudioCLI.Run_AlfalfaWorkflow PROPERTIES RESOURCE_LOCK "compact_osw")
+
   add_test(NAME OpenStudioCLI.Run_RubyPythonPlugin
     COMMAND $<TARGET_FILE:openstudio> run --show-stdout -w python_plugin_jinja_erb.osw
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/workflow/python_plugin/"
@@ -261,6 +278,63 @@ if(BUILD_TESTING)
   set_tests_properties(OpenStudioCLI.Run_RubyPythonPlugin PROPERTIES
     PASS_REGULAR_EXPRESSION "HI FROM ERB PYTHON PLUGIN[\r\n\t ]*HI FROM JINJA PYTHON PLUGIN"
   )
+
+  # ======================== Workflows should fail ========================
+  add_test(NAME OpenStudioCLI.Run_Validate.MissingAMeasure
+    COMMAND $<TARGET_FILE:openstudio> run --show-stdout -w missing_a_measure.osw
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/workflow/invalid_measures/"
+  )
+  set_tests_properties(OpenStudioCLI.Run_Validate.MissingAMeasure PROPERTIES
+    WILL_FAIL TRUE
+    RESOURCE_LOCK "invalid_measures"
+  )
+
+  add_test(NAME OpenStudioCLI.Run_Validate.UnloadableMeasure
+    COMMAND $<TARGET_FILE:openstudio> run --show-stdout -w unloadable_measure.osw
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/workflow/invalid_measures/"
+  )
+  set_tests_properties(OpenStudioCLI.Run_Validate.UnloadableMeasure PROPERTIES
+    WILL_FAIL TRUE
+    RESOURCE_LOCK "invalid_measures"
+  )
+
+  add_test(NAME OpenStudioCLI.Run_Validate.WrongMeasureTypeOrder
+    COMMAND $<TARGET_FILE:openstudio> run --show-stdout -w wrong_measure_type_order.osw
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/workflow/invalid_measures/"
+  )
+  set_tests_properties(OpenStudioCLI.Run_Validate.WrongMeasureTypeOrder PROPERTIES
+    WILL_FAIL TRUE
+    RESOURCE_LOCK "invalid_measures"
+  )
+
+  # Classic
+  add_test(NAME OpenStudioCLI.Classic.Run_Validate.MissingAMeasure
+    COMMAND $<TARGET_FILE:openstudio> classic run --show-stdout -w missing_a_measure.osw
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/workflow/invalid_measures/"
+  )
+  set_tests_properties(OpenStudioCLI.Classic.Run_Validate.MissingAMeasure PROPERTIES
+    WILL_FAIL TRUE
+    RESOURCE_LOCK "invalid_measures"
+  )
+
+  add_test(NAME OpenStudioCLI.Classic.Run_Validate.UnloadableMeasure
+    COMMAND $<TARGET_FILE:openstudio> classic run --show-stdout -w unloadable_measure.osw
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/workflow/invalid_measures/"
+  )
+  set_tests_properties(OpenStudioCLI.Classic.Run_Validate.UnloadableMeasure PROPERTIES
+    WILL_FAIL TRUE
+    RESOURCE_LOCK "invalid_measures"
+  )
+
+  add_test(NAME OpenStudioCLI.Classic.Run_Validate.WrongMeasureTypeOrder
+    COMMAND $<TARGET_FILE:openstudio> classic run --show-stdout -w wrong_measure_type_order.osw
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/workflow/invalid_measures/"
+  )
+  set_tests_properties(OpenStudioCLI.Classic.Run_Validate.WrongMeasureTypeOrder PROPERTIES
+    WILL_FAIL TRUE
+    RESOURCE_LOCK "invalid_measures"
+  )
+  # ====================== End Workflows should fail ======================
 
   if (Pytest_AVAILABLE)
     add_test(NAME OpenStudioCLI.test_loglevel
@@ -288,12 +362,27 @@ if(BUILD_TESTING)
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/workflow/output_test/"
     )
 
+    add_test(NAME OpenStudioCLI.test_reporting_modeloutputrequests
+      COMMAND ${Python_EXECUTABLE} -m pytest --verbose --os-cli-path $<TARGET_FILE:openstudio> "${CMAKE_CURRENT_SOURCE_DIR}/test/test_reporting_modeloutputrequests.py"
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/workflow/reporting_modeloutputrequests/"
+    )
+
     file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/Testing/")
     add_test(NAME OpenStudioCLI.test_bcl_measure_templates
       COMMAND ${Python_EXECUTABLE} -m pytest --verbose --os-cli-path $<TARGET_FILE:openstudio> "${CMAKE_CURRENT_SOURCE_DIR}/test/test_bcl_measure_templates.py"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/Testing/"
     )
 
+    if (PyRequests_AVAILABLE)
+      add_test(NAME OpenStudioCLI.test_measure_manager
+        COMMAND ${Python_EXECUTABLE} -m pytest --verbose --os-cli-path $<TARGET_FILE:openstudio> "${CMAKE_CURRENT_SOURCE_DIR}/test/test_measure_manager.py"
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/Testing/"
+      )
+      add_test(NAME OpenStudioCLI.Classic.test_measure_manager
+        COMMAND ${Python_EXECUTABLE} -m pytest --verbose --use-classic --os-cli-path $<TARGET_FILE:openstudio> "${CMAKE_CURRENT_SOURCE_DIR}/test/test_measure_manager.py"
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/Testing/"
+      )
+    endif()
 
   else()
     # TODO: Remove. Fallback on these for now, as I don't know if CI has pytest installed
@@ -416,6 +505,14 @@ if(BUILD_TESTING)
   )
   set_tests_properties(OpenStudioCLI.execute_python_script.forward_flags.path_backwardslash PROPERTIES
     PASS_REGULAR_EXPRESSION "Hello from -x, at .\\\\test_folder\\\\hello.xml"
+  )
+
+  add_test(NAME OpenStudioCLI.execute_python_script.no_memory_leak
+    COMMAND $<TARGET_FILE:openstudio> execute_python_script memleak_source.py
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/test/"
+  )
+  set_tests_properties(OpenStudioCLI.execute_python_script.no_memory_leak PROPERTIES
+    FAIL_REGULAR_EXPRESSION "swig/python detected a memory leak of type"
   )
 
   # ============ EndForward a Path properly no matter the slashes employed ============

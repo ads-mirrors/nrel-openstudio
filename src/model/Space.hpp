@@ -67,7 +67,7 @@ namespace model {
     /// the space inherits that by default.
     explicit Space(const Model& model);
 
-    virtual ~Space() = default;
+    virtual ~Space() override = default;
     // Default the copy and move operators because the virtual dtor is explicit
     Space(const Space& other) = default;
     Space(Space&& other) = default;
@@ -555,6 +555,41 @@ namespace model {
      *  Ignores SpaceInfiltrationEffectiveLeakageArea and SpaceInfiltrationFlowCoefficient objects. */
     /// Does not include space multiplier in calculation.
     double infiltrationDesignAirChangesPerHour() const;
+
+    /** Sets the SpaceInfiltrationDesignFlowRate design flow rate (m^3/s) in this space,
+      * Ignores SpaceInfiltrationEffectiveLeakageArea and SpaceInfiltrationFlowCoefficient objects.
+      * All other spaceInfiltrationDesignFlowRate() in this space will be removed.
+      * The SpaceType will be made unique and modified, if necessary, and the final SpaceInfiltrationDesignFlowRate
+      * object will be attached directly to this Space, not to a SpaceType. */
+    bool setInfiltrationDesignFlowRate(double infiltrationDesignFlowRate);
+
+    /** Sets the SpaceInfiltrationDesignFlowRate design flow per space floor area (m^3/m^2*s) in this space,
+      * Ignores SpaceInfiltrationEffectiveLeakageArea and SpaceInfiltrationFlowCoefficient objects.
+      * All other spaceInfiltrationDesignFlowRate() in this space will be removed.
+      * The SpaceType will be made unique and modified, if necessary, and the final SpaceInfiltrationDesignFlowRate
+      * object will be attached directly to this Space, not to a SpaceType. */
+    bool setInfiltrationDesignFlowPerSpaceFloorArea(double infiltrationDesignFlowPerSpaceFloorArea);
+
+    /** Sets the SpaceInfiltrationDesignFlowRate design flow per exterior surface area (m^3/m^2*s) in this space,
+      * Ignores SpaceInfiltrationEffectiveLeakageArea and SpaceInfiltrationFlowCoefficient objects.
+      * All other spaceInfiltrationDesignFlowRate() in this space will be removed.
+      * The SpaceType will be made unique and modified, if necessary, and the final SpaceInfiltrationDesignFlowRate
+      * object will be attached directly to this Space, not to a SpaceType. */
+    bool setInfiltrationDesignFlowPerExteriorSurfaceArea(double infiltrationDesignFlowPerExteriorSurfaceArea);
+
+    /** Sets the SpaceInfiltrationDesignFlowRate design flow per exterior wall area (m^3/m^2*s) in this space,
+      * Ignores SpaceInfiltrationEffectiveLeakageArea and SpaceInfiltrationFlowCoefficient objects.
+      * All other spaceInfiltrationDesignFlowRate() in this space will be removed.
+      * The SpaceType will be made unique and modified, if necessary, and the final SpaceInfiltrationDesignFlowRate
+      * object will be attached directly to this Space, not to a SpaceType. */
+    bool setInfiltrationDesignFlowPerExteriorWallArea(double infiltrationDesignFlowPerExteriorWallArea);
+
+    /** Sets the SpaceInfiltrationDesignFlowRate design air changes per hour (1/h) in this space,
+      * Ignores SpaceInfiltrationEffectiveLeakageArea and SpaceInfiltrationFlowCoefficient objects.
+      * All other spaceInfiltrationDesignFlowRate() in this space will be removed.
+      * The SpaceType will be made unique and modified, if necessary, and the final SpaceInfiltrationDesignFlowRate
+      * object will be attached directly to this Space, not to a SpaceType. */
+    bool setInfiltrationDesignAirChangesPerHour(double infiltrationDesignAirChangesPerHour);
 
     /** The following functionality is used by the EnergyPlus translator, the primary aim
    *  is to preserve information while putting the space into a state where it can easily

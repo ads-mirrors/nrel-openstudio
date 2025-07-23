@@ -4,6 +4,7 @@
 ***********************************************************************************************************************/
 
 #include "OSWorkflow.hpp"
+#include "Util.hpp"
 #include "WorkflowRunOptions.hpp"
 
 #include "../osversion/VersionTranslator.hpp"
@@ -25,7 +26,6 @@
 #include "../utilities/filetypes/WorkflowStep.hpp"
 #include "../utilities/idf/Workspace.hpp"
 #include "../energyplus/ForwardTranslator.hpp"
-#include "workflow/Util.hpp"
 
 #include <fmt/color.h>
 #include <fmt/chrono.h>
@@ -273,7 +273,7 @@ bool OSWorkflow::run() {
     }
   }
   if (!openstudio::filesystem::is_directory(runDirPath)) {
-    openstudio::filesystem::create_directory(runDirPath);
+    openstudio::filesystem::create_directories(runDirPath);
   }
 
   FileLogSink logFile(runDirPath / "run.log");

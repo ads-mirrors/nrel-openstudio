@@ -58,6 +58,8 @@
 #include "../OutputControlFiles_Impl.hpp"
 #include "../OutputControlReportingTolerances.hpp"
 #include "../OutputControlReportingTolerances_Impl.hpp"
+#include "../OutputControlResilienceSummaries.hpp"
+#include "../OutputControlResilienceSummaries_Impl.hpp"
 #include "../OutputControlTableStyle.hpp"
 #include "../OutputControlTableStyle_Impl.hpp"
 #include "../OutputDiagnostics.hpp"
@@ -128,6 +130,8 @@
 #include "../EnvironmentalImpactFactors_Impl.hpp"
 #include "../ExternalInterface.hpp"
 #include "../ExternalInterface_Impl.hpp"
+#include "../PythonPluginSearchPaths.hpp"
+#include "../PythonPluginSearchPaths_Impl.hpp"
 
 #include "../../utilities/core/PathHelpers.hpp"
 #include "../../utilities/data/TimeSeries.hpp"
@@ -819,13 +823,13 @@ TEST_F(ModelFixture, Ensure_Name_Unicity_SpaceAndSpaceGroupNames) {
   // Zone, ZoneList, Space, SpaceList all need to be unique names
   Model m;
 
-  std::vector<ModelObject> mos{Space{m}, m.getUniqueModelObject<Building>(), BuildingStory{m}, SpaceType{m}, ThermalZone{m}};
-  EXPECT_EQ(5, m.getObjectsByReference("SpaceAndSpaceGroupNames").size());
+  std::vector<ModelObject> mos{Space{m}, BuildingStory{m}, SpaceType{m}, ThermalZone{m}};
+  EXPECT_EQ(4, m.getObjectsByReference("SpaceAndSpaceGroupNames").size());
 
   std::string name = "A Name";
 
   std::vector<std::pair<size_t, size_t>> combinations{
-    {0, 1}, {0, 2}, {0, 3}, {0, 4}, {1, 2}, {1, 3}, {1, 4}, {2, 3}, {2, 4}, {3, 4},
+    {0, 1}, {0, 2}, {0, 3}, {1, 2}, {1, 3}, {2, 3},
   };
 
   auto resetNames = [&mos]() {
@@ -932,6 +936,12 @@ TEST_F(ModelFixture, UniqueModelObjectCachedGetters) {
   EXPECT_EQ(i, m.getModelObjects<ModelObject>().size());
   auto outputControlReportingTolerances = m.getUniqueModelObject<OutputControlReportingTolerances>();
   EXPECT_TRUE(m.getOptionalUniqueModelObject<OutputControlReportingTolerances>());
+  EXPECT_EQ(++i, m.getModelObjects<ModelObject>().size());
+
+  EXPECT_FALSE(m.getOptionalUniqueModelObject<OutputControlResilienceSummaries>());
+  EXPECT_EQ(i, m.getModelObjects<ModelObject>().size());
+  auto outputControlResilienceSummaries = m.getUniqueModelObject<OutputControlResilienceSummaries>();
+  EXPECT_TRUE(m.getOptionalUniqueModelObject<OutputControlResilienceSummaries>());
   EXPECT_EQ(++i, m.getModelObjects<ModelObject>().size());
 
   EXPECT_FALSE(m.getOptionalUniqueModelObject<OutputControlTableStyle>());
@@ -1160,6 +1170,12 @@ TEST_F(ModelFixture, UniqueModelObjectCachedGetters) {
   EXPECT_EQ(i, m.getModelObjects<ModelObject>().size());
   auto externalInterface = m.getUniqueModelObject<ExternalInterface>();
   EXPECT_TRUE(m.getOptionalUniqueModelObject<ExternalInterface>());
+  EXPECT_EQ(++i, m.getModelObjects<ModelObject>().size());
+
+  EXPECT_FALSE(m.getOptionalUniqueModelObject<PythonPluginSearchPaths>());
+  EXPECT_EQ(i, m.getModelObjects<ModelObject>().size());
+  auto pythonPluginSearchPaths = m.getUniqueModelObject<PythonPluginSearchPaths>();
+  EXPECT_TRUE(m.getOptionalUniqueModelObject<PythonPluginSearchPaths>());
   EXPECT_EQ(++i, m.getModelObjects<ModelObject>().size());
 }
 

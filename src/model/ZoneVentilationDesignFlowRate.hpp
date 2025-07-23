@@ -30,7 +30,7 @@ namespace model {
 
     explicit ZoneVentilationDesignFlowRate(const Model& model);
 
-    virtual ~ZoneVentilationDesignFlowRate() = default;
+    virtual ~ZoneVentilationDesignFlowRate() override = default;
     // Default the copy and move operators because the virtual dtor is explicit
     ZoneVentilationDesignFlowRate(const ZoneVentilationDesignFlowRate& other) = default;
     ZoneVentilationDesignFlowRate(ZoneVentilationDesignFlowRate&& other) = default;
@@ -44,6 +44,8 @@ namespace model {
     static std::vector<std::string> designFlowRateCalculationMethodValues();
 
     static std::vector<std::string> ventilationTypeValues();
+
+    static std::vector<std::string> densityBasisValues();
 
     /** @name Getters */
     //@{
@@ -95,6 +97,8 @@ namespace model {
     boost::optional<Schedule> maximumOutdoorTemperatureSchedule() const;
 
     double maximumWindSpeed() const;
+
+    std::string densityBasis() const;
 
     //@}
     /** @name Setters */
@@ -155,6 +159,8 @@ namespace model {
     void resetMaximumOutdoorTemperatureSchedule();
 
     bool setMaximumWindSpeed(double maximumWindSpeed);
+
+    bool setDensityBasis(const std::string& densityBasis);
 
     //@}
     /** @name Other */

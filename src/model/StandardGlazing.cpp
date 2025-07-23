@@ -502,10 +502,6 @@ namespace model {
     return getImpl<detail::StandardGlazing_Impl>()->solarTransmittance();
   }
 
-  double StandardGlazing::thickness() const {
-    return getImpl<detail::StandardGlazing_Impl>()->thickness();
-  }
-
   boost::optional<double> StandardGlazing::solarTransmittanceatNormalIncidence() const {
     return getImpl<detail::StandardGlazing_Impl>()->solarTransmittanceatNormalIncidence();
   }
@@ -604,10 +600,6 @@ namespace model {
 
   bool StandardGlazing::setSolarTransmittance(double value) {
     return getImpl<detail::StandardGlazing_Impl>()->setSolarTransmittance(value);
-  }
-
-  bool StandardGlazing::setThickness(double thickness) {
-    return getImpl<detail::StandardGlazing_Impl>()->setThickness(thickness);
   }
 
   bool StandardGlazing::setSolarTransmittanceatNormalIncidence(double solarTransmittanceatNormalIncidence) {

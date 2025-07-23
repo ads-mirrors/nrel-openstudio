@@ -67,9 +67,9 @@ class ScriptEngine
   // TODO: this is totally the wrong place to put it, but I'm trying to see if it works
   virtual void setupEmbeddedGems(const std::vector<openstudio::path>& includeDirs, const std::vector<openstudio::path>& gemPathDirs,
                                  const openstudio::path& gemHomeDir, const openstudio::path& bundleGemFilePath,
-                                 const openstudio::path& bundleGemDirPath, const std::string& bundleWithoutGroups){};
+                                 const openstudio::path& bundleGemDirPath, const std::string& bundleWithoutGroups) {};
 
-  virtual void setupPythonPath(const std::vector<openstudio::path>& includeDirs){};
+  virtual void setupPythonPath(const std::vector<openstudio::path>& includeDirs) {};
 
   virtual std::string inferMeasureClassName(const openstudio::path& measureScriptPath) = 0;
 
@@ -77,7 +77,11 @@ class ScriptEngine
   // issue for the underlying ScriptObject (and VALUE or PyObject), so just return the ScriptObject
   virtual ScriptObject loadMeasure(const openstudio::path& measureScriptPath, std::string_view className) = 0;
 
+  // Returns number of arguments for methodName of the object methodObject
   virtual int numberOfArguments(ScriptObject& methodObject, std::string_view methodName) = 0;
+
+  // Check if methodObject has a method called methodName. If overriden_only, will only look into the current subclass, not the parent ones
+  virtual bool hasMethod(ScriptObject& methodObject, std::string_view methodName, bool overriden_only = true) = 0;
 
   template <typename T>
   T getAs(ScriptObject& obj) {

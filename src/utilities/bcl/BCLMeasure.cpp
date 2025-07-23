@@ -59,7 +59,9 @@ static constexpr std::array<std::pair<std::string_view, std::string_view>, 3> ap
   {"resources", "resource"},
 }};
 
-static constexpr std::array<std::string_view, 3> ignoredSubFolders{"tests/output", "__pycache__", "tests/__pycache__"};
+static constexpr std::array<std::string_view, 1> ignoredSubFolders{
+  "tests/output",
+};
 
 // TODO: do we want to keep ignoring the docs/ directory?
 static constexpr std::array<std::string_view, 1> usageTypesIgnoredOnClone{"doc"};
@@ -177,9 +179,6 @@ BCLMeasure::BCLMeasure(const std::string& name, const std::string& className, co
   std::string testTemplate;
 
   std::string templateClassName;
-  std::string templateName = "NAME_TEXT";
-  std::string templateDescription = "DESCRIPTION_TEXT";
-  std::string templateModelerDescription = "MODELER_DESCRIPTION_TEXT";
   std::vector<BCLMeasureArgument> arguments;
   std::vector<BCLMeasureOutput> outputs;
   std::string testOSM;
@@ -257,6 +256,9 @@ BCLMeasure::BCLMeasure(const std::string& name, const std::string& className, co
   if (!measureTemplate.empty()) {
     measureString = ::openstudio::embedded_files::getFileAsString(measureTemplate);
     boost::replace_all(measureString, templateClassName, className);
+    std::string templateName = "NAME_TEXT";
+    std::string templateDescription = "DESCRIPTION_TEXT";
+    std::string templateModelerDescription = "MODELER_DESCRIPTION_TEXT";
     boost::replace_all(measureString, templateName, name);
     boost::replace_all(measureString, templateModelerDescription, modelerDescription);  // put first as this includes description tag
     boost::replace_all(measureString, templateDescription, description);
@@ -823,7 +825,6 @@ bool BCLMeasure::updateMeasureScript(const MeasureType& oldMeasureType, const Me
   boost::optional<openstudio::path> rubyScriptPath_ = primaryRubyScriptPath();
   if (rubyScriptPath_ && exists(*rubyScriptPath_)) {
 
-    std::string fileString;
     openstudio::filesystem::ifstream file(*rubyScriptPath_, std::ios_base::binary);
     if (file.is_open()) {
 
@@ -832,7 +833,7 @@ bool BCLMeasure::updateMeasureScript(const MeasureType& oldMeasureType, const Me
       std::string descriptionFunction = "$1def description\n$1  return \"" + description + "\"\n$1end";
       std::string modelerDescriptionFunction = "$1def modeler_description\n$1  return \"" + modelerDescription + "\"\n$1end";
 
-      fileString = openstudio::filesystem::read_as_string(file);
+      std::string fileString = openstudio::filesystem::read_as_string(file);
 
       boost::regex re;
 
@@ -1013,12 +1014,24 @@ bool BCLMeasure::checkForUpdatesFiles() {
   for (const auto& [subFolderName, usageType] : approvedSubFolderToUsageMap) {
     openstudio::path approvedSubFolderAbsolutePath = m_directory / toPath(subFolderName);
     if (openstudio::filesystem::exists(approvedSubFolderAbsolutePath)) {
-      for (const auto& relativeFilePath : openstudio::filesystem::recursive_directory_files(approvedSubFolderAbsolutePath)) {
-        openstudio::path absoluteFilePath = approvedSubFolderAbsolutePath / relativeFilePath;
-        if (!isApprovedFile(absoluteFilePath, m_directory)) {
-          continue;
+
+      for (auto it = openstudio::filesystem::recursive_directory_iterator(approvedSubFolderAbsolutePath);
+           it != openstudio::filesystem::recursive_directory_iterator(); ++it) {
+        const auto& absoluteFilePath = it->path();
+
+        if (openstudio::filesystem::is_directory(absoluteFilePath)) {
+          const std::string name = absoluteFilePath.filename().string();
+          if (!name.empty() && (name[0] == '.' || name == "__pycache__")) {
+            // Skip this directory and all its children
+            it.disable_recursion_pending();
+          }
+        } else if (openstudio::filesystem::is_regular_file(absoluteFilePath)) {
+          if (!isApprovedFile(absoluteFilePath, m_directory)) {
+            continue;
+          }
+          const openstudio::path relativeFilePath = openstudio::filesystem::relative(absoluteFilePath, m_directory);
+          result |= addWithUsageTypeIfNotExisting(relativeFilePath, std::string(usageType));
         }
-        result |= addWithUsageTypeIfNotExisting(toPath(subFolderName) / relativeFilePath, std::string(usageType));
       }
     }
   }
@@ -1151,13 +1164,25 @@ boost::optional<BCLMeasure> BCLMeasure::clone(const openstudio::path& newDir) co
           != usageTypesIgnoredOnClone.cend()) {
         continue;
       }
-      openstudio::path subFolderPath = toPath(subFolderName);
-      openstudio::path approvedSubFolderAbsolutePath = m_directory / subFolderPath;
+      const openstudio::path approvedSubFolderAbsolutePath = m_directory / toPath(subFolderName);
       if (openstudio::filesystem::exists(approvedSubFolderAbsolutePath)) {
-        for (const auto& relativeFilePath : openstudio::filesystem::recursive_directory_files(approvedSubFolderAbsolutePath)) {
-          openstudio::path absoluteFilePath = approvedSubFolderAbsolutePath / relativeFilePath;
-          if (isApprovedFile(absoluteFilePath, m_directory)) {
-            filesToCopy.emplace_back(absoluteFilePath, newDir / subFolderPath / relativeFilePath);
+
+        for (auto it = openstudio::filesystem::recursive_directory_iterator(approvedSubFolderAbsolutePath);
+             it != openstudio::filesystem::recursive_directory_iterator(); ++it) {
+          const auto& absoluteFilePath = it->path();
+
+          if (openstudio::filesystem::is_directory(absoluteFilePath)) {
+            const std::string name = absoluteFilePath.filename().string();
+            if (!name.empty() && (name[0] == '.' || name == "__pycache__")) {
+              // Skip this directory and all its children
+              it.disable_recursion_pending();
+            }
+          } else if (openstudio::filesystem::is_regular_file(absoluteFilePath)) {
+            if (!isApprovedFile(absoluteFilePath, m_directory)) {
+              continue;
+            }
+            const openstudio::path relativeFilePath = openstudio::filesystem::relative(absoluteFilePath, m_directory);
+            filesToCopy.emplace_back(absoluteFilePath, newDir / relativeFilePath);
           }
         }
       }

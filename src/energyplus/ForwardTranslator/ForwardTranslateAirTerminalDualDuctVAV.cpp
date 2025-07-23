@@ -14,9 +14,12 @@
 #include "../../model/Node_Impl.hpp"
 #include "../../model/DesignSpecificationOutdoorAir.hpp"
 #include "../../model/DesignSpecificationOutdoorAir_Impl.hpp"
+
+#include "../../utilities/idd/IddEnums.hpp"
+#include "../../utilities/plot/ProgressBar.hpp"
+
 #include <utilities/idd/AirTerminal_DualDuct_VAV_FieldEnums.hxx>
 #include <utilities/idd/ZoneHVAC_AirDistributionUnit_FieldEnums.hxx>
-#include "../../utilities/idd/IddEnums.hpp"
 #include <utilities/idd/IddEnums.hxx>
 #include <utilities/idd/IddFactory.hxx>
 
@@ -71,8 +74,29 @@ namespace energyplus {
       idfObject.setDouble(AirTerminal_DualDuct_VAVFields::ZoneMinimumAirFlowFraction, value);
     }
 
+    // TODO: replace with "Control for Outdoor Air!"
     if (auto designOA = modelObject.designSpecificationOutdoorAirObject()) {
-      if (auto idf = translateAndMapModelObject(designOA.get())) {
+
+      auto translateAndMapDSOA = [this](DesignSpecificationOutdoorAir& dsoa) -> boost::optional<IdfObject> {
+        auto objInMapIt = m_map.find(dsoa.handle());
+        if (objInMapIt != m_map.end()) {
+          return objInMapIt->second;
+        }
+
+        auto idf_dsoa_ = detail::translateDesignSpecificationOutdoorAir(dsoa);
+
+        if (idf_dsoa_) {
+          m_idfObjects.push_back(*idf_dsoa_);
+          m_map.emplace(dsoa.handle(), *idf_dsoa_);
+        }
+
+        if (m_progressBar) {
+          m_progressBar->setValue((int)m_map.size());
+        }
+        return idf_dsoa_;
+      };
+
+      if (auto idf = translateAndMapDSOA(designOA.get())) {
         idfObject.setString(AirTerminal_DualDuct_VAVFields::DesignSpecificationOutdoorAirObjectName, idf->name().get());
       }
     }

@@ -10,11 +10,12 @@
 #include "../BCLXML.hpp"
 #include "../../core/ApplicationPathHelpers.hpp"
 #include "../../core/PathHelpers.hpp"
-#include "utilities/core/Filesystem.hpp"
+#include "../../core/Filesystem.hpp"
+
+#include <pugixml.hpp>
 
 #include <algorithm>
 #include <sstream>
-#include <pugixml.hpp>
 
 using namespace openstudio;
 namespace fs = openstudio::filesystem;
@@ -344,8 +345,16 @@ std::vector<TestPath> generateTestMeasurePaths() {
 
   std::vector<std::string> approved_folders{"docs", "resources", "tests"};
 
-  std::vector<std::string> ignoredPaths{"root_file.txt", "tests/output/output.txt", "subfolder/subfolder.txt", ".git/index",
-                                        ".hidden_folder/file.txt"};
+  std::vector<std::string> ignoredPaths{
+    "root_file.txt",
+    "tests/output/output.txt",
+    "subfolder/subfolder.txt",
+    ".git/index",
+    ".hidden_folder/file.txt",
+    "resources/__pycache__/test_test_python_folders.cpython-312-pytest-8.3.2.pyc",
+    "tests/.pytest_cache/README.md",
+    "docs/.hidden_folder/subfolder/file.txt",
+  };
 
   testPaths.reserve(approvedRootFiles.size() + 2 * approved_folders.size() + ignoredPaths.size());
   for (const auto& s : approvedRootFiles) {
@@ -486,7 +495,7 @@ TEST_F(BCLFixture, 4156_TestRecursive) {
   }
 
   std::vector<TestPath> testPaths = generateTestMeasurePaths();
-  EXPECT_EQ(15, testPaths.size());
+  EXPECT_EQ(18, testPaths.size());
 
   size_t addedFiles = std::count_if(testPaths.cbegin(), testPaths.cend(), [&expectedInitialPaths](const TestPath& t) {
     return t.allowed && (std::find(expectedInitialPaths.cbegin(), expectedInitialPaths.cend(), t.path) == expectedInitialPaths.cend());
@@ -511,6 +520,8 @@ TEST_F(BCLFixture, 4156_TestRecursive) {
   // ├── ./docs
   //+│   ├── ./docs/docs.rb
   // │   ├── ./docs/.gitkeep
+  // │   ├── ./docs/.hidden_folder
+  //~│       └── ./docs/.hidden_folder/file.txt
   // │   └── ./docs/subfolder
   //+│       └── ./docs/subfolder/subfolder_file.txt
   // ├── ./.git
@@ -523,6 +534,8 @@ TEST_F(BCLFixture, 4156_TestRecursive) {
   //+├── ./README.md
   // ├── ./README.md.erb
   // ├── ./resources
+  // │   ├── ./resources/__pycache__
+  //~│   │   └── ./resources/__pycache__/test_test_python_folders.cpython-312-pytest-8.3.2.pyc
   //+│   ├── ./resources/resources.rb
   // │   └── ./resources/subfolder
   //+│       └── ./resources/subfolder/subfolder_file.txt
@@ -533,12 +546,14 @@ TEST_F(BCLFixture, 4156_TestRecursive) {
   //     ├── ./tests/example_model.osm
   //     ├── ./tests/output
   //~    │   └── ./tests/output/output.txt
+  //     ├── ./tests/.pytest_cache
+  //~    │   └── ./tests/.pytest_cache/README.md
   //     ├── ./tests/subfolder
   //+    │   └── ./tests/subfolder/subfolder_file.txt
   //     ├── ./tests/test_recursive_measure_test.rb
   //+    └── ./tests/tests.rb
   //
-  //  10 directories, 19 files:   12 have been added on disk (+/~), but only 7 are allowed (+ is allowed, ~ is disallowed)
+  //  14 directories, 22 files:   15 have been added on disk (+/~), but only 7 are allowed (+ is allowed, ~ is disallowed)
 
   EXPECT_EQ(addedFiles, 7);
 
@@ -844,7 +859,7 @@ TEST_F(BCLFixture, 4156_TestRecursive_OutdatedXML) {
   size_t numFiles = files.size();
 
   std::vector<TestPath> testPaths = generateTestMeasurePaths();
-  EXPECT_EQ(15, testPaths.size());
+  EXPECT_EQ(18, testPaths.size());
 
   /***************************************************************************************************************************************************
    *                                             A D D    E X T R A    F I L E S    I N    F O L D E R                                               *

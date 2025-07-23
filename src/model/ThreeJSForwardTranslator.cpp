@@ -6,6 +6,7 @@
 #include "ThreeJSForwardTranslator.hpp"
 
 #include "RenderingColor.hpp"
+#include "RenderingColor_Impl.hpp"
 #include "ConstructionBase.hpp"
 #include "ConstructionBase_Impl.hpp"
 #include "ConstructionAirBoundary.hpp"
@@ -64,12 +65,13 @@ namespace model {
     for (auto& construction : model.getModelObjects<ConstructionBase>()) {
       // If it's ConstructionAirBoundary, we'll later use the standard material "AirWall"
       if (!construction.optionalCast<ConstructionAirBoundary>()) {
+        std::string name = getObjectThreeMaterialName(construction);
         boost::optional<RenderingColor> color = construction.renderingColor();
         if (!color) {
           color = RenderingColor(model);
+          color->setName(name);
           construction.setRenderingColor(*color);
         }
-        std::string name = getObjectThreeMaterialName(construction);
         addThreeMaterial(materials, materialMap,
                          makeThreeMaterial(name, toThreeColor(color->renderingRedValue(), color->renderingBlueValue(), color->renderingGreenValue()),
                                            1, ThreeSide::DoubleSide));
@@ -78,12 +80,13 @@ namespace model {
 
     // make thermal zone materials
     for (auto& thermalZone : model.getConcreteModelObjects<ThermalZone>()) {
+      std::string name = getObjectThreeMaterialName(thermalZone);
       boost::optional<RenderingColor> color = thermalZone.renderingColor();
       if (!color) {
         color = RenderingColor(model);
+        color->setName(name);
         thermalZone.setRenderingColor(*color);
       }
-      std::string name = getObjectThreeMaterialName(thermalZone);
       addThreeMaterial(materials, materialMap,
                        makeThreeMaterial(name, toThreeColor(color->renderingRedValue(), color->renderingBlueValue(), color->renderingGreenValue()), 1,
                                          ThreeSide::DoubleSide));
@@ -91,12 +94,13 @@ namespace model {
 
     // make space type materials
     for (auto& spaceType : model.getConcreteModelObjects<SpaceType>()) {
+      std::string name = getObjectThreeMaterialName(spaceType);
       boost::optional<RenderingColor> color = spaceType.renderingColor();
       if (!color) {
         color = RenderingColor(model);
+        color->setName(name);
         spaceType.setRenderingColor(*color);
       }
-      std::string name = getObjectThreeMaterialName(spaceType);
       addThreeMaterial(materials, materialMap,
                        makeThreeMaterial(name, toThreeColor(color->renderingRedValue(), color->renderingBlueValue(), color->renderingGreenValue()), 1,
                                          ThreeSide::DoubleSide));
@@ -104,12 +108,13 @@ namespace model {
 
     // make building story materials
     for (auto& buildingStory : model.getConcreteModelObjects<BuildingStory>()) {
+      std::string name = getObjectThreeMaterialName(buildingStory);
       boost::optional<RenderingColor> color = buildingStory.renderingColor();
       if (!color) {
         color = RenderingColor(model);
+        color->setName(name);
         buildingStory.setRenderingColor(*color);
       }
-      std::string name = getObjectThreeMaterialName(buildingStory);
       addThreeMaterial(materials, materialMap,
                        makeThreeMaterial(name, toThreeColor(color->renderingRedValue(), color->renderingBlueValue(), color->renderingGreenValue()), 1,
                                          ThreeSide::DoubleSide));
@@ -117,12 +122,13 @@ namespace model {
 
     // make building unit materials
     for (auto& buildingUnit : model.getConcreteModelObjects<BuildingUnit>()) {
+      std::string name = getObjectThreeMaterialName(buildingUnit);
       boost::optional<RenderingColor> color = buildingUnit.renderingColor();
       if (!color) {
         color = RenderingColor(model);
+        color->setName(name);
         buildingUnit.setRenderingColor(*color);
       }
-      std::string name = getObjectThreeMaterialName(buildingUnit);
       addThreeMaterial(materials, materialMap,
                        makeThreeMaterial(name, toThreeColor(color->renderingRedValue(), color->renderingBlueValue(), color->renderingGreenValue()), 1,
                                          ThreeSide::DoubleSide));
@@ -131,7 +137,12 @@ namespace model {
     // make air loop HVAC materials
     for (auto& airLoopHVAC : model.getConcreteModelObjects<AirLoopHVAC>()) {
       std::string name = getObjectThreeMaterialName(airLoopHVAC);
-      boost::optional<RenderingColor> color = RenderingColor(model);
+      // AirLoopHVAC does not have a renderingColor method
+      boost::optional<RenderingColor> color = model.getConcreteModelObjectByName<RenderingColor>(name);
+      if (!color) {
+        color = RenderingColor(model);
+        color->setName(name);
+      }
       addThreeMaterial(materials, materialMap,
                        makeThreeMaterial(name, toThreeColor(color->renderingRedValue(), color->renderingBlueValue(), color->renderingGreenValue()), 1,
                                          ThreeSide::DoubleSide));

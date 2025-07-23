@@ -12,6 +12,8 @@
 namespace openstudio {
 namespace model {
 
+  class EnergyManagementSystemMeteredOutputVariable;
+
   namespace detail {
 
     /** EnergyManagementSystemSubroutine_Impl is a ModelObject_Impl that is the implementation class for EnergyManagementSystemSubroutine.*/
@@ -27,7 +29,7 @@ namespace model {
 
       EnergyManagementSystemSubroutine_Impl(const EnergyManagementSystemSubroutine_Impl& other, Model_Impl* model, bool keepHandle);
 
-      virtual ~EnergyManagementSystemSubroutine_Impl() = default;
+      virtual ~EnergyManagementSystemSubroutine_Impl() override = default;
 
       //@}
       /** @name Virtual Methods */
@@ -64,6 +66,8 @@ namespace model {
       //@}
       /** @name Other */
       //@{
+
+      std::vector<EnergyManagementSystemMeteredOutputVariable> energyManagementSystemMeteredOutputVariables() const;
 
       //@}
      protected:

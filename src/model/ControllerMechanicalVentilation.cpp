@@ -15,6 +15,8 @@
 #include "Schedule_Impl.hpp"
 #include "SizingSystem.hpp"
 #include "SizingSystem_Impl.hpp"
+#include "ThermalZone.hpp"
+#include "Space.hpp"
 #include "Model.hpp"
 #include "Model_Impl.hpp"
 #include "ScheduleTypeLimits.hpp"
@@ -24,6 +26,8 @@
 #include <utilities/idd/OS_Controller_MechanicalVentilation_FieldEnums.hxx>
 #include <utilities/idd/IddEnums.hxx>
 #include "../utilities/core/Assert.hpp"
+
+#include <algorithm>
 
 namespace openstudio {
 namespace model {
@@ -105,8 +109,13 @@ namespace model {
           if (oaSystem) {
             const auto airLoop = oaSystem->airLoopHVAC();
             if (airLoop) {
-              const auto sizingSystem = airLoop->sizingSystem();
-              result = sizingSystem.systemOutdoorAirMethod();
+              const auto sizingSystemOAMethod = airLoop->sizingSystem().systemOutdoorAirMethod();
+              const auto possible_vals = systemOutdoorAirMethodValues();
+              if (std::find_if(possible_vals.cbegin(), possible_vals.cend(),
+                               [&sizingSystemOAMethod](const std::string& val) { return openstudio::istringEqual(val, sizingSystemOAMethod); })
+                  != possible_vals.cend()) {
+                result = sizingSystemOAMethod;
+              }
             }
           }
         }
@@ -190,6 +199,17 @@ namespace model {
       LOG_AND_THROW(briefDescription() << " does not have a ControllerOutdoorAir assigned");
     }
 
+    bool ControllerMechanicalVentilation_Impl::hasZonesWithDesignSpecificationOutdoorAir() const {
+      auto oa_controller = controllerOutdoorAir();
+      if (auto oa_sys_ = oa_controller.airLoopHVACOutdoorAirSystem()) {
+        if (auto a_ = oa_sys_->airLoopHVAC()) {
+          auto zones = a_->thermalZones();
+          return std::any_of(zones.cbegin(), zones.cend(), [](const auto& z) { return !z.spacesWithDesignSpecificationOutdoorAir().empty(); });
+        }
+      }
+      return false;
+    }
+
   }  // namespace detail
 
   ControllerMechanicalVentilation::ControllerMechanicalVentilation(const Model& model)
@@ -255,6 +275,10 @@ namespace model {
 
   ControllerOutdoorAir ControllerMechanicalVentilation::controllerOutdoorAir() const {
     return getImpl<detail::ControllerMechanicalVentilation_Impl>()->controllerOutdoorAir();
+  }
+
+  bool ControllerMechanicalVentilation::hasZonesWithDesignSpecificationOutdoorAir() const {
+    return getImpl<detail::ControllerMechanicalVentilation_Impl>()->hasZonesWithDesignSpecificationOutdoorAir();
   }
 
   /// @cond

@@ -357,6 +357,7 @@ macro(MAKE_SWIG_TARGET NAME SIMPLENAME KEY_I_FILE I_FILES PARENT_TARGET PARENT_S
     )
 
     target_compile_definitions(${swig_target} PRIVATE SHARED_OS_LIBS)
+    target_compile_definitions(${swig_target} PRIVATE SWIG_PYTHON_SILENT_MEMLEAK) # Shush it, cf #5421
     set_target_properties(${swig_target} PROPERTIES OUTPUT_NAME _${LOWER_NAME})
     set_target_properties(${swig_target} PROPERTIES PREFIX "")
     set_target_properties(${swig_target} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/python/")
@@ -379,9 +380,9 @@ macro(MAKE_SWIG_TARGET NAME SIMPLENAME KEY_I_FILE I_FILES PARENT_TARGET PARENT_S
     set(COPY_PYTHON_GENERATED_SRC "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/python/${LOWER_NAME}.py")
     add_custom_command(TARGET ${swig_target}
       POST_BUILD
-      # OUTPUT "${PYTHON_GENERATED_SRC}"
+      # OUTPUT "${COPY_PYTHON_GENERATED_SRC}"
       COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${PYTHON_GENERATED_SRC}" "${COPY_PYTHON_GENERATED_SRC}"
-      DEPENDS "${PYTHON_GENERATED_SRC}"
+      # DEPENDS "${PYTHON_GENERATED_SRC}"
     )
     set_source_files_properties(${COPY_PYTHON_GENERATED_SRC} PROPERTIES GENERATED TRUE)
 
@@ -532,6 +533,7 @@ macro(MAKE_SWIG_TARGET NAME SIMPLENAME KEY_I_FILE I_FILES PARENT_TARGET PARENT_S
 
     set( model_names
       OpenStudioMeasure
+      OpenStudioAlfalfa
       OpenStudioModel
       OpenStudioModelAirflow
       OpenStudioModelAvailabilityManager

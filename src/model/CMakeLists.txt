@@ -443,6 +443,9 @@ set(${target_name}_src
   CoilPerformanceDXCooling.hpp
   CoilPerformanceDXCooling_Impl.hpp
   CoilPerformanceDXCooling.cpp
+  CoilSystemCoolingWater.hpp
+  CoilSystemCoolingWater_Impl.hpp
+  CoilSystemCoolingWater.cpp
   CoilSystemCoolingWaterHeatExchangerAssisted.hpp
   CoilSystemCoolingWaterHeatExchangerAssisted_Impl.hpp
   CoilSystemCoolingWaterHeatExchangerAssisted.cpp
@@ -1075,6 +1078,9 @@ set(${target_name}_src
   OutputControlReportingTolerances.hpp
   OutputControlReportingTolerances_Impl.hpp
   OutputControlReportingTolerances.cpp
+  OutputControlResilienceSummaries.hpp
+  OutputControlResilienceSummaries_Impl.hpp
+  OutputControlResilienceSummaries.cpp
   OutputControlTableStyle.hpp
   OutputControlTableStyle_Impl.hpp
   OutputControlTableStyle.cpp
@@ -1114,6 +1120,12 @@ set(${target_name}_src
   OutputTableSummaryReports.hpp
   OutputTableSummaryReports_Impl.hpp
   OutputTableSummaryReports.cpp
+  OutputTableAnnual.hpp
+  OutputTableAnnual_Impl.hpp
+  OutputTableAnnual.cpp
+  OutputTableMonthly.hpp
+  OutputTableMonthly_Impl.hpp
+  OutputTableMonthly.cpp
   OutputSchedules.hpp
   OutputSchedules_Impl.hpp
   OutputSchedules.cpp
@@ -1228,6 +1240,9 @@ set(${target_name}_src
   PythonPluginOutputVariable.hpp
   PythonPluginOutputVariable_Impl.hpp
   PythonPluginOutputVariable.cpp
+  PythonPluginSearchPaths.hpp
+  PythonPluginSearchPaths_Impl.hpp
+  PythonPluginSearchPaths.cpp
   RadianceParameters.hpp
   RadianceParameters_Impl.hpp
   RadianceParameters.cpp
@@ -1771,6 +1786,9 @@ set(${target_name}_src
   ZoneHVACEquipmentList.hpp
   ZoneHVACEquipmentList_Impl.hpp
   ZoneHVACEquipmentList.cpp
+  ZoneHVACEvaporativeCoolerUnit.hpp
+  ZoneHVACEvaporativeCoolerUnit_Impl.hpp
+  ZoneHVACEvaporativeCoolerUnit.cpp
   ZoneHVACFourPipeFanCoil.hpp
   ZoneHVACFourPipeFanCoil_Impl.hpp
   ZoneHVACFourPipeFanCoil.cpp
@@ -1999,6 +2017,7 @@ set(${target_name}_test_src
   test/CoilHeatingWaterBaseboardRadiant_GTest.cpp
   test/CoilPerformanceDXCooling_GTest.cpp
   test/CoilSystemCoolingDXHeatExchangerAssisted_GTest.cpp
+  test/CoilSystemCoolingWater_GTest.cpp
   test/CoilSystemCoolingWaterHeatExchangerAssisted_GTest.cpp
   test/CoilSystemIntegratedHeatPumpAirSource_GTest.cpp
   test/CoilUserDefined_GTest.cpp
@@ -2183,6 +2202,7 @@ set(${target_name}_test_src
   test/OtherEquipment_GTest.cpp
   test/OutputControlFiles_GTest.cpp
   test/OutputControlReportingTolerances_GTest.cpp
+  test/OutputControlResilienceSummaries_GTest.cpp
   test/OutputControlTableStyle_GTest.cpp
   test/OutputControlTimestamp_GTest.cpp
   test/OutputDebuggingData_GTest.cpp
@@ -2196,6 +2216,8 @@ set(${target_name}_test_src
   test/OutputMeter_GTest.cpp
   test/OutputVariable_GTest.cpp
   test/OutputTableSummaryReports_GTest.cpp
+  test/OutputTableAnnual_GTest.cpp
+  test/OutputTableMonthly_GTest.cpp
   test/OutputSchedules_GTest.cpp
   test/OutputConstructions_GTest.cpp
   test/ParentObject_GTest.cpp
@@ -2221,6 +2243,7 @@ set(${target_name}_test_src
   test/PythonPluginVariable_GTest.cpp
   test/PythonPluginTrendVariable_GTest.cpp
   test/PythonPluginOutputVariable_GTest.cpp
+  test/PythonPluginSearchPaths_GTest.cpp
   test/RadianceParameters_GTest.cpp
   test/RefractionExtinctionGlazing_GTest.cpp
   test/RefrigerationAirChiller_GTest.cpp
@@ -2332,6 +2355,7 @@ set(${target_name}_test_src
   test/ThermalZone_GTest.cpp
   test/ThermalStorageIceDetailed_GTest.cpp
   test/ThermalStorageChilledWaterStratified_GTest.cpp
+  test/ThermochromicGlazing_GTest.cpp
   test/TemperingValve_GTest.cpp
   test/ThreeJSForwardTranslator_GTest.cpp
   test/ThreeJSReverseTranslator_GTest.cpp
@@ -2361,6 +2385,7 @@ set(${target_name}_test_src
   test/ZoneHVACEnergyRecoveryVentilator_GTest.cpp
   test/ZoneHVACEnergyRecoveryVentilatorController_GTest.cpp
   test/ZoneHVACEquipmentList_GTest.cpp
+  test/ZoneHVACEvaporativeCoolerUnit_GTest.cpp
   test/ZoneHVACFourPipeFanCoil_GTest.cpp
   test/ZoneHVACHighTemperatureRadiant_GTest.cpp
   test/ZoneHVACLowTemperatureRadiantElectric_GTest.cpp

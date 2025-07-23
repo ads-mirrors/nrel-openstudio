@@ -7,12 +7,12 @@
 #include "CoilSystemCoolingWaterHeatExchangerAssisted_Impl.hpp"
 #include "AirToAirComponent.hpp"
 #include "AirToAirComponent_Impl.hpp"
-#include "ControllerWaterCoil.hpp"
-#include "ControllerWaterCoil_Impl.hpp"
 #include "WaterToAirComponent.hpp"
 #include "WaterToAirComponent_Impl.hpp"
 #include "CoilCoolingWater.hpp"
 #include "CoilCoolingWater_Impl.hpp"
+#include "CoilSystemCoolingWater.hpp"
+#include "CoilSystemCoolingWater_Impl.hpp"
 #include "Model.hpp"
 #include "Model_Impl.hpp"
 #include "Node.hpp"
@@ -73,8 +73,12 @@ namespace model {
     std::vector<ModelObject> CoilSystemCoolingWaterHeatExchangerAssisted_Impl::children() const {
       std::vector<ModelObject> result;
 
-      result.push_back(coolingCoil());
-      result.push_back(heatExchanger());
+      if (auto intermediate = optionalCoolingCoil()) {
+        result.push_back(*intermediate);
+      }
+      if (auto intermediate = optionalHeatExchanger()) {
+        result.push_back(*intermediate);
+      }
 
       return result;
     }
@@ -95,6 +99,14 @@ namespace model {
       return std::move(newCoilSystem);
     }
 
+    std::vector<IdfObject> CoilSystemCoolingWaterHeatExchangerAssisted_Impl::remove() {
+      if (auto cc_ = optionalCoolingCoil()) {
+        cc_->removeFromPlantLoop();
+      }
+
+      return StraightComponent_Impl::remove();
+    }
+
     boost::optional<HVACComponent> CoilSystemCoolingWaterHeatExchangerAssisted_Impl::containingHVACComponent() const {
       // AirLoopHVACUnitarySystem
       std::vector<AirLoopHVACUnitarySystem> airLoopHVACUnitarySystems = this->model().getConcreteModelObjects<AirLoopHVACUnitarySystem>();
@@ -103,6 +115,17 @@ namespace model {
         if (boost::optional<HVACComponent> coolingCoil = airLoopHVACUnitarySystem.coolingCoil()) {
           if (coolingCoil->handle() == this->handle()) {
             return airLoopHVACUnitarySystem;
+          }
+        }
+      }
+
+      // CoilSystemCoolingWater
+      for (const auto& coilSystem : this->model().getConcreteModelObjects<CoilSystemCoolingWater>()) {
+        if (coilSystem.coolingCoil().handle() == this->handle()) {
+          return coilSystem;
+        } else if (boost::optional<HVACComponent> companionCoil_ = coilSystem.companionCoilUsedForHeatRecovery()) {
+          if (companionCoil_->handle() == this->handle()) {
+            return coilSystem;
           }
         }
       }
@@ -190,29 +213,7 @@ namespace model {
 
       if (boost::optional<AirLoopHVAC> airLoop = node.airLoopHVAC()) {
         if (!airLoop->demandComponent(node.handle())) {
-          result = StraightComponent_Impl::addToNode(node);
-          if (result) {
-            auto t_coolingCoil = coolingCoil();
-            if (auto waterInletModelObject = t_coolingCoil.waterInletModelObject()) {
-
-              // TODO: why aren't we setting the water coil in this case? @kbenne thoughts please
-              if (auto coilCoolingWater = t_coolingCoil.optionalCast<CoilCoolingWater>()) {
-                if (auto oldController = coilCoolingWater->controllerWaterCoil()) {
-                  oldController->remove();
-                }
-              }
-
-              auto t_model = model();
-              ControllerWaterCoil controller(t_model);
-
-              auto coilWaterInletNode = waterInletModelObject->optionalCast<Node>();
-              OS_ASSERT(coilWaterInletNode);
-              controller.setActuatorNode(coilWaterInletNode.get());
-              // sensor node will be established in translator since that node does not yet exist
-
-              controller.setAction("Reverse");
-            }
-          }
+          return StraightComponent_Impl::addToNode(node);
         }
       } else if (boost::optional<AirLoopHVACOutdoorAirSystem> oas = node.airLoopHVACOutdoorAirSystem()) {
         if (oas->airLoopHVACDedicatedOutdoorAirSystem()) {
@@ -259,13 +260,12 @@ namespace model {
 
     bool ok = setHeatExchanger(heatExchanger);
     if (!ok) {
+      remove();
       LOG_AND_THROW("Unable to set " << briefDescription() << "'s Heat Exchanger " << heatExchanger.briefDescription() << ".");
     }
 
     CoilCoolingWater coolingCoil(model);
     setCoolingCoil(coolingCoil);
-
-    setHeatExchanger(heatExchanger);
   }
 
   IddObjectType CoilSystemCoolingWaterHeatExchangerAssisted::iddObjectType() {

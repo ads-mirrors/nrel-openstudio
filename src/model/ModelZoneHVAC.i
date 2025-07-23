@@ -54,6 +54,7 @@ MODELOBJECT_TEMPLATES(ZoneHVACCoolingPanelRadiantConvectiveWater);
 MODELOBJECT_TEMPLATES(ZoneHVACDehumidifierDX);
 MODELOBJECT_TEMPLATES(ZoneHVACEnergyRecoveryVentilator);
 MODELOBJECT_TEMPLATES(ZoneHVACEnergyRecoveryVentilatorController);
+MODELOBJECT_TEMPLATES(ZoneHVACEvaporativeCoolerUnit);
 MODELOBJECT_TEMPLATES(ZoneHVACFourPipeFanCoil);
 MODELOBJECT_TEMPLATES(ZoneHVACHighTemperatureRadiant);
 MODELOBJECT_TEMPLATES(ZoneHVACIdealLoadsAirSystem);
@@ -79,6 +80,7 @@ SWIG_MODELOBJECT(ZoneHVACCoolingPanelRadiantConvectiveWater,1);
 SWIG_MODELOBJECT(ZoneHVACDehumidifierDX,1);
 SWIG_MODELOBJECT(ZoneHVACEnergyRecoveryVentilator,1);
 SWIG_MODELOBJECT(ZoneHVACEnergyRecoveryVentilatorController,1);
+SWIG_MODELOBJECT(ZoneHVACEvaporativeCoolerUnit,1);
 SWIG_MODELOBJECT(ZoneHVACFourPipeFanCoil,1);
 SWIG_MODELOBJECT(ZoneHVACHighTemperatureRadiant,1);
 SWIG_MODELOBJECT(ZoneHVACIdealLoadsAirSystem,1);
@@ -91,5 +93,74 @@ SWIG_MODELOBJECT(ZoneHVACTerminalUnitVariableRefrigerantFlow,1);
 SWIG_MODELOBJECT(ZoneHVACUnitHeater,1);
 SWIG_MODELOBJECT(ZoneHVACUnitVentilator,1);
 SWIG_MODELOBJECT(ZoneHVACWaterToAirHeatPump,1);
+
+#if defined(SWIGCSHARP) || defined(SWIGJAVA)
+  %inline {
+    namespace openstudio {
+      namespace model {
+
+        // AirCondVRF, reimplemented from ModelHVAC.i
+        std::vector<ZoneHVACTerminalUnitVariableRefrigerantFlow> terminals(const openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControl& airCondVRF) {
+          return airCondVRF.terminals();
+        }
+        bool addTerminal(openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControl airCondVRF, openstudio::model::ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+          return airCondVRF.addTerminal(vrf);
+        }
+        void removeTerminal(openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControl airCondVRF, openstudio::model::ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+          airCondVRF.removeTerminal(vrf);
+        }
+
+        std::vector<ZoneHVACTerminalUnitVariableRefrigerantFlow> terminals(const openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControlHR& airCondVRF) {
+          return airCondVRF.terminals();
+        }
+        bool addTerminal(openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControlHR airCondVRF, openstudio::model::ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+          return airCondVRF.addTerminal(vrf);
+        }
+        void removeTerminal(openstudio::model::AirConditionerVariableRefrigerantFlowFluidTemperatureControlHR airCondVRF, openstudio::model::ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+          airCondVRF.removeTerminal(vrf);
+        }
+
+      } // namespace model
+    } // namespace openstudio
+  } // %inline
+#endif
+
+#if defined(SWIGCSHARP)
+  //%pragma(csharp) imclassimports=%{
+  %pragma(csharp) moduleimports=%{
+
+    using System;
+    using System.Runtime.InteropServices;
+
+    public partial class AirConditionerVariableRefrigerantFlowFluidTemperatureControl : HVACComponent {
+      public ZoneHVACTerminalUnitVariableRefrigerantFlowVector terminals(){
+        return OpenStudio.OpenStudioModelZoneHVAC.terminals(this);
+      }
+
+      public bool addTerminal(OpenStudio.ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+        return OpenStudio.OpenStudioModelZoneHVAC.addTerminal(this, vrf);
+      }
+
+      public void removeTerminal(OpenStudio.ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+        OpenStudio.OpenStudioModelZoneHVAC.removeTerminal(this, vrf);
+      }
+    }
+
+    public partial class AirConditionerVariableRefrigerantFlowFluidTemperatureControlHR : HVACComponent {
+      public ZoneHVACTerminalUnitVariableRefrigerantFlowVector terminals(){
+        return OpenStudio.OpenStudioModelZoneHVAC.terminals(this);
+      }
+
+      public bool addTerminal(OpenStudio.ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+        return OpenStudio.OpenStudioModelZoneHVAC.addTerminal(this, vrf);
+      }
+
+      public void removeTerminal(OpenStudio.ZoneHVACTerminalUnitVariableRefrigerantFlow vrf) {
+        OpenStudio.OpenStudioModelZoneHVAC.removeTerminal(this, vrf);
+      }
+    }
+
+  %}
+#endif
 
 #endif

@@ -11,6 +11,7 @@
 #include "FoundationKivaSettings.hpp"
 #include "OutputControlFiles.hpp"
 #include "OutputControlReportingTolerances.hpp"
+#include "OutputControlResilienceSummaries.hpp"
 #include "OutputControlTableStyle.hpp"
 #include "OutputControlTimestamp.hpp"
 #include "OutputDiagnostics.hpp"
@@ -54,6 +55,7 @@
 #include "ClimateZones.hpp"
 #include "EnvironmentalImpactFactors.hpp"
 #include "ExternalInterface.hpp"
+#include "PythonPluginSearchPaths.hpp"
 
 #include "../nano/nano_signal_slot.hpp"  // Signal-Slot replacement
 
@@ -130,7 +132,7 @@ namespace model {
       /** Swaps underlying data between this workspace and other. */
       virtual void swap(Workspace& other) override;
 
-      virtual ~Model_Impl() = default;
+      virtual ~Model_Impl() override = default;
 
       /** Creates ComponentWatchers for each ComponentData object. Should be called as part of
      *  construction from IdfFile or Workspace. */
@@ -167,6 +169,10 @@ namespace model {
       /** Get the OutputControlReportingTolerances object if there is one, this implementation uses a cached reference to the OutputControlReportingTolerances
      *  object which can be significantly faster than calling getOptionalUniqueModelObject<OutputControlReportingTolerances>(). */
       boost::optional<OutputControlReportingTolerances> outputControlReportingTolerances() const;
+
+      /** Get the OutputControlResilienceSummaries object if there is one, this implementation uses a cached reference to the OutputControlResilienceSummaries
+     *  object which can be significantly faster than calling getOptionalUniqueModelObject<OutputControlResilienceSummaries>(). */
+      boost::optional<OutputControlResilienceSummaries> outputControlResilienceSummaries() const;
 
       /** Get the OutputControlTableStyle object if there is one, this implementation uses a cached reference to the OutputControlTableStyle
      *  object which can be significantly faster than calling getOptionalUniqueModelObject<OutputControlTableStyle>(). */
@@ -336,6 +342,10 @@ namespace model {
      *  object which can be significantly faster than calling getOptionalUniqueModelObject<ExternalInterface>(). */
       boost::optional<ExternalInterface> externalInterface() const;
 
+      /** Get the PythonPluginSearchPaths object if there is one, this implementation uses a cached reference to the PythonPluginSearchPaths
+     *  object which can be significantly faster than calling getOptionalUniqueModelObject<PythonPluginSearchPaths>(). */
+      boost::optional<PythonPluginSearchPaths> pythonPluginSearchPaths() const;
+
       /** Get or create the YearDescription object if there is one, then call method from YearDescription. */
       // DLM: this is due to issues exporting the model::YearDescription object because of name conflict with utilities::YearDescription.
       boost::optional<int> calendarYear() const;
@@ -470,6 +480,7 @@ namespace model {
       mutable boost::optional<FoundationKivaSettings> m_cachedFoundationKivaSettings;
       mutable boost::optional<OutputControlFiles> m_cachedOutputControlFiles;
       mutable boost::optional<OutputControlReportingTolerances> m_cachedOutputControlReportingTolerances;
+      mutable boost::optional<OutputControlResilienceSummaries> m_cachedOutputControlResilienceSummaries;
       mutable boost::optional<OutputControlTableStyle> m_cachedOutputControlTableStyle;
       mutable boost::optional<OutputControlTimestamp> m_cachedOutputControlTimestamp;
       mutable boost::optional<OutputDiagnostics> m_cachedOutputDiagnostics;
@@ -513,6 +524,7 @@ namespace model {
       mutable boost::optional<ClimateZones> m_cachedClimateZones;
       mutable boost::optional<EnvironmentalImpactFactors> m_cachedEnvironmentalImpactFactors;
       mutable boost::optional<ExternalInterface> m_cachedExternalInterface;
+      mutable boost::optional<PythonPluginSearchPaths> m_cachedPythonPluginSearchPaths;
 
       // private slots:
       void clearCachedData();
@@ -520,6 +532,7 @@ namespace model {
       void clearCachedFoundationKivaSettings(const Handle& handle);
       void clearCachedOutputControlFiles(const Handle& handle);
       void clearCachedOutputControlReportingTolerances(const Handle& handle);
+      void clearCachedOutputControlResilienceSummaries(const Handle& handle);
       void clearCachedOutputControlTableStyle(const Handle& handle);
       void clearCachedOutputControlTimestamp(const Handle& handle);
       void clearCachedOutputDiagnostics(const Handle& handle);
@@ -562,6 +575,7 @@ namespace model {
       void clearCachedClimateZones(const Handle& handle);
       void clearCachedEnvironmentalImpactFactors(const Handle& handle);
       void clearCachedExternalInterface(const Handle& handle);
+      void clearCachedPythonPluginSearchPaths(const Handle& handle);
 
       using CopyConstructorFunction = std::function<std::shared_ptr<openstudio::detail::WorkspaceObject_Impl>(
         Model_Impl*, const std::shared_ptr<openstudio::detail::WorkspaceObject_Impl>&, bool)>;

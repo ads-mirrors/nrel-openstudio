@@ -88,6 +88,8 @@ namespace energyplus {
       idfObject.setDouble(ZoneInfiltration_DesignFlowRateFields::VelocitySquaredTermCoefficient, modelObject.velocitySquaredTermCoefficient());
     }
 
+    idfObject.setString(ZoneInfiltration_DesignFlowRateFields::DensityBasis, modelObject.densityBasis());
+
     return idfObject;
   }
 

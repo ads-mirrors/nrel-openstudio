@@ -92,7 +92,7 @@ namespace model {
         }
       }
       if (intendedSurfaceType) {
-        if (istringEqual(*intendedSurfaceType, "InterorWall")) {
+        if (istringEqual(*intendedSurfaceType, "InteriorWall")) {
           result.push_back("Mass");
           result.push_back("Metal");
           result.push_back("SteelFramed");

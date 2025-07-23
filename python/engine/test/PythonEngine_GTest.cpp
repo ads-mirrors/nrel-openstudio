@@ -5,11 +5,12 @@
 
 #include <gtest/gtest.h>
 
-#include "measure/ModelMeasure.hpp"
-#include "measure/OSArgument.hpp"
-#include "measure/OSMeasure.hpp"
-#include "model/Model.hpp"
-#include "scriptengine/ScriptEngine.hpp"
+#include "../../../src/measure/ModelMeasure.hpp"
+#include "../../../src/measure/OSArgument.hpp"
+#include "../../../src/measure/OSMeasure.hpp"
+#include "../../../src/measure/OSRunner.hpp"
+#include "../../../src/model/Model.hpp"
+#include "../../../src/scriptengine/ScriptEngine.hpp"
 
 #include <fmt/format.h>
 
@@ -53,9 +54,9 @@ TEST_F(PythonEngineFixture, BadMeasure) {
   std::string expected_exception = fmt::format(R"(SWIG director method error. In method 'arguments': `ValueError('oops')`
 
 Traceback (most recent call last):
-  File "{0}", line 17, in arguments
+  File "{0}", line 22, in arguments
     self.another_method()
-  File "{0}", line 14, in another_method
+  File "{0}", line 19, in another_method
     raise ValueError("oops")
 ValueError: oops)",
                                                scriptPath.generic_string());
@@ -84,8 +85,9 @@ TEST_F(PythonEngineFixture, WrongMethodMeasure) {
     fmt::format(R"(SWIG director method error. In method 'arguments': `AttributeError("'Model' object has no attribute 'nonExistingMethod'")`
 
 Traceback (most recent call last):
-  File "{}", line 14, in arguments
+  File "{}", line 19, in arguments
     model.nonExistingMethod()
+    ^^^^^^^^^^^^^^^^^^^^^^^
 AttributeError: 'Model' object has no attribute 'nonExistingMethod')",
                 scriptPath.generic_string());
 
@@ -113,14 +115,17 @@ TEST_F(PythonEngineFixture, StackLevelTooDeepMeasure) {
     fmt::format(R"(SWIG director method error. In method 'arguments': `RecursionError('maximum recursion depth exceeded')`
 
 Traceback (most recent call last):
-  File "{0}", line 16, in arguments
+  File "{0}", line 21, in arguments
     s(10)
-  File "{0}", line 6, in s
+  File "{0}", line 11, in s
     return s(x)
-  File "{0}", line 6, in s
+           ^^^^
+  File "{0}", line 11, in s
     return s(x)
-  File "{0}", line 6, in s
+           ^^^^
+  File "{0}", line 11, in s
     return s(x)
+           ^^^^
   [Previous line repeated 996 more times]
 RecursionError: maximum recursion depth exceeded)",
                 scriptPath.generic_string());
@@ -132,5 +137,59 @@ RecursionError: maximum recursion depth exceeded)",
   } catch (std::exception& e) {
     std::string error = e.what();
     EXPECT_EQ(expected_exception, error);
+  }
+}
+
+TEST_F(PythonEngineFixture, AlfalfaMeasure) {
+  const std::string classAndDirName = "AlfalfaMeasure";
+
+  const auto scriptPath = getScriptPath(classAndDirName);
+  auto measureScriptObject = (*thisEngine)->loadMeasure(scriptPath, classAndDirName);
+  auto* measurePtr = (*thisEngine)->getAs<openstudio::measure::ModelMeasure*>(measureScriptObject);
+
+  ASSERT_EQ(measurePtr->name(), "Alfalfa Measure");
+
+  std::string workflow_json = R"json(
+{
+  "seed": "../seed.osm",
+  "weather_file": "../weather.epw",
+  "steps": [
+    {
+      "arguments": {},
+      "description": "The method attempts to build an alfalfa json in the measure",
+      "measure_dir_name": "AlfalfaMeasure",
+      "modeler_description": "The method attempts to build an alfalfa json in the measure",
+      "name": "AlfalfaMeasure"
+    }
+  ]
+}
+  )json";
+
+  openstudio::model::Model model;
+  openstudio::WorkflowJSON workflow = *openstudio::WorkflowJSON::load(workflow_json);
+  openstudio::measure::OSRunner runner(workflow);
+  EXPECT_TRUE(runner.alfalfa().points().empty());
+
+  openstudio::measure::OSArgumentMap arguments;
+  measurePtr->run(model, runner, arguments);
+  EXPECT_EQ(5, runner.alfalfa().points().size());
+}
+
+TEST_F(PythonEngineFixture, hasMethod) {
+  {
+    const std::string classAndDirName = "ReportingMeasureWithoutModelOutputs";
+    const auto scriptPath = getScriptPath(classAndDirName);
+    auto measureScriptObject = (*thisEngine)->loadMeasure(scriptPath, classAndDirName);
+    EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "doesNotExists"));
+    EXPECT_TRUE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests", false));  // overriden_only = false
+    EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests"));
+  }
+  {
+    const std::string classAndDirName = "ReportingMeasureWithModelOutputs";
+    const auto scriptPath = getScriptPath(classAndDirName);
+    auto measureScriptObject = (*thisEngine)->loadMeasure(scriptPath, classAndDirName);
+    EXPECT_FALSE((*thisEngine)->hasMethod(measureScriptObject, "doesNotExists"));
+    EXPECT_TRUE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests", false));  // overriden_only = false
+    EXPECT_TRUE((*thisEngine)->hasMethod(measureScriptObject, "modelOutputRequests"));
   }
 }

@@ -39,9 +39,8 @@
   // HeatExchangerDesiccantBalancedFlow is done later in ModelHVAC.i
   %ignore openstudio::model::HeatExchangerDesiccantBalancedFlowPerformanceDataType1::heatExchangerDesiccantBalancedFlows;
 
-  // TODO: why?
-  // ignore schedule type
-  // %ignore openstudio::model::ScheduleType;
+  // Done later in ModelHVAC.i
+  %ignore openstudio::model::ExternalFile::chillerElectricASHRAE205s;
 
 #endif
 
@@ -96,6 +95,15 @@ class HeatExchangerDesiccantBalancedFlow;
   }
 };
 
+%extend openstudio::model::ThermochromicGroup {
+  // Use the overloaded operator<< for string representation
+  std::string __str__() {
+    std::ostringstream os;
+    os << *$self;
+    return os.str();
+  }
+};
+
 MODELOBJECT_TEMPLATES(ScheduleType)
 MODELOBJECT_TEMPLATES(ScheduleInterval);
 MODELOBJECT_TEMPLATES(ScheduleFixedInterval);
@@ -105,6 +113,7 @@ MODELOBJECT_TEMPLATES(PythonPluginInstance);
 MODELOBJECT_TEMPLATES(PythonPluginVariable);
 MODELOBJECT_TEMPLATES(PythonPluginTrendVariable);
 MODELOBJECT_TEMPLATES(PythonPluginOutputVariable);
+UNIQUEMODELOBJECT_TEMPLATES(PythonPluginSearchPaths);
 MODELOBJECT_TEMPLATES(ScheduleVariableInterval);
 MODELOBJECT_TEMPLATES(ScheduleCompact);
 MODELOBJECT_TEMPLATES(ScheduleConstant);
@@ -137,6 +146,7 @@ MODELOBJECT_TEMPLATES(SimpleGlazing);
 MODELOBJECT_TEMPLATES(StandardGlazing);
 MODELOBJECT_TEMPLATES(StandardOpaqueMaterial);
 MODELOBJECT_TEMPLATES(ThermochromicGlazing);
+MODELOBJECT_TEMPLATES(ThermochromicGroup); // helper for extensible fields for ThermochromicGlazing
 MODELOBJECT_TEMPLATES(StandardsInformationMaterial);
 MODELOBJECT_TEMPLATES(ConstructionBase);
 MODELOBJECT_TEMPLATES(LayeredConstruction);
@@ -206,6 +216,7 @@ SWIG_MODELOBJECT(PythonPluginInstance, 1);
 SWIG_MODELOBJECT(PythonPluginVariable, 1);
 SWIG_MODELOBJECT(PythonPluginTrendVariable, 1);
 SWIG_MODELOBJECT(PythonPluginOutputVariable, 1);
+SWIG_UNIQUEMODELOBJECT(PythonPluginSearchPaths);
 SWIG_MODELOBJECT(ExternalFile, 1);
 SWIG_MODELOBJECT(ScheduleFixedInterval, 1);
 SWIG_MODELOBJECT(ScheduleVariableInterval, 1);
@@ -311,6 +322,10 @@ SWIG_MODELOBJECT(HeatExchangerDesiccantBalancedFlowPerformanceDataType1, 1);
           return ems_curve.setCurveOrTableObject(curve);
         }
 
+        boost::optional<PythonPluginSearchPaths> pythonPluginSearchPaths(const openstudio::model::Model& model) {
+          return model.pythonPluginSearchPaths();
+        }
+
       }
     }
   }
@@ -332,6 +347,12 @@ SWIG_MODELOBJECT(HeatExchangerDesiccantBalancedFlowPerformanceDataType1, 1);
       public EnergyManagementSystemCurveOrTableIndexVariable(Model model, OpenStudio.Curve curve)
         : this(model) {
         this.setCurveOrTableObject(curve);
+      }
+    }
+
+    public partial class Model : Workspace {
+      public OptionalPythonPluginSearchPaths pythonPluginSearchPaths() {
+        return OpenStudio.OpenStudioModelResources.pythonPluginSearchPaths(this);
       }
     }
   %}

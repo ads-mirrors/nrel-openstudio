@@ -173,7 +173,7 @@ namespace energyplus {
       }
     }
 
-    if (istringEqual(solarModelIndicator, "ASHRAETau")) {
+    if (istringEqual(solarModelIndicator, "ASHRAETau") || istringEqual(solarModelIndicator, "ASHRAETau2017")) {
       // ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub)
       idfObject.setDouble(SizingPeriod_DesignDayFields::ASHRAEClearSkyOpticalDepthforBeamIrradiance_taub_,
                           modelObject.ashraeClearSkyOpticalDepthForBeamIrradiance());

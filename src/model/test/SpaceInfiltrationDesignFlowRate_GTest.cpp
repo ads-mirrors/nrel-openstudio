@@ -72,6 +72,13 @@ TEST_F(ModelFixture, SpaceInfiltrationDesignFlowRate) {
   ASSERT_TRUE(spaceInfiltrationDesignFlowRate.airChangesperHour());
   EXPECT_EQ(5.0, spaceInfiltrationDesignFlowRate.airChangesperHour().get());
 
+  // DensityBasis
+  EXPECT_EQ("Outdoor", spaceInfiltrationDesignFlowRate.densityBasis());
+  EXPECT_TRUE(spaceInfiltrationDesignFlowRate.setDensityBasis("Standard"));
+  EXPECT_EQ("Standard", spaceInfiltrationDesignFlowRate.densityBasis());
+  EXPECT_FALSE(spaceInfiltrationDesignFlowRate.setDensityBasis("BADENUM"));
+  EXPECT_EQ("Standard", spaceInfiltrationDesignFlowRate.densityBasis());
+
   boost::optional<model::ModelObject> clone1 = spaceInfiltrationDesignFlowRate.clone(spaceInfiltrationDesignFlowRate.model());
   EXPECT_EQ(2u, model.numObjects());
 

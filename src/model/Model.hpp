@@ -29,6 +29,7 @@ namespace model {
   class FoundationKivaSettings;
   class OutputControlFiles;
   class OutputControlReportingTolerances;
+  class OutputControlResilienceSummaries;
   class OutputControlTableStyle;
   class OutputControlTimestamp;
   class OutputDiagnostics;
@@ -76,6 +77,7 @@ namespace model {
   class Schedule;
   class Node;
   class SpaceType;
+  class PythonPluginSearchPaths;
 
   namespace detail {
     class Model_Impl;
@@ -115,7 +117,7 @@ namespace model {
    *  Any unwrapped IDD types will be wrapped with GenericModelObject. */
     explicit Model(const openstudio::Workspace& workspace);
 
-    virtual ~Model() = default;
+    virtual ~Model() override = default;
     // Default the copy and move operators because the virtual dtor is explicit
     Model(const Model& other) = default;
     Model(Model&& other) = default;
@@ -147,6 +149,10 @@ namespace model {
     /** Get the OutputControlReportingTolerances object if there is one, this implementation uses a cached reference to the OutputControlReportingTolerances
    *  object which can be significantly faster than calling getOptionalUniqueModelObject<OutputControlReportingTolerances>(). */
     boost::optional<OutputControlReportingTolerances> outputControlReportingTolerances() const;
+
+    /** Get the OutputControlResilienceSummaries object if there is one, this implementation uses a cached reference to the OutputControlResilienceSummaries
+   *  object which can be significantly faster than calling getOptionalUniqueModelObject<OutputControlResilienceSummaries>(). */
+    boost::optional<OutputControlResilienceSummaries> outputControlResilienceSummaries() const;
 
     /** Get the OutputControlTableStyle object if there is one, this implementation uses a cached reference to the OutputControlTableStyle
    *  object which can be significantly faster than calling getOptionalUniqueModelObject<OutputControlTableStyle>(). */
@@ -315,6 +321,10 @@ namespace model {
     /** Get the ExternalInterface object if there is one, this implementation uses a cached reference to the ExternalInterface
    *  object which can be significantly faster than calling getOptionalUniqueModelObject<ExternalInterface>(). */
     boost::optional<ExternalInterface> externalInterface() const;
+
+    /** Get the PythonPluginSearchPaths object if there is one, this implementation uses a cached reference to the PythonPluginSearchPaths
+   *  object which can be significantly faster than calling getOptionalUniqueModelObject<PythonPluginSearchPaths>(). */
+    boost::optional<PythonPluginSearchPaths> pythonPluginSearchPaths() const;
 
     /** Get or create the YearDescription object if there is one, then call method from YearDescription. */
     // DLM: this is due to issues exporting the model::YearDescription object because of name conflict with utilities::YearDescription.
@@ -704,6 +714,9 @@ namespace model {
   MODEL_API OutputControlReportingTolerances Model::getUniqueModelObject<OutputControlReportingTolerances>();
 
   template <>
+  MODEL_API OutputControlResilienceSummaries Model::getUniqueModelObject<OutputControlResilienceSummaries>();
+
+  template <>
   MODEL_API OutputControlTableStyle Model::getUniqueModelObject<OutputControlTableStyle>();
 
   template <>
@@ -828,6 +841,9 @@ namespace model {
 
   template <>
   MODEL_API ExternalInterface Model::getUniqueModelObject<ExternalInterface>();
+
+  template <>
+  MODEL_API PythonPluginSearchPaths Model::getUniqueModelObject<PythonPluginSearchPaths>();
 
 }  // namespace model
 }  // namespace openstudio

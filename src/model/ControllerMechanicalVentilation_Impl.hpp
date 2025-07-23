@@ -31,7 +31,7 @@ namespace model {
 
       ControllerMechanicalVentilation_Impl(const ControllerMechanicalVentilation_Impl& other, Model_Impl* model, bool keepHandle);
 
-      virtual ~ControllerMechanicalVentilation_Impl() = default;
+      virtual ~ControllerMechanicalVentilation_Impl() override = default;
 
       //@}
 
@@ -77,6 +77,10 @@ namespace model {
       //@{
 
       ControllerOutdoorAir controllerOutdoorAir() const;
+
+      // Convenience method to check whether it links to zones that have DesignSpecificationOutdoorAir(s) assigned
+      bool hasZonesWithDesignSpecificationOutdoorAir() const;
+
       //@}
      protected:
      private:

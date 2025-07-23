@@ -29,6 +29,11 @@ namespace measure {
     return true;
   }
 
+  bool ReportingMeasure::modelOutputRequests(openstudio::model::Model& /*model*/, OSRunner& /*runner*/,
+                                             const std::map<std::string, OSArgument>& /*user_arguments*/) const {
+    return true;
+  }
+
   std::vector<IdfObject> ReportingMeasure::energyPlusOutputRequests(OSRunner& /*runner*/,
                                                                     const std::map<std::string, OSArgument>& /*user_arguments*/) const {
     return {};

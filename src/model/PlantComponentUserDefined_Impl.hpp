@@ -22,6 +22,7 @@ namespace model {
   class EnergyManagementSystemProgramCallingManager;
   class EnergyManagementSystemProgram;
   class EnergyManagementSystemActuator;
+  class EnergyManagementSystemMeteredOutputVariable;
   class Connection;
   class Node;
   class ThermalZone;
@@ -41,7 +42,7 @@ namespace model {
 
       PlantComponentUserDefined_Impl(const PlantComponentUserDefined_Impl& other, Model_Impl* model, bool keepHandle);
 
-      virtual ~PlantComponentUserDefined_Impl() = default;
+      virtual ~PlantComponentUserDefined_Impl() override = default;
 
       //@}
       /** @name Virtual Methods */
@@ -170,6 +171,9 @@ namespace model {
       //@}
       /** @name Other */
       //@{
+
+      // Will look into the MainModelProgram and the PlantSimulationProgram 's linked EMS Metered Output Variables
+      std::vector<EnergyManagementSystemMeteredOutputVariable> energyManagementSystemMeteredOutputVariables() const;
 
       //@}
      protected:

@@ -15,6 +15,8 @@
 #include "EnergyManagementSystemProgram_Impl.hpp"
 #include "EnergyManagementSystemActuator.hpp"
 #include "EnergyManagementSystemActuator_Impl.hpp"
+#include "EnergyManagementSystemMeteredOutputVariable.hpp"
+#include "EnergyManagementSystemMeteredOutputVariable_Impl.hpp"
 #include "Connection.hpp"
 #include "Connection_Impl.hpp"
 #include "Node.hpp"
@@ -24,6 +26,7 @@
 
 #include "../utilities/core/Assert.hpp"
 #include "../utilities/data/DataEnums.hpp"
+#include "../utilities/core/ContainersMove.hpp"
 
 #include <utilities/idd/IddFactory.hxx>
 #include <utilities/idd/IddEnums.hxx>
@@ -498,20 +501,71 @@ namespace model {
       return simProgram;
     }
 
+    std::vector<EnergyManagementSystemMeteredOutputVariable> PlantComponentUserDefined_Impl::energyManagementSystemMeteredOutputVariables() const {
+      std::vector<EnergyManagementSystemMeteredOutputVariable> result;
+      if (auto prgm_ = mainModelProgram()) {
+        openstudio::detail::concat_helper(result, prgm_->energyManagementSystemMeteredOutputVariables());
+      }
+      if (auto prgm_ = plantSimulationProgram()) {
+        openstudio::detail::concat_helper(result, prgm_->energyManagementSystemMeteredOutputVariables());
+      }
+      return result;
+    }
+
     ComponentType PlantComponentUserDefined_Impl::componentType() const {
-      return ComponentType::Both;
+      bool has_heating = false;
+      bool has_cooling = false;
+
+      for (const auto& ems_metered_var : energyManagementSystemMeteredOutputVariables()) {
+        auto compType = ems_metered_var.componentType();
+        if (compType == ComponentType::Cooling) {
+          has_cooling = true;
+        } else if (compType == ComponentType::Heating) {
+          has_heating = true;
+        } else if (compType == ComponentType::Both) {
+          has_cooling = true;
+          has_heating = true;
+        }
+      }
+
+      if (has_cooling && has_heating) {
+        return ComponentType::Both;
+      } else if (has_cooling) {
+        return ComponentType::Cooling;
+      } else if (has_heating) {
+        return ComponentType::Heating;
+      }
+      return ComponentType::None;
     }
 
     std::vector<FuelType> PlantComponentUserDefined_Impl::coolingFuelTypes() const {
-      return {FuelType::OtherFuel_1};
+      std::set<FuelType> result;
+      for (const auto& ems_metered_var : energyManagementSystemMeteredOutputVariables()) {
+        for (auto& ft : ems_metered_var.coolingFuelTypes()) {
+          result.insert(ft);
+        }
+      }
+      return {result.begin(), result.end()};
     }
 
     std::vector<FuelType> PlantComponentUserDefined_Impl::heatingFuelTypes() const {
-      return {FuelType::OtherFuel_1};
+      std::set<FuelType> result;
+      for (const auto& ems_metered_var : energyManagementSystemMeteredOutputVariables()) {
+        for (auto& ft : ems_metered_var.heatingFuelTypes()) {
+          result.insert(ft);
+        }
+      }
+      return {result.begin(), result.end()};
     }
 
     std::vector<AppGFuelType> PlantComponentUserDefined_Impl::appGHeatingFuelTypes() const {
-      return {AppGFuelType::Other};
+      std::set<AppGFuelType> result;
+      for (const auto& ems_metered_var : energyManagementSystemMeteredOutputVariables()) {
+        for (auto& ft : ems_metered_var.appGHeatingFuelTypes()) {
+          result.insert(ft);
+        }
+      }
+      return {result.begin(), result.end()};
     }
 
   }  // namespace detail
@@ -789,6 +843,10 @@ namespace model {
   EnergyManagementSystemProgram PlantComponentUserDefined::createSimProgram(const EnergyManagementSystemActuator& otActuator,
                                                                             const EnergyManagementSystemActuator& mfrActuator, const Model& model) {
     return getImpl<detail::PlantComponentUserDefined_Impl>()->createSimProgram(otActuator, mfrActuator, model);
+  }
+
+  std::vector<EnergyManagementSystemMeteredOutputVariable> PlantComponentUserDefined::energyManagementSystemMeteredOutputVariables() const {
+    return getImpl<detail::PlantComponentUserDefined_Impl>()->energyManagementSystemMeteredOutputVariables();
   }
 
   /// @cond

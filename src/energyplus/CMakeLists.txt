@@ -98,6 +98,7 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslateCoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.cpp
   ForwardTranslator/ForwardTranslateCoilPerformanceDXCooling.cpp
   ForwardTranslator/ForwardTranslateCoilSystemCoolingDXHeatExchangerAssisted.cpp
+  ForwardTranslator/ForwardTranslateCoilSystemCoolingWater.cpp
   ForwardTranslator/ForwardTranslateCoilSystemCoolingWaterHeatExchangerAssisted.cpp
   ForwardTranslator/ForwardTranslateCoilSystemIntegratedHeatPumpAirSource.cpp
   ForwardTranslator/ForwardTranslateCoilUserDefined.cpp
@@ -259,6 +260,7 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslateOutsideSurfaceConvectionAlgorithm.cpp
   ForwardTranslator/ForwardTranslateOutputControlFiles.cpp
   ForwardTranslator/ForwardTranslateOutputControlReportingTolerances.cpp
+  ForwardTranslator/ForwardTranslateOutputControlResilienceSummaries.cpp
   ForwardTranslator/ForwardTranslateOutputControlTableStyle.cpp
   ForwardTranslator/ForwardTranslateOutputControlTimestamp.cpp
   ForwardTranslator/ForwardTranslateOutputMeter.cpp
@@ -273,6 +275,8 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslateOutputConstructions.cpp
   ForwardTranslator/ForwardTranslateEnvironmentalImpactFactors.cpp
   ForwardTranslator/ForwardTranslateFuelFactors.cpp
+  ForwardTranslator/ForwardTranslateOutputTableAnnual.cpp
+  ForwardTranslator/ForwardTranslateOutputTableMonthly.cpp
   ForwardTranslator/ForwardTranslateOutputTableSummaryReports.cpp
   ForwardTranslator/ForwardTranslatePeople.cpp
   ForwardTranslator/ForwardTranslatePerformancePrecisionTradeoffs.cpp
@@ -302,6 +306,7 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslatePythonPluginVariable.cpp
   ForwardTranslator/ForwardTranslatePythonPluginTrendVariable.cpp
   ForwardTranslator/ForwardTranslatePythonPluginOutputVariable.cpp
+  ForwardTranslator/ForwardTranslatePythonPluginSearchPaths.cpp
   ForwardTranslator/ForwardTranslateRefractionExtinctionGlazing.cpp
   ForwardTranslator/ForwardTranslateRefrigerationAirChiller.cpp
   ForwardTranslator/ForwardTranslateRefrigerationCase.cpp
@@ -415,6 +420,7 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslateThermalStorageIceDetailed.cpp
   ForwardTranslator/ForwardTranslateThermalStorageChilledWaterStratified.cpp
   ForwardTranslator/ForwardTranslateThermalZone.cpp
+  ForwardTranslator/ForwardTranslateThermochromicGlazing.cpp
   ForwardTranslator/ForwardTranslateThermostatSetpointDualSetpoint.cpp
   ForwardTranslator/ForwardTranslateTimestep.cpp
   ForwardTranslator/ForwardTranslateUnitarySystemPerformanceMultispeed.cpp
@@ -443,6 +449,7 @@ set(${target_name}_src
   ForwardTranslator/ForwardTranslateZoneHVACEnergyRecoveryVentilator.cpp
   ForwardTranslator/ForwardTranslateZoneHVACEnergyRecoveryVentilatorController.cpp
   ForwardTranslator/ForwardTranslateZoneHVACEquipmentList.cpp
+  ForwardTranslator/ForwardTranslateZoneHVACEvaporativeCoolerUnit.cpp
   ForwardTranslator/ForwardTranslateZoneHVACFourPipeFanCoil.cpp
   ForwardTranslator/ForwardTranslateZoneHVACHighTemperatureRadiant.cpp
   ForwardTranslator/ForwardTranslateZoneHVACIdealLoadsAirSystem.cpp
@@ -551,6 +558,7 @@ set(${target_name}_src
   ReverseTranslator/ReverseTranslateOtherEquipment.cpp
   ReverseTranslator/ReverseTranslateOutputControlFiles.cpp
   ReverseTranslator/ReverseTranslateOutputControlReportingTolerances.cpp
+  ReverseTranslator/ReverseTranslateOutputControlResilienceSummaries.cpp
   ReverseTranslator/ReverseTranslateOutputControlTableStyle.cpp
   ReverseTranslator/ReverseTranslateOutputControlTimestamp.cpp
   ReverseTranslator/ReverseTranslateOutputDebuggingData.cpp
@@ -569,6 +577,8 @@ set(${target_name}_src
   ReverseTranslator/ReverseTranslateOutputMeterCumulativeMeterFileOnly.cpp
   ReverseTranslator/ReverseTranslateOutputMeterMeterFileOnly.cpp
   ReverseTranslator/ReverseTranslateOutputVariable.cpp
+  ReverseTranslator/ReverseTranslateOutputTableAnnual.cpp
+  ReverseTranslator/ReverseTranslateOutputTableMonthly.cpp
   ReverseTranslator/ReverseTranslateOutputTableSummaryReports.cpp
   ReverseTranslator/ReverseTranslatePeople.cpp
   ReverseTranslator/ReverseTranslatePerformancePrecisionTradeoffs.cpp
@@ -623,6 +633,7 @@ set(${target_name}_src
   ReverseTranslator/ReverseTranslateVersion.cpp
   ReverseTranslator/ReverseTranslateWindowMaterialGas.cpp
   ReverseTranslator/ReverseTranslateWindowMaterialGlazing.cpp
+  ReverseTranslator/ReverseTranslateWindowMaterialGlazingGroupThermochromic.cpp
   ReverseTranslator/ReverseTranslateWindowMaterialSimpleGlazingSystem.cpp
   ReverseTranslator/ReverseTranslateWindowPropertyFrameAndDivider.cpp
   ReverseTranslator/ReverseTranslateWindowShadingControl.cpp
@@ -665,6 +676,8 @@ set(${target_name}_test_src
   Test/AirTerminalDualDuctVAVOutdoorAir_GTest.cpp
   Test/AirTerminalSingleDuctConstantVolumeFourPipeBeam_GTest.cpp
   Test/AirTerminalSingleDuctInletSideMixer_GTest.cpp
+  Test/AirTerminalSingleDuctSeriesPIUReheat_GTest.cpp
+  Test/AirTerminalSingleDuctParallelPIUReheat_GTest.cpp
   Test/AirTerminalSingleDuctVAVNoReheat_GTest.cpp
   Test/AirTerminalSingleDuctVAVReheat_GTest.cpp
   Test/AirTerminalSingleDuctVAVHeatAndCoolNoReheat_GTest.cpp
@@ -687,6 +700,8 @@ set(${target_name}_test_src
   Test/BoilerHotWater_GTest.cpp
   Test/Building_GTest.cpp
   Test/ChillerElectricASHRAE205_GTest.cpp
+  Test/ChillerElectricEIR_GTest.cpp
+  Test/ChillerElectricReformulatedEIR_GTest.cpp
   Test/CentralHeatPumpSystem_GTest.cpp
   Test/CoilCoolingDX_GTest.cpp
   Test/CoilCoolingDXCurveFitPerformance_GTest.cpp
@@ -698,6 +713,7 @@ set(${target_name}_test_src
   Test/CoilCoolingDXTwoSpeed_GTest.cpp
   Test/CoilCoolingDXTwoStageWithHumidityControlMode_GTest.cpp
   Test/CoilCoolingDXVariableSpeed_GTest.cpp
+  Test/CoilCoolingWater_GTest.cpp
   Test/CoilCoolingWaterToAirHeatPumpEquationFit_GTest.cpp
   Test/CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit_GTest.cpp
   Test/CoilHeatingDXMultiSpeed_GTest.cpp
@@ -708,6 +724,8 @@ set(${target_name}_test_src
   Test/CoilHeatingGasMultiStage_GTest.cpp
   Test/CoilHeatingWaterToAirHeatPumpEquationFit_GTest.cpp
   Test/CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit_GTest.cpp
+  Test/CoilSystemCoolingWater_GTest.cpp
+  Test/CoilSystemCoolingWaterHeatExchangerAssisted_GTest.cpp
   Test/CoilSystemIntegratedHeatPumpAirSource_GTest.cpp
   Test/CoilUserDefined_GTest.cpp
   Test/CoilWaterHeatingAirToWaterHeatPump_GTest.cpp
@@ -717,6 +735,7 @@ set(${target_name}_test_src
   Test/Construction_GTest.cpp
   Test/ConstructionWithInternalSource_GTest.cpp
   Test/ControllerOutdoorAir_GTest.cpp
+  Test/CoolingTowerSingleSpeed_GTest.cpp
   Test/CurveQuadLinear_GTest.cpp
   Test/CurveQuintLinear_GTest.cpp
   Test/DaylightingControl_GTest.cpp
@@ -768,6 +787,7 @@ set(${target_name}_test_src
   Test/Meter_GTest.cpp
   Test/OutputControlFiles_GTest.cpp
   Test/OutputControlReportingTolerances_GTest.cpp
+  Test/OutputControlResilienceSummaries_GTest.cpp
   Test/OutputControlTableStyle_GTest.cpp
   Test/OutputControlTimestamp_GTest.cpp
   Test/OutputDebuggingData_GTest.cpp
@@ -776,6 +796,8 @@ set(${target_name}_test_src
   Test/OutputSQLite_GTest.cpp
   Test/OutputEnvironmentalImpactFactors_GTest.cpp
   Test/OutputTableSummaryReports_GTest.cpp
+  Test/OutputTableAnnual_GTest.cpp
+  Test/OutputTableMonthly_GTest.cpp
   Test/OutputSchedules_GTest.cpp
   Test/OutputConstructions_GTest.cpp
   Test/People_GTest.cpp
@@ -787,6 +809,7 @@ set(${target_name}_test_src
   Test/PythonPluginVariable_GTest.cpp
   Test/PythonPluginOutputVariable_GTest.cpp
   Test/PythonPluginTrendVariable_GTest.cpp
+  Test/PythonPluginSearchPaths_GTest.cpp
   Test/RunPeriod_GTest.cpp
   Test/RunPeriodControlDaylightSavingTime_GTest.cpp
   Test/RunPeriodControlSpecialDays_GTest.cpp
@@ -799,6 +822,7 @@ set(${target_name}_test_src
   Test/ShadingSurface_GTest.cpp
   Test/ShadowCalculation_GTest.cpp
   Test/SimulationControl_GTest.cpp
+  Test/Site_GTest.cpp
   Test/SiteGroundTemperatureUndisturbedKusudaAchenbach_GTest.cpp
   Test/SiteGroundTemperatureUndisturbedXing_GTest.cpp
   Test/SizingSystem_GTest.cpp
@@ -823,7 +847,9 @@ set(${target_name}_test_src
   Test/TableLookup_GTest.cpp
   Test/ThermalStorageChilledWaterStratified_GTest.cpp
   Test/ThermalZone_GTest.cpp
+  Test/ThermochromicGlazing_GTest.cpp
   Test/ThermostatSetpointDualSetpoint_GTest.cpp
+  Test/UnitarySystemPerformanceMultispeed_GTest.cpp
   Test/WindowPropertyFrameAndDivider_GTest.cpp
   Test/WaterHeaterMixed_GTest.cpp
   Test/WaterHeaterSizing_GTest.cpp
@@ -831,6 +857,7 @@ set(${target_name}_test_src
   Test/WaterUseConnections_GTest.cpp
   Test/ZoneAirHeatBalanceAlgorithm_GTest.cpp
   Test/ZoneHVACBaseboardRadiantConvectiveWater_GTest.cpp
+  Test/ZoneHVACEvaporativeCoolerUnit_GTest.cpp
   Test/ZoneHVACLowTemperatureRadiantElectric_GTest.cpp
   Test/ZoneHVACLowTempRadiantConstFlow_GTest.cpp
   Test/ZoneHVACLowTempRadiantVarFlow_GTest.cpp
@@ -841,6 +868,7 @@ set(${target_name}_test_src
   Test/ZoneHVACWaterToAirHeatPump_GTest.cpp
   Test/ZoneMixing_GTest.cpp
   Test/ZonePropertyUserViewFactorsBySurfaceName_GTest.cpp
+  Test/ZoneVentilationDesignFlowRate_GTest.cpp
   Test/ZoneVentilationWindandStackOpenArea_GTest.cpp
 )
 

@@ -55,6 +55,15 @@ namespace measure {
    *  super(runner, user_arguments). */
     virtual bool run(OSRunner& runner, const std::map<std::string, OSArgument>& user_arguments) const;
 
+    /** This method is called on all reporting measures immediately before the translation to E+ IDF.
+     *  There is an implicit contract that this method should NOT be modifying your model in a way that would produce
+     *  different results, meaning it should only add or modify reporting-related elements (eg: OutputTableSummaryReports, OutputControlFiles, etc)
+     *  but that is not going to be enforced.
+     *  If you mean to modify the model in a significant way, use a ModelMeasure.
+     */
+    virtual bool modelOutputRequests(openstudio::model::Model& model, OSRunner& runner,
+                                     const std::map<std::string, OSArgument>& user_arguments) const;
+
     /** This method is called on all reporting measures immediately before the E+
    *  simulation. The code that injects these objects into the IDF checks that
    *  only objects of allowed types are added to prevent changes that impact

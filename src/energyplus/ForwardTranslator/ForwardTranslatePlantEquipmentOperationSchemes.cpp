@@ -91,6 +91,10 @@
 #include "../../model/HeatPumpPlantLoopEIRHeating_Impl.hpp"
 #include "../../model/HeatPumpPlantLoopEIRCooling.hpp"
 #include "../../model/HeatPumpPlantLoopEIRCooling_Impl.hpp"
+#include "../../model/CoilCoolingWater.hpp"
+#include "../../model/CoilCoolingWater_Impl.hpp"
+#include "../../model/CoilSystemCoolingWater.hpp"
+#include "../../model/CoilSystemCoolingWater_Impl.hpp"
 #include "../../utilities/idf/IdfExtensibleGroup.hpp"
 #include "../../utilities/idf/Workspace.hpp"
 #include "../../utilities/idf/WorkspaceObjectOrder.hpp"
@@ -470,6 +474,18 @@ namespace energyplus {
       }
     }
 
+    // Special case for CoilSystemCoolingWater (Wrap Around Water Coil Heat Recovery Mode)
+    for (const auto& comp : subsetCastVector<HVACComponent>(plantLoop.demandComponents())) {
+      if (comp.iddObject().type().value() == openstudio::IddObjectType::OS_Coil_Cooling_Water) {
+        auto coil = comp.cast<CoilCoolingWater>();
+        if (auto containingHVACComponent = coil.containingHVACComponent()) {
+          if (auto coilSystemCoolingWater = containingHVACComponent->optionalCast<CoilSystemCoolingWater>()) {
+            result.push_back(operationSchemeComponent(*coilSystemCoolingWater));
+          }
+        }
+      }
+    }
+
     return result;
   }
 
@@ -679,7 +695,9 @@ namespace energyplus {
         eg.setString(PlantEquipmentOperationSchemesExtensibleFields::ControlSchemeScheduleName, _alwaysOn->nameString());
 
         for (auto& uncontrolledComponent : t_uncontrolledComponents) {
-          if (auto idfObject_ = translateAndMapModelObject(uncontrolledComponent)) {
+          if (uncontrolledComponent.optionalCast<CoilSystemCoolingWater>()) {
+            // no-op
+          } else if (auto idfObject_ = translateAndMapModelObject(uncontrolledComponent)) {
             IdfExtensibleGroup eg = plantEquipmentList.pushExtensibleGroup();
             eg.setString(PlantEquipmentListExtensibleFields::EquipmentObjectType, idfObject_->iddObject().name());
             eg.setString(PlantEquipmentListExtensibleFields::EquipmentName, idfObject_->nameString());

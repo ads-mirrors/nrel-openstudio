@@ -20,6 +20,7 @@ namespace model {
     class ControllerWaterCoil_Impl;
     class CoilCoolingWater_Impl;
     class CoilHeatingWater_Impl;
+    class CoilSystemCoolingWater_Impl;
     class CoilSystemCoolingWaterHeatExchangerAssisted_Impl;
 
   }  // namespace detail
@@ -32,7 +33,7 @@ namespace model {
     /** @name Constructors and Destructors */
     //@{
 
-    virtual ~ControllerWaterCoil() = default;
+    virtual ~ControllerWaterCoil() override = default;
     // Default the copy and move operators because the virtual dtor is explicit
     ControllerWaterCoil(const ControllerWaterCoil& other) = default;
     ControllerWaterCoil(ControllerWaterCoil&& other) = default;
@@ -141,6 +142,7 @@ namespace model {
     // Classes that need to instantiate it
     friend class openstudio::model::detail::CoilCoolingWater_Impl;
     friend class openstudio::model::detail::CoilHeatingWater_Impl;
+    friend class openstudio::model::detail::CoilSystemCoolingWater_Impl;
     friend class openstudio::model::detail::CoilSystemCoolingWaterHeatExchangerAssisted_Impl;
 
     explicit ControllerWaterCoil(const Model& model);

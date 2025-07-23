@@ -3,6 +3,8 @@
 #  See also https://openstudio.net/license
 ########################################################################################################################
 
+require 'stringio'
+
 module EmbeddedScripting
   @@fileNames = EmbeddedScripting::allFileNamesAsString.split(';')
 
@@ -34,7 +36,7 @@ module OpenStudio
       end
       absolute_path = ':' + absolute_path
     else
-      absolute_path = File.expand_path p2
+      absolute_path = File.expand_path p
     end
     return absolute_path
   end
@@ -55,6 +57,17 @@ BINDING = Kernel::binding()
 
 # DLM: ignore for now
 #Encoding.default_external = Encoding::ASCII
+
+# We patch Kernel.open, and IO.open
+# to read embedded files as a StringIO, not as a FileIO
+# But Gem.open_file for eg expects it to be a File, not a StringIO, and on
+# Windows it will call File::flock (file lock) to protect access, but StringIO
+# does not have this method
+class FakeFileAsStringIO < StringIO
+  def flock(operation)
+    return 0
+  end
+end
 
 module Kernel
   # ":" is our root path to the embedded file system
@@ -81,6 +94,7 @@ module Kernel
   # puts $LOAD_PATH
 
   # TODO: double check and update platform-specific includes
+  $LOAD_PATH.clear
   $LOAD_PATH << ':'
   $LOAD_PATH << ":/ruby/site_ruby/#{RUBY_V}"
   $LOAD_PATH << ":/ruby/site_ruby/#{RUBY_V}/#{RUBY_PLATFORM}"
@@ -146,6 +160,11 @@ module Kernel
   end
 
   def require path
+    # puts "requiring #{path} from #{caller.first}"
+    # puts "LOADED_FEATURES"
+    # puts $LOADED_FEATURES
+    # puts "LOADED"
+    # puts $LOADED
     result = false
     original_directory = Dir.pwd
     path_with_extension = path
@@ -329,7 +348,7 @@ module Kernel
         #puts "string = #{string}"
         if block_given?
           # if a block is given, then a new IO is created and closed
-          io = StringIO.open(string)
+          io = FakeFileAsStringIO.open(string)
           begin
             result = yield(io)
           ensure
@@ -337,13 +356,13 @@ module Kernel
           end
           return result
         else
-          return StringIO.open(string)
+          return FakeFileAsStringIO.open(string)
         end
       else
         #puts "IO.open cannot find embedded file '#{absolute_path}' for '#{name}'"
         if block_given?
           # if a block is given, then a new IO is created and closed
-          io = StringIO.open("")
+          io = FakeFileAsStringIO.open("")
           begin
             result = yield(io)
           ensure
@@ -459,7 +478,7 @@ class IO
         #puts "string = #{string}"
         if block_given?
           # if a block is given, then a new IO is created and closed
-          io = StringIO.open(string)
+          io = FakeFileAsStringIO.open(string)
           begin
             result = yield(io)
           ensure
@@ -467,13 +486,13 @@ class IO
           end
           return result
         else
-          return StringIO.open(string)
+          return FakeFileAsStringIO.open(string)
         end
       else
         puts "IO.open cannot find embedded file '#{absolute_path}' for '#{name}'"
         if block_given?
           # if a block is given, then a new IO is created and closed
-          io = StringIO.open("")
+          io = FakeFileAsStringIO.open("")
           begin
             result = yield(io)
           ensure
@@ -607,8 +626,10 @@ class Dir
     end
   end
 
-  def self.glob(pattern, *args, **options)
+  def self.glob(pattern, _flags = 0, flags: _flags, base: nil, sort: true)
 
+    debug = false
+    # debug = !base.nil? && base.start_with?(':/ruby/gems/3.2.0/specifications/default')
     pattern_array = []
     if pattern.is_a? String
       pattern_array = [pattern]
@@ -618,45 +639,71 @@ class Dir
       pattern_array = pattern
     end
 
-    #puts "Dir.glob pattern = #{pattern}, pattern_array = #{pattern_array}, args = #{args}, options = #{options}"
-    override_args_extglob = false
+    pattern_has_embedded = pattern_array.any? {|p| p.to_s.chars.first == ':'}
+    base_has_embedded = (!base.nil? && base.to_s.chars.first == ':')
+    if !pattern_has_embedded && !base_has_embedded
+      # puts "Original glob"
+      return self.original_glob(pattern, flags: flags, base: base, sort: sort)
+    end
 
+    absolute_base = if base.nil?
+                      nil
+                    else
+                      OpenStudio.get_absolute_path(base)
+                    end
+    if debug
+      puts "pattern_array=#{pattern_array}"
+      puts "base=#{base}"
+      puts "flags=#{flags}"
+      puts "pattern_has_embedded=#{pattern_has_embedded}"
+      puts "base_has_embedded=#{base_has_embedded}"
+      puts "absolute_base=#{absolute_base}"
+    end
+
+    # DLM: seems like this is needed for embedded paths, possibly due to leading ':' character?
+    # JM (2025): Seems like fnmatch behaves differently than Dir.glob
+    # fnmatch specifically needs EXTGLOB to allow patterns like '{a,b}' while
+    # glob seems to allow that directly
+    override_args_extglob = true
+
+    flags = flags | File::FNM_EXTGLOB if override_args_extglob
     result = []
     pattern_array.each do |pattern|
 
-      if pattern.to_s.chars.first == ':'
+      absolute_pattern = if pattern.to_s.chars.first == ':'
+                           OpenStudio.get_absolute_path(pattern)
+                         elsif !base.nil?
+                           File.expand_path(pattern, base)
+                         else
+                           pattern
+                         end
+      if debug
+        puts "searching embedded files for #{pattern}"
+        puts "absolute_pattern #{absolute_pattern}"
+      end
 
-        # DLM: seems like this is needed for embedded paths, possibly due to leading ':' character?
-        override_args_extglob = true
-
-        #puts "searching embedded files for #{pattern}"
-        absolute_pattern = OpenStudio.get_absolute_path(pattern)
-        #puts "absolute_pattern #{absolute_pattern}"
-
-        EmbeddedScripting::fileNames.each do |name|
-          absolute_path = OpenStudio.get_absolute_path(name)
-
-          if override_args_extglob
-            if File.fnmatch( absolute_pattern, absolute_path, File::FNM_EXTGLOB )
-              #puts "#{absolute_path} is a match!"
-              result << absolute_path
-            end
-          else
-            if File.fnmatch( absolute_pattern, absolute_path, *args, **options )
-              #puts "#{absolute_path} is a match!"
-              result << absolute_path
-            end
+      EmbeddedScripting::fileNames.each do |name|
+        absolute_path = OpenStudio.get_absolute_path(name)
+        if base_has_embedded
+          next unless absolute_path.start_with?(absolute_base)
+          if debug
+            puts "name=#{name}, absolute_path=#{absolute_path}"
+            puts "absolute_path.start_with?(absolute_base)=#{absolute_path.start_with?(absolute_base)}"
           end
-
         end
 
-      else
-        if override_args_extglob
-          result.concat(self.original_glob(pattern, File::FNM_EXTGLOB))
-        else
-          result.concat(self.original_glob(pattern, *args, **options))
+        #if override_args_extglob
+        # if File.fnmatch( absolute_pattern, absolute_path, File::FNM_EXTGLOB )
+        if File.fnmatch(absolute_pattern, absolute_path, flags)
+          #puts "#{absolute_path} is a match!"
+          result << absolute_path
         end
       end
+
+    end
+
+    if debug
+      puts result
     end
 
     if block_given?
@@ -687,6 +734,58 @@ class Dir
   end
 end
 
+# Instead of loading the generated (at build time) rbconfig.rb then manually
+# fixing the CONFIG values, we load the original file, then we do replacements
+# and we let the "magic" RbConfig::expand happen which has less chances of
+# screw ups
+def require_rb_config_with_patch
+  path_with_extension = EmbeddedScripting.fileNames.find{|x| x.include?('rbconfig.rb')}
+  if $LOADED.include?(path_with_extension)
+    return false
+  end
+
+  original_directory = Dir.pwd
+  $LOADED << path_with_extension
+  s = EmbeddedScripting::getFileAsString(path_with_extension)
+  s = OpenStudio::preprocess_ruby_script(s)
+
+  s = (
+    s.gsub(/CONFIG\["prefix"\] = .*/, 'CONFIG["prefix"] = ":"')
+     .gsub(/CONFIG\["libdir"\] = .*/, 'CONFIG["libdir"] = "$(prefix)"')
+     .gsub(/CONFIG\["rubylibprefix"\] = .*/, 'CONFIG["rubylibprefix"] = "$(libdir)/$(RUBY_BASE_NAME)"') # win32 only
+  )
+
+  result = Kernel::eval(s, BINDING, path_with_extension)
+
+  current_directory = Dir.pwd
+  if original_directory != current_directory
+    Dir.chdir(original_directory)
+  end
+
+  return result
+end
+
+require_rb_config_with_patch
+
+module RbConfig
+  def RbConfig.ruby
+    EmbeddedScripting::applicationFilePath;
+  end
+end
+
+# This is going to be used by rubygems/defaults.rb#default_dir
+# RbConfig::CONFIG["rubylibprefix"] = ':/ruby'
+# Instead of fixing just this one, we globally fix the prefix
+# if RbConfig::CONFIG['prefix'] == '/'
+#   # Normally CONFIG["libdir"] = "$(prefix)/lib" but we want just $(prefix)
+#   puts "Fixing RbConfig prefix from #{RbConfig::CONFIG['prefix']} to ':'"
+#   libdir = RbConfig::CONFIG['libdir']
+#   RbConfig::CONFIG.transform_values!{ |val| val.gsub(libdir, ':').gsub('//', ':/') }
+#   RbConfig::CONFIG['bindir'] = File.dirname(EmbeddedScripting::applicationFilePath)
+# end
+raise "rubylibprefix isn't correct, it's '#{RbConfig::CONFIG["rubylibprefix"]}' but should be ':/ruby' "unless RbConfig::CONFIG["rubylibprefix"] == ':/ruby'
+
+# NOTE: fileutils requires rbconfig, so we have to do our RbConfig shenanigans beforehand
 require 'fileutils'
 module FileUtils
   class << self
@@ -831,13 +930,5 @@ module Find
         end
       end
     end
-  end
-end
-
-require 'rbconfig'
-
-module RbConfig
-  def RbConfig.ruby
-    EmbeddedScripting::applicationFilePath;
   end
 end

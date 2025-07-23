@@ -697,8 +697,13 @@ namespace energyplus {
         modelObject = translateOutputMeterMeterFileOnly(workspaceObject);
         break;
       }
+      case openstudio::IddObjectType::Output_Table_Annual: {
+        modelObject = translateOutputTableAnnual(workspaceObject);
+        break;
+      }
       case openstudio::IddObjectType::Output_Table_Monthly: {
-        break;  // no-op
+        modelObject = translateOutputTableMonthly(workspaceObject);
+        break;
       }
       case openstudio::IddObjectType::Output_Table_SummaryReports: {
         modelObject = translateOutputTableSummaryReports(workspaceObject);
@@ -714,6 +719,10 @@ namespace energyplus {
       }
       case openstudio::IddObjectType::OutputControl_ReportingTolerances: {
         modelObject = translateOutputControlReportingTolerances(workspaceObject);
+        break;
+      }
+      case openstudio::IddObjectType::OutputControl_ResilienceSummaries: {
+        modelObject = translateOutputControlResilienceSummaries(workspaceObject);
         break;
       }
       case openstudio::IddObjectType::OutputControl_Table_Style: {
@@ -976,6 +985,10 @@ namespace energyplus {
       }
       case openstudio::IddObjectType::WindowMaterial_Glazing: {
         modelObject = translateWindowMaterialGlazing(workspaceObject);
+        break;
+      }
+      case openstudio::IddObjectType::WindowMaterial_GlazingGroup_Thermochromic: {
+        modelObject = translateWindowMaterialGlazingGroupThermochromic(workspaceObject);
         break;
       }
       case openstudio::IddObjectType::WindowMaterial_SimpleGlazingSystem: {

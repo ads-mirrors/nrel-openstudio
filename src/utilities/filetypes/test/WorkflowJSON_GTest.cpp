@@ -15,9 +15,11 @@
 
 #include "../../time/DateTime.hpp"
 
+#include "../../core/Filesystem.hpp"
 #include "../../core/Exception.hpp"
 #include "../../core/System.hpp"
 #include "../../core/Checksum.hpp"
+#include "../../core/StringStreamLogSink.hpp"
 
 #include <resources.hxx>
 
@@ -1435,4 +1437,72 @@ TEST(Filetypes, RunOptions_overrideValuesWith) {
   ASSERT_TRUE(ftOptions.isExcludeVariableDictionaryDefaulted());
   ASSERT_FALSE(ftOptions.excludeSpaceTranslation());
   ASSERT_TRUE(ftOptions.isExcludeSpaceTranslationDefaulted());
+}
+
+TEST(Filetypes, WorkflowJSON_ValidateMeasures_Ok) {
+  auto p = resourcesPath() / toPath("utilities/Filetypes/full.osw");
+  WorkflowJSON w(p);
+  EXPECT_TRUE(w.validateMeasures());
+}
+
+TEST(Filetypes, WorkflowJSON_ValidateMeasures_Missing) {
+  auto p = resourcesPath() / toPath("workflow/invalid_measures/missing_a_measure.osw");
+  ASSERT_TRUE(boost::filesystem::is_regular_file(p));
+  WorkflowJSON w(p);
+  StringStreamLogSink sink;
+  sink.setLogLevel(Error);
+  EXPECT_FALSE(w.validateMeasures());
+  ASSERT_EQ(1, sink.logMessages().size());
+  EXPECT_EQ("Cannot find measure 'NON_EXISTING_MEASURE_THIS_SHOULD_BE_CAUGHT'", sink.logMessages()[0].logMessage());
+}
+
+TEST(Filetypes, WorkflowJSON_ValidateMeasures_Unloadable) {
+  auto p = resourcesPath() / toPath("workflow/invalid_measures/unloadable_measure.osw");
+  ASSERT_TRUE(boost::filesystem::is_regular_file(p));
+  WorkflowJSON w(p);
+  StringStreamLogSink sink;
+  sink.setLogLevel(Error);
+  EXPECT_FALSE(w.validateMeasures());
+  auto logMessages = sink.logMessages();
+  ASSERT_EQ(3, logMessages.size());
+  EXPECT_EQ("utilities.bcl.BCLXML", logMessages.at(0).logChannel());
+  EXPECT_EQ("utilities.bcl.BCLMeasure", logMessages.at(1).logChannel());
+  EXPECT_EQ("openstudio.WorkflowJSON", logMessages.at(2).logChannel());
+  auto logMessage = sink.logMessages()[2].logMessage();
+  EXPECT_TRUE(logMessage.find("Cannot load measure 'UnloadableMeasure' at '") != std::string::npos) << logMessage;
+}
+
+TEST(Filetypes, WorkflowJSON_ValidateMeasures_WrongOrder) {
+  auto p = resourcesPath() / toPath("workflow/invalid_measures/wrong_measure_type_order.osw");
+  ASSERT_TRUE(boost::filesystem::is_regular_file(p));
+  WorkflowJSON w(p);
+  StringStreamLogSink sink;
+  sink.setLogLevel(Error);
+  EXPECT_FALSE(w.validateMeasures());
+  ASSERT_EQ(1, sink.logMessages().size());
+
+  EXPECT_EQ("OpenStudio measure 'FakeModelMeasure' called after Energyplus simulation.", sink.logMessages()[0].logMessage());
+}
+
+TEST(Filetypes, WorkflowJSON_rootDir) {
+  auto p = resourcesPath() / toPath("utilities/Filetypes/full.osw");
+  WorkflowJSON w(p);
+  EXPECT_EQ(p, w.oswPath().get());
+  EXPECT_EQ(p.parent_path(), w.oswDir());
+  EXPECT_EQ(toPath("../.."), w.rootDir());
+  EXPECT_EQ(w.oswDir().parent_path().parent_path(), w.absoluteRootDir());
+  EXPECT_EQ(toPath("./run"), w.runDir());
+  EXPECT_EQ(w.oswDir().parent_path().parent_path() / "run", w.absoluteRunDir());
+
+  EXPECT_TRUE(w.setRootDir("../"));
+  EXPECT_EQ(toPath(".."), w.rootDir());
+  EXPECT_EQ(w.oswDir().parent_path(), w.absoluteRootDir());
+  EXPECT_EQ(toPath("./run"), w.runDir());
+  EXPECT_EQ(w.oswDir().parent_path() / "run", w.absoluteRunDir());
+
+  EXPECT_TRUE(w.setRunDir("../run"));
+  EXPECT_EQ(toPath(".."), w.rootDir());
+  EXPECT_EQ(w.oswDir().parent_path(), w.absoluteRootDir());
+  EXPECT_EQ(toPath("../run"), w.runDir());
+  EXPECT_EQ(w.oswDir().parent_path().parent_path() / "run", w.absoluteRunDir());
 }

@@ -25,6 +25,17 @@
 #  pragma GCC diagnostic pop
 #endif
 
+// >= 3.13.0
+// #if PY_VERSION_HEX >= 0x30d0000
+#if PY_MAJOR_VERSION > 3 || (PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION > 12)
+extern "C"
+{
+  // These functions was removed from Python 3.13 API but are still exported
+  // for the stable ABI. Until we upgrade to PyConfig, just keep using it
+  extern void Py_SetPath(const wchar_t* path);
+}
+#endif
+
 namespace openstudio {
 
 void addToPythonPath(const openstudio::path& includePath) {
@@ -78,7 +89,7 @@ PythonEngine::PythonEngine(int argc, char* argv[]) : ScriptEngine(argc, argv), p
   Py_FrozenFlag = 1;
 
   // Path to the E+ shipped standard library
-  auto pathToPythonPackages = getEnergyPlusDirectory() / "python_standard_lib";
+  auto pathToPythonPackages = getEnergyPlusDirectory() / "python_lib";
 
   // The PYTHONPATH / PYTHONHOME should be set before initializing Python
   // If this Py_SetPath is called before Py_Initialize, then Py_GetPath won't attempt to compute a default search path
@@ -372,11 +383,11 @@ spec.loader.exec_module(module)
   return result;
 }
 
-int PythonEngine::numberOfArguments(ScriptObject& classInstanceObject, std::string_view methodName) {
+int PythonEngine::numberOfArguments(ScriptObject& methodObject, std::string_view methodName) {
 
   int numberOfArguments = -1;
 
-  auto val = std::any_cast<PythonObject>(classInstanceObject.object);
+  auto val = std::any_cast<PythonObject>(methodObject.object);
   if (PyObject_HasAttrString(val.obj_, methodName.data()) == 0) {
     // FAILED
     return numberOfArguments;
@@ -386,18 +397,53 @@ int PythonEngine::numberOfArguments(ScriptObject& classInstanceObject, std::stri
   if (PyMethod_Check(method)) {
     PyObject* func = PyMethod_Function(method);   // Borrowed
     if (auto* code = PyFunction_GetCode(func)) {  // Borrowed
-      auto* co = (PyCodeObject*)code;
+      // cppcheck-suppress cstyleCast
+      const auto* co = (PyCodeObject*)code;
       numberOfArguments = co->co_argcount - 1;  // This includes `self`
     }
   } else if (PyFunction_Check(method)) {
     // Shouldn't enter this block here
-    if (auto code = PyFunction_GetCode(method)) {
-      auto* co = (PyCodeObject*)code;
+    if (auto* code = PyFunction_GetCode(method)) {
+      // cppcheck-suppress cstyleCast
+      const auto* co = (PyCodeObject*)code;
       numberOfArguments = co->co_argcount;
     }
   }
   Py_DECREF(method);
   return numberOfArguments;
+}
+
+bool PythonEngine::hasMethod(ScriptObject& methodObject, std::string_view methodName, bool overriden_only) {
+  auto val = std::any_cast<PythonObject>(methodObject.object);
+  if (PyObject_HasAttrString(val.obj_, methodName.data()) == 0) {
+    return false;
+  }
+  PyObject* method = PyObject_GetAttrString(val.obj_, methodName.data());  // New reference
+  if (PyMethod_Check(method) == 0) {
+    // Should never happen with modelOutputRequests since the Base class (C++) has it
+    return false;
+  }
+  Py_DECREF(method);
+  if (!overriden_only) {
+    return true;
+  }
+
+  // equivalent to getattr(instance_obj.__class__, method_name) == getattr(instance_obj.__class__.__bases__[0], method_name)
+  PyTypeObject* class_type = Py_TYPE(val.obj_);  // PyObject_Type returns a strong (New) reference, not needed for us
+  // cppcheck-suppress cstyleCast
+  PyObject* class_method = PyObject_GetAttrString((PyObject*)class_type, methodName.data());  // New reference
+
+  assert(class_type->tp_base != nullptr);
+  // cppcheck-suppress cstyleCast
+  auto* base = (PyTypeObject*)class_type->tp_base;
+  // cppcheck-suppress cstyleCast
+  PyObject* base_method = PyObject_GetAttrString((PyObject*)base, methodName.data());  // New reference
+
+  bool result = class_method != base_method;
+  Py_DECREF(class_method);
+  Py_DECREF(base_method);
+
+  return result;
 }
 
 }  // namespace openstudio

@@ -8,6 +8,7 @@
 
 #include "ModelAPI.hpp"
 #include "Glazing.hpp"
+#include "StandardGlazing.hpp"
 
 namespace openstudio {
 namespace model {
@@ -18,6 +19,37 @@ namespace model {
 
   }  // namespace detail
 
+  /** This class implements a Thermochromic Group */
+  class MODEL_API ThermochromicGroup
+  {
+   public:
+    /* Only accepts ModelObjects that are of type Surface, Subsurface or InternalMass, will throw otherwise */
+    ThermochromicGroup(const StandardGlazing& standardGlazing, double opticalDataTemperature);
+
+    StandardGlazing standardGlazing() const;
+    double opticalDataTemperature() const;
+
+    // Equality is defined as having the same StandardGlazing **OR** has having equal opticalDataTemperature with epsilon tolerance
+    // Meaning we enforce both unitcity of StandardGlazing and opticalDataTemperature
+    bool operator==(const ThermochromicGroup& other) const;
+    bool operator!=(const ThermochromicGroup& other) const;
+
+    // Sort order is defined by the opticalDataTemperature only, used in FT to ensure that the groups are sorted by temperature
+    bool operator<(const ThermochromicGroup& other) const;
+    bool operator>(const ThermochromicGroup& other) const;
+    bool operator<=(const ThermochromicGroup& other) const;
+    bool operator>=(const ThermochromicGroup& other) const;
+
+   private:
+    // From
+    StandardGlazing m_standardGlazing;
+    double m_opticalDataTemperature;
+    REGISTER_LOGGER("openstudio.model.ThermochromicGroup");
+  };
+
+  // Overload operator<<
+  MODEL_API std::ostream& operator<<(std::ostream& out, const openstudio::model::ThermochromicGroup& thermochromicGroup);
+
   /** ThermochromicGlazing is a Glazing that wraps the OpenStudio IDD object 'OS:WindowMaterial:GlazingGroup:Thermochromic'. */
   class MODEL_API ThermochromicGlazing : public Glazing
   {
@@ -25,9 +57,9 @@ namespace model {
     /** @name Constructors and Destructors */
     //@{
 
-    explicit ThermochromicGlazing(const Model& model, double opticalDataTemperature = 80.0);
+    explicit ThermochromicGlazing(const Model& model);
 
-    virtual ~ThermochromicGlazing() = default;
+    virtual ~ThermochromicGlazing() override = default;
     // Default the copy and move operators because the virtual dtor is explicit
     ThermochromicGlazing(const ThermochromicGlazing& other) = default;
     ThermochromicGlazing(ThermochromicGlazing&& other) = default;
@@ -41,21 +73,31 @@ namespace model {
     /** @name Getters */
     //@{
 
-    double opticalDataTemperature() const;
-
-    // TODO: Handle this object's extensible fields.
-
     //@}
     /** @name Setters */
     //@{
 
-    bool setOpticalDataTemperature(double value);
-
-    // TODO: Handle this object's extensible fields.
-
     //@}
     /** @name Other */
     //@{
+
+    // Handle this object's extensible fields.
+
+    std::vector<ThermochromicGroup> thermochromicGroups() const;
+
+    unsigned int numberofThermochromicGroups() const;
+
+    boost::optional<unsigned> thermochromicGroupIndex(const ThermochromicGroup& thermochromicGroup) const;
+    boost::optional<ThermochromicGroup> getThermochromicGroup(unsigned groupIndex) const;
+
+    bool addThermochromicGroup(const ThermochromicGroup& thermochromicGroup);
+
+    // Convenience fucntion that will create a ThermochromicGroup
+    bool addThermochromicGroup(const StandardGlazing& standardGlazing, double opticalDataTemperature);
+
+    bool addThermochromicGroups(const std::vector<ThermochromicGroup>& thermochromicGroups);
+    bool removeThermochromicGroup(unsigned groupIndex);
+    void removeAllThermochromicGroups();
 
     //@}
    protected:

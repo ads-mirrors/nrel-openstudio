@@ -263,6 +263,22 @@ namespace model {
       return m_cachedOutputControlReportingTolerances;
     }
 
+    boost::optional<OutputControlResilienceSummaries> Model_Impl::outputControlResilienceSummaries() const {
+      if (m_cachedOutputControlResilienceSummaries) {
+        return m_cachedOutputControlResilienceSummaries;
+      }
+
+      boost::optional<OutputControlResilienceSummaries> result = this->model().getOptionalUniqueModelObject<OutputControlResilienceSummaries>();
+      if (result) {
+        m_cachedOutputControlResilienceSummaries = result;
+        result->getImpl<OutputControlResilienceSummaries_Impl>()
+          ->OutputControlResilienceSummaries_Impl::onRemoveFromWorkspace
+          .connect<Model_Impl, &Model_Impl::clearCachedOutputControlResilienceSummaries>(const_cast<openstudio::model::detail::Model_Impl*>(this));
+      }
+
+      return m_cachedOutputControlResilienceSummaries;
+    }
+
     boost::optional<OutputControlTableStyle> Model_Impl::outputControlTableStyle() const {
       if (m_cachedOutputControlTableStyle) {
         return m_cachedOutputControlTableStyle;
@@ -936,6 +952,22 @@ namespace model {
       return m_cachedExternalInterface;
     }
 
+    boost::optional<PythonPluginSearchPaths> Model_Impl::pythonPluginSearchPaths() const {
+      if (m_cachedPythonPluginSearchPaths) {
+        return m_cachedPythonPluginSearchPaths;
+      }
+
+      boost::optional<PythonPluginSearchPaths> result = this->model().getOptionalUniqueModelObject<PythonPluginSearchPaths>();
+      if (result) {
+        m_cachedPythonPluginSearchPaths = result;
+        result->getImpl<PythonPluginSearchPaths_Impl>()
+          ->PythonPluginSearchPaths_Impl::onRemoveFromWorkspace.connect<Model_Impl, &Model_Impl::clearCachedPythonPluginSearchPaths>(
+            const_cast<openstudio::model::detail::Model_Impl*>(this));
+      }
+
+      return m_cachedPythonPluginSearchPaths;
+    }
+
     boost::optional<int> Model_Impl::calendarYear() const {
       if (!m_cachedYearDescription) {
         m_cachedYearDescription = this->model().getUniqueModelObject<YearDescription>();
@@ -1505,6 +1537,7 @@ namespace model {
       clearCachedFoundationKivaSettings(dummy);
       clearCachedOutputControlFiles(dummy);
       clearCachedOutputControlReportingTolerances(dummy);
+      clearCachedOutputControlResilienceSummaries(dummy);
       clearCachedOutputControlTableStyle(dummy);
       clearCachedOutputControlTimestamp(dummy);
       clearCachedOutputDiagnostics(dummy);
@@ -1547,6 +1580,7 @@ namespace model {
       clearCachedClimateZones(dummy);
       clearCachedEnvironmentalImpactFactors(dummy);
       clearCachedExternalInterface(dummy);
+      clearCachedPythonPluginSearchPaths(dummy);
     }
 
     void Model_Impl::clearCachedBuilding(const Handle&) {
@@ -1563,6 +1597,10 @@ namespace model {
 
     void Model_Impl::clearCachedOutputControlReportingTolerances(const Handle&) {
       m_cachedOutputControlReportingTolerances.reset();
+    }
+
+    void Model_Impl::clearCachedOutputControlResilienceSummaries(const Handle&) {
+      m_cachedOutputControlResilienceSummaries.reset();
     }
 
     void Model_Impl::clearCachedOutputControlTableStyle(const Handle&) {
@@ -1733,6 +1771,10 @@ namespace model {
       m_cachedExternalInterface.reset();
     }
 
+    void Model_Impl::clearCachedPythonPluginSearchPaths(const Handle&) {
+      m_cachedPythonPluginSearchPaths.reset();
+    }
+
     void Model_Impl::autosize() {
       for (auto& optModelObj : objects()) {
         if (auto modelObj = optModelObj.optionalCast<HVACComponent>()) {  // HVACComponent
@@ -1897,6 +1939,10 @@ namespace model {
 
   boost::optional<OutputControlReportingTolerances> Model::outputControlReportingTolerances() const {
     return getImpl<detail::Model_Impl>()->outputControlReportingTolerances();
+  }
+
+  boost::optional<OutputControlResilienceSummaries> Model::outputControlResilienceSummaries() const {
+    return getImpl<detail::Model_Impl>()->outputControlResilienceSummaries();
   }
 
   boost::optional<OutputControlTableStyle> Model::outputControlTableStyle() const {
@@ -2067,6 +2113,10 @@ namespace model {
     return getImpl<detail::Model_Impl>()->externalInterface();
   }
 
+  boost::optional<PythonPluginSearchPaths> Model::pythonPluginSearchPaths() const {
+    return getImpl<detail::Model_Impl>()->pythonPluginSearchPaths();
+  }
+
   boost::optional<int> Model::calendarYear() const {
     return getImpl<detail::Model_Impl>()->calendarYear();
   }
@@ -2232,9 +2282,9 @@ namespace model {
     if (!openstudio::equal(inputResult, outputResult, tol)) {
       LOG_FREE(logLevel, "openstudio.model.Model",
                "The " << attributeName << " values determined for " << object.briefDescription()
-                      << " using input and output data differ by a (relative) error "
-                      << "greater than " << tol << ". The value calculated from input data was " << inputResult
-                      << ", whereas the value calculated from output data was " << outputResult << ".");
+                      << " using input and output data differ by a (relative) error " << "greater than " << tol
+                      << ". The value calculated from input data was " << inputResult << ", whereas the value calculated from output data was "
+                      << outputResult << ".");
       return false;
     }
     return true;
@@ -3434,6 +3484,15 @@ namespace model {
   }
 
   template <>
+  OutputControlResilienceSummaries Model::getUniqueModelObject<OutputControlResilienceSummaries>() {
+    if (boost::optional<OutputControlResilienceSummaries> _b = outputControlResilienceSummaries()) {
+      return _b.get();
+    } else {
+      return OutputControlResilienceSummaries(*this);
+    }
+  }
+
+  template <>
   OutputControlTableStyle Model::getUniqueModelObject<OutputControlTableStyle>() {
     if (boost::optional<OutputControlTableStyle> _b = outputControlTableStyle()) {
       return _b.get();
@@ -3811,6 +3870,15 @@ namespace model {
     }
   }
 
+  template <>
+  PythonPluginSearchPaths Model::getUniqueModelObject<PythonPluginSearchPaths>() {
+    if (boost::optional<PythonPluginSearchPaths> _b = pythonPluginSearchPaths()) {
+      return _b.get();
+    } else {
+      return PythonPluginSearchPaths(*this);
+    }
+  }
+
   std::shared_ptr<openstudio::detail::WorkspaceObject_Impl> detail::Model_Impl::ModelObjectCreator::getNew(Model_Impl* model, const IdfObject& obj,
                                                                                                            bool keepHandle) const {
     auto typeToCreate = obj.iddObject().type();
@@ -3969,6 +4037,7 @@ namespace model {
     REGISTER_CONSTRUCTOR(CoilHeatingWaterBaseboard);
     REGISTER_CONSTRUCTOR(CoilHeatingWaterBaseboardRadiant);
     REGISTER_CONSTRUCTOR(CoilPerformanceDXCooling);
+    REGISTER_CONSTRUCTOR(CoilSystemCoolingWater);
     REGISTER_CONSTRUCTOR(CoilSystemCoolingWaterHeatExchangerAssisted);
     REGISTER_CONSTRUCTOR(CoilSystemCoolingDXHeatExchangerAssisted);
     REGISTER_CONSTRUCTOR(CoilSystemIntegratedHeatPumpAirSource);
@@ -4162,6 +4231,7 @@ namespace model {
     REGISTER_CONSTRUCTOR(OtherEquipmentDefinition);
     REGISTER_CONSTRUCTOR(OutputControlFiles);
     REGISTER_CONSTRUCTOR(OutputControlReportingTolerances);
+    REGISTER_CONSTRUCTOR(OutputControlResilienceSummaries);
     REGISTER_CONSTRUCTOR(OutputControlTableStyle);
     REGISTER_CONSTRUCTOR(OutputControlTimestamp);
     REGISTER_CONSTRUCTOR(OutputDebuggingData);
@@ -4176,6 +4246,8 @@ namespace model {
     REGISTER_CONSTRUCTOR(FuelFactors);
     REGISTER_CONSTRUCTOR(OutputMeter);
     REGISTER_CONSTRUCTOR(OutputVariable);
+    REGISTER_CONSTRUCTOR(OutputTableAnnual);
+    REGISTER_CONSTRUCTOR(OutputTableMonthly);
     REGISTER_CONSTRUCTOR(OutputTableSummaryReports);
     REGISTER_CONSTRUCTOR(OutsideSurfaceConvectionAlgorithm);
     REGISTER_CONSTRUCTOR(People);
@@ -4207,6 +4279,7 @@ namespace model {
     REGISTER_CONSTRUCTOR(PythonPluginVariable);
     REGISTER_CONSTRUCTOR(PythonPluginTrendVariable);
     REGISTER_CONSTRUCTOR(PythonPluginOutputVariable);
+    REGISTER_CONSTRUCTOR(PythonPluginSearchPaths);
     REGISTER_CONSTRUCTOR(RadianceParameters);
     REGISTER_CONSTRUCTOR(RefractionExtinctionGlazing);
     REGISTER_CONSTRUCTOR(RefrigerationAirChiller);
@@ -4378,6 +4451,7 @@ namespace model {
     REGISTER_CONSTRUCTOR(ZoneControlHumidistat);
     REGISTER_CONSTRUCTOR(ZoneControlThermostatStagedDualSetpoint);
     REGISTER_CONSTRUCTOR(ZoneHVACEquipmentList);
+    REGISTER_CONSTRUCTOR(ZoneHVACEvaporativeCoolerUnit);
     REGISTER_CONSTRUCTOR(ZoneHVACBaseboardConvectiveElectric);
     REGISTER_CONSTRUCTOR(ZoneHVACBaseboardConvectiveWater);
     REGISTER_CONSTRUCTOR(ZoneHVACBaseboardRadiantConvectiveElectric);
@@ -4542,6 +4616,7 @@ namespace model {
     REGISTER_COPYCONSTRUCTORS(CoilHeatingWaterBaseboard);
     REGISTER_COPYCONSTRUCTORS(CoilHeatingWaterBaseboardRadiant);
     REGISTER_COPYCONSTRUCTORS(CoilPerformanceDXCooling);
+    REGISTER_COPYCONSTRUCTORS(CoilSystemCoolingWater);
     REGISTER_COPYCONSTRUCTORS(CoilSystemCoolingWaterHeatExchangerAssisted);
     REGISTER_COPYCONSTRUCTORS(CoilSystemCoolingDXHeatExchangerAssisted);
     REGISTER_COPYCONSTRUCTORS(CoilSystemIntegratedHeatPumpAirSource);
@@ -4735,6 +4810,7 @@ namespace model {
     REGISTER_COPYCONSTRUCTORS(OtherEquipmentDefinition);
     REGISTER_COPYCONSTRUCTORS(OutputControlFiles);
     REGISTER_COPYCONSTRUCTORS(OutputControlReportingTolerances);
+    REGISTER_COPYCONSTRUCTORS(OutputControlResilienceSummaries);
     REGISTER_COPYCONSTRUCTORS(OutputControlTableStyle);
     REGISTER_COPYCONSTRUCTORS(OutputControlTimestamp);
     REGISTER_COPYCONSTRUCTORS(OutputDebuggingData);
@@ -4749,6 +4825,8 @@ namespace model {
     REGISTER_COPYCONSTRUCTORS(FuelFactors);
     REGISTER_COPYCONSTRUCTORS(OutputMeter);
     REGISTER_COPYCONSTRUCTORS(OutputVariable);
+    REGISTER_COPYCONSTRUCTORS(OutputTableAnnual);
+    REGISTER_COPYCONSTRUCTORS(OutputTableMonthly);
     REGISTER_COPYCONSTRUCTORS(OutputTableSummaryReports);
     REGISTER_COPYCONSTRUCTORS(OutsideSurfaceConvectionAlgorithm);
     REGISTER_COPYCONSTRUCTORS(People);
@@ -4780,6 +4858,7 @@ namespace model {
     REGISTER_COPYCONSTRUCTORS(PythonPluginVariable);
     REGISTER_COPYCONSTRUCTORS(PythonPluginTrendVariable);
     REGISTER_COPYCONSTRUCTORS(PythonPluginOutputVariable);
+    REGISTER_COPYCONSTRUCTORS(PythonPluginSearchPaths);
     REGISTER_COPYCONSTRUCTORS(RadianceParameters);
     REGISTER_COPYCONSTRUCTORS(RefractionExtinctionGlazing);
     REGISTER_COPYCONSTRUCTORS(RefrigerationAirChiller);
@@ -4951,6 +5030,7 @@ namespace model {
     REGISTER_COPYCONSTRUCTORS(ZoneControlHumidistat);
     REGISTER_COPYCONSTRUCTORS(ZoneControlThermostatStagedDualSetpoint);
     REGISTER_COPYCONSTRUCTORS(ZoneHVACEquipmentList);
+    REGISTER_COPYCONSTRUCTORS(ZoneHVACEvaporativeCoolerUnit);
     REGISTER_COPYCONSTRUCTORS(ZoneHVACBaseboardConvectiveElectric);
     REGISTER_COPYCONSTRUCTORS(ZoneHVACBaseboardConvectiveWater);
     REGISTER_COPYCONSTRUCTORS(ZoneHVACBaseboardRadiantConvectiveElectric);
