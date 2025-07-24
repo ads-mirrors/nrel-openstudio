@@ -1127,13 +1127,13 @@ TEST_F(ModelFixture, ChillerElectricEIR_referenceConditionsCurveOutput) {
   double ref_lchwt = chiller.referenceLeavingChilledWaterTemperature();
   double ref_ecnwt = chiller.referenceEnteringCondenserFluidTemperature();
 
-  CurveBiquadratic capft = chiller.coolingCapacityFunctionOfTemperature();
-  CurveBiquadratic eirft = chiller.electricInputToCoolingOutputRatioFunctionOfTemperature();
-  CurveQuadratic eirfplr = chiller.electricInputToCoolingOutputRatioFunctionOfPLR();
+  Curve capft = chiller.coolingCapacityFunctionOfTemperature();
+  Curve eirft = chiller.electricInputToCoolingOutputRatioFunctionOfTemperature();
+  Curve eirfplr = chiller.electricInputToCoolingOutputRatioFunctionOfPLR();
 
   EXPECT_DOUBLE_EQ(1.0, capft.evaluate(ref_lchwt, ref_ecnwt));  // 85F (water cooled)
   EXPECT_DOUBLE_EQ(1.0, eirft.evaluate(ref_lchwt, ref_ecnwt));  // 85F (water cooled)
-  EXPECT_DOUBLE_EQ(1.0, capft.evaluate(ref_lchwt, 35.0));  // 95F (air cooled)
-  EXPECT_DOUBLE_EQ(1.0, eirft.evaluate(ref_lchwt, 35.0));  // 95F (air cooled)
+  EXPECT_DOUBLE_EQ(1.0, capft.evaluate(ref_lchwt, 35.0));       // 95F (air cooled)
+  EXPECT_DOUBLE_EQ(1.0, eirft.evaluate(ref_lchwt, 35.0));       // 95F (air cooled)
   EXPECT_DOUBLE_EQ(1.0, eirfplr.evaluate(1.0));
 }

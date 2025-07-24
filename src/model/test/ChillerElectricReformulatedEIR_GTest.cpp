@@ -924,9 +924,9 @@ TEST_F(ModelFixture, ChillerElectricReformulatedEIR_referenceConditionsCurveOutp
   double ref_lchwt = chiller.referenceLeavingChilledWaterTemperature();
   double ref_lcnwt = chiller.referenceLeavingCondenserWaterTemperature();
 
-  CurveBiquadratic capft = chiller.coolingCapacityFunctionOfTemperature();
-  CurveBiquadratic eirft = chiller.electricInputToCoolingOutputRatioFunctionOfTemperature();
-  CurveBicubic eirfplr = chiller.electricInputToCoolingOutputRatioFunctionOfPLR();
+  Curve capft = chiller.coolingCapacityFunctionOfTemperature();
+  Curve eirft = chiller.electricInputToCoolingOutputRatioFunctionOfTemperature();
+  Curve eirfplr = chiller.electricInputToCoolingOutputRatioFunctionOfPLR();
 
   EXPECT_DOUBLE_EQ(1.0, capft.evaluate(ref_lchwt, ref_lcnwt));
   EXPECT_DOUBLE_EQ(1.0, eirft.evaluate(ref_lchwt, ref_lcnwt));
