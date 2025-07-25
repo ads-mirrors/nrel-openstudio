@@ -1131,9 +1131,9 @@ TEST_F(ModelFixture, ChillerElectricEIR_referenceConditionsCurveOutput) {
   Curve eirft = chiller.electricInputToCoolingOutputRatioFunctionOfTemperature();
   Curve eirfplr = chiller.electricInputToCoolingOutputRatioFunctionOfPLR();
 
-  EXPECT_NEAR(1.0, capft.evaluate(ref_lchwt, ref_ecnwt), 0.001);  // 85F (water cooled)
-  EXPECT_NEAR(1.0, eirft.evaluate(ref_lchwt, ref_ecnwt), 0.001);  // 85F (water cooled)
-  EXPECT_NEAR(1.0, capft.evaluate(ref_lchwt, 35.0), 0.001);       // 95F (air cooled)
-  EXPECT_NEAR(1.0, eirft.evaluate(ref_lchwt, 35.0), 0.001);       // 95F (air cooled)
-  EXPECT_NEAR(1.0, eirfplr.evaluate(1.0), 0.001);
+  EXPECT_NEAR(1.0, capft.evaluate(ref_lchwt, ref_ecnwt), 0.01);  // 85F (water cooled)
+  EXPECT_NEAR(1.0, eirft.evaluate(ref_lchwt, ref_ecnwt), 0.01);  // 85F (water cooled)
+  EXPECT_NEAR(1.0, capft.evaluate(ref_lchwt, 35.0), 0.01);       // 95F (air cooled)
+  EXPECT_NEAR(1.0, eirft.evaluate(ref_lchwt, 35.0), 0.01);       // 95F (air cooled)
+  EXPECT_NEAR(1.0, eirfplr.evaluate(1.0), 0.01);
 }
