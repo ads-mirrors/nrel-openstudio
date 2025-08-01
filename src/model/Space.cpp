@@ -698,7 +698,7 @@ namespace model {
     }
 
     SurfaceVector Space_Impl::surfaces() const {
-      // get all surfaces, sort so results are repeatable
+      // Get all surfaces, sort so results are repeatable.
       std::vector<Surface> surfaces = getObject<ModelObject>().getModelObjectSources<Surface>(Surface::iddObjectType());
       std::sort(surfaces.begin(), surfaces.end(), IdfObjectNameLess());
 
