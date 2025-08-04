@@ -105,3 +105,4 @@
 *.woff    binary
 *.xlsx    binary
 *.zip     binary
+.github/ merge=ours
