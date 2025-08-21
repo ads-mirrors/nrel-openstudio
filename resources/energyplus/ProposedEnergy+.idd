@@ -1,4 +1,4 @@
-!IDD_Version 25.1.0
+!IDD_Version 25.2.0
 !IDD_BUILD TBD
 ! **************************************************************************
 ! This file is the Input Data Dictionary (IDD) for EnergyPlus.
@@ -405,7 +405,7 @@ Version,
       \format singleLine
       \min-fields 1
   A1 ; \field Version Identifier
-      \default 25.1
+      \default 25.2
 
 SimulationControl,
       \unique-object
@@ -2382,12 +2382,23 @@ Site:WaterMainsTemperature,
        \note field is ignored.
        \type real
        \units C
-  N2 ; \field Maximum Difference In Monthly Average Outdoor Air Temperatures
+  N2 , \field Maximum Difference In Monthly Average Outdoor Air Temperatures
        \note If calculation method is CorrelationFromWeatherFile or Schedule, this input
        \note field is ignored.
        \type real
        \units deltaC
        \minimum 0
+  N3 , \field Temperature Multiplier
+       \note If calculation method is Schedule, this input field is ignored.
+       \type real
+       \units dimensionless
+       \default 1
+       \minimum 0
+  N4 ; \field Temperature Offset
+       \note If calculation method is Schedule, this input field is ignored.
+       \type real
+       \units deltaC
+       \default 0
 
 Site:Precipitation,
       \memo Used to describe the amount of water precipitation at the building site.
@@ -26140,7 +26151,7 @@ ZoneHVAC:Baseboard:RadiantConvective:Water:Design,
   A1,  \field Name
        \required-field
        \type alpha
-       \reference BaseboardDesignObject
+       \reference RadiantDesignObject
   A2,  \field Heating Design Capacity Method
        \type choice
        \key HeatingDesignCapacity
@@ -26190,8 +26201,9 @@ ZoneHVAC:Baseboard:RadiantConvective:Water,
        \reference validBranchEquipmentNames
        \reference ZoneEquipmentNames
   A2,  \field Design Object
+       \required-field
        \type object-list
-       \object-list BaseboardDesignObject
+       \object-list RadiantDesignObject
   A3,  \field Availability Schedule Name
        \note Availability schedule name for this system. Schedule value > 0 means the system is available.
        \note If this field is blank, the system is always available.
@@ -26304,9 +26316,10 @@ ZoneHVAC:Baseboard:RadiantConvective:Steam,
        \reference-class-name validBranchEquipmentTypes
        \reference validBranchEquipmentNames
        \reference ZoneEquipmentNames
-  A2, \field Design Object
-        \type object-list
-        \object-list RadiantDesignObject
+  A2,  \field Design Object
+       \required-field
+       \type object-list
+       \object-list RadiantDesignObject
   A3,  \field Availability Schedule Name
        \note Availability schedule name for this system. Schedule value > 0 means the system is available.
        \note If this field is blank, the system is always available.
@@ -26659,6 +26672,7 @@ ZoneHVAC:LowTemperatureRadiant:VariableFlow,
         \reference validBranchEquipmentNames
         \reference ZoneEquipmentNames
   A2, \field Design Object
+        \required-field
         \type object-list
         \object-list RadiantDesignObject
   A3, \field Availability Schedule Name
@@ -26867,6 +26881,7 @@ ZoneHVAC:LowTemperatureRadiant:ConstantFlow,
         \reference validBranchEquipmentNames
         \reference ZoneEquipmentNames
    A2 , \field Design Object
+        \required-field
         \type object-list
         \object-list RadiantDesignObject
    A3 , \field Availability Schedule Name
@@ -27233,7 +27248,9 @@ ZoneHVAC:HighTemperatureRadiant,
         \minimum 0
         \default 2.0
    A7 , \field Heating Setpoint Temperature Schedule Name
-        \note This setpoint is an "operative temperature" setpoint
+        \required-field
+        \note This setpoint is a "mean air temperature", a "mean radiant temperature" or an 
+        \note "operative temperature" setpoint depending on the control type
         \type object-list
         \object-list ScheduleNames
    N9,  \field Fraction of Radiant Energy Incident on People
@@ -29067,7 +29084,7 @@ SpaceHVAC:EquipmentConnections,
        \memo Specifies the HVAC equipment connections for a space. Node names are specified for the
        \memo space air node, air inlet nodes, air exhaust nodes, and the air return node.
        \memo If any space in a zone has a SpaceHVAC:EquipmentConnections object, then all spaces in the zone must have one.
-       \memo Used only when ZoneAirHeatBalanceAlgorithm "Do Space Heat Balance for Sizing"is Yes.
+       \memo Used only when ZoneAirHeatBalanceAlgorithm "Do Space Heat Balance for Simulation" is Yes.
        \min-fields 4
   A1 , \field Space Name
        \required-field
@@ -29100,13 +29117,13 @@ SpaceHVAC:ZoneEquipmentSplitter,
        \memo Distributes the output from a piece of zone equipment to one or more Spaces in the Zone.
        \memo If any equipment in a zone has a SpaceHVAC:ZoneEquipmentSplitter, then all equipment in the zone must have one.
        \memo except Fan:ZoneExhaust. All spaces in the zone must also have a SpaceHVAC:EquipmentConnections object.
-       \memo Used only when ZoneAirHeatBalanceAlgorithm "Do Space Heat Balance for Sizing" = Yes.
+       \memo Used only when ZoneAirHeatBalanceAlgorithm "Do Space Heat Balance for Simulation" is Yes.
        \min-fields 10
    A1, \field Name
        \required-field
        \reference SpaceSplitterNames
    A2, \field Zone Name
-       \note Must be a controlled zone which has a ZoneHVAC:EquipmentConfiguration object.
+       \note Must be a controlled zone which has a ZoneHVAC:EquipmentConnections object.
        \required-field
        \type object-list
        \object-list ZoneNames
@@ -29196,13 +29213,13 @@ SpaceHVAC:ZoneEquipmentMixer,
        \extensible:3
        \memo Mixes the airflow from one or more Spaces into a piece of zone equipment.
        \memo All spaces in the zone must also have a SpaceHVAC:EquipmentConnections object.
-       \memo Used only when ZoneAirHeatBalanceAlgorithm "Do Space Heat Balance for Sizing" = Yes.
+       \memo Used only when ZoneAirHeatBalanceAlgorithm "Do Space Heat Balance for Simulation" is Yes.
        \min-fields 7
    A1, \field Name
        \required-field
        \reference SpaceMixerNames
    A2, \field Zone Name
-       \note Must be a controlled zone which has a ZoneHVAC:EquipmentConfiguration object.
+       \note Must be a controlled zone which has a ZoneHVAC:EquipmentConnections object.
        \required-field
        \type object-list
        \object-list ZoneNames
@@ -29241,13 +29258,13 @@ SpaceHVAC:ZoneReturnMixer,
        \extensible:2
        \memo Mixes the return airflow from one or more Spaces into a zone return node.
        \memo All spaces in the zone must also have a SpaceHVAC:EquipmentConnections object.
-       \memo Used only when ZoneAirHeatBalanceAlgorithm "Do Space Heat Balance for Sizing" = Yes.
+       \memo Used only when ZoneAirHeatBalanceAlgorithm "Do Space Heat Balance for Simulation" is Yes.
        \min-fields 5
    A1, \field Name
        \required-field
        \reference SpaceMixerNames
    A2, \field Zone Name
-       \note Must be a controlled zone which has a ZoneHVAC:EquipmentConfiguration object.
+       \note Must be a controlled zone which has a ZoneHVAC:EquipmentConnections object.
        \required-field
        \type object-list
        \object-list ZoneNames
@@ -30632,6 +30649,44 @@ Coil:Cooling:DX:CurveFit:Speed,
        \type object-list
        \object-list UnivariateFunctions
 
+Coil:DX:ASHRAE205:Performance,
+       \memo DX coil performance specification referencing an ASHRAE Standard 205 compliant representation
+       \memo for air-to-air direct expansion refrigerant system (Representation Specification RS0004). As
+       \memo RS0004 files are intended to support both heating and cooling performance, this object may
+       \memo referenced by the Coil:Cooling:DX and the corresponding Coil:Heating:DX object (planned for
+       \memo future addition).
+       \min-fields 2
+  A1,  \field Name
+       \required-field
+       \type alpha
+       \reference DXCoolingPerformanceNames
+  A2,  \field Representation File Name
+       \note The name of the ASHRAE 205 RS0004 (air-to-air direct expansion refrigerant system) representation file
+       \type alpha
+       \retaincase
+       \required-field
+  A3,  \field Performance Interpolation Method
+       \type choice
+       \key Linear
+       \key Cubic
+       \default Linear
+  N1,  \field Rated Total Cooling Capacity
+       \note Not yet implemented / reserved for future use. Full load cooling capacity at AHRI 210/240 "A" test conditions.
+       \note Used to scale representation data.
+       \type real
+       \units W
+       \minimum> 0.0
+       \autosizable
+       \default autosize
+  N2;  \field Rated Steady-State Heating Capacity
+       \note Not yet implemented / reserved for future use. Full load heating capacity at AHRI 210/240 "H1" test conditions.
+       \note Used to scale representation data.
+       \type real
+       \units W
+       \minimum> 0.0
+       \autosizable
+       \default autosize
+
 Coil:Cooling:DX:SingleSpeed,
        \memo Direct expansion (DX) cooling coil and condensing unit (includes electric compressor
        \memo and condenser fan), single-speed. Optional inputs for moisture evaporation from wet
@@ -31506,6 +31561,7 @@ Coil:Cooling:DX:VariableSpeed,
         \type alpha
         \reference CoolingCoilsDXVariableSpeed
         \reference DesuperHeatingCoilSources
+        \reference AFNCoilNames
    A2,  \field Indoor Air Inlet Node Name
         \required-field
         \type node
@@ -33128,6 +33184,7 @@ Coil:Heating:DX:VariableSpeed,
         \required-field
         \type alpha
         \reference HeatingCoilsDXVariableSpeed
+        \reference AFNCoilNames
    A2,  \field Indoor Air Inlet Node Name
         \required-field
         \type node
@@ -33276,7 +33333,7 @@ Coil:Heating:DX:VariableSpeed,
         \note curve = a + b*db + c*db**2 + d*oat + e*oat**2 + f*db*oat
         \note db = entering air dry-bulb temperature (C)
         \note oat = air entering temperature seen by the evaporator (C)
-   A10, \field Speed 1 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+   A10, \field Speed 1 Total Heating Capacity Function of Air Flow Fraction Curve Name
         \required-field
         \type object-list
         \object-list UnivariateFunctions
@@ -33667,6 +33724,7 @@ Coil:Cooling:WaterToAirHeatPump:EquationFit,
         \reference-class-name validBranchEquipmentTypes
         \reference validBranchEquipmentNames
         \reference DesuperHeatingWaterOnlySources
+        \reference AFNCoilNames
    A2,  \field Water Inlet Node Name
         \required-field
         \type node
@@ -33815,6 +33873,7 @@ Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
         \reference-class-name validBranchEquipmentTypes
         \reference validBranchEquipmentNames
         \reference DesuperHeatingWaterOnlySources
+        \reference AFNCoilNames
    A2,  \field Water-to-Refrigerant HX Water Inlet Node Name
         \required-field
         \type node
@@ -33995,6 +34054,7 @@ Coil:Heating:WaterToAirHeatPump:EquationFit,
         \reference HeatingCoilsWaterToAirHP
         \reference-class-name validBranchEquipmentTypes
         \reference validBranchEquipmentNames
+        \reference AFNCoilNames
    A2,  \field Water Inlet Node Name
         \required-field
         \type node
@@ -34087,6 +34147,7 @@ Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,
         \reference HeatingCoilsWaterToAirVSHP
         \reference-class-name validBranchEquipmentTypes
         \reference validBranchEquipmentNames
+        \reference AFNCoilNames
    A2,  \field Water-to-Refrigerant HX Water Inlet Node Name
         \required-field
         \type node
@@ -34145,7 +34206,7 @@ Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,
         \units W/W
         \minimum> 0.0
         \required-field
-   N8,  \field Speed 1 Reference Unit Rated Air Flow
+   N8,  \field Speed 1 Reference Unit Rated Air Flow Rate
         \units m3/s
         \type real
         \minimum 0
@@ -34163,7 +34224,7 @@ Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,
         \note curve = a + b*db + c*db**2 + d*ewt + e*ewt**2 + f*db*ewt
         \note db = entering air dry-bulb temperature (C)
         \note ewt = water entering temperature seen by the evaporator (C)
-   A8,  \field Speed 1 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+   A8,  \field Speed 1 Total Heating Capacity Function of Air Flow Fraction Curve Name
         \required-field
         \type object-list
         \object-list UnivariateFunctions
@@ -34767,7 +34828,7 @@ Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \note PLR = part load ratio (heating delivered/steady state heating capacity).
        \note Use curve coefficients of 1,0,0 or leave this field blank when neglecting performance impacts
        \note due to variations in part load ratio.
-  N12, \field Rated Water Heating Capacity at Speed 1
+  N12, \field Speed 1 Rated Water Heating Capacity
        \required-field
        \type real
        \units W
@@ -34776,7 +34837,7 @@ Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \note Heating capacity at the rated inlet air temperatures, rated condenser inlet
        \note water temperature, rated air flow rate, and rated water flow rate.
        \note Can optionally include condenser pump heat.
-  N13, \field Rated Water Heating COP at Speed 1
+  N13, \field Speed 1 Rated Water Heating COP
        \type real
        \units W/W
        \minimum> 0
@@ -34784,7 +34845,7 @@ Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \note Heating coefficient of performance at the rated inlet air and water temperatures,
        \note rated condenser inlet water temperature, rated air flow rate, and rated water flow rate.
        \note Can optionally include condenser pump power and evaporator fan power (see fields below).
-  N14, \field Rated Sensible Heat Ratio at Speed 1
+  N14, \field Speed 1 Rated Sensible Heat Ratio
        \type real
        \minimum 0.5
        \maximum 1
@@ -45551,8 +45612,6 @@ HeatPump:AirToWater:FuelFired:Heating,
        \required-field
        \reference HeatPumpAirToWaterFuelFiredHeatingNames
        \note Name of the fuel fired absorption heat pump system system
-       \reference-class-name validPlantEquipmentTypes
-       \reference validPlantEquipmentNames
        \reference-class-name validBranchEquipmentTypes
        \reference validBranchEquipmentNames
   A2 , \field Water Inlet Node Name
@@ -45617,7 +45676,7 @@ HeatPump:AirToWater:FuelFired:Heating,
        \units deltaC
        \note Design Temperature Lift in [degree C]
   N6 , \field Sizing Factor
-       \minimum 1.0
+       \minimum 0.0
        \default 1.0
        \note Sizing Factor for equipment sizing
   A8 , \field Flow Mode
@@ -45717,11 +45776,16 @@ HeatPump:AirToWater:FuelFired:Heating,
        \object-list UnivariateFunctions
        \note Auxiliary Electric EIRFPLR - Auxiliary Electric Energy Input Ratio Function of PLR (Part Load Ratio) Curve Name,
        \note which is a cubic curve or a lookup table.
-  N13; \field Standby Electric Power
+  N13, \field Standby Electric Power
        \units W
        \minimum 0
        \default 0
        \note Standby Electric Power in [W]
+  N14; \field Minimum Unloading Ratio
+       \minimum 0
+       \maximum 1
+       \default 0.25
+       \note Minimum modulation level of the gas-fired heat pump. Typically less than 1.0 and slightly higher than the minimum part load ratio.
 
 HeatPump:AirToWater:FuelFired:Cooling,
        \memo The object defines a fuel-fired absorption heat pump based on equation-fit models.
@@ -45730,8 +45794,6 @@ HeatPump:AirToWater:FuelFired:Cooling,
        \required-field
        \reference HeatPumpAirToWaterFuelFiredCoolingNames
        \note Name of the fuel fired absorption heat pump system system
-       \reference-class-name validPlantEquipmentTypes
-       \reference validPlantEquipmentNames
        \reference-class-name validBranchEquipmentTypes
        \reference validBranchEquipmentNames
   A2 , \field Water Inlet Node Name
@@ -45796,7 +45858,7 @@ HeatPump:AirToWater:FuelFired:Cooling,
        \units deltaC
        \note Design Temperature Lift in [degree C]
   N6 , \field Sizing Factor
-       \minimum 1.0
+       \minimum 0.0
        \default 1.0
        \note Sizing Factor for equipment sizing
   A8 , \field Flow Mode
@@ -45868,11 +45930,16 @@ HeatPump:AirToWater:FuelFired:Cooling,
        \object-list UnivariateFunctions
        \note Auxiliary Electric EIRFPLR - Auxiliary Electric Energy Input Ratio Function of PLR (Part Load Ratio) Curve Name,
        \note which is a cubic curve or a lookup table.
-  N10; \field Standby Electric Power
+  N10, \field Standby Electric Power
        \units W
        \minimum 0
        \default 0
        \note Standby Electric Power in [W]
+  N11; \field Minimum Unloading Ratio
+       \minimum 0
+       \maximum 1
+       \default 0.25
+       \note Minimum modulation level of the gas-fired heat pump. Typically less than 1.0 and slightly higher than the minimum part load ratio.
 
 HeatPump:WaterToWater:EquationFit:Heating,
         \memo simple water-water hp curve-fit model
@@ -52550,7 +52617,6 @@ ExternalInterface:FunctionalMockupUnitExport:To:Schedule,
        \retaincase
   N1 ; \field Initial Value
        \type real
-       \required-field
        \note Used during the first call of EnergyPlus.
 
 ExternalInterface:FunctionalMockupUnitExport:To:Actuator,
@@ -52577,8 +52643,8 @@ ExternalInterface:FunctionalMockupUnitExport:To:Actuator,
        \retaincase
   N1 ; \field Initial Value
        \type real
-       \required-field
        \note Used during the first call of EnergyPlus.
+       \note If no value is specified, then the actuated component will only be updated after sizing and warm-up.
 
 ExternalInterface:FunctionalMockupUnitExport:To:Variable,
        \memo Declares Erl variable as having global scope
@@ -52596,7 +52662,7 @@ ExternalInterface:FunctionalMockupUnitExport:To:Variable,
   N1 ; \field Initial Value
        \type real
        \required-field
-       \note Used during the first call of EnergyPlus.
+       \note Used during EnergyPlus sizing and warm-up.
 
 \group User Defined HVAC and Plant Component Models
 
