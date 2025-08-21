@@ -278,5 +278,5 @@ TEST_F(MeasureFixture, OSArgument_setRequired) {
   EXPECT_EQ(true, boolArgument.required());
 
   boolArgument.setRequired(false);
-  EXPECT_EQ(false, boolArgument.required())
+  EXPECT_EQ(false, boolArgument.required());
 }
