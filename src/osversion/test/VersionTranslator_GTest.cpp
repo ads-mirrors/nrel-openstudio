@@ -4642,10 +4642,10 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_People) {
   ASSERT_EQ(1u, ps.size());
   const auto& p = ps.front();
 
-  EXPECT_TRUE(p.isEmpty(7));                                        // Work Efficiency Schedule Name
-  EXPECT_EQ("ClothingInsulationSchedule", p.getString(8).get());    // Clothing Insulation Calculation Method
-  EXPECT_TRUE(p.isEmpty(9));                                        // Clothing Insulation Calculation Method Schedule Name
-  EXPECT_EQ("Schedule Constant 1", p.getTarget(10)->nameString());  // Clothing Insulation Schedule Name
-  EXPECT_TRUE(p.isEmpty(11));                                       // Air Velocity Schedule Name
-  EXPECT_EQ(1.0, p.getDouble(12).get());                            // Multiplier
+  EXPECT_TRUE(p.isEmpty(7));                                                 // Work Efficiency Schedule Name
+  EXPECT_EQ("ClothingInsulationSchedule", p.getString(8).get());             // Clothing Insulation Calculation Method
+  EXPECT_TRUE(p.isEmpty(9));                                                 // Clothing Insulation Calculation Method Schedule Name
+  EXPECT_EQ("Clothing Insulation Schedule", p.getTarget(10)->nameString());  // Clothing Insulation Schedule Name
+  EXPECT_TRUE(p.isEmpty(11));                                                // Air Velocity Schedule Name
+  EXPECT_EQ(1.0, p.getDouble(12).get());                                     // Multiplier
 }

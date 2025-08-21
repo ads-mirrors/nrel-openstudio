@@ -27,7 +27,7 @@ OS:People,
 
 OS:Schedule:Constant,
   {26b7994e-de80-4f7f-a424-69814193928f}, !- Handle
-  Schedule Constant 1,                    !- Name
+  Clothing Insulation Schedule,           !- Name
   {fb0431eb-40a3-4ccc-a93f-8554e9712b20}, !- Schedule Type Limits Name
   0;                                      !- Value
 
