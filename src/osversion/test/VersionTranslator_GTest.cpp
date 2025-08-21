@@ -4628,3 +4628,19 @@ TEST_F(OSVersionFixture, can_still_load_older_components) {
   EXPECT_EQ(1, model.getObjectsByType("OS:ComponentData").size());
   EXPECT_EQ(2, model.objects().size());
 }
+
+TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_ControllerMechanicalVentilation) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_ControllerMechanicalVentilation.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_ControllerMechanicalVentilation_updated.osm");
+  model->save(outPath, true);
+
+  std::vector<WorkspaceObject> cs = model->getObjectsByType("OS:ControllerMechanicalVentilation");
+  ASSERT_EQ(1u, cs.size());
+  const auto& c = cs.front();
+
+  EXPECT_EQ("ProportionalControlBasedonOccupancySchedule", c.getString(4).get()); // System Outdoor Air Method
+}
