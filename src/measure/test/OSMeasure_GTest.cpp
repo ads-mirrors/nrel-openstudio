@@ -21,6 +21,7 @@
 #include <utilities/idd/IddEnums.hxx>
 
 #include "../../utilities/core/Finder.hpp"
+#include "../../utilities/core/StringStreamLogSink.hpp"
 #include "../../utilities/filetypes/WorkflowJSON.hpp"
 #include "../../utilities/filetypes/WorkflowStep.hpp"
 
@@ -511,10 +512,17 @@ TEST_F(MeasureFixture, ModelMeasureWithSeparator) {
   OSArgument& double_arg = argumentMap["double_arg"];
   OSArgument& int_arg = argumentMap["int_arg"];
 
+  StringStreamLogSink sink;
+  sink.setLogLevel(Fatal);
+
   // call with a good value
   double_arg.setValue(-1.0);
   int_arg.setValue(1.0);
   EXPECT_TRUE(measure.run(model, runner, argumentMap));
+
+  EXPECT_EQ(0, sink.logMessages().size()) << sink.string();
+  sink.resetStringStream();
+
   WorkflowStepResult result = runner.result();
   ASSERT_TRUE(result.stepResult());
   EXPECT_EQ(StepResult::Success, result.stepResult()->value());
@@ -526,6 +534,10 @@ TEST_F(MeasureFixture, ModelMeasureWithSeparator) {
   double_arg.setValue(1.0);
   int_arg.setValue(-3);
   EXPECT_FALSE(measure.run(model, runner, argumentMap));
+
+  EXPECT_EQ(0, sink.logMessages().size()) << sink.string();
+  sink.resetStringStream();
+
   result = runner.result();
   ASSERT_TRUE(result.stepResult());
   EXPECT_EQ(StepResult::Fail, result.stepResult()->value());
