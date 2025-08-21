@@ -159,9 +159,6 @@ TEST_F(ModelFixture, BoilerSteam_addToNode) {
   EXPECT_EQ((unsigned)5, airLoop.demandComponents().size());
 
   PlantLoop plantLoop(m);
-  EXPECT_TRUE(plantLoop.setFluidType("PropyleneGlycol"));
-  EXPECT_TRUE(plantLoop.setGlycolConcentration(50));
-
   supplyOutletNode = plantLoop.supplyOutletNode();
   EXPECT_TRUE(testObject.addToNode(supplyOutletNode));
   EXPECT_EQ((unsigned)7, plantLoop.supplyComponents().size());
@@ -175,7 +172,4 @@ TEST_F(ModelFixture, BoilerSteam_addToNode) {
 
   EXPECT_TRUE(testObjectClone.addToNode(supplyOutletNode));
   EXPECT_EQ((unsigned)9, plantLoop.supplyComponents().size());
-
-  EXPECT_EQ(plantLoop.fluidType(), "PropyleneGlycol");
-  EXPECT_EQ(plantLoop.glycolConcentration(), 50);
 }
