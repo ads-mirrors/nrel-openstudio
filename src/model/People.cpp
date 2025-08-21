@@ -337,14 +337,6 @@ namespace model {
 
     bool People_Impl::setClothingInsulationCalculationMethod(const std::string& clothingInsulationCalculationMethod) {
       const bool result = setString(OS_PeopleFields::ClothingInsulationCalculationMethod, clothingInsulationCalculationMethod);
-      if (result) {
-        if (istringEqual("ClothingInsulationSchedule", clothingInsulationCalculationMethod)) {
-          resetClothingInsulationCalculationMethodSchedule();
-        } else if (istringEqual("DynamicClothingModelASHRAE55", clothingInsulationCalculationMethod)) {
-          resetClothingInsulationCalculationMethodSchedule();
-          resetClothingInsulationSchedule();
-        }
-      }
       return result;
     }
 
