@@ -75,7 +75,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_People) {
     cloSch.setValue(1.0);
     EXPECT_TRUE(p.setClothingInsulationSchedule(cloSch));
 
-    ScheduleConstant cloSch2(model);
+    ScheduleConstant cloSch2(m);
     cloSch2.setName("CalculationMethodSchedule");
     cloSch2.setValue(1.0);
     EXPECT_TRUE(p.setClothingInsulationCalculationMethodSchedule(cloSch2));
