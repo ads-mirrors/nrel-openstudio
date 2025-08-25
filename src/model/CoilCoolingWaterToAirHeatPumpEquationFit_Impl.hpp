@@ -52,6 +52,8 @@ namespace model {
 
       virtual unsigned waterOutletPort() const override;
 
+      virtual std::vector<ModelObject> children() const override;
+
       virtual boost::optional<ZoneHVACComponent> containingZoneHVACComponent() const override;
 
       virtual ComponentType componentType() const override;
@@ -191,6 +193,10 @@ namespace model {
       //@{
 
       void setConstructorSharedDefaults(const Model& model);
+
+      AirflowNetworkEquivalentDuct getAirflowNetworkEquivalentDuct(double length, double diameter);
+
+      boost::optional<AirflowNetworkEquivalentDuct> airflowNetworkEquivalentDuct() const;
 
       //@}
      protected:

@@ -19,6 +19,8 @@
 #include "AirLoopHVACOutdoorAirSystem_Impl.hpp"
 #include "AirLoopHVACUnitaryHeatPumpAirToAir.hpp"
 #include "AirLoopHVACUnitaryHeatPumpAirToAir_Impl.hpp"
+#include "AirflowNetworkEquivalentDuct.hpp"
+#include "AirflowNetworkEquivalentDuct_Impl.hpp"
 #include "ZoneHVACPackagedTerminalAirConditioner.hpp"
 #include "ZoneHVACPackagedTerminalAirConditioner_Impl.hpp"
 #include "ZoneHVACPackagedTerminalHeatPump.hpp"
@@ -375,6 +377,9 @@ namespace model {
       if (auto c_ = crankcaseHeaterCapacityFunctionofTemperatureCurve()) {
         children.emplace_back(std::move(*c_));
       }
+      std::vector<AirflowNetworkEquivalentDuct> myAFNItems =
+        getObject<ModelObject>().getModelObjectSources<AirflowNetworkEquivalentDuct>(AirflowNetworkEquivalentDuct::iddObjectType());
+      children.insert(children.end(), myAFNItems.begin(), myAFNItems.end());
       return children;
     }
 
@@ -530,6 +535,32 @@ namespace model {
       }
 
       return result;
+    }
+
+    AirflowNetworkEquivalentDuct CoilHeatingDXVariableSpeed_Impl::getAirflowNetworkEquivalentDuct(double length, double diameter) {
+      boost::optional<AirflowNetworkEquivalentDuct> opt = airflowNetworkEquivalentDuct();
+      if (opt) {
+        if (opt->airPathLength() != length) {
+          opt->setAirPathLength(length);
+        }
+        if (opt->airPathHydraulicDiameter() != diameter) {
+          opt->setAirPathHydraulicDiameter(diameter);
+        }
+      }
+      return AirflowNetworkEquivalentDuct(model(), length, diameter, handle());
+    }
+
+    boost::optional<AirflowNetworkEquivalentDuct> CoilHeatingDXVariableSpeed_Impl::airflowNetworkEquivalentDuct() const {
+      std::vector<AirflowNetworkEquivalentDuct> myAFN =
+        getObject<ModelObject>().getModelObjectSources<AirflowNetworkEquivalentDuct>(AirflowNetworkEquivalentDuct::iddObjectType());
+      auto count = myAFN.size();
+      if (count == 1) {
+        return myAFN[0];
+      } else if (count > 1) {
+        LOG(Warn, briefDescription() << " has more than one AirflowNetwork EquivalentDuct attached, returning first.");
+        return myAFN[0];
+      }
+      return boost::none;
     }
 
     boost::optional<double> CoilHeatingDXVariableSpeed_Impl::autosizedRatedHeatingCapacityAtSelectedNominalSpeedLevel() const {
@@ -850,6 +881,14 @@ namespace model {
 
   void CoilHeatingDXVariableSpeed::removeAllSpeeds() {
     getImpl<detail::CoilHeatingDXVariableSpeed_Impl>()->removeAllSpeeds();
+  }
+
+  AirflowNetworkEquivalentDuct CoilHeatingDXVariableSpeed::getAirflowNetworkEquivalentDuct(double length, double diameter) {
+    return getImpl<detail::CoilHeatingDXVariableSpeed_Impl>()->getAirflowNetworkEquivalentDuct(length, diameter);
+  }
+
+  boost::optional<AirflowNetworkEquivalentDuct> CoilHeatingDXVariableSpeed::airflowNetworkEquivalentDuct() const {
+    return getImpl<detail::CoilHeatingDXVariableSpeed_Impl>()->airflowNetworkEquivalentDuct();
   }
 
   /// @cond
