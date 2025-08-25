@@ -4628,3 +4628,25 @@ TEST_F(OSVersionFixture, can_still_load_older_components) {
   EXPECT_EQ(1, model.getObjectsByType("OS:ComponentData").size());
   EXPECT_EQ(2, model.objects().size());
 }
+
+TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_HeatPumpAirToWaterFuelFired) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_HeatPumpAirToWaterFuelFired.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_HeatPumpAirToWaterFuelFired_updated.osm");
+  model->save(outPath, true);
+
+  std::vector<WorkspaceObject> htgs = model->getObjectsByType("OS:HeatPump:AirToWater:FuelFired:Heating");
+  ASSERT_EQ(1u, htgs.size());
+  const auto& htg = htgs.front();
+
+  EXPECT_EQ(0.25, htg.getDouble(31).get());                           // Minimum Unloading Ratio
+
+  std::vector<WorkspaceObject> clgs = model->getObjectsByType("OS:HeatPump:AirToWater:FuelFired:Cooling");
+  ASSERT_EQ(1u, clgs.size());
+  const auto& clg = clgs.front();
+
+  EXPECT_EQ(0.25, clg.getDouble(26).get());                           // Minimum Unloading Ratio
+}
