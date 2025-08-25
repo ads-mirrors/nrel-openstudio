@@ -4642,10 +4642,10 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_SiteWaterMainsTemperature) {
   ASSERT_EQ(1u, swmts.size());
   const auto& swmt = swmts.front();
 
-  EXPECT_EQ("CorrelationFromWeatherFile", swmt.getString(1).get());             // Calculation Method
-  EXPECT_TRUE(swmt.isEmpty(2));                                                 // Temperature Schedule Name
-  EXPECT_TRUE(swmt.isEmpty(3));                                                 // Annual Average Outdoor Air Temperature
-  EXPECT_TRUE(swmt.isEmpty(4));                                                 // Maximum Difference In Monthly Average Outdoor Air Temperatures
-  EXPECT_EQ(1.0, swmt.getDouble(5).get());             // Temperature Multiplier
-  EXPECT_EQ(0.0, swmt.getString(6).get());             // Temperature Offset
+  EXPECT_EQ("CorrelationFromWeatherFile", swmt.getString(1).get());  // Calculation Method
+  EXPECT_TRUE(swmt.isEmpty(2));                                      // Temperature Schedule Name
+  EXPECT_TRUE(swmt.isEmpty(3));                                      // Annual Average Outdoor Air Temperature
+  EXPECT_TRUE(swmt.isEmpty(4));                                      // Maximum Difference In Monthly Average Outdoor Air Temperatures
+  EXPECT_EQ(1.0, swmt.getDouble(5).get());                           // Temperature Multiplier
+  EXPECT_EQ(0.0, swmt.getString(6).get());                           // Temperature Offset
 }
