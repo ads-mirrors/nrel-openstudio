@@ -161,12 +161,12 @@ namespace model {
       OS_ASSERT(result);
     }
 
-    void SiteWaterMainsTemperature_Impl::setTemperatureMultiplier(double temperatureMultiplier) {
+    bool SiteWaterMainsTemperature_Impl::setTemperatureMultiplier(double temperatureMultiplier) {
       bool result = setDouble(OS_Site_WaterMainsTemperatureFields::TemperatureMultiplier, temperatureMultiplier);
       OS_ASSERT(result);
     }
 
-    void SiteWaterMainsTemperature_Impl::setTemperatureOffset(double temperatureOffset) {
+    bool SiteWaterMainsTemperature_Impl::setTemperatureOffset(double temperatureOffset) {
       bool result = setDouble(OS_Site_WaterMainsTemperatureFields::TemperatureOffset, temperatureOffset);
       OS_ASSERT(result);
     }
@@ -205,9 +205,9 @@ namespace model {
     OS_ASSERT(getImpl<detail::SiteWaterMainsTemperature_Impl>());
     bool ok = setCalculationMethod("CorrelationFromWeatherFile");
     OS_ASSERT(ok);
-    bool ok = setTemperatureMultiplier(1.0);
+    ok = setTemperatureMultiplier(1.0);
     OS_ASSERT(ok);
-    bool ok = setTemperatureOffset(0.0);
+    ok = setTemperatureOffset(0.0);
     OS_ASSERT(ok);
   }
 
