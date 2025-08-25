@@ -15142,6 +15142,10 @@ AirflowNetwork:Distribution:Component:Coil,
       \key Coil:Heating:Desuperheater
       \key Coil:Heating:Electric:MultiStage
       \key Coil:Heating:Gas:MultiStage
+      \key Coil:Cooling:WaterToAirHeatPump:EquationFit
+      \key Coil:Heating:WaterToAirHeatPump:EquationFit
+      \key Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit
+      \key Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit
       \note Select the type of coil corresponding to the name entered in the field above.
  N1 , \field Air Path Length
       \required-field

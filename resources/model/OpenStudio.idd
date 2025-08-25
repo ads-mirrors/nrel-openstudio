@@ -18709,6 +18709,7 @@ OS:Coil:Cooling:DX:TwoSpeed,
        \reference CoolingCoilsDX
        \reference DesuperHeatingCoilSources
        \reference ConnectionObject
+       \reference AFNCoilNames
   A3, \field Availability Schedule Name
        \type object-list
        \required-field
@@ -20351,6 +20352,7 @@ OS:Coil:Cooling:WaterToAirHeatPump:EquationFit,
        \reference CoolingCoilsWaterToAirHP
        \reference ConnectionObject
        \reference DesuperHeatingWaterOnlySources
+       \reference AFNCoilNames
   A3,  \field Water Inlet Node Name
        \type object-list
        \required-field
@@ -21486,6 +21488,7 @@ OS:Coil:Heating:WaterToAirHeatPump:EquationFit,
        \required-field
        \reference HeatingCoilsWaterToAirHP
        \reference ConnectionObject
+       \reference AFNCoilNames
   A3,  \field Water Inlet Node Name
        \type object-list
        \required-field
@@ -22148,6 +22151,7 @@ OS:Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,
         \type alpha
         \reference HeatingCoilsWaterToAirVSHP
         \reference ConnectionObject
+        \reference AFNCoilNames
    A3,  \field Water-to-Refrigerant HX Water Inlet Node Name
         \type object-list
         \required-field
@@ -22270,6 +22274,7 @@ OS:Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
         \reference CoolingCoilsWaterToAirVSHP
         \reference DesuperHeatingWaterOnlySources
         \reference ConnectionObject
+        \reference AFNCoilNames
    A3,  \field Water-to-Refrigerant HX Water Inlet Node Name
         \type object-list
         \required-field
