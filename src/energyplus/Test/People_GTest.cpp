@@ -74,6 +74,11 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_People) {
     cloSch.setName("ClothingInsulationSchedule");
     cloSch.setValue(1.0);
     EXPECT_TRUE(p.setClothingInsulationSchedule(cloSch));
+
+    ScheduleConstant cloSch2(model);
+    cloSch2.setName("CalculationMethodSchedule");
+    cloSch2.setValue(1.0);
+    EXPECT_TRUE(p.setClothingInsulationCalculationMethodSchedule(cloSch2));
   }
 
   {
@@ -119,8 +124,8 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_People) {
 
   EXPECT_EQ("ClothingInsulationSchedule", peopleObject.getString(PeopleFields::ClothingInsulationCalculationMethod).get());
   EXPECT_TRUE(peopleObject.isEmpty(PeopleFields::ClothingInsulationCalculationMethodScheduleName));
-
   EXPECT_EQ("ClothingInsulationSchedule", peopleObject.getString(PeopleFields::ClothingInsulationScheduleName).get());
+
   EXPECT_EQ("AirVelocitySchedule", peopleObject.getString(PeopleFields::AirVelocityScheduleName).get());
   EXPECT_EQ("Fanger", peopleObject.getString(PeopleFields::ThermalComfortModel1Type).get());
   EXPECT_EQ("Pierce", peopleObject.getString(PeopleFields::ThermalComfortModel2Type).get());

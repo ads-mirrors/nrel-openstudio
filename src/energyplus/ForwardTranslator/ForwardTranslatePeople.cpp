@@ -117,7 +117,7 @@ namespace energyplus {
     // Clothing Insulation
     // ---
     // ClothingInsulationSchedule: Only Clothing Insulation Schedule Name should be filled.
-    // DynamicClothingModelASHRAE55: Neither should be field.
+    // DynamicClothingModelASHRAE55: Neither should be filled.
     // CalculationMethodSchedule: Both Clothing Insulation Calculation Method Schedule Name and Clothing Insulation Schedule Name should be filled.
 
     // Clothing Insulation Calculation Method
