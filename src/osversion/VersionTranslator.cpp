@@ -9746,5 +9746,42 @@ namespace osversion {
 
   }  // end update_3_9_0_to_3_10_0
 
+  std::string VersionTranslator::update_3_10_0_to_3_10_1(const IdfFile& idf_3_10_0, const IddFileAndFactoryWrapper& idd_3_10_1) {
+    std::stringstream ss;
+    boost::optional<std::string> value;
+
+    ss << idf_3_10_0.header() << '\n' << '\n';
+    IdfFile targetIdf(idd_3_10_1.iddFile());
+    ss << targetIdf.versionObject().get();
+
+    for (const IdfObject& object : idf_3_10_0.objects()) {
+      auto iddname = object.iddObject().name();
+
+      if (iddname == "OS:Site:WaterMainsTemperature") {
+
+        // 2 Fields have been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Temperature Multiplier * 5
+        // * Temperature Offset * 6
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        newObject.setDouble(5, 1.0);
+        newObject.setDouble(6, 0.0);
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+        // No-op
+      } else {
+        ss << object;
+      }
+    }
+
+    return ss.str();
+
+  }  // end update_3_10_0_to_3_10_1
+
 }  // namespace osversion
 }  // namespace openstudio
