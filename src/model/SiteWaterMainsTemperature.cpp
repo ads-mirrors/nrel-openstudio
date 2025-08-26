@@ -162,13 +162,13 @@ namespace model {
     }
 
     bool SiteWaterMainsTemperature_Impl::setTemperatureMultiplier(double temperatureMultiplier) {
-      bool result = setDouble(OS_Site_WaterMainsTemperatureFields::TemperatureMultiplier, temperatureMultiplier);
-      OS_ASSERT(result);
+      const bool result = setDouble(OS_Site_WaterMainsTemperatureFields::TemperatureMultiplier, temperatureMultiplier);
+      return result;
     }
 
     bool SiteWaterMainsTemperature_Impl::setTemperatureOffset(double temperatureOffset) {
-      bool result = setDouble(OS_Site_WaterMainsTemperatureFields::TemperatureOffset, temperatureOffset);
-      OS_ASSERT(result);
+      const bool result = setDouble(OS_Site_WaterMainsTemperatureFields::TemperatureOffset, temperatureOffset);
+      return result;
     }
 
     std::vector<std::string> SiteWaterMainsTemperature_Impl::calculationMethodValues() const {
