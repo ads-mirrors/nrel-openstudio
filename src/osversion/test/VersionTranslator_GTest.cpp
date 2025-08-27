@@ -4647,5 +4647,5 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_SiteWaterMainsTemperature) {
   EXPECT_TRUE(swmt.isEmpty(3));                                      // Annual Average Outdoor Air Temperature
   EXPECT_TRUE(swmt.isEmpty(4));                                      // Maximum Difference In Monthly Average Outdoor Air Temperatures
   EXPECT_EQ(1.0, swmt.getDouble(5).get());                           // Temperature Multiplier
-  EXPECT_EQ(0.0, swmt.getString(6).get());                           // Temperature Offset
+  EXPECT_EQ(0.0, swmt.getDouble(6).get());                           // Temperature Offset
 }
