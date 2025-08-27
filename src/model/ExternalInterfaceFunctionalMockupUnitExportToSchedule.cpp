@@ -72,7 +72,9 @@ namespace model {
 
     std::vector<double> ExternalInterfaceFunctionalMockupUnitExportToSchedule_Impl::values() const {
       DoubleVector result;
-      result.push_back(initialValue());
+      if (boost::optional<double> _initialValue = initialValue()) {
+        result.push_back(_initialValue.get());
+      }
       return result;
     }
 
