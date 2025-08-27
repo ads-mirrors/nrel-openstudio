@@ -9703,6 +9703,7 @@ namespace osversion {
         // 1 Field has been added from 3.9.0 to 3.10.0:
         // -------------------------------------------
         // * Density Basis * 26
+
         auto iddObject = idd_3_10_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
@@ -9722,6 +9723,7 @@ namespace osversion {
         // 1 Field has been added from 3.9.0 to 3.10.0:
         // -------------------------------------------
         // * Density Basis * 13
+
         auto iddObject = idd_3_10_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
@@ -9761,29 +9763,41 @@ namespace osversion {
 
         // 1 Field has been added from 3.10.0 to 3.10.1:
         // ------------------------------------------------
-        // * Minimum Unloading Ratio * 31
+        // * Minimum Unloading Ratio * 32
 
         auto iddObject = idd_3_10_1.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
-        newObject.setDouble(31, 0.25);
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
 
+        newObject.setDouble(32, 0.25);
+
+        m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
-        m_refactored.emplace_back(std::move(object), std::move(newObject));
 
       } else if (iddname == "OS:HeatPump:AirToWater:FuelFired:Cooling") {
 
         // 1 Field has been added from 3.10.0 to 3.10.1:
         // ------------------------------------------------
-        // * Minimum Unloading Ratio * 26
+        // * Minimum Unloading Ratio * 27
 
         auto iddObject = idd_3_10_1.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
-        newObject.setDouble(26, 0.25);
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
 
+        newObject.setDouble(27, 0.25);
+
+        m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
-        m_refactored.emplace_back(std::move(object), std::move(newObject));
 
         // No-op
       } else {
