@@ -146,7 +146,8 @@ namespace osversion {
     m_updateMethods[VersionString("3.8.0")] = &VersionTranslator::update_3_7_0_to_3_8_0;
     m_updateMethods[VersionString("3.9.0")] = &VersionTranslator::update_3_8_0_to_3_9_0;
     m_updateMethods[VersionString("3.10.0")] = &VersionTranslator::update_3_9_0_to_3_10_0;
-    m_updateMethods[VersionString("3.10.1")] = &VersionTranslator::defaultUpdate;
+    m_updateMethods[VersionString("3.10.1")] = &VersionTranslator::update_3_10_0_to_3_10_1;
+    // m_updateMethods[VersionString("3.10.1")] = &VersionTranslator::defaultUpdate;
 
     // List of previous versions that may be updated to this one.
     //   - To increment the translator, add an entry for the version just released (branched for
@@ -9767,11 +9768,17 @@ namespace osversion {
         auto iddObject = idd_3_10_1.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
         newObject.setDouble(5, 1.0);
         newObject.setDouble(6, 0.0);
 
+        m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
-        m_refactored.emplace_back(std::move(object), std::move(newObject));
 
         // No-op
       } else {
