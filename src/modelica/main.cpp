@@ -8,17 +8,17 @@ int main() {
   const auto moPath = openstudio::getApplicationSourceDirectory() / "resources/Examples/compact_osw/modelica/Template_IdealHeat/Model2.mo";
 
   openstudio::modelica::ModelicaFile moFile(moPath);
-  //std::cout << moFile.printTree() << std::flush;
 
-  std::cout << moFile.print() << std::flush;
+  auto classDefinitions = moFile.classDefinitions();
 
-  auto model2Class = moFile.classDefinitions().front();
+  for (const auto& classDef : classDefinitions) {
+    std::cout << "Found class name: " << classDef.longClassSpecifier() << std::endl;  // NOLINT
+  }
 
-  model2Class.addComponentClause(
-    R"(Buildings.ThermalZones.EnergyPlus_24_2_0.ThermalZone zon2(redeclare package Medium = Medium, zoneName = "MyZone2"))");
+  auto& class1 = classDefinitions.front();
+  class1.addComponentClause("Buildings.ThermalZones.EnergyPlus_24_2_0.ThermalZone zon2(redeclare package Medium = Medium, zoneName = \"MyZone2\");");
 
-  std::cout << "************** new file *************** \n" << std::flush;
-  std::cout << moFile.print() << std::flush;
+  std::cout << moFile.getText() << std::endl;  // NOLINT
 
   return 0;
 }
