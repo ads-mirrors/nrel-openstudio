@@ -23,6 +23,8 @@ add_executable(antdemo
   main.cpp
   ModelicaFile.hpp
   ModelicaFile.cpp
+  ModelicaFileImpl.hpp
+  ModelicaFileImpl.cpp
 )
 
 target_link_libraries(antdemo

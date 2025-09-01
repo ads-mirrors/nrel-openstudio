@@ -9,7 +9,7 @@ int main() {
 
   openstudio::modelica::ModelicaFile moFile(moPath);
 
-  auto classDefinitions = moFile.classDefinitions();
+  auto classDefinitions = moFile.getClassDefinitions();
 
   for (const auto& classDef : classDefinitions) {
     std::cout << "Found class name: " << classDef.longClassSpecifier() << std::endl;  // NOLINT
