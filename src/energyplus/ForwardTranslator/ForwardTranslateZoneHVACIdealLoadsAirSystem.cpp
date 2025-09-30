@@ -242,6 +242,28 @@ namespace energyplus {
                                             modelObject.latentHeatRecoveryEffectiveness());
     }
 
+    // heating fuel efficiency schedule name
+    if (boost::optional<Schedule> schedule = modelObject.heatingFuelEfficiencySchedule()) {
+      if (boost::optional<IdfObject> _schedule = translateAndMapModelObject(schedule.get())) {
+        zoneHVACIdealLoadsAirSystem.setString(ZoneHVAC_IdealLoadsAirSystemFields::HeatingFuelEfficiencyScheduleName, _schedule->name().get());
+      }
+    }
+
+    // heating fuel type
+    const std::string heatingFuelType = modelObject.heatingFuelType();
+    zoneHVACIdealLoadsAirSystem.setString(ZoneHVAC_IdealLoadsAirSystemFields::HeatingFuelType, heatingFuelType);
+
+    // cooling fuel efficiency schedule name
+    if (boost::optional<Schedule> schedule = modelObject.coolingFuelEfficiencySchedule()) {
+      if (boost::optional<IdfObject> _schedule = translateAndMapModelObject(schedule.get())) {
+        zoneHVACIdealLoadsAirSystem.setString(ZoneHVAC_IdealLoadsAirSystemFields::CoolingFuelEfficiencyScheduleName, _schedule->name().get());
+      }
+    }
+
+    // cooling fuel type
+    const std::string coolingFuelType = modelObject.coolingFuelType();
+    zoneHVACIdealLoadsAirSystem.setString(ZoneHVAC_IdealLoadsAirSystemFields::CoolingFuelType, coolingFuelType);
+
     return zoneHVACIdealLoadsAirSystem;
   }
 
