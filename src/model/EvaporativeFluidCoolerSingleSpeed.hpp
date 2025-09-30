@@ -78,9 +78,17 @@ namespace model {
 
     boost::optional<double> designEnteringWaterTemperature() const;
 
-    boost::optional<double> designEnteringAirTemperature() const;
+    bool isDesignEnteringWaterTemperatureDefaulted() const;
 
-    boost::optional<double> designEnteringAirWetbulbTemperature() const;
+    bool isDesignEnteringWaterTemperatureAutosized() const;
+
+    double designEnteringAirTemperature() const;
+
+    bool isDesignEnteringAirTemperatureDefaulted() const;
+
+    double designEnteringAirWetbulbTemperature() const;
+
+    bool isDesignEnteringAirWetbulbTemperatureDefaulted() const;
 
     std::string capacityControl() const;
 
@@ -149,6 +157,8 @@ namespace model {
     bool setDesignEnteringWaterTemperature(double designEnteringWaterTemperature);
 
     void resetDesignEnteringWaterTemperature();
+
+    void autosizeDesignEnteringWaterTemperature();
 
     bool setDesignEnteringAirTemperature(double designEnteringAirTemperature);
 
