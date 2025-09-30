@@ -24976,6 +24976,8 @@ OS:EvaporativeFluidCooler:SingleSpeed,
        \type real
        \units C
        \minimum> 0.0
+       \default autosize
+       \autosizable
        \ip-units F
        \note Only used for Performance Input Method = UserSpecifiedDesignCapacity;
        \note for other Performance Input Methods, this field is ignored.
@@ -24983,6 +24985,7 @@ OS:EvaporativeFluidCooler:SingleSpeed,
   N9 , \field Design Entering Air Temperature
        \type real
        \units C
+       \default 35.0
        \minimum> 0.0
        \ip-units F
        \note Only used for Performance Input Method = UserSpecifiedDesignCapacity;
@@ -24992,6 +24995,7 @@ OS:EvaporativeFluidCooler:SingleSpeed,
   N10, \field Design Entering Air Wet-bulb Temperature
        \type real
        \units C
+       \default 25.6
        \minimum> 0.0
        \ip-units F
        \note Only used for Performance Input Method = UserSpecifiedDesignCapacity;
