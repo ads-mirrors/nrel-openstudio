@@ -116,6 +116,8 @@ namespace energyplus {
 
     if ((d = modelObject.designEnteringWaterTemperature())) {
       idfObject.setDouble(openstudio::EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringWaterTemperature, d.get());
+    } else if (modelObject.isDesignEnteringWaterTemperatureAutosized()) {
+      idfObject.setString(openstudio::EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringWaterTemperature, "Autosize");
     }
 
     // DesignEnteringAirTemperature
