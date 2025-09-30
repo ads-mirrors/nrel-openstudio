@@ -923,7 +923,7 @@ namespace model {
   ZoneHVACIdealLoadsAirSystem::ZoneHVACIdealLoadsAirSystem(const Model& model)
     : ZoneHVACComponent(ZoneHVACIdealLoadsAirSystem::iddObjectType(), model) {
     OS_ASSERT(getImpl<detail::ZoneHVACIdealLoadsAirSystem_Impl>());
-    
+
     bool ok = true;
     ok = setHeatingFuelType("DistrictHeatingWater");
     OS_ASSERT(ok);
@@ -1136,7 +1136,7 @@ namespace model {
   boost::optional<Schedule> ZoneHVACIdealLoadsAirSystem::heatingFuelEfficiencySchedule() const {
     return getImpl<detail::ZoneHVACIdealLoadsAirSystem_Impl>()->heatingFuelEfficiencySchedule();
   }
-  
+
   std::string ZoneHVACIdealLoadsAirSystem::heatingFuelType() const {
     return getImpl<detail::ZoneHVACIdealLoadsAirSystem_Impl>()->heatingFuelType();
   }
@@ -1144,7 +1144,7 @@ namespace model {
   boost::optional<Schedule> ZoneHVACIdealLoadsAirSystem::coolingFuelEfficiencySchedule() const {
     return getImpl<detail::ZoneHVACIdealLoadsAirSystem_Impl>()->coolingFuelEfficiencySchedule();
   }
-  
+
   std::string ZoneHVACIdealLoadsAirSystem::coolingFuelType() const {
     return getImpl<detail::ZoneHVACIdealLoadsAirSystem_Impl>()->coolingFuelType();
   }
@@ -1360,7 +1360,7 @@ namespace model {
   void ZoneHVACIdealLoadsAirSystem::resetCoolingFuelEfficiencySchedule() {
     getImpl<detail::ZoneHVACIdealLoadsAirSystem_Impl>()->resetCoolingFuelEfficiencySchedule();
   }
-  
+
   bool ZoneHVACIdealLoadsAirSystem::setCoolingFuelType(const std::string& coolingFuelType) {
     return getImpl<detail::ZoneHVACIdealLoadsAirSystem_Impl>()->setCoolingFuelType(coolingFuelType);
   }

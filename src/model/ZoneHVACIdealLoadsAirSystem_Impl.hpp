@@ -137,11 +137,11 @@ namespace model {
       bool isLatentHeatRecoveryEffectivenessDefaulted() const;
 
       boost::optional<Schedule> heatingFuelEfficiencySchedule() const;
-      
+
       std::string heatingFuelType() const;
 
       boost::optional<Schedule> coolingFuelEfficiencySchedule() const;
-      
+
       std::string coolingFuelType() const;
 
       boost::optional<double> autosizedMaximumHeatingAirFlowRate() const;
@@ -269,9 +269,9 @@ namespace model {
       bool setCoolingFuelEfficiencySchedule(Schedule& coolingFuelEfficiencySchedule);
 
       void resetCoolingFuelEfficiencySchedule();
-      
+
       bool setCoolingFuelType(const std::string& coolingFuelType);
-      
+
       //@}
       /** @name Other */
       //@{

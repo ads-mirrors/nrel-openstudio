@@ -56,9 +56,9 @@ namespace model {
     static std::vector<std::string> outdoorAirEconomizerTypeValues();
 
     static std::vector<std::string> heatRecoveryTypeValues();
-    
+
     static std::vector<std::string> heatingFuelTypeValues();
-    
+
     static std::vector<std::string> coolingFuelTypeValues();
 
     /** @name Getters */
@@ -145,11 +145,11 @@ namespace model {
     bool isLatentHeatRecoveryEffectivenessDefaulted() const;
 
     boost::optional<Schedule> heatingFuelEfficiencySchedule() const;
-    
+
     std::string heatingFuelType() const;
 
     boost::optional<Schedule> coolingFuelEfficiencySchedule() const;
-    
+
     std::string coolingFuelType() const;
 
     //@}
@@ -261,7 +261,7 @@ namespace model {
     bool setCoolingFuelEfficiencySchedule(Schedule& coolingFuelEfficiencySchedule);
 
     void resetCoolingFuelEfficiencySchedule();
-    
+
     bool setCoolingFuelType(const std::string& coolingFuelType);
 
     //@}
