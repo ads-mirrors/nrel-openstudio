@@ -757,7 +757,7 @@ namespace model {
   bool EvaporativeFluidCoolerSingleSpeed::isDesignEnteringWaterTemperatureDefaulted() const {
     return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->isDesignEnteringWaterTemperatureDefaulted();
   }
-  
+
   bool EvaporativeFluidCoolerSingleSpeed::isDesignEnteringWaterTemperatureAutosized() const {
     return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->isDesignEnteringWaterTemperatureAutosized();
   }

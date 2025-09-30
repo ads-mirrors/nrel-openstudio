@@ -83,11 +83,11 @@ namespace model {
       boost::optional<double> userSpecifiedDesignCapacity() const;
 
       boost::optional<double> designEnteringWaterTemperature() const;
-      
+
       bool isDesignEnteringWaterTemperatureDefaulted() const;
 
       bool isDesignEnteringWaterTemperatureAutosized() const;
-      
+
       double designEnteringAirTemperature() const;
 
       bool isDesignEnteringAirTemperatureDefaulted() const;
@@ -180,7 +180,7 @@ namespace model {
       bool setDesignEnteringWaterTemperature(boost::optional<double> designEnteringWaterTemperature);
 
       void resetDesignEnteringWaterTemperature();
-      
+
       void autosizeDesignEnteringWaterTemperature();
 
       bool setDesignEnteringAirTemperature(boost::optional<double> designEnteringAirTemperature);
