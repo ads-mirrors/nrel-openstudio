@@ -85,7 +85,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerTwoSpeed) {
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setLowSpeedUserSpecifiedDesignCapacity(17.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setHighSpeedUserSpecifiedDesignCapacity(18.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setLowSpeedUserSpecifiedDesignCapacitySizingFactor(19.0));
-  evaporativeFluidCoolerSingleSpeed.autosizeDesignEnteringWaterTemperature();
+  evaporativeFluidCoolerTwoSpeed.autosizeDesignEnteringWaterTemperature();
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setDesignEnteringAirTemperature(20.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setDesignEnteringAirWetbulbTemperature(21.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setHighSpeedSizingFactor(22.0));
@@ -95,7 +95,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerTwoSpeed) {
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setBlowdownCalculationMode("ScheduledRate"));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setBlowdownConcentrationRatio(25.0));
   Schedule blowdownMakeupWaterUsageSchedule = m.alwaysOnDiscreteSchedule();
-  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setBlowdownMakeupWaterUsageSchedule(blowdownMakeupWaterUsageSchedule));
+  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setBlowdownMakeupWaterUsageSchedule(blowdownMakeupWaterUsageSchedule));
 
   const Workspace w = ft.translateModel(m);
   const auto idfObjs = w.getObjectsByType(IddObjectType::EvaporativeFluidCooler_TwoSpeed);
