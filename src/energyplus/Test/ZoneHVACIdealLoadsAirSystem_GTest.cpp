@@ -136,8 +136,10 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ZoneHVACIdealLoadsAirSystem) {
   EXPECT_EQ(10.0, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::SensibleHeatRecoveryEffectiveness).get());
   EXPECT_EQ(11.0, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::LatentHeatRecoveryEffectiveness).get());
   EXPECT_EQ("", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::DesignSpecificationZoneHVACSizingObjectName).get());
-  EXPECT_EQ(heatingFuelEfficiencySchedule.nameString(), idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::HeatingFuelEfficiencyScheduleName).get());  
-  EXPECT_EQ("DistrictHeatingWater", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::HeatingFuelType).get());  
-  EXPECT_EQ(coolingFuelEfficiencySchedule.nameString(), idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::CoolingFuelEfficiencyScheduleName).get());  
-  EXPECT_EQ("DistrictCooling", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::CoolingFuelType).get());  
+  EXPECT_EQ(heatingFuelEfficiencySchedule.nameString(),
+            idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::HeatingFuelEfficiencyScheduleName).get());
+  EXPECT_EQ("DistrictHeatingWater", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::HeatingFuelType).get());
+  EXPECT_EQ(coolingFuelEfficiencySchedule.nameString(),
+            idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::CoolingFuelEfficiencyScheduleName).get());
+  EXPECT_EQ("DistrictCooling", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::CoolingFuelType).get());
 }
