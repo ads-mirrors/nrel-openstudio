@@ -1250,6 +1250,10 @@ namespace model {
     getImpl<detail::EvaporativeFluidCoolerTwoSpeed_Impl>()->resetDesignEnteringWaterTemperature();
   }
 
+  void EvaporativeFluidCoolerTwoSpeed::autosizeDesignEnteringWaterTemperature() {
+    getImpl<detail::EvaporativeFluidCoolerTwoSpeed_Impl>()->autosizeDesignEnteringWaterTemperature();
+  }
+
   bool EvaporativeFluidCoolerTwoSpeed::setDesignEnteringAirTemperature(double designEnteringAirTemperature) {
     return getImpl<detail::EvaporativeFluidCoolerTwoSpeed_Impl>()->setDesignEnteringAirTemperature(designEnteringAirTemperature);
   }
