@@ -753,6 +753,7 @@ set(${target_name}_test_src
   Test/EnvironmentalImpactFactors_GTest.cpp
   Test/EvaporativeCoolerDirectResearchSpecial_GTest.cpp
   Test/EvaporativeFluidCoolerSingleSpeed_GTest.cpp
+  Test/EvaporativeFluidCoolerTwoSpeed_GTest.cpp
   Test/ExteriorLights_GTest.cpp
   Test/ExteriorFuelEquipment_GTest.cpp
   Test/ExteriorWaterEquipment_GTest.cpp

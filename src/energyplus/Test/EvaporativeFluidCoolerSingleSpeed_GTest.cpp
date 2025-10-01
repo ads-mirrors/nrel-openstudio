@@ -36,6 +36,8 @@
 #include "../../model/EvaporativeFluidCoolerSingleSpeed_Impl.hpp"
 #include "../../model/Schedule.hpp"
 #include "../../model/Schedule_Impl.hpp"
+#include "../../model/AirLoopHVAC.hpp"
+#include "../../model/Node.hpp"
 
 #include "../../utilities/idf/Workspace.hpp"
 #include "../../utilities/idf/IdfObject.hpp"
@@ -56,6 +58,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerSingleSpeed) {
   Model m;
 
   EvaporativeFluidCoolerSingleSpeed evaporativeFluidCoolerSingleSpeed(m);
+  AirLoopHVAC airLoop(m);
+  Node supplyOutletNode = airLoop.supplyOutletNode();
+  evaporativeFluidCoolerSingleSpeed.addToNode(supplyOutletNode);  
 
   evaporativeFluidCoolerSingleSpeed.setName("My EvaporativeFluidCoolerSingleSpeed");
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setDesignAirFlowRate(1.0));
@@ -67,15 +72,15 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerSingleSpeed) {
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setDesignWaterFlowRate(6.0));
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setUserSpecifiedDesignCapacity(7.0));
   evaporativeFluidCoolerSingleSpeed.autosizeDesignEnteringWaterTemperature();
-  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setDesignEnteringAirTemperature(9.0));
-  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setDesignEnteringAirWetbulbTemperature(10.0));
+  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setDesignEnteringAirTemperature(8.0));
+  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setDesignEnteringAirWetbulbTemperature(9.0));
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setCapacityControl("FluidBypass"));
-  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setSizingFactor(11.0));
+  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setSizingFactor(10.0));
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setEvaporationLossMode("LossFactor"));
-  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setEvaporationLossFactor(12.0));
-  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setDriftLossPercent(13.0));
+  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setEvaporationLossFactor(11.0));
+  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setDriftLossPercent(12.0));
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setBlowdownCalculationMode("ScheduledRate"));
-  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setBlowdownConcentrationRatio(14.0));
+  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setBlowdownConcentrationRatio(13.0));
   Schedule blowdownMakeupWaterUsageSchedule = m.alwaysOnDiscreteSchedule();
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setBlowdownMakeupWaterUsageSchedule(blowdownMakeupWaterUsageSchedule));
 
@@ -98,15 +103,15 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerSingleSpeed) {
   EXPECT_EQ(6.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::DesignWaterFlowRate).get());
   EXPECT_EQ(7.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::UserSpecifiedDesignCapacity).get());
   EXPECT_EQ("Autosize", idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringWaterTemperature).get());
-  EXPECT_EQ(9.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringAirTemperature).get());
-  EXPECT_EQ(10.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringAirWetbulbTemperature).get());
+  EXPECT_EQ(8.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringAirTemperature).get());
+  EXPECT_EQ(9.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringAirWetbulbTemperature).get());
   EXPECT_EQ("FluidBypass", idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::CapacityControl).get());
-  EXPECT_EQ(11.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::SizingFactor).get());
+  EXPECT_EQ(10.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::SizingFactor).get());
   EXPECT_EQ("LossFactor", idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::EvaporationLossMode).get());
-  EXPECT_EQ(12.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::EvaporationLossFactor).get());
-  EXPECT_EQ(13.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::DriftLossPercent).get());
+  EXPECT_EQ(11.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::EvaporationLossFactor).get());
+  EXPECT_EQ(12.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::DriftLossPercent).get());
   EXPECT_EQ("ScheduledRate", idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::BlowdownCalculationMode).get());
-  EXPECT_EQ(14.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::BlowdownConcentrationRatio).get());
+  EXPECT_EQ(13.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::BlowdownConcentrationRatio).get());
   EXPECT_EQ(blowdownMakeupWaterUsageSchedule.nameString(),
             idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::BlowdownMakeupWaterUsageScheduleName).get());
   EXPECT_EQ("", idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::SupplyWaterStorageTankName).get());

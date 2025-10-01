@@ -282,12 +282,37 @@ namespace model {
       return getDouble(OS_EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringWaterTemperature, true);
     }
 
-    boost::optional<double> EvaporativeFluidCoolerTwoSpeed_Impl::designEnteringAirTemperature() const {
-      return getDouble(OS_EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringAirTemperature, true);
+    bool EvaporativeFluidCoolerTwoSpeed_Impl::isDesignEnteringWaterTemperatureDefaulted() const {
+      return isEmpty(OS_EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringWaterTemperature);
     }
 
-    boost::optional<double> EvaporativeFluidCoolerTwoSpeed_Impl::designEnteringAirWetbulbTemperature() const {
-      return getDouble(OS_EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringAirWetbulbTemperature, true);
+    bool EvaporativeFluidCoolerTwoSpeed_Impl::isDesignEnteringWaterTemperatureAutosized() const {
+      bool result = false;
+      boost::optional<std::string> value = getString(OS_EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringWaterTemperature, true);
+      if (value) {
+        result = openstudio::istringEqual(value.get(), "autosize");
+      }
+      return result;
+    }
+
+    double EvaporativeFluidCoolerTwoSpeed_Impl::designEnteringAirTemperature() const {
+      boost::optional<double> value = getDouble(OS_EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringAirTemperature, true);
+      OS_ASSERT(value);
+      return value.get();
+    }
+
+    bool EvaporativeFluidCoolerTwoSpeed_Impl::isDesignEnteringAirTemperatureDefaulted() const {
+      return isEmpty(OS_EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringAirTemperature);
+    }
+
+    double EvaporativeFluidCoolerTwoSpeed_Impl::designEnteringAirWetbulbTemperature() const {
+      boost::optional<double> value = getDouble(OS_EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringAirWetbulbTemperature, true);
+      OS_ASSERT(value);
+      return value.get();
+    }
+
+    bool EvaporativeFluidCoolerTwoSpeed_Impl::isDesignEnteringAirWetbulbTemperatureDefaulted() const {
+      return isEmpty(OS_EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringAirWetbulbTemperature);
     }
 
     double EvaporativeFluidCoolerTwoSpeed_Impl::highSpeedSizingFactor() const {
@@ -606,6 +631,11 @@ namespace model {
       OS_ASSERT(result);
     }
 
+    void EvaporativeFluidCoolerTwoSpeed_Impl::autosizeDesignEnteringWaterTemperature() {
+      bool result = setString(OS_EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringWaterTemperature, "autosize");
+      OS_ASSERT(result);
+    }
+
     bool EvaporativeFluidCoolerTwoSpeed_Impl::setDesignEnteringAirTemperature(boost::optional<double> designEnteringAirTemperature) {
       bool result(false);
       if (designEnteringAirTemperature) {
@@ -745,6 +775,10 @@ namespace model {
       return getAutosizedValue("Design Size Low Speed User Specified Design Capacity", "W");
     }
 
+    boost::optional<double> EvaporativeFluidCoolerTwoSpeed_Impl::autosizedDesignEnteringWaterTemperature() const {
+      return getAutosizedValue("TODO", "W");
+    }
+
     void EvaporativeFluidCoolerTwoSpeed_Impl::autosize() {
       autosizeHighFanSpeedAirFlowRate();
       autosizeHighFanSpeedFanPower();
@@ -755,6 +789,7 @@ namespace model {
       autosizeLowFanSpeedUfactorTimesAreaValue();
       autosizeDesignWaterFlowRate();
       autosizeLowSpeedUserSpecifiedDesignCapacity();
+      autosizeDesignEnteringWaterTemperature();
     }
 
     void EvaporativeFluidCoolerTwoSpeed_Impl::applySizingValues() {
@@ -802,6 +837,11 @@ namespace model {
       val = autosizedLowSpeedUserSpecifiedDesignCapacity();
       if (val) {
         setLowSpeedUserSpecifiedDesignCapacity(val.get());
+      }
+
+      val = autosizedDesignEnteringWaterTemperature();
+      if (val) {
+        setDesignEnteringWaterTemperature(val.get());
       }
     }
 
@@ -994,12 +1034,28 @@ namespace model {
     return getImpl<detail::EvaporativeFluidCoolerTwoSpeed_Impl>()->designEnteringWaterTemperature();
   }
 
-  boost::optional<double> EvaporativeFluidCoolerTwoSpeed::designEnteringAirTemperature() const {
+  bool EvaporativeFluidCoolerTwoSpeed::isDesignEnteringWaterTemperatureDefaulted() const {
+    return getImpl<detail::EvaporativeFluidCoolerTwoSpeed_Impl>()->isDesignEnteringWaterTemperatureDefaulted();
+  }
+
+  bool EvaporativeFluidCoolerTwoSpeed::isDesignEnteringWaterTemperatureAutosized() const {
+    return getImpl<detail::EvaporativeFluidCoolerTwoSpeed_Impl>()->isDesignEnteringWaterTemperatureAutosized();
+  }
+
+  double EvaporativeFluidCoolerTwoSpeed::designEnteringAirTemperature() const {
     return getImpl<detail::EvaporativeFluidCoolerTwoSpeed_Impl>()->designEnteringAirTemperature();
   }
 
-  boost::optional<double> EvaporativeFluidCoolerTwoSpeed::designEnteringAirWetbulbTemperature() const {
+  bool EvaporativeFluidCoolerTwoSpeed::isDesignEnteringAirTemperatureDefaulted() const {
+    return getImpl<detail::EvaporativeFluidCoolerTwoSpeed_Impl>()->isDesignEnteringAirTemperatureDefaulted();
+  }
+
+  double EvaporativeFluidCoolerTwoSpeed::designEnteringAirWetbulbTemperature() const {
     return getImpl<detail::EvaporativeFluidCoolerTwoSpeed_Impl>()->designEnteringAirWetbulbTemperature();
+  }
+
+  bool EvaporativeFluidCoolerTwoSpeed::isDesignEnteringAirWetbulbTemperatureDefaulted() const {
+    return getImpl<detail::EvaporativeFluidCoolerTwoSpeed_Impl>()->isDesignEnteringAirWetbulbTemperatureDefaulted();
   }
 
   double EvaporativeFluidCoolerTwoSpeed::highSpeedSizingFactor() const {
@@ -1293,6 +1349,10 @@ namespace model {
 
   boost::optional<double> EvaporativeFluidCoolerTwoSpeed::autosizedLowSpeedUserSpecifiedDesignCapacity() const {
     return getImpl<detail::EvaporativeFluidCoolerTwoSpeed_Impl>()->autosizedLowSpeedUserSpecifiedDesignCapacity();
+  }
+
+  boost::optional<double> EvaporativeFluidCoolerTwoSpeed::autosizedDesignEnteringWaterTemperature() const {
+    return getImpl<detail::EvaporativeFluidCoolerTwoSpeed_Impl>()->autosizedDesignEnteringWaterTemperature();
   }
 
 }  // namespace model

@@ -601,11 +601,16 @@ namespace model {
       return getAutosizedValue("Design Water Flow Rate", "m3/s");
     }
 
+    boost::optional<double> EvaporativeFluidCoolerSingleSpeed_Impl::autosizedDesignEnteringWaterTemperature() const {
+      return getAutosizedValue("TODO", "m3/s");
+    }
+
     void EvaporativeFluidCoolerSingleSpeed_Impl::autosize() {
       autosizeDesignAirFlowRate();
       autosizeFanPoweratDesignAirFlowRate();
       autosizeUfactorTimesAreaValueatDesignAirFlowRate();
       autosizeDesignWaterFlowRate();
+      autosizeDesignEnteringWaterTemperature();
     }
 
     void EvaporativeFluidCoolerSingleSpeed_Impl::applySizingValues() {
@@ -628,6 +633,11 @@ namespace model {
       val = autosizedDesignWaterFlowRate();
       if (val) {
         setDesignWaterFlowRate(val.get());
+      }
+
+      val = autosizedDesignEnteringWaterTemperature();
+      if (val) {
+        setDesignEnteringWaterTemperature(val.get());
       }
     }
 
@@ -1010,6 +1020,10 @@ namespace model {
 
   boost::optional<double> EvaporativeFluidCoolerSingleSpeed::autosizedDesignWaterFlowRate() const {
     return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->autosizedDesignWaterFlowRate();
+  }
+
+  boost::optional<double> EvaporativeFluidCoolerSingleSpeed::autosizedDesignEnteringWaterTemperature() const {
+    return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->autosizedDesignEnteringWaterTemperature();
   }
 
 }  // namespace model

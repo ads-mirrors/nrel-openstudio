@@ -118,9 +118,17 @@ namespace model {
 
       boost::optional<double> designEnteringWaterTemperature() const;
 
-      boost::optional<double> designEnteringAirTemperature() const;
+      bool isDesignEnteringWaterTemperatureDefaulted() const;
 
-      boost::optional<double> designEnteringAirWetbulbTemperature() const;
+      bool isDesignEnteringWaterTemperatureAutosized() const;
+
+      double designEnteringAirTemperature() const;
+
+      bool isDesignEnteringAirTemperatureDefaulted() const;
+
+      double designEnteringAirWetbulbTemperature() const;
+
+      bool isDesignEnteringAirWetbulbTemperatureDefaulted() const;
 
       double highSpeedSizingFactor() const;
 
@@ -155,6 +163,8 @@ namespace model {
       boost::optional<double> autosizedDesignWaterFlowRate() const;
 
       boost::optional<double> autosizedLowSpeedUserSpecifiedDesignCapacity() const;
+
+      boost::optional<double> autosizedDesignEnteringWaterTemperature() const;
 
       virtual void autosize() override;
 
@@ -241,6 +251,8 @@ namespace model {
       bool setDesignEnteringWaterTemperature(boost::optional<double> designEnteringWaterTemperature);
 
       void resetDesignEnteringWaterTemperature();
+
+      void autosizeDesignEnteringWaterTemperature();
 
       bool setDesignEnteringAirTemperature(boost::optional<double> designEnteringAirTemperature);
 

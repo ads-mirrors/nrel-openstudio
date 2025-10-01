@@ -212,6 +212,8 @@ namespace model {
 
     boost::optional<double> autosizedDesignWaterFlowRate() const;
 
+    boost::optional<double> autosizedDesignEnteringWaterTemperature() const;
+
     //@}
    protected:
     /// @cond
