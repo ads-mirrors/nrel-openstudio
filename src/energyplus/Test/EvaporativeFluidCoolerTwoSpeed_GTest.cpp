@@ -60,10 +60,10 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerTwoSpeed) {
   EvaporativeFluidCoolerTwoSpeed evaporativeFluidCoolerTwoSpeed(m);
   AirLoopHVAC airLoop(m);
   Node supplyOutletNode = airLoop.supplyOutletNode();
-  evaporativeFluidCoolerTwoSpeed.addToNode(supplyOutletNode);  
+  evaporativeFluidCoolerTwoSpeed.addToNode(supplyOutletNode);
 
   evaporativeFluidCoolerTwoSpeed.setName("My EvaporativeFluidCoolerTwoSpeed");
-  
+
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setHighFanSpeedAirFlowRate(1.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setHighFanSpeedFanPower(2.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setLowFanSpeedAirFlowRate(3.0));
@@ -134,6 +134,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerTwoSpeed) {
   EXPECT_EQ(24.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::DriftLossPercent).get());
   EXPECT_EQ("ScheduledRate", idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::BlowdownCalculationMode).get());
   EXPECT_EQ(25.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::BlowdownConcentrationRatio).get());
-  EXPECT_EQ(blowdownMakeupWaterUsageSchedule.nameString(), idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::BlowdownMakeupWaterUsageScheduleName).get());
+  EXPECT_EQ(blowdownMakeupWaterUsageSchedule.nameString(),
+            idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::BlowdownMakeupWaterUsageScheduleName).get());
   EXPECT_EQ("", idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::SupplyWaterStorageTankName).get());
 }

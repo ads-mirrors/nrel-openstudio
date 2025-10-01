@@ -60,7 +60,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerSingleSpeed) {
   EvaporativeFluidCoolerSingleSpeed evaporativeFluidCoolerSingleSpeed(m);
   AirLoopHVAC airLoop(m);
   Node supplyOutletNode = airLoop.supplyOutletNode();
-  evaporativeFluidCoolerSingleSpeed.addToNode(supplyOutletNode);  
+  evaporativeFluidCoolerSingleSpeed.addToNode(supplyOutletNode);
 
   evaporativeFluidCoolerSingleSpeed.setName("My EvaporativeFluidCoolerSingleSpeed");
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setDesignAirFlowRate(1.0));

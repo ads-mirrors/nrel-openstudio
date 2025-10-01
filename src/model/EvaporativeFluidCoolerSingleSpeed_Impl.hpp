@@ -131,7 +131,7 @@ namespace model {
       boost::optional<double> autosizedUfactorTimesAreaValueatDesignAirFlowRate() const;
 
       boost::optional<double> autosizedDesignWaterFlowRate() const;
-      
+
       boost::optional<double> autosizedDesignEnteringWaterTemperature() const;
 
       virtual void autosize() override;
