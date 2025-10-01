@@ -72,7 +72,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerSingleSpeed) {
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setCapacityControl("FluidBypass"));
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setSizingFactor(11.0));
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setEvaporationLossMode("LossFactor"));
-  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setEvaporationLossFactor(12.0));  
+  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setEvaporationLossFactor(12.0));
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setDriftLossPercent(13.0));
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setBlowdownCalculationMode("ScheduledRate"));
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setBlowdownConcentrationRatio(14.0));
@@ -107,6 +107,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerSingleSpeed) {
   EXPECT_EQ(13.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::DriftLossPercent).get());
   EXPECT_EQ("ScheduledRate", idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::BlowdownCalculationMode).get());
   EXPECT_EQ(14.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::BlowdownConcentrationRatio).get());
-  EXPECT_EQ(blowdownMakeupWaterUsageSchedule.nameString(), idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::BlowdownMakeupWaterUsageScheduleName).get());
+  EXPECT_EQ(blowdownMakeupWaterUsageSchedule.nameString(),
+            idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::BlowdownMakeupWaterUsageScheduleName).get());
   EXPECT_EQ("", idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::SupplyWaterStorageTankName).get());
 }
