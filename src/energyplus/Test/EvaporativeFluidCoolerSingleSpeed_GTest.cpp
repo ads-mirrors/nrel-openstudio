@@ -34,9 +34,8 @@
 
 #include "../../model/EvaporativeFluidCoolerSingleSpeed.hpp"
 #include "../../model/EvaporativeFluidCoolerSingleSpeed_Impl.hpp"
-#include "../../model/Schedule.hpp"
-#include "../../model/Schedule_Impl.hpp"
-#include "../../model/AirLoopHVAC.hpp"
+#include "../../model/ScheduleCompact.hpp"
+#include "../../model/PlantLoop.hpp"
 #include "../../model/Node.hpp"
 
 #include "../../utilities/idf/Workspace.hpp"
@@ -58,9 +57,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerSingleSpeed) {
   Model m;
 
   EvaporativeFluidCoolerSingleSpeed evaporativeFluidCoolerSingleSpeed(m);
-  AirLoopHVAC airLoop(m);
-  Node supplyOutletNode = airLoop.supplyOutletNode();
-  evaporativeFluidCoolerSingleSpeed.addToNode(supplyOutletNode);
+  PlantLoop plantLoop(m);
+  Node supplyOutletNode = plantLoop.supplyOutletNode();
+  EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.addToNode(supplyOutletNode));
 
   evaporativeFluidCoolerSingleSpeed.setName("My EvaporativeFluidCoolerSingleSpeed");
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setDesignAirFlowRate(1.0));
@@ -81,7 +80,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerSingleSpeed) {
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setDriftLossPercent(12.0));
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setBlowdownCalculationMode("ScheduledRate"));
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setBlowdownConcentrationRatio(13.0));
-  Schedule blowdownMakeupWaterUsageSchedule = m.alwaysOnDiscreteSchedule();
+  ScheduleCompact blowdownMakeupWaterUsageSchedule(m);
   EXPECT_TRUE(evaporativeFluidCoolerSingleSpeed.setBlowdownMakeupWaterUsageSchedule(blowdownMakeupWaterUsageSchedule));
 
   const Workspace w = ft.translateModel(m);

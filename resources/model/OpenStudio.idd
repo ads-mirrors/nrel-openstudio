@@ -25193,15 +25193,19 @@ OS:EvaporativeFluidCooler:TwoSpeed,
        \type real
        \units C
        \minimum> 0.0
+       \default autosize
+       \autosizable
        \ip-units F
   N20, \field Design Entering Air Temperature
        \type real
        \units C
+       \default 35.0
        \minimum> 0.0
        \ip-units F
   N21, \field Design Entering Air Wet-bulb Temperature
        \type real
        \units C
+       \default 25.6
        \minimum> 0.0
        \ip-units F
        \note Temperature.
