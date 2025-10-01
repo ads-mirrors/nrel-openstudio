@@ -40,6 +40,8 @@
 #include "../../model/PortList.hpp"
 #include "../../model/ThermalZone.hpp"
 #include "../../model/Space.hpp"
+#include "../../model/ScheduleCompact.hpp"
+#include "../../model/DesignSpecificationOutdoorAir.hpp"
 
 #include "../../utilities/idf/Workspace.hpp"
 #include "../../utilities/idf/IdfObject.hpp"
