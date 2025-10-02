@@ -81,20 +81,20 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ZoneHVACIdealLoadsAirSystem) {
   ScheduleCompact coolingAvailabilitySchedule(m);
   EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setCoolingAvailabilitySchedule(coolingAvailabilitySchedule));
   EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setDehumidificationControlType("Humidistat"));
-  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setCoolingSensibleHeatRatio(9.0));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setCoolingSensibleHeatRatio(0.1));
   EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setHumidificationControlType("Humidistat"));
   DesignSpecificationOutdoorAir dsoa(m);
   EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setDesignSpecificationOutdoorAirObject(dsoa));
   EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setDemandControlledVentilationType("OccupancySchedule"));
   EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setOutdoorAirEconomizerType("DifferentialDryBulb"));
   EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setHeatRecoveryType("Sensible"));
-  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setSensibleHeatRecoveryEffectiveness(10.0));
-  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setLatentHeatRecoveryEffectiveness(11.0));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setSensibleHeatRecoveryEffectiveness(0.2));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setLatentHeatRecoveryEffectiveness(0.3));
   ScheduleCompact heatingFuelEfficiencySchedule(m);
-  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.heatingFuelEfficiencySchedule());
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setHeatingFuelEfficiencySchedule(heatingFuelEfficiencySchedule));
   EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setHeatingFuelType("DistrictHeatingWater"));
   ScheduleCompact coolingFuelEfficiencySchedule(m);
-  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.coolingFuelEfficiencySchedule());
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setCoolingFuelEfficiencySchedule(coolingFuelEfficiencySchedule));
   EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setCoolingFuelType("DistrictCooling"));
 
   // Need to be in a thermal zone to be translated, with at least one space
@@ -129,14 +129,14 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ZoneHVACIdealLoadsAirSystem) {
   EXPECT_EQ(heatingAvailabilitySchedule.nameString(), idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::HeatingAvailabilityScheduleName).get());
   EXPECT_EQ(coolingAvailabilitySchedule.nameString(), idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::CoolingAvailabilityScheduleName).get());
   EXPECT_EQ("Humidistat", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::DehumidificationControlType).get());
-  EXPECT_EQ(9.0, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::CoolingSensibleHeatRatio).get());
+  EXPECT_EQ(0.1, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::CoolingSensibleHeatRatio).get());
   EXPECT_EQ("Humidistat", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::HumidificationControlType).get());
   EXPECT_EQ(dsoa.nameString(), idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::DesignSpecificationOutdoorAirObjectName).get());
   EXPECT_EQ("OccupancySchedule", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::DemandControlledVentilationType).get());
   EXPECT_EQ("DifferentialDryBulb", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::OutdoorAirEconomizerType).get());
   EXPECT_EQ("Sensible", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::HeatRecoveryType).get());
-  EXPECT_EQ(10.0, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::SensibleHeatRecoveryEffectiveness).get());
-  EXPECT_EQ(11.0, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::LatentHeatRecoveryEffectiveness).get());
+  EXPECT_EQ(0.2, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::SensibleHeatRecoveryEffectiveness).get());
+  EXPECT_EQ(0.3, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::LatentHeatRecoveryEffectiveness).get());
   EXPECT_EQ("", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::DesignSpecificationZoneHVACSizingObjectName).get());
   EXPECT_EQ(heatingFuelEfficiencySchedule.nameString(),
             idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::HeatingFuelEfficiencyScheduleName).get());
