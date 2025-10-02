@@ -89,13 +89,15 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerSingleSpeed) {
   const auto& idfObject = idfObjs.front();
 
   EXPECT_EQ(evaporativeFluidCoolerSingleSpeed.nameString(), idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::Name).get());
-  EXPECT_EQ("", idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::WaterInletNodeName).get());
-  EXPECT_EQ("", idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::WaterOutletNodeName).get());
+  EXPECT_EQ(evaporativeFluidCoolerSingleSpeed.inletModelObject().get().nameString(),
+            idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::WaterInletNodeName).get());
+  EXPECT_EQ(evaporativeFluidCoolerSingleSpeed.outletModelObject().get().nameString(),
+            idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::WaterOutletNodeName).get());
   EXPECT_EQ(1.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::DesignAirFlowRate).get());
   EXPECT_EQ(2.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::DesignAirFlowRateFanPower).get());
   EXPECT_EQ(3.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::DesignSprayWaterFlowRate).get());
   EXPECT_EQ("StandardDesignCapacity", idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::PerformanceInputMethod).get());
-  EXPECT_EQ("", idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::OutdoorAirInletNodeName).get());
+  EXPECT_TRUE(idfObject.isEmpty(EvaporativeFluidCooler_SingleSpeedFields::OutdoorAirInletNodeName));
   EXPECT_EQ(1.25, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::HeatRejectionCapacityandNominalCapacitySizingRatio).get());
   EXPECT_EQ(4.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::StandardDesignCapacity).get());
   EXPECT_EQ(5.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::DesignAirFlowRateUfactorTimesAreaValue).get());
@@ -113,5 +115,5 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerSingleSpeed) {
   EXPECT_EQ(13.0, idfObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::BlowdownConcentrationRatio).get());
   EXPECT_EQ(blowdownMakeupWaterUsageSchedule.nameString(),
             idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::BlowdownMakeupWaterUsageScheduleName).get());
-  EXPECT_EQ("", idfObject.getString(EvaporativeFluidCooler_SingleSpeedFields::SupplyWaterStorageTankName).get());
+  EXPECT_TRUE(idfObject.isEmpty(EvaporativeFluidCooler_SingleSpeedFields::SupplyWaterStorageTankName));
 }

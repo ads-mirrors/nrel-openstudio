@@ -71,7 +71,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerTwoSpeed) {
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setLowFanSpeedFanPowerSizingFactor(6.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setDesignSprayWaterFlowRate(7.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setPerformanceInputMethod("StandardDesignCapacity"));
-  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setOutdoorAirInletNodeName("Outdoor Air Inlet Node Name"));
+  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setOutdoorAirInletNodeName("Outdoor Air Inlet Node Name"));  // FIXME: this gets translated as ""
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setHeatRejectionCapacityandNominalCapacitySizingRatio(8.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setHighSpeedStandardDesignCapacity(9.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setLowSpeedStandardDesignCapacity(10.0));
@@ -82,17 +82,16 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerTwoSpeed) {
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setDesignWaterFlowRate(15.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setHighSpeedUserSpecifiedDesignCapacity(16.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setLowSpeedUserSpecifiedDesignCapacity(17.0));
-  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setHighSpeedUserSpecifiedDesignCapacity(18.0));
-  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setLowSpeedUserSpecifiedDesignCapacitySizingFactor(19.0));
+  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setLowSpeedUserSpecifiedDesignCapacitySizingFactor(18.0));
   evaporativeFluidCoolerTwoSpeed.autosizeDesignEnteringWaterTemperature();
-  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setDesignEnteringAirTemperature(20.0));
-  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setDesignEnteringAirWetbulbTemperature(21.0));
-  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setHighSpeedSizingFactor(22.0));
+  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setDesignEnteringAirTemperature(19.0));
+  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setDesignEnteringAirWetbulbTemperature(20.0));
+  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setHighSpeedSizingFactor(21.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setEvaporationLossMode("LossFactor"));
-  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setEvaporationLossFactor(23.0));
-  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setDriftLossPercent(24.0));
+  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setEvaporationLossFactor(22.0));
+  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setDriftLossPercent(23.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setBlowdownCalculationMode("ScheduledRate"));
-  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setBlowdownConcentrationRatio(25.0));
+  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setBlowdownConcentrationRatio(24.0));
   ScheduleCompact blowdownMakeupWaterUsageSchedule(m);
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setBlowdownMakeupWaterUsageSchedule(blowdownMakeupWaterUsageSchedule));
 
@@ -102,8 +101,10 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerTwoSpeed) {
   const auto& idfObject = idfObjs.front();
 
   EXPECT_EQ(evaporativeFluidCoolerTwoSpeed.nameString(), idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::Name).get());
-  EXPECT_EQ("", idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::WaterInletNodeName).get());
-  EXPECT_EQ("", idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::WaterOutletNodeName).get());
+  EXPECT_EQ(evaporativeFluidCoolerTwoSpeed.inletModelObject().get().nameString(),
+            idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::WaterInletNodeName).get());
+  EXPECT_EQ(evaporativeFluidCoolerTwoSpeed.outletModelObject().get().nameString(),
+            idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::WaterOutletNodeName).get());
   EXPECT_EQ(1.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::HighFanSpeedAirFlowRate).get());
   EXPECT_EQ(2.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::HighFanSpeedFanPower).get());
   EXPECT_EQ(3.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::LowFanSpeedAirFlowRate).get());
@@ -112,7 +113,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerTwoSpeed) {
   EXPECT_EQ(6.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::LowFanSpeedFanPowerSizingFactor).get());
   EXPECT_EQ(7.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::DesignSprayWaterFlowRate).get());
   EXPECT_EQ("StandardDesignCapacity", idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::PerformanceInputMethod).get());
-  EXPECT_EQ("", idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::OutdoorAirInletNodeName).get());
+  EXPECT_TRUE(idfObject.isEmpty(EvaporativeFluidCooler_TwoSpeedFields::OutdoorAirInletNodeName));
   EXPECT_EQ(8.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::HeatRejectionCapacityandNominalCapacitySizingRatio).get());
   EXPECT_EQ(9.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::HighSpeedStandardDesignCapacity).get());
   EXPECT_EQ(10.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::LowSpeedStandardDesignCapacity).get());
@@ -124,16 +125,16 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerTwoSpeed) {
   EXPECT_EQ(16.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::HighSpeedUserSpecifiedDesignCapacity).get());
   EXPECT_EQ(17.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::LowSpeedUserSpecifiedDesignCapacity).get());
   EXPECT_EQ(18.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::LowSpeedUserSpecifiedDesignCapacitySizingFactor).get());
-  EXPECT_EQ(19.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringWaterTemperature).get());
-  EXPECT_EQ(20.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringAirTemperature).get());
-  EXPECT_EQ(21.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringAirWetbulbTemperature).get());
-  EXPECT_EQ(22.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::HighSpeedSizingFactor).get());
+  EXPECT_EQ("Autosize", idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringWaterTemperature).get());
+  EXPECT_EQ(19.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringAirTemperature).get());
+  EXPECT_EQ(20.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::DesignEnteringAirWetbulbTemperature).get());
+  EXPECT_EQ(21.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::HighSpeedSizingFactor).get());
   EXPECT_EQ("LossFactor", idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::EvaporationLossMode).get());
-  EXPECT_EQ(23.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::EvaporationLossFactor).get());
-  EXPECT_EQ(24.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::DriftLossPercent).get());
+  EXPECT_EQ(22.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::EvaporationLossFactor).get());
+  EXPECT_EQ(23.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::DriftLossPercent).get());
   EXPECT_EQ("ScheduledRate", idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::BlowdownCalculationMode).get());
-  EXPECT_EQ(25.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::BlowdownConcentrationRatio).get());
+  EXPECT_EQ(24.0, idfObject.getDouble(EvaporativeFluidCooler_TwoSpeedFields::BlowdownConcentrationRatio).get());
   EXPECT_EQ(blowdownMakeupWaterUsageSchedule.nameString(),
             idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::BlowdownMakeupWaterUsageScheduleName).get());
-  EXPECT_EQ("", idfObject.getString(EvaporativeFluidCooler_TwoSpeedFields::SupplyWaterStorageTankName).get());
+  EXPECT_TRUE(idfObject.isEmpty(EvaporativeFluidCooler_TwoSpeedFields::SupplyWaterStorageTankName));
 }
