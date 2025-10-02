@@ -150,6 +150,13 @@ namespace model {
       return value.get();
     }
 
+    double EvaporativeFluidCoolerSingleSpeed_Impl::heatRejectionCapacityandNominalCapacitySizingRatio() const {
+      boost::optional<double> value =
+        getDouble(OS_EvaporativeFluidCooler_SingleSpeedFields::HeatRejectionCapacityandNominalCapacitySizingRatio, true);
+      OS_ASSERT(value);
+      return value.get();
+    }
+
     boost::optional<double> EvaporativeFluidCoolerSingleSpeed_Impl::standardDesignCapacity() const {
       return getDouble(OS_EvaporativeFluidCooler_SingleSpeedFields::StandardDesignCapacity, true);
     }
@@ -323,6 +330,14 @@ namespace model {
 
     bool EvaporativeFluidCoolerSingleSpeed_Impl::setPerformanceInputMethod(const std::string& performanceInputMethod) {
       bool result = setString(OS_EvaporativeFluidCooler_SingleSpeedFields::PerformanceInputMethod, performanceInputMethod);
+      return result;
+    }
+
+    bool EvaporativeFluidCoolerSingleSpeed_Impl::setHeatRejectionCapacityandNominalCapacitySizingRatio(
+      double heatRejectionCapacityandNominalCapacitySizingRatio) {
+      bool result = setDouble(OS_EvaporativeFluidCooler_SingleSpeedFields::HeatRejectionCapacityandNominalCapacitySizingRatio,
+                              heatRejectionCapacityandNominalCapacitySizingRatio);
+      OS_ASSERT(result);
       return result;
     }
 
@@ -670,6 +685,8 @@ namespace model {
     OS_ASSERT(ok);
     ok = setPerformanceInputMethod("UFactorTimesAreaAndDesignWaterFlowRate");
     OS_ASSERT(ok);
+    ok = setHeatRejectionCapacityandNominalCapacitySizingRatio(1.25);
+    OS_ASSERT(ok);
     resetStandardDesignCapacity();
     autosizeUfactorTimesAreaValueatDesignAirFlowRate();
     autosizeDesignWaterFlowRate();
@@ -677,11 +694,14 @@ namespace model {
     resetDesignEnteringWaterTemperature();
     resetDesignEnteringAirTemperature();
     resetDesignEnteringAirWetbulbTemperature();
-    setCapacityControl("FanCycling");
-    setSizingFactor(1.0);
+    ok = setCapacityControl("FanCycling");
+    OS_ASSERT(ok);
+    ok = setSizingFactor(1.0);
+    OS_ASSERT(ok);
     ok = setEvaporationLossMode("SaturatedExit");
     OS_ASSERT(ok);
-    setDriftLossPercent(0.008);
+    ok = setDriftLossPercent(0.008);
+    OS_ASSERT(ok);
     ok = setBlowdownCalculationMode("ConcentrationRatio");
     OS_ASSERT(ok);
     ok = setBlowdownConcentrationRatio(3.0);
@@ -734,6 +754,10 @@ namespace model {
 
   std::string EvaporativeFluidCoolerSingleSpeed::performanceInputMethod() const {
     return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->performanceInputMethod();
+  }
+
+  double EvaporativeFluidCoolerSingleSpeed::heatRejectionCapacityandNominalCapacitySizingRatio() const {
+    return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->heatRejectionCapacityandNominalCapacitySizingRatio();
   }
 
   boost::optional<double> EvaporativeFluidCoolerSingleSpeed::standardDesignCapacity() const {
@@ -866,6 +890,12 @@ namespace model {
 
   bool EvaporativeFluidCoolerSingleSpeed::setPerformanceInputMethod(const std::string& performanceInputMethod) {
     return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->setPerformanceInputMethod(performanceInputMethod);
+  }
+
+  bool EvaporativeFluidCoolerSingleSpeed::setHeatRejectionCapacityandNominalCapacitySizingRatio(
+    double heatRejectionCapacityandNominalCapacitySizingRatio) {
+    return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->setHeatRejectionCapacityandNominalCapacitySizingRatio(
+      heatRejectionCapacityandNominalCapacitySizingRatio);
   }
 
   bool EvaporativeFluidCoolerSingleSpeed::setStandardDesignCapacity(double standardDesignCapacity) {

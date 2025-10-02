@@ -71,7 +71,8 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_EvaporativeFluidCoolerTwoSpeed) {
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setLowFanSpeedFanPowerSizingFactor(6.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setDesignSprayWaterFlowRate(7.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setPerformanceInputMethod("StandardDesignCapacity"));
-  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setOutdoorAirInletNodeName("Outdoor Air Inlet Node Name"));  // FIXME: this gets translated as ""
+  EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setOutdoorAirInletNodeName(
+    "Outdoor Air Inlet Node Name"));  // FIXME: this gets translated as "" even though there's a setter?
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setHeatRejectionCapacityandNominalCapacitySizingRatio(8.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setHighSpeedStandardDesignCapacity(9.0));
   EXPECT_TRUE(evaporativeFluidCoolerTwoSpeed.setLowSpeedStandardDesignCapacity(10.0));

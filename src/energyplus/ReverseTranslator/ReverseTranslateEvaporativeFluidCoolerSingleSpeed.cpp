@@ -70,6 +70,12 @@ namespace energyplus {
         evapCooler->setPerformanceInputMethod(s.get());
       }
 
+      // HeatRejectionCapacityandNominalCapacitySizingRatio
+      value = workspaceObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::HeatRejectionCapacityandNominalCapacitySizingRatio);
+      if (value) {
+        evapCooler->setHeatRejectionCapacityandNominalCapacitySizingRatio(value.get());
+      }
+
       // StandardDesignCapacity
       value = workspaceObject.getDouble(EvaporativeFluidCooler_SingleSpeedFields::StandardDesignCapacity);
       if (value) {

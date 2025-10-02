@@ -64,6 +64,8 @@ namespace model {
 
     std::string performanceInputMethod() const;
 
+    double heatRejectionCapacityandNominalCapacitySizingRatio() const;
+
     boost::optional<double> standardDesignCapacity() const;
 
     boost::optional<double> ufactorTimesAreaValueatDesignAirFlowRate() const;
@@ -133,6 +135,8 @@ namespace model {
     bool setDesignSprayWaterFlowRate(double designSprayWaterFlowRate);
 
     bool setPerformanceInputMethod(const std::string& performanceInputMethod);
+
+    bool setHeatRejectionCapacityandNominalCapacitySizingRatio(double heatRejectionCapacityandNominalCapacitySizingRatio);
 
     bool setStandardDesignCapacity(double standardDesignCapacity);
 

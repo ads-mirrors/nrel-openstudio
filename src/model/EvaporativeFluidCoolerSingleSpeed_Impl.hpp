@@ -70,6 +70,8 @@ namespace model {
 
       std::string performanceInputMethod() const;
 
+      double heatRejectionCapacityandNominalCapacitySizingRatio() const;
+
       boost::optional<double> standardDesignCapacity() const;
 
       boost::optional<double> ufactorTimesAreaValueatDesignAirFlowRate() const;
@@ -157,7 +159,7 @@ namespace model {
 
       bool setPerformanceInputMethod(const std::string& performanceInputMethod);
 
-      void resetOutdoorAirInletNode();
+      bool setHeatRejectionCapacityandNominalCapacitySizingRatio(double heatRejectionCapacityandNominalCapacitySizingRatio);
 
       bool setStandardDesignCapacity(boost::optional<double> standardDesignCapacity);
 

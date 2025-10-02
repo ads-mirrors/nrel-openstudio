@@ -47,6 +47,7 @@ TEST_F(ModelFixture, EvaporativeFluidCoolerSingleSpeed_DefaultConstructor) {
       EXPECT_TRUE(testObject.isFanPoweratDesignAirFlowRateAutosized());
       EXPECT_DOUBLE_EQ(0.03, testObject.designSprayWaterFlowRate());
       EXPECT_EQ("UFactorTimesAreaAndDesignWaterFlowRate", testObject.performanceInputMethod());
+      EXPECT_DOUBLE_EQ(1.25, testObject.heatRejectionCapacityandNominalCapacitySizingRatio());
       EXPECT_FALSE(testObject.standardDesignCapacity());
       EXPECT_TRUE(testObject.isUfactorTimesAreaValueatDesignAirFlowRateAutosized());
       EXPECT_TRUE(testObject.isDesignWaterFlowRateAutosized());
