@@ -204,13 +204,30 @@ namespace energyplus {
       zoneHVACIdealLoadsAirSystem.setString(ZoneHVAC_IdealLoadsAirSystemFields::HumidificationControlType, modelObject.humidificationControlType());
     }
 
-    // forward translate design specification outdoor air object name
-    // get the zone that this piece of equipment is connected to
-    boost::optional<ThermalZone> zone = modelObject.thermalZone();
-    if (zone) {
-      if (auto dsoaOrList_ = getOrCreateThermalZoneDSOA(zone->cast<ThermalZone>())) {
-        // set the field to reference the design specification outdoor air
-        zoneHVACIdealLoadsAirSystem.setString(ZoneHVAC_IdealLoadsAirSystemFields::DesignSpecificationOutdoorAirObjectName, dsoaOrList_->nameString());
+    // design specification outdoor air object name
+    if (auto designOA = modelObject.designSpecificationOutdoorAirObject()) {
+
+      auto translateAndMapDSOA = [this](DesignSpecificationOutdoorAir& dsoa) -> boost::optional<IdfObject> {
+        auto objInMapIt = m_map.find(dsoa.handle());
+        if (objInMapIt != m_map.end()) {
+          return objInMapIt->second;
+        }
+
+        auto idf_dsoa_ = detail::translateDesignSpecificationOutdoorAir(dsoa);
+
+        if (idf_dsoa_) {
+          m_idfObjects.push_back(*idf_dsoa_);
+          m_map.emplace(dsoa.handle(), *idf_dsoa_);
+        }
+
+        if (m_progressBar) {
+          m_progressBar->setValue((int)m_map.size());
+        }
+        return idf_dsoa_;
+      };
+
+      if (auto idf = translateAndMapDSOA(designOA.get())) {
+        idfObject.setString(ZoneHVAC_IdealLoadsAirSystemFields::DesignSpecificationOutdoorAirObjectName, idf->name().get());
       }
     }
 
