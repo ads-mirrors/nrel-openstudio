@@ -4628,3 +4628,28 @@ TEST_F(OSVersionFixture, can_still_load_older_components) {
   EXPECT_EQ(1, model.getObjectsByType("OS:ComponentData").size());
   EXPECT_EQ(2, model.objects().size());
 }
+
+TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_EvaporativeFluidCoolerSingleSpeed) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_EvaporativeFluidCoolerSingleSpeed.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_EvaporativeFluidCoolerSingleSpeed_updated.osm");
+  model->save(outPath, true);
+
+  std::vector<WorkspaceObject> efcsss = model->getObjectsByType("OS:EvaporativeFluidCooler:SingleSpeed");
+  ASSERT_EQ(1u, efcsss.size());
+  const auto& efcss = efcsss.front();
+
+  EXPECT_EQ("Evaporative Fluid Cooler Single Speed 1", efcss.getString(1).get());  // Name
+
+  // Before insertion: Performance Input Method
+  EXPECT_EQ("StandardDesignCapacity", efcss.getString(7).get());
+
+  // New Field: Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+  EXPECT_EQ(1.25, efcss.getDouble(9).get());
+
+  // After insertion and also last field: Standard Design Capacity
+  EXPECT_EQ(123.0, efcss.getDouble(10).get());
+}

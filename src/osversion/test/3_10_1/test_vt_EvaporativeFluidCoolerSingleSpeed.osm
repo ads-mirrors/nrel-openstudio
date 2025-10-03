@@ -1,0 +1,32 @@
+
+OS:Version,
+  {273de967-d349-44ea-886c-cafe86da5ed5}, !- Handle
+  3.10.0;                                 !- Version Identifier
+
+OS:EvaporativeFluidCooler:SingleSpeed,
+  {082f7d64-b76a-4244-a250-10d8d68481d8}, !- Handle
+  Evaporative Fluid Cooler Single Speed 1, !- Name
+  ,                                       !- Water Inlet Node Name
+  ,                                       !- Water Outlet Node Name
+  autosize,                               !- Design Air Flow Rate {m3/s}
+  autosize,                               !- Fan Power at Design Air Flow Rate {W}
+  0.03,                                   !- Design Spray Water Flow Rate {m3/s}
+  StandardDesignCapacity,                 !- Performance Input Method
+  ,                                       !- Outdoor Air Inlet Node Name
+  123,                                    !- Standard Design Capacity {W}
+  autosize,                               !- U-factor Times Area Value at Design Air Flow Rate {W/K}
+  autosize,                               !- Design Water Flow Rate {m3/s}
+  ,                                       !- User Specified Design Capacity {W}
+  ,                                       !- Design Entering Water Temperature {C}
+  ,                                       !- Design Entering Air Temperature {C}
+  ,                                       !- Design Entering Air Wet-bulb Temperature {C}
+  FanCycling,                             !- Capacity Control
+  1,                                      !- Sizing Factor
+  SaturatedExit,                          !- Evaporation Loss Mode
+  ,                                       !- Evaporation Loss Factor {percent/K}
+  0.008,                                  !- Drift Loss Percent {percent}
+  ConcentrationRatio,                     !- Blowdown Calculation Mode
+  3,                                      !- Blowdown Concentration Ratio
+  ,                                       !- Blowdown Makeup Water Usage Schedule Name
+  ;                                       !- Supply Water Storage Tank Name
+
