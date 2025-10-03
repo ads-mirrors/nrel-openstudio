@@ -228,7 +228,7 @@ namespace energyplus {
       };
 
       if (auto idf = translateAndMapDSOA(designOA.get())) {
-        idfObject.setString(ZoneHVAC_IdealLoadsAirSystemFields::DesignSpecificationOutdoorAirObjectName, idf->name().get());
+        zoneHVACIdealLoadsAirSystem.setString(ZoneHVAC_IdealLoadsAirSystemFields::DesignSpecificationOutdoorAirObjectName, idf->name().get());
       }
     }
 
