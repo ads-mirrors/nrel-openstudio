@@ -43159,7 +43159,7 @@ Boiler:HotWater,
        \type real
        \units W
        \autosizable
-       \minimum 0.0
+       \minimum> 0.0
   N2 , \field Nominal Thermal Efficiency
        \required-field
        \type real
