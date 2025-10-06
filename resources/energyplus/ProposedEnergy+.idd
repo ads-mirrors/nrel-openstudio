@@ -46237,7 +46237,7 @@ HeatPump:AirToWater,
         \key Timed
         \key OnDemand
         \key TimedEmpirical
-        \note A blank field is the same as None.
+        \default None
    N17, \field Heat Pump Defrost Time Period Fraction
         \type real
         \minimum 0.0
@@ -46294,6 +46294,7 @@ HeatPump:AirToWater,
    N24, \field Number of Speeds for Heating
         \type integer
         \note the number of speed levels in heating mode
+        \minimum 0
         \maximum 5
         \default 1
         \note if there's only cooling component, set this field to 0
@@ -46446,6 +46447,7 @@ HeatPump:AirToWater,
         \note which is a cubic curve or a lookup table.
    N37, \field Number of Speeds for Cooling
         \type integer
+        \minimum 0
         \maximum 5
         \default 1
         \note the number of speed levels in cooling mode
