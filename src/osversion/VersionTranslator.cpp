@@ -146,7 +146,8 @@ namespace osversion {
     m_updateMethods[VersionString("3.8.0")] = &VersionTranslator::update_3_7_0_to_3_8_0;
     m_updateMethods[VersionString("3.9.0")] = &VersionTranslator::update_3_8_0_to_3_9_0;
     m_updateMethods[VersionString("3.10.0")] = &VersionTranslator::update_3_9_0_to_3_10_0;
-    m_updateMethods[VersionString("3.10.1")] = &VersionTranslator::defaultUpdate;
+    m_updateMethods[VersionString("3.10.1")] = &VersionTranslator::update_3_10_0_to_3_10_1;
+    // m_updateMethods[VersionString("3.10.1")] = &VersionTranslator::defaultUpdate;
 
     // List of previous versions that may be updated to this one.
     //   - To increment the translator, add an entry for the version just released (branched for
@@ -9745,6 +9746,107 @@ namespace osversion {
     return ss.str();
 
   }  // end update_3_9_0_to_3_10_0
+
+  std::string VersionTranslator::update_3_10_0_to_3_10_1(const IdfFile& idf_3_10_0, const IddFileAndFactoryWrapper& idd_3_10_1) {
+    std::stringstream ss;
+    boost::optional<std::string> value;
+
+    ss << idf_3_10_0.header() << '\n' << '\n';
+    IdfFile targetIdf(idd_3_10_1.iddFile());
+    ss << targetIdf.versionObject().get();
+
+    for (const IdfObject& object : idf_3_10_0.objects()) {
+      auto iddname = object.iddObject().name();
+
+      if (iddname == "OS:ZoneHVAC:PackagedTerminalHeatPump") {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * DX Heating Coil Sizing Ratio * 25
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setString(25, 1.0);
+
+        m_refactored.push_back(RefactoredObjectData(object, newObject));
+        ss << newObject;
+
+      } else if (iddname == "OS:ZoneHVAC:WaterToAirHeatPump") {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * DX Heating Coil Sizing Ratio * 25
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setString(25, 1.0);
+
+        m_refactored.push_back(RefactoredObjectData(object, newObject));
+        ss << newObject;
+
+      } else if (iddname == "OS:AirLoopHVAC:UnitaryHeatPump:AirToAir") {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * DX Heating Coil Sizing Ratio * 18
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setString(18, 1.0);
+
+        m_refactored.push_back(RefactoredObjectData(object, newObject));
+        ss << newObject;
+
+      } else if (iddname == "OS:AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed") {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * DX Heating Coil Sizing Ratio * 10
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setString(10, 1.0);
+
+        m_refactored.push_back(RefactoredObjectData(object, newObject));
+        ss << newObject;
+
+        // No-op
+      } else {
+        ss << object;
+      }
+    }
+
+    return ss.str();
+
+  }  // end update_3_10_0_to_3_10_1
 
 }  // namespace osversion
 }  // namespace openstudio
