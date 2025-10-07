@@ -4647,6 +4647,9 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_EvaporativeFluidCoolerSingleSpe
   // Before insertion: Performance Input Method
   EXPECT_EQ("StandardDesignCapacity", efcss.getString(7).get());
 
+  // Before insertion: Outdoor Air Inlet Node Name
+  EXPECT_TRUE(efcss.isEmpty(8));
+
   // New Field: Heat Rejection Capacity and Nominal Capacity Sizing Ratio
   EXPECT_EQ(1.25, efcss.getDouble(9).get());
 
