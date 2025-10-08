@@ -617,7 +617,7 @@ namespace model {
     }
 
     boost::optional<double> EvaporativeFluidCoolerSingleSpeed_Impl::autosizedDesignEnteringWaterTemperature() const {
-      return getAutosizedValue("TODO", "m3/s");
+      return getAutosizedValue("Design Entering Water Temperature", "C");
     }
 
     void EvaporativeFluidCoolerSingleSpeed_Impl::autosize() {
