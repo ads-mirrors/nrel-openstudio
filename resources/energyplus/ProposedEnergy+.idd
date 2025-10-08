@@ -15312,6 +15312,7 @@ AirflowNetwork:Distribution:Linkage,
       \min-fields 4
       \memo This object defines the connection between two nodes and a component.
  A1 , \field Name
+      \reference AirflowNetworkDistributionLinkageNames
       \required-field
       \type alpha
       \note Enter a unique name for this object.
@@ -27250,7 +27251,7 @@ ZoneHVAC:HighTemperatureRadiant,
         \extensible:2 - repeat last two fields, remembering to remove ; from "inner" fields.
         \memo The number of surfaces can be expanded beyond 100, if necessary, by adding more
         \memo groups to the end of the list
-        \min-fields 14
+        \min-fields 15
    A1,  \field Name
         \required-field
         \reference ZoneEquipmentNames
@@ -43159,7 +43160,7 @@ Boiler:HotWater,
        \type real
        \units W
        \autosizable
-       \minimum 0.0
+       \minimum> 0.0
   N2 , \field Nominal Thermal Efficiency
        \required-field
        \type real
@@ -46475,22 +46476,22 @@ CentralHeatPumpSystem,
        \key SmartMixing
        \default SmartMixing
   A3,  \field Cooling Loop Inlet Node Name
-       \type alpha
+       \type node
        \required-field
   A4,  \field Cooling Loop Outlet Node Name
-       \type alpha
+       \type node
        \required-field
   A5,  \field Source Loop Inlet Node Name
-       \type alpha
+       \type node
        \required-field
   A6,  \field Source Loop Outlet Node Name
-       \type alpha
+       \type node
        \required-field
   A7,  \field Heating Loop Inlet Node Name
-       \type alpha
+       \type node
        \required-field
   A8,  \field Heating Loop Outlet Node Name
-       \type alpha
+       \type node
        \required-field
   N1,  \field Ancillary Power
        \type real
@@ -63248,8 +63249,6 @@ Output:Table:Annual,
        \minimum 0
        \maximum 10
 
-
-
 OutputControl:Table:Style,
        \memo default style for the OutputControl:Table:Style is comma -- this works well for
        \memo importing into spreadsheet programs such as Excel(tm) but not so well for word
@@ -63270,7 +63269,7 @@ OutputControl:Table:Style,
        \key XMLandHTML
        \key All
        \default Comma
-   A2; \field Unit Conversion
+   A2, \field Unit Conversion
        \type choice
        \key None
        \key JtoKWH
@@ -63279,6 +63278,13 @@ OutputControl:Table:Style,
        \key InchPound
        \key InchPoundExceptElectricity
        \default None
+   A3; \field Format Numeric Values
+       \memo If No, all digits are shown after the decimal point without any rounding (23.238769213).
+       \memo If Yes, values are rounded for readability (23.24).
+       \type choice
+       \key Yes
+       \key No
+       \default Yes
 
 OutputControl:ReportingTolerances,
        \memo Calculations of the time that setpoints are not met use a tolerance of 0.2C.
@@ -63719,11 +63725,30 @@ Output:JSON,
        \key Yes
        \key No
        \default No
-  A4 ; \field Output MessagePack
+  A4 , \field Output MessagePack
        \type choice
        \key Yes
        \key No
        \default No
+  A5 , \field Unit Conversion for Tabular Data
+       \type choice
+       \note Unit conversion option used when writing JSON Tabular Data
+       \note This option applies to TabularData and TabularDatawithString in the JSON file(s)
+       \key UseOutputControlTableStyle
+       \key None
+       \key JtoKWH
+       \key JtoMJ
+       \key JtoGJ
+       \key InchPound
+       \key InchPoundExceptElectricity
+       \default UseOutputControlTableStyle
+  A6 ; \field Format Numeric Values for Tabular Data
+       \memo If No, all digits are shown after the decimal point without any rounding (23.238769213).
+       \memo If Yes, values are rounded for readability (23.24).
+       \type choice
+       \key Yes
+       \key No
+       \default Yes
 
 Output:SQLite,
        \memo Output from EnergyPlus can be written to an SQLite format file.
@@ -63732,7 +63757,7 @@ Output:SQLite,
        \type choice
        \key Simple
        \key SimpleAndTabular
-  A2 ; \field Unit Conversion for Tabular Data
+  A2 , \field Unit Conversion for Tabular Data
        \type choice
        \note Unit conversion option used when writing SQLite Tabular Data
        \note This option applies to TabularData and TabularDatawithString in the SQLite file
@@ -63744,6 +63769,13 @@ Output:SQLite,
        \key InchPound
        \key InchPoundExceptElectricity
        \default UseOutputControlTableStyle
+  A3 ; \field Format Numeric Values for Tabular Data
+       \memo If No, all digits are shown after the decimal point without any rounding (23.238769213).
+       \memo If Yes, values are rounded for readability (23.24).
+       \type choice
+       \key Yes
+       \key No
+       \default Yes
 
 Output:EnvironmentalImpactFactors,
    \memo This is used to Automatically report the facility meters and turn on the Environmental Impact Report calculations
