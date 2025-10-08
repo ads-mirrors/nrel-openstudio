@@ -27251,7 +27251,7 @@ ZoneHVAC:HighTemperatureRadiant,
         \extensible:2 - repeat last two fields, remembering to remove ; from "inner" fields.
         \memo The number of surfaces can be expanded beyond 100, if necessary, by adding more
         \memo groups to the end of the list
-        \min-fields 14
+        \min-fields 15
    A1,  \field Name
         \required-field
         \reference ZoneEquipmentNames
