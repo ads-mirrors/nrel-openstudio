@@ -9758,7 +9758,7 @@ namespace osversion {
     for (const IdfObject& object : idf_3_10_0.objects()) {
       auto iddname = object.iddObject().name();
 
-      if (iddname == "OS:People") {
+      if (iddname == "OS:Controller:MechanicalVentilation") {
 
         // 1 Field has been modified from 3.10.0 to 3.10.1:
         // ------------------------------------------------
@@ -9772,7 +9772,11 @@ namespace osversion {
             if (i == 4) {
               if (istringEqual(value.get(), "ProportionalControl")) {
                 newObject.setString(4, "ProportionalControlBasedonOccupancySchedule");
+              } else {
+                newObject.setString(i, value.get());
               }
+            } else {
+              newObject.setString(i, value.get());
             }
           }
         }
