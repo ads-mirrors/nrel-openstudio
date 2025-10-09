@@ -50948,8 +50948,8 @@ ThermalStorage:ChilledWater:Stratified,
   N4 , \field Deadband Temperature Difference
        \type real
        \units deltaC
-       \minimum 0.0
-       \default 0.0
+       \minimum 0.0001
+       \default 0.0001
   N5,  \field Temperature Sensor Height
        \units m
        \minimum 0.0
@@ -50959,6 +50959,8 @@ ThermalStorage:ChilledWater:Stratified,
   N7 , \field Nominal Cooling Capacity
        \type real
        \units W
+       \autosizable
+       \default autosize
   A4 , \field Ambient Temperature Indicator
        \required-field
        \type choice
