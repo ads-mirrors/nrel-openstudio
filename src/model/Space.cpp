@@ -698,11 +698,7 @@ namespace model {
     }
 
     SurfaceVector Space_Impl::surfaces() const {
-      // Get all surfaces, sort so results are repeatable.
-      std::vector<Surface> surfaces = getObject<ModelObject>().getModelObjectSources<Surface>(Surface::iddObjectType());
-      std::sort(surfaces.begin(), surfaces.end(), IdfObjectNameLess());
-
-      return surfaces;
+      return getObject<ModelObject>().getModelObjectSources<Surface>(Surface::iddObjectType());
     }
 
     std::vector<InternalMass> Space_Impl::internalMass() const {
@@ -1075,8 +1071,12 @@ namespace model {
         return value.get();
       }
 
+      // get all surfaces, sort so results are repeatable
+      std::vector<Surface> surfaces = this->surfaces();
+      std::sort(surfaces.begin(), surfaces.end(), IdfObjectNameLess());
+
       double result = 0;
-      for (const Surface& surface : this->surfaces()) {
+      for (const Surface& surface : surfaces) {
         if (istringEqual(surface.surfaceType(), "Floor")) {
           if (surface.isAirWall()) {
             continue;
@@ -2831,10 +2831,14 @@ namespace model {
     std::vector<Point3d> Space_Impl::floorPrint() const {
       double tol = 0.01;  // 1 cm tolerance
 
+      // get all surfaces, sort so results are repeatable
+      std::vector<Surface> surfaces = this->surfaces();
+      std::sort(surfaces.begin(), surfaces.end(), IdfObjectNameLess());
+
       // find all floors
       boost::optional<double> z;
       std::vector<Surface> floors;
-      for (const Surface& surface : this->surfaces()) {
+      for (const Surface& surface : surfaces) {
         if (surface.vertices().size() < 3) {
           LOG(Warn, "Skipping floor with fewer than 3 vertices");
           continue;
