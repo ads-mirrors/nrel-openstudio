@@ -195,10 +195,6 @@ namespace model {
       return getDouble(OS_EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringWaterTemperature, true);
     }
 
-    bool EvaporativeFluidCoolerSingleSpeed_Impl::isDesignEnteringWaterTemperatureDefaulted() const {
-      return isEmpty(OS_EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringWaterTemperature);
-    }
-
     bool EvaporativeFluidCoolerSingleSpeed_Impl::isDesignEnteringWaterTemperatureAutosized() const {
       bool result = false;
       boost::optional<std::string> value = getString(OS_EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringWaterTemperature, true);
@@ -214,18 +210,10 @@ namespace model {
       return value.get();
     }
 
-    bool EvaporativeFluidCoolerSingleSpeed_Impl::isDesignEnteringAirTemperatureDefaulted() const {
-      return isEmpty(OS_EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringAirTemperature);
-    }
-
     double EvaporativeFluidCoolerSingleSpeed_Impl::designEnteringAirWetbulbTemperature() const {
       boost::optional<double> value = getDouble(OS_EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringAirWetbulbTemperature, true);
       OS_ASSERT(value);
       return value.get();
-    }
-
-    bool EvaporativeFluidCoolerSingleSpeed_Impl::isDesignEnteringAirWetbulbTemperatureDefaulted() const {
-      return isEmpty(OS_EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringAirWetbulbTemperature);
     }
 
     std::string EvaporativeFluidCoolerSingleSpeed_Impl::capacityControl() const {
@@ -421,16 +409,8 @@ namespace model {
       bool result(false);
       if (designEnteringWaterTemperature) {
         result = setDouble(OS_EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringWaterTemperature, designEnteringWaterTemperature.get());
-      } else {
-        resetDesignEnteringWaterTemperature();
-        result = true;
       }
       return result;
-    }
-
-    void EvaporativeFluidCoolerSingleSpeed_Impl::resetDesignEnteringWaterTemperature() {
-      bool result = setString(OS_EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringWaterTemperature, "");
-      OS_ASSERT(result);
     }
 
     void EvaporativeFluidCoolerSingleSpeed_Impl::autosizeDesignEnteringWaterTemperature() {
@@ -442,16 +422,8 @@ namespace model {
       bool result(false);
       if (designEnteringAirTemperature) {
         result = setDouble(OS_EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringAirTemperature, designEnteringAirTemperature.get());
-      } else {
-        resetDesignEnteringAirTemperature();
-        result = true;
       }
       return result;
-    }
-
-    void EvaporativeFluidCoolerSingleSpeed_Impl::resetDesignEnteringAirTemperature() {
-      bool result = setString(OS_EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringAirTemperature, "");
-      OS_ASSERT(result);
     }
 
     bool EvaporativeFluidCoolerSingleSpeed_Impl::setDesignEnteringAirWetbulbTemperature(boost::optional<double> designEnteringAirWetbulbTemperature) {
@@ -459,16 +431,8 @@ namespace model {
       if (designEnteringAirWetbulbTemperature) {
         result =
           setDouble(OS_EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringAirWetbulbTemperature, designEnteringAirWetbulbTemperature.get());
-      } else {
-        resetDesignEnteringAirWetbulbTemperature();
-        result = true;
       }
       return result;
-    }
-
-    void EvaporativeFluidCoolerSingleSpeed_Impl::resetDesignEnteringAirWetbulbTemperature() {
-      bool result = setString(OS_EvaporativeFluidCooler_SingleSpeedFields::DesignEnteringAirWetbulbTemperature, "");
-      OS_ASSERT(result);
     }
 
     bool EvaporativeFluidCoolerSingleSpeed_Impl::setCapacityControl(const std::string& capacityControl) {
@@ -691,9 +655,11 @@ namespace model {
     autosizeUfactorTimesAreaValueatDesignAirFlowRate();
     autosizeDesignWaterFlowRate();
     resetUserSpecifiedDesignCapacity();
-    resetDesignEnteringWaterTemperature();
-    resetDesignEnteringAirTemperature();
-    resetDesignEnteringAirWetbulbTemperature();
+    autosizeDesignEnteringWaterTemperature();
+    ok = setDesignEnteringAirTemperature(35.0);
+    OS_ASSERT(ok);
+    ok = setDesignEnteringAirWetbulbTemperature(25.6);
+    OS_ASSERT(ok);
     ok = setCapacityControl("FanCycling");
     OS_ASSERT(ok);
     ok = setSizingFactor(1.0);
@@ -788,10 +754,6 @@ namespace model {
     return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->designEnteringWaterTemperature();
   }
 
-  bool EvaporativeFluidCoolerSingleSpeed::isDesignEnteringWaterTemperatureDefaulted() const {
-    return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->isDesignEnteringWaterTemperatureDefaulted();
-  }
-
   bool EvaporativeFluidCoolerSingleSpeed::isDesignEnteringWaterTemperatureAutosized() const {
     return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->isDesignEnteringWaterTemperatureAutosized();
   }
@@ -800,16 +762,8 @@ namespace model {
     return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->designEnteringAirTemperature();
   }
 
-  bool EvaporativeFluidCoolerSingleSpeed::isDesignEnteringAirTemperatureDefaulted() const {
-    return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->isDesignEnteringAirTemperatureDefaulted();
-  }
-
   double EvaporativeFluidCoolerSingleSpeed::designEnteringAirWetbulbTemperature() const {
     return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->designEnteringAirWetbulbTemperature();
-  }
-
-  bool EvaporativeFluidCoolerSingleSpeed::isDesignEnteringAirWetbulbTemperatureDefaulted() const {
-    return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->isDesignEnteringAirWetbulbTemperatureDefaulted();
   }
 
   std::string EvaporativeFluidCoolerSingleSpeed::capacityControl() const {
@@ -943,10 +897,6 @@ namespace model {
     return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->setDesignEnteringWaterTemperature(designEnteringWaterTemperature);
   }
 
-  void EvaporativeFluidCoolerSingleSpeed::resetDesignEnteringWaterTemperature() {
-    getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->resetDesignEnteringWaterTemperature();
-  }
-
   void EvaporativeFluidCoolerSingleSpeed::autosizeDesignEnteringWaterTemperature() {
     getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->autosizeDesignEnteringWaterTemperature();
   }
@@ -955,16 +905,8 @@ namespace model {
     return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->setDesignEnteringAirTemperature(designEnteringAirTemperature);
   }
 
-  void EvaporativeFluidCoolerSingleSpeed::resetDesignEnteringAirTemperature() {
-    getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->resetDesignEnteringAirTemperature();
-  }
-
   bool EvaporativeFluidCoolerSingleSpeed::setDesignEnteringAirWetbulbTemperature(double designEnteringAirWetbulbTemperature) {
     return getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->setDesignEnteringAirWetbulbTemperature(designEnteringAirWetbulbTemperature);
-  }
-
-  void EvaporativeFluidCoolerSingleSpeed::resetDesignEnteringAirWetbulbTemperature() {
-    getImpl<detail::EvaporativeFluidCoolerSingleSpeed_Impl>()->resetDesignEnteringAirWetbulbTemperature();
   }
 
   bool EvaporativeFluidCoolerSingleSpeed::setCapacityControl(const std::string& capacityControl) {

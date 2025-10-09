@@ -9764,6 +9764,12 @@ namespace osversion {
         // ------------------------------------------------
         // * Heat Rejection Capacity and Nominal Capacity Sizing Ratio * 9
 
+        // 3 Fields were made required from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Design Entering Water Temperature * 14
+        // * Design Entering Air Temperature * 15
+        // * Design Entering Air Wet-bulb Temperature * 16
+
         auto iddObject = idd_3_10_1.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
@@ -9774,6 +9780,14 @@ namespace osversion {
             } else {
               newObject.setString(i + 1, value.get());
             }
+          } else {
+            if (i == 13) {
+              newObject.setString(i + 1, "Autosize");
+            } else if (i == 14) {
+              newObject.setDouble(i + 1, 35.0);
+            } else if (i == 15) {
+              newObject.setDouble(i + 1, 25.6);
+            }
           }
         }
 
@@ -9782,15 +9796,48 @@ namespace osversion {
         m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
 
-        // No-op
-      } else {
-        ss << object;
+      } else if (iddname == "OS:EvaporativeFluidCooler:TwoSpeed") {
+
+        // 3 Fields were made required from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Design Entering Water Temperature * 24
+        // * Design Entering Air Temperature * 25
+        // * Design Entering Air Wet-bulb Temperature * 26
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+        else {
+          if (i == 24) {
+            newObject.setString(i, "Autosize");
+          } else if (i == 25) {
+            newObject.setDouble(i, 35.0);
+          } else if (i == 26) {
+            newObject.setDouble(i, 25.6);
+          }
+        }
       }
+
+      newObject.setDouble(9, 1.25);
+
+      m_refactored.push_back(RefactoredObjectData(object, newObject));
+      ss << newObject;
+
+      // No-op
     }
+    else {
+      ss << object;
+    }
+  }
 
-    return ss.str();
+  return ss.str();
 
-  }  // end update_3_10_0_to_3_10_1
+}  // end update_3_10_0_to_3_10_1
 
 }  // namespace osversion
 }  // namespace openstudio

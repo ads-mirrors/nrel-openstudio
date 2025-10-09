@@ -4629,13 +4629,13 @@ TEST_F(OSVersionFixture, can_still_load_older_components) {
   EXPECT_EQ(2, model.objects().size());
 }
 
-TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_EvaporativeFluidCoolerSingleSpeed) {
-  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_EvaporativeFluidCoolerSingleSpeed.osm");
+TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_EvaporativeFluidCooler) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_EvaporativeFluidCooler.osm");
   osversion::VersionTranslator vt;
   boost::optional<model::Model> model = vt.loadModel(path);
   ASSERT_TRUE(model) << "Failed to load " << path;
 
-  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_EvaporativeFluidCoolerSingleSpeed_updated.osm");
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_EvaporativeFluidCooler_updated.osm");
   model->save(outPath, true);
 
   std::vector<WorkspaceObject> efcsss = model->getObjectsByType("OS:EvaporativeFluidCooler:SingleSpeed");
@@ -4655,4 +4655,20 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_EvaporativeFluidCoolerSingleSpe
 
   // After insertion and also last field: Standard Design Capacity
   EXPECT_EQ(123.0, efcss.getDouble(10).get());
+
+  // Fields made required
+  EXPECT_EQ("Autosize", efcss.getString(14).get());  // Design Entering Water Temperature
+  EXPECT_EQ(35.0, efcss.getDouble(15).get());        // Design Entering Air Temperature
+  EXPECT_EQ(26.6, efcss.getDouble(16).get());        // Design Entering Air Wet-bulb Temperature
+
+  std::vector<WorkspaceObject> efctss = model->getObjectsByType("OS:EvaporativeFluidCooler:TwoSpeed");
+  ASSERT_EQ(1u, efctss.size());
+  const auto& efcts = efctss.front();
+
+  EXPECT_EQ("Evaporative Fluid Cooler Single Speed 1", efcts.getString(1).get());  // Name
+
+  // Fields made required
+  EXPECT_EQ(150.0, efcts.getDouble(24).get());  // Design Entering Water Temperature
+  EXPECT_EQ(35.0, efcts.getDouble(25).get());   // Design Entering Air Temperature
+  EXPECT_EQ(25.6, efcts.getDouble(26).get());   // Design Entering Air Wet-bulb Temperature
 }
