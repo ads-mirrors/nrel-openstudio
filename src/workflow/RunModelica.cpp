@@ -172,12 +172,15 @@ namespace {
     mosFile << buildSetModelicaPathCommand(setup.searchPaths);
     for (const auto& file : setup.files) {
       mosFile << fmt::format("loadFile({});\n", modelicaStringLiteral(file));
+      mosFile << "getErrorString();\n";
     }
     const auto allParams = params.getAllParameters();
     for (const auto& param : allParams) {
       mosFile << fmt::format("setParameterValue({}, {}, {});\n", param.model(), param.key(), param.value());
+      mosFile << "getErrorString();\n";
     }
-    mosFile << fmt::format("simulate({}, stopTime=604800, stepSize=10);", *seedModelicaModel);
+    mosFile << fmt::format("simulate({}, stopTime=604800, stepSize=10);\n", *seedModelicaModel);
+    mosFile << "getErrorString();";
     mosFile.close();
 
     return mosPath;

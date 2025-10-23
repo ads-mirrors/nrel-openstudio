@@ -58,7 +58,7 @@ class SetModelicaZones < OpenStudio::Measure::ModelicaMeasure
       TSetCoo=273.15 + 25,
       QHea_flow_nominal=10000,
       QCoo_flow_nominal=10000),
-    zon(zoneName=\"#{escape_quotes(zone_name)}\"));
+    zon(zoneName=\"#{zone_name}\"));
         COMPCLAUSE
       )
     end
@@ -82,10 +82,6 @@ class SetModelicaZones < OpenStudio::Measure::ModelicaMeasure
     sanitized = name.gsub(/[^0-9A-Za-z_]/, '_')
     sanitized = "zone_#{sanitized}" if sanitized.empty? || sanitized[0] =~ /\d/
     sanitized
-  end
-
-  def escape_quotes(value)
-    value.gsub('"', '\\"')
   end
 end
 
