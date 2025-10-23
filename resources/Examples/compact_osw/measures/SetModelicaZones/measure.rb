@@ -29,29 +29,57 @@ class SetModelicaZones < OpenStudio::Measure::ModelicaMeasure
   end
 
   # define what happens when the measure is run
-  def run(model, workspace, runner, user_arguments)
-    super(model, workspace, runner, user_arguments)  # Do **NOT** remove this line
+  def run(modelica_file, model, workspace, runner, user_arguments)
+    super(modelica_file, model, workspace, runner, user_arguments)  # Do **NOT** remove this line
 
-    # use the built-in error checking
     if !runner.validateUserArguments(arguments(model, workspace), user_arguments)
       return false
     end
 
-    workflow = runner.workflow()
-    seed_modelica_model = workflow.seedModelicaModel().get()
-    params = runner.modelicaParameters()
+    #puts modelica_file.getText()
 
     all_zones = model.getThermalZones()
-    # In this example, only include zones that have people in them
-    conditioned_zones = all_zones.select { |zone| zone.numberOfPeople > 0.0 }
-    # quote the zone names and separate with commas
-    zone_names = conditioned_zones.map { |z| "\"#{z.nameString()}\"" }.join(", ")
-    # The final parameter value is wrapped in curly braces
-    zones_param = "{#{zone_names}}"
-    params.setParameterValue(seed_modelica_model, "zoneNames", zones_param)
-    params.setParameterValue(seed_modelica_model, "zoneCount", conditioned_zones.count().to_s)
 
+    main_class_definition = modelica_file.getClassDefinitions().first()
+
+    all_zones.each do |zone|
+      zone_name = zone.nameString
+
+      if plenum_zone?(zone)
+        runner.registerInfo("Skipping Modelica zone for '#{zone_name}' because its space type is Plenum.")
+        next
+      end
+
+      component_name = modelica_identifier(zone_name)
+      main_class_definition.addComponentClause(
+        "Buildings.ThermalZones.EnergyPlus_24_2_0.ThermalZone #{component_name}(redeclare package Medium = Medium, zoneName = \"#{escape_quotes(zone_name)}\");"
+      )
+    end
+
+    puts modelica_file.getText()
     return true
+  end
+
+  private
+
+  def plenum_zone?(zone)
+    zone.spaces.any? do |space|
+      space_type = space.spaceType
+      next false unless space_type.is_initialized
+
+      standards_type = space_type.get.standardsSpaceType
+      standards_type.is_initialized && standards_type.get.casecmp('Plenum').zero?
+    end
+  end
+
+  def modelica_identifier(name)
+    sanitized = name.gsub(/[^0-9A-Za-z_]/, '_')
+    sanitized = "zone_#{sanitized}" if sanitized.empty? || sanitized[0] =~ /\d/
+    sanitized
+  end
+
+  def escape_quotes(value)
+    value.gsub('"', '"')
   end
 end
 

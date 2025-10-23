@@ -9,6 +9,7 @@
 #include "MeasureAPI.hpp"
 #include "OSMeasure.hpp"
 
+#include "modelica/ModelicaFile.hpp"
 #include "utilities/core/Logger.hpp"
 #include "utilities/idf/Workspace.hpp"
 
@@ -47,8 +48,8 @@ namespace measure {
    *  beginning of derived class implementations of this method. (In C++, that call looks like
    *  ModelicaMeasure::run(model, workspace, runner, user_arguments). In Ruby that call looks like
    *  super(model, workspace, runner, user_arguments). */
-    virtual bool run(openstudio::model::Model& model, const openstudio::Workspace& workspace, OSRunner& runner,
-                     const std::map<std::string, OSArgument>& user_arguments) const;
+    virtual bool run(openstudio::modelica::ModelicaFile& modelicaFile, openstudio::model::Model& model, const openstudio::Workspace& workspace,
+                     OSRunner& runner, const std::map<std::string, OSArgument>& user_arguments) const;
 
     //@}
     //

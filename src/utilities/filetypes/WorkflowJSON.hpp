@@ -204,6 +204,16 @@ class UTILITIES_API WorkflowJSON
   /** Resets the seed Modelica file path. */
   void resetSeedModelicaFile();
 
+  /** Returns additional Modelica packages to load prior to simulation.
+   *  Each entry is evaluated relative to filePaths if not absolute. */
+  std::vector<openstudio::path> modelicaPackages() const;
+
+  /** Sets additional Modelica packages to load. */
+  bool setModelicaPackages(const std::vector<openstudio::path>& packages);
+
+  /** Clears any additional Modelica packages. */
+  void resetModelicaPackages();
+
   /** Returns the weather file path. Evaluated relative to filePaths if not absolute. */
   boost::optional<openstudio::path> weatherFile() const;
 

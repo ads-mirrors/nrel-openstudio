@@ -36,9 +36,7 @@ std::vector<ClassDefinition> ModelicaFile::getClassDefinitions() {
   result.reserve(implClasses.size());
   
   for (auto& implClass : implClasses) {
-    // Create shared_ptr from the moved impl object
-    auto sharedImpl = std::make_shared<detail::ClassDefinitionImpl>(std::move(implClass));
-    result.emplace_back(ClassDefinition(sharedImpl));
+    result.emplace_back(ClassDefinition(implClass));
   }
   
   return result;
@@ -46,14 +44,12 @@ std::vector<ClassDefinition> ModelicaFile::getClassDefinitions() {
 
 ClassDefinition ModelicaFile::getClassDefinitionByName(const std::string& name) {
   auto implClass = m_impl->getClassDefinitionByName(name);
-  auto sharedImpl = std::make_shared<detail::ClassDefinitionImpl>(std::move(implClass));
-  return ClassDefinition(sharedImpl);
+  return ClassDefinition(implClass);
 }
 
 ClassDefinition ModelicaFile::addClassDefinition(const std::string& text) {
   auto implClass = m_impl->addClassDefinition(text);
-  auto sharedImpl = std::make_shared<detail::ClassDefinitionImpl>(std::move(implClass));
-  return ClassDefinition(sharedImpl);
+  return ClassDefinition(implClass);
 }
 
 // ClassDefinition implementation

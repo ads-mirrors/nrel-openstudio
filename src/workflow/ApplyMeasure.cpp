@@ -277,7 +277,7 @@ end
       } else if (measureType == MeasureType::EnergyPlusMeasure) {
         static_cast<openstudio::measure::EnergyPlusMeasure*>(measurePtr)->run(workspace_.get(), runner, argmap);
       } else if (measureType == MeasureType::ModelicaMeasure) {
-        static_cast<openstudio::measure::ModelicaMeasure*>(measurePtr)->run(model, workspace_.get(), runner, argmap);
+        static_cast<openstudio::measure::ModelicaMeasure*>(measurePtr)->run(modelicaFile.get(), model, workspace_.get(), runner, argmap);
       } else if (measureType == MeasureType::ReportingMeasure) {
         if (energyplus_output_requests) {
           LOG(Debug, "Calling measure.energyPlusOutputRequests for '" << measureDirName << "'");

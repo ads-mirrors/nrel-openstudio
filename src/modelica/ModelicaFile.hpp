@@ -1,6 +1,7 @@
 #ifndef MODELICA_MODELICAFILE_H
 #define MODELICA_MODELICAFILE_H
 
+#include "ModelicaAPI.hpp"
 #include "utilities/core/Filesystem.hpp"
 #include <string>
 #include <vector>
@@ -15,7 +16,7 @@ namespace detail {
 
 class ClassDefinition;
 
-class ModelicaFile
+class MODELICA_API ModelicaFile
 {
  public:
   ModelicaFile(const openstudio::path& path);
@@ -48,7 +49,7 @@ class ModelicaFile
   std::shared_ptr<detail::ModelicaFileImpl> m_impl;
 };
 
-class ClassDefinition
+class MODELICA_API ClassDefinition
 {
  public:
   // Default constructor for invalid/empty state

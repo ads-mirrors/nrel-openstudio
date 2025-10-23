@@ -18,7 +18,8 @@ namespace measure {
     return {};
   }
 
-  bool ModelicaMeasure::run(openstudio::model::Model& /*model*/, const openstudio::Workspace& /*workspace*/, OSRunner& runner,
+  bool ModelicaMeasure::run(openstudio::modelica::ModelicaFile& /*modelicaFile*/, openstudio::model::Model& /*model*/,
+                            const openstudio::Workspace& /*workspace*/, OSRunner& runner,
                             const std::map<std::string, OSArgument>& /*user_arguments*/) const {
     runner.prepareForMeasureRun(*this);
     return true;

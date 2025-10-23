@@ -14,6 +14,7 @@
 #include "../utilities/core/Filesystem.hpp"
 #include "../utilities/filetypes/WorkflowJSON.hpp"
 #include "../utilities/filetypes/RunOptions.hpp"
+#include "modelica/ModelicaFile.hpp"
 
 #include <functional>
 #include <map>
@@ -52,6 +53,7 @@ class OSWorkflow
   measure::OSRunner runner{workflowJSON};
   model::Model model;
   boost::optional<Workspace> workspace_;
+  boost::optional<modelica::ModelicaFile> modelicaFile;
   openstudio::filesystem::path epwPath;
   openstudio::filesystem::path sqlPath;
 
