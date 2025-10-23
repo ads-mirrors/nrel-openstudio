@@ -25,6 +25,13 @@ void OSWorkflow::runModelicaMeasures() {
   LOG(Info, "Beginning to execute Modelica Measures");
   setDefaultParameters(runner);
   applyMeasures(MeasureType::ModelicaMeasure, false);
+  try {
+    saveModelicaFileSnapshot(workflowJSON.absoluteRunDir());
+  } catch (const std::exception& e) {
+    runner.registerError(e.what());
+    state = State::Errored;
+    throw;
+  }
   LOG(Info, "Finished applying Modelica Measures.");
 
   communicateMeasureAttributes();

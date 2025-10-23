@@ -54,7 +54,7 @@ namespace {
     paths = std::move(unique);
   }
 
-  ModelicaSetup getModelicaSetup(const WorkflowJSON& workflowJSON) {
+  ModelicaSetup getModelicaSetup(const WorkflowJSON& workflowJSON, const boost::optional<openstudio::path>& finalSeedModelicaFile) {
     ModelicaSetup setup;
 
     auto addSearchPath = [&setup](const openstudio::path& dir) {
@@ -91,16 +91,6 @@ namespace {
       }
     }
 
-    if (auto seedModelicaFile = workflowJSON.seedModelicaFile()) {
-      if (auto resolved = workflowJSON.findFile(seedModelicaFile.get())) {
-        if (openstudio::filesystem::is_directory(*resolved)) {
-          handleDirectory(*resolved);
-        } else {
-          addFileToLoad(*resolved);
-        }
-      }
-    }
-
     for (const auto& packageSpec : workflowJSON.modelicaPackages()) {
       openstudio::path resolved;
       if (packageSpec.is_absolute()) {
@@ -116,14 +106,29 @@ namespace {
       }
 
       if (!openstudio::filesystem::exists(resolved)) {
-        throw std::runtime_error(
-          fmt::format("Modelica package '{}' does not exist at '{}'", toString(packageSpec), resolved.generic_string()));
+        throw std::runtime_error(fmt::format("Modelica package '{}' does not exist at '{}'", toString(packageSpec), resolved.generic_string()));
       }
 
       if (openstudio::filesystem::is_directory(resolved)) {
         handleDirectory(resolved);
       } else {
         addFileToLoad(resolved);
+      }
+    }
+
+    if (finalSeedModelicaFile) {
+      if (openstudio::filesystem::is_directory(*finalSeedModelicaFile)) {
+        handleDirectory(*finalSeedModelicaFile);
+      } else {
+        addFileToLoad(*finalSeedModelicaFile);
+      }
+    } else if (auto seedModelicaFile = workflowJSON.seedModelicaFile()) {
+      if (auto resolved = workflowJSON.findFile(seedModelicaFile.get())) {
+        if (openstudio::filesystem::is_directory(*resolved)) {
+          handleDirectory(*resolved);
+        } else {
+          addFileToLoad(*resolved);
+        }
       }
     }
 
@@ -193,7 +198,7 @@ void OSWorkflow::runModelica() {
     OS_ASSERT(workspace_);
     //const auto params = getModelicaParams(workflowJSON, *workspace_);
     const auto params = runner.modelicaParameters();
-    const auto setup = getModelicaSetup(workflowJSON);
+    const auto setup = getModelicaSetup(workflowJSON, m_latestModelicaFilePath);
     const auto script_path = createModelicaScript(workflowJSON, setup, params);
     const auto cmd = fmt::format("{} {}", getOMCExecutable().string(), script_path.string());
 

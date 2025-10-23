@@ -36,8 +36,6 @@ class SetModelicaZones < OpenStudio::Measure::ModelicaMeasure
       return false
     end
 
-    #puts modelica_file.getText()
-
     all_zones = model.getThermalZones()
 
     main_class_definition = modelica_file.getClassDefinitions().first()
@@ -52,11 +50,19 @@ class SetModelicaZones < OpenStudio::Measure::ModelicaMeasure
 
       component_name = modelica_identifier(zone_name)
       main_class_definition.addComponentClause(
-        "Buildings.ThermalZones.EnergyPlus_24_2_0.ThermalZone #{component_name}(redeclare package Medium = Medium, zoneName = \"#{escape_quotes(zone_name)}\");"
+        <<-COMPCLAUSE
+
+  TemplatesZoneHVAC.SingleZoneRTU #{component_name}(
+    redeclare Template_IdealHeat.MVP1.TemplatesRTUs.RTU_Ideal rtu(
+      TSetHea=273.15 + 20,
+      TSetCoo=273.15 + 25,
+      QHea_flow_nominal=10000,
+      QCoo_flow_nominal=10000),
+    zon(zoneName=\"#{escape_quotes(zone_name)}\"));
+        COMPCLAUSE
       )
     end
 
-    puts modelica_file.getText()
     return true
   end
 
@@ -79,7 +85,7 @@ class SetModelicaZones < OpenStudio::Measure::ModelicaMeasure
   end
 
   def escape_quotes(value)
-    value.gsub('"', '"')
+    value.gsub('"', '\\"')
   end
 end
 

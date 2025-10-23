@@ -54,6 +54,8 @@ class OSWorkflow
   model::Model model;
   boost::optional<Workspace> workspace_;
   boost::optional<modelica::ModelicaFile> modelicaFile;
+  boost::optional<openstudio::path> m_modelicaSeedFileName;
+  boost::optional<openstudio::path> m_latestModelicaFilePath;
   openstudio::filesystem::path epwPath;
   openstudio::filesystem::path sqlPath;
 
@@ -130,6 +132,9 @@ class OSWorkflow
 
   void initializeWeatherFileFromOSW();
   void updateLastWeatherFileFromModel();
+
+  void saveModelicaFileToPath(const openstudio::path& filePath);
+  void saveModelicaFileSnapshot(const openstudio::path& directory);
   void applyMeasures(MeasureType measureType, bool energyplus_output_requests = false);
   static void applyArguments(measure::OSArgumentMap& argumentMap, const std::string& argumentName, const openstudio::Variant& argumentValue);
   void saveOSMToRootDirIfDebug();

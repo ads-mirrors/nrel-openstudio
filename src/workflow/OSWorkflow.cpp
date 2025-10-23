@@ -38,6 +38,7 @@
 #include <limits>
 #include <string_view>
 #include <stdexcept>
+#include <boost/filesystem/operations.hpp>
 
 // TODO: this should really in Variant.hpp, but I'm getting pwned by the fact that ruby defines int128_t as a macro, no time to track it down
 template <>
@@ -155,6 +156,39 @@ void OSWorkflow::updateLastWeatherFileFromModel() {
   }
 
   LOG(Debug, "Weather file is not defined by the model");
+}
+
+void OSWorkflow::saveModelicaFileToPath(const openstudio::path& filePath) {
+  if (!modelicaFile) {
+    return;
+  }
+
+  auto parent = filePath.parent_path();
+  if (!parent.empty()) {
+    openstudio::filesystem::create_directories(parent);
+  }
+
+  openstudio::filesystem::ofstream out(filePath);
+  if (!out.is_open()) {
+    throw std::runtime_error(fmt::format("Unable to write Modelica seed file to '{}'", filePath.generic_string()));
+  }
+  out << modelicaFile->getText();
+  out.close();
+
+  m_latestModelicaFilePath = boost::filesystem::absolute(filePath);
+}
+
+void OSWorkflow::saveModelicaFileSnapshot(const openstudio::path& directory) {
+  if (!modelicaFile || !m_modelicaSeedFileName) {
+    return;
+  }
+
+  if (!directory.empty()) {
+    openstudio::filesystem::create_directories(directory);
+  }
+
+  auto targetPath = directory / m_modelicaSeedFileName.get();
+  saveModelicaFileToPath(targetPath);
 }
 
 void OSWorkflow::applyArguments(measure::OSArgumentMap& argumentMap, const std::string& argumentName, const openstudio::Variant& argumentValue) {

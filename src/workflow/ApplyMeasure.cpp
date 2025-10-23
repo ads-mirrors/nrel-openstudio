@@ -335,6 +335,16 @@ end
       LOG(Debug, "Step Result: " << stepResult.valueName());
       measureAttributes["applicable"] = openstudio::Variant(!((stepResult == StepResult::NA) || (stepResult == StepResult::Skip)));
 
+      if (measureType == MeasureType::ModelicaMeasure) {
+        try {
+          saveModelicaFileSnapshot(thisRunDir);
+        } catch (const std::exception& e) {
+          runner.registerError(e.what());
+          ensureBlock(true);
+          throw;
+        }
+      }
+
       if (measureType == MeasureType::ModelMeasure) {
         updateLastWeatherFileFromModel();
       }
