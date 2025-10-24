@@ -73,8 +73,13 @@ class SetModelicaZones < OpenStudio::Measure::ModelicaMeasure
       space_type = space.spaceType
       next false unless space_type.is_initialized
 
-      standards_type = space_type.get.standardsSpaceType
-      standards_type.is_initialized && standards_type.get.casecmp('Plenum').zero?
+      st = space_type.get
+      standards_type = st.standardsSpaceType
+      if standards_type.is_initialized
+        standards_type.get.casecmp('Plenum').zero?
+      else
+        st.nameString.casecmp('Plenum').zero?
+      end
     end
   end
 
