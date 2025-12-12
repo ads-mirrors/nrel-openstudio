@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     branches:
-      - main
+      - develop
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -50,6 +50,15 @@ jobs:
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
           # make safe repository
           git config --global --add safe.directory "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}"
+
+      - name: Remove old artifacts
+        run: |
+          BUILD_DIR="${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}"
+          if [ -d "$BUILD_DIR" ]; then
+            echo "Cleaning up old artifacts in $BUILD_DIR"
+            find "$BUILD_DIR" -maxdepth 1 -name "*.deb" -delete
+            rm -rf "$BUILD_DIR/_CPack_Packages"
+          fi
 
       - name: Install ccache
         run: |
