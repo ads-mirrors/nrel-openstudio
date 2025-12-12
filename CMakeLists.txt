@@ -123,6 +123,7 @@ if(GIT_FOUND)
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
   if(${RESULT} EQUAL 0 AND NOT "${GIT_VERSION}" EQUAL "${PROJECT_VERSION_BUILD}")
     set(PROJECT_VERSION_BUILD ${GIT_VERSION} CACHE STRING "Build number" FORCE) # git sha
+    message(STATUS "GIT_SHA: ${GIT_VERSION}")
   endif()
 
   # Git branch name
@@ -458,6 +459,7 @@ find_package(TinyGLTF)
 find_package(CLI11)
 find_package(minizip)
 find_package(OpenSSL)
+find_package(antlr4-runtime)
 find_package(ZLIB)
 if(BUILD_TESTING)
   find_package(GTest)
@@ -1049,6 +1051,7 @@ set(project_directories
   generateiddfactory
   utilities
   model
+  modelica
   energyplus
   epjson
   radiance

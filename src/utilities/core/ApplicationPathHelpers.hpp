@@ -8,9 +8,25 @@
 
 #include "../UtilitiesAPI.hpp"
 #include "Path.hpp"
+#include <string>
 #include <vector>
 
 namespace openstudio {
+
+enum class ModelicaCompilerType
+{
+  OpenModelica,
+  Dymola,
+};
+
+struct ModelicaCompilerInfo
+{
+  // cppcheck-suppress unusedStructMember
+  ModelicaCompilerType type{ModelicaCompilerType::OpenModelica};
+  openstudio::path executable;
+  // cppcheck-suppress unusedStructMember
+  std::vector<std::string> defaultArgs;
+};
 
 /// \returns The source directory the application was built from
 UTILITIES_API openstudio::path getApplicationSourceDirectory();
@@ -44,6 +60,12 @@ UTILITIES_API openstudio::path getEnergyPlusDirectory();
 
 /// \returns The path to the EnergyPlus executable if it exists.
 UTILITIES_API openstudio::path getEnergyPlusExecutable();
+
+/// \returns Information about the configured Modelica compiler.
+UTILITIES_API ModelicaCompilerInfo getModelicaCompiler();
+
+/// |returns The path to the Modelica Buildings Library package.mo file.
+UTILITIES_API openstudio::path getMBLPath();
 
 /// \returns The path to the Radiance installation if it exists.
 UTILITIES_API openstudio::path getRadianceDirectory();

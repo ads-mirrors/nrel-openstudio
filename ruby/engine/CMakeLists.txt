@@ -178,6 +178,19 @@ if( WIN32 )
   target_link_options(rubyengine PRIVATE $<$<CONFIG:Debug>:/NODEFAULTLIB:MSVCRT>)
 endif()
 
+if(APPLE)
+  # Newer versions of ld64 sometimes discard the libcrypto object that hosts OPENSSL_cpuid_setup,
+  # so force-load the archive to keep the initializer fixups intact.
+  if(OPENSSL_CRYPTO_LIBRARY)
+    # OPENSSL_CRYPTO_LIBRARY may be a list; force-load every entry.
+    foreach(_crypto_lib ${OPENSSL_CRYPTO_LIBRARY})
+      target_link_options(rubyengine PRIVATE "SHELL:-Wl,-force_load,${_crypto_lib}")
+    endforeach()
+  else()
+    message(WARNING "OPENSSL_CRYPTO_LIBRARY is not defined; unable to force-load libcrypto for rubyengine")
+  endif()
+endif()
+
 target_compile_definitions(rubyengine PRIVATE openstudio_scriptengine_EXPORTS SHARED_OS_LIBS)
 
 # This is statically linked to libruby.a, so no need to tweak the rpath stuff for that, but we still need to add $ORIGIN so that it finds libopenstudiolib
