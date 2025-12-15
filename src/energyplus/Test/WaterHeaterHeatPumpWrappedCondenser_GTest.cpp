@@ -88,6 +88,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser_
   ForwardTranslator ft;
   const Workspace w = ft.translateModel(m);
 
+  EXPECT_EQ(1u, w.getObjectsByType(IddObjectType::WaterHeater_Stratified).size());
   const auto idfObjs = w.getObjectsByType(IddObjectType::WaterHeater_HeatPump_WrappedCondenser);
   ASSERT_EQ(1u, idfObjs.size());
   const auto& idfObject = idfObjs.front();
@@ -191,6 +192,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser_
   ForwardTranslator ft;
   const Workspace w = ft.translateModel(m);
 
+  EXPECT_EQ(1u, w.getObjectsByType(IddObjectType::WaterHeater_Stratified).size());
   const auto idfObjs = w.getObjectsByType(IddObjectType::WaterHeater_HeatPump_WrappedCondenser);
   ASSERT_EQ(1u, idfObjs.size());
   const auto& idfObject = idfObjs.front();
