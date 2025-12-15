@@ -173,7 +173,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser_
   EXPECT_TRUE(hpwh.setDXCoil(coil));
   EXPECT_TRUE(hpwh.setMinimumInletAirTemperatureforCompressorOperation(15));
   EXPECT_TRUE(hpwh.setMaximumInletAirTemperatureforCompressorOperation(30));
-  EXPECT_TRUE(hpwh.setCompressorLocation("Outdoors"));
+  EXPECT_TRUE(hpwh.setCompressorLocation("Schedule"));
   ScheduleConstant scheduleConstant4(m);
   scheduleConstant4.setValue(0.4);
   EXPECT_TRUE(hpwh.setCompressorAmbientTemperatureSchedule(scheduleConstant4));
@@ -229,8 +229,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser_
   EXPECT_EQ(coil.nameString(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::DXCoilName).get());
   EXPECT_EQ(15, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::MinimumInletAirTemperatureforCompressorOperation).get());
   EXPECT_EQ(30, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::MaximumInletAirTemperatureforCompressorOperation).get());
-  EXPECT_EQ("Outdoors", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::CompressorLocation).get());
-  EXPECT_TRUE(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::CompressorAmbientTemperatureScheduleName));
+  EXPECT_EQ("Schedule", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::CompressorLocation).get());
+  EXPECT_EQ(scheduleConstant4.nameString(),
+            idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::CompressorAmbientTemperatureScheduleName).get());
   EXPECT_EQ("Fan:OnOff", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::FanObjectType).get());
   EXPECT_EQ(fan.nameString(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::FanName).get());
   EXPECT_EQ("DrawThrough", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::FanPlacement).get());
