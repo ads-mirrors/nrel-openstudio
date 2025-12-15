@@ -94,9 +94,9 @@ TEST_F(ModelFixture, WaterHeaterHeatPumpWrappedCondenser_GettersSetters) {
 
   // Air Outlet Node Name: Required String
   EXPECT_EQ("", hpwh.airOutletNodeName());
-  EXPECT_TRUE(hpwh.setOutletAirConfiguration("ZoneAndOutdoorAir"));
+  EXPECT_TRUE(hpwh.setInletAirConfiguration("ZoneAndOutdoorAir"));
   EXPECT_EQ("", hpwh.airOutletNodeName());
-  EXPECT_TRUE(hpwh.setOutletAirConfiguration("Schedule"));
+  EXPECT_TRUE(hpwh.setInletAirConfiguration("Schedule"));
   EXPECT_EQ(hpwh.nameString() + " Outlet", hpwh.airOutletNodeName());
 
   // Inlet Air Temperature Schedule: Optional Object but set in Ctor
