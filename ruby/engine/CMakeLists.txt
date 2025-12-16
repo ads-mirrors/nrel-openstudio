@@ -178,6 +178,49 @@ if( WIN32 )
   target_link_options(rubyengine PRIVATE $<$<CONFIG:Debug>:/NODEFAULTLIB:MSVCRT>)
 endif()
 
+if(APPLE)
+  # Newer versions of ld64 sometimes discard the libcrypto object that hosts OPENSSL_cpuid_setup,
+  # so force-load the archive to keep the initializer fixups intact. Conan's OpenSSL package
+  # exposes per-config package folders; use those to build absolute paths.
+  # KSB: This is an abomination. the basic idea is that we need a full path to the crypto library
+  # so that we can use -force_load
+  # It would really be nice to have a simpler solution, but this appears to work
+  set(_rubyengine_force_load_flags)
+  set(_rubyengine_known_configs Debug Release RelWithDebInfo MinSizeRel)
+  foreach(_cfg IN LISTS _rubyengine_known_configs)
+    string(TOUPPER "${_cfg}" _cfg_upper)
+    set(_pkg_folder_var "openssl_PACKAGE_FOLDER_${_cfg_upper}")
+    if(DEFINED ${_pkg_folder_var})
+      set(_crypto_candidate "${${_pkg_folder_var}}/lib/libcrypto.a")
+      if(EXISTS "${_crypto_candidate}")
+        list(APPEND _rubyengine_force_load_flags "$<$<CONFIG:${_cfg}>:-Wl,-force_load,${_crypto_candidate}>")
+      endif()
+    endif()
+  endforeach()
+  if(NOT _rubyengine_force_load_flags AND CMAKE_BUILD_TYPE)
+    string(TOUPPER "${CMAKE_BUILD_TYPE}" _rubyengine_cfg_upper)
+    set(_pkg_folder_var "openssl_PACKAGE_FOLDER_${_rubyengine_cfg_upper}")
+    if(DEFINED ${_pkg_folder_var})
+      set(_crypto_candidate "${${_pkg_folder_var}}/lib/libcrypto.a")
+      if(EXISTS "${_crypto_candidate}")
+        list(APPEND _rubyengine_force_load_flags "-Wl,-force_load,${_crypto_candidate}")
+      endif()
+    endif()
+  endif()
+  if(NOT _rubyengine_force_load_flags AND OPENSSL_CRYPTO_LIBRARY)
+    foreach(_crypto_lib ${OPENSSL_CRYPTO_LIBRARY})
+      if(IS_ABSOLUTE "${_crypto_lib}" AND EXISTS "${_crypto_lib}")
+        list(APPEND _rubyengine_force_load_flags "-Wl,-force_load,${_crypto_lib}")
+      endif()
+    endforeach()
+  endif()
+  if(_rubyengine_force_load_flags)
+    target_link_options(rubyengine PRIVATE ${_rubyengine_force_load_flags})
+  else()
+    message(WARNING "Unable to resolve libcrypto path for rubyengine force-load; OPENSSL_CPUID setup may fail")
+  endif()
+endif()
+
 target_compile_definitions(rubyengine PRIVATE openstudio_scriptengine_EXPORTS SHARED_OS_LIBS)
 
 # This is statically linked to libruby.a, so no need to tweak the rpath stuff for that, but we still need to add $ORIGIN so that it finds libopenstudiolib
