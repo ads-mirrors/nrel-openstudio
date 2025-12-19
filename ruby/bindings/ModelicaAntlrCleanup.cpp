@@ -15,9 +15,6 @@ extern "C" void modelica_antlr_cleanup(VALUE) {
   // release the singleton so ANTLR's own static destructor becomes a no-op; otherwise Ruby would
   // run the destructor after parts of the interpreter are gone and we'd segfault while unloading.
   auto* defaultFactory = const_cast<FactoryPtr*>(&antlr4::CommonTokenFactory::DEFAULT);
-  if (!defaultFactory) {
-    return;
-  }
   auto* raw = defaultFactory->release();
   if (raw != nullptr) {
     delete raw;
