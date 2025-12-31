@@ -48,7 +48,7 @@ jobs:
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
           # make safe repository
-          git config --global --add safe.directory "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}"
+          git config --global --add safe.directory "*"
 
       - name: Remove old artifacts
         run: |
@@ -78,7 +78,7 @@ jobs:
         run: |
           # Set up git and fetch PR head, then detect conan profile and install dependencies
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
-          git config --global --add safe.directory "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}" && \
+          git config --global --add safe.directory "*" && \
           git config user.email "cicommercialbuilding@gmail.com" && \
           git config user.name "ci-commercialbuildings" && \
           git fetch origin && \
