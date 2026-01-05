@@ -120,6 +120,12 @@ Refer to the changelog on the release page at [v3.11.0](https://github.com/NREL/
 ### OpenStudio Standards v0.8.5
 
 Update the openstudio-standards gem to version [0.8.5](https://github.com/NREL/openstudio-standards/releases/tag/v0.8.5)
+* This release refactors more methods into modules
+* Add support for adding typical interior lighting in an interior lighting module
+* HVAC component refactor that moves component level methods into the HVAC module
+* Prototype space type mapping to translate old prototype building/space types into new openstudio-standards space types and setting additional properties
+* Several minor bug fixes.
+* NECB code update.
 
 ---
 # This YAML header controls the pandoc (via TeX) to PDF settings
