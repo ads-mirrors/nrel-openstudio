@@ -2,7 +2,7 @@
 
 _Release Notes_ -  _TBD_
 
-These release notes describe version 3.11.0 of the OpenStudio SDK developed by the National Renewable Energy Laboratory (NREL), Buildings and Thermal Sciences Center, Commercial Buildings Research Group, Tools Development Section, and associated collaborators. The notes are organized into the following sections:
+These release notes describe version 3.11.0 of the OpenStudio SDK developed by the National Laboratory of the Rockies (NLR), Building Technologies and Sciences Center, Building Performance Modeling Group, and associated collaborators. The notes are organized into the following sections:
 
 -  Overview
 -  Where to Find OpenStudio Documentation
@@ -11,7 +11,7 @@ These release notes describe version 3.11.0 of the OpenStudio SDK developed by t
 
 # Overview
 
-As of April 2020, development and distribution of the OpenStudioApplication and the SketchUp plugin have transitioned to the OpenStudio Coalition, who is independently managing and distributing the software through its own [openstudiocoalition/OpenStudioApplication](https://github.com/openstudiocoalition/OpenStudioApplication) repository. The OpenStudio SDK is continuing to be actively developed and distributed by NREL and is released two times per year, through a spring and a fall release.
+As of April 2020, development and distribution of the OpenStudioApplication and the SketchUp plugin have transitioned to the OpenStudio Coalition, who is independently managing and distributing the software through its own [openstudiocoalition/OpenStudioApplication](https://github.com/openstudiocoalition/OpenStudioApplication) repository. The OpenStudio SDK is continuing to be actively developed and distributed by NLR and is released two times per year, through a spring and a fall release.
 
 Below is the list of components that is included in this SDK installer:
 
@@ -73,7 +73,6 @@ Please see [openstudio on PyPi](https://pypi.org/project/openstudio/) for furthe
 You can also refer to the [OpenStudio SDK Python Binding Version Compatibility Matrix](https://github.com/NREL/OpenStudio/wiki/OpenStudio-SDK-Python-Binding-Version-Compatibility-Matrix) to see the list of supported platforms and python versions.
 
 ## New Features, Major Fixes and API-breaking changes
-
 * [#5481](https://github.com/NREL/OpenStudio/pull/5481) - ExternalInterface's optional Initial Value field
     * Field `Initial Value` is made optional for `ExternalInterface:FunctionalMockupUnitExport:To:Schedule` and `ExternalInterface:FunctionalMockupUnitExport:To:Actuator`
     * API-breaking change for `ExternalInterface:FunctionalMockupUnitExport:To:Schedule` and `ExternalInterface:FunctionalMockupUnitExport:To:Actuator`:
@@ -100,9 +99,9 @@ You can also refer to the [OpenStudio SDK Python Binding Version Compatibility M
         * `designEnteringAirTemperature` and `designEnteringAirWetbulbTemperature` (`boost::optional<double>` to `double`)
         * `resetDesignEnteringWaterTemperature`, `resetDesignEnteringAirTemperature`, and `resetDesignEnteringAirWetbulbTemperature` are removed
 
+* todo - add in Modelica Measures
+
 ## Minor changes and bug fixes
-
-
 
 Refer to the changelog on the release page at [v3.11.0](https://github.com/NREL/OpenStudio/releases/v3.11.0)
 
@@ -110,17 +109,16 @@ Refer to the changelog on the release page at [v3.11.0](https://github.com/NREL/
 
 **New Contributors**:
 
-### OpenStudio Standards v0.8.2
+### OpenStudio Standards v0.8.5
 
-Update the openstudio-standards gem to version [0.8.2](https://github.com/NREL/openstudio-standards/releases/tag/v0.8.2)
-In addition to some refactoring, this release also included conversion of 90.1 data to formal database.
+Update the openstudio-standards gem to version [0.8.5](https://github.com/NREL/openstudio-standards/releases/tag/v0.8.5)
 
 ---
 # This YAML header controls the pandoc (via TeX) to PDF settings
 # To convert the markdown to pdf, do `pandoc release_notes.md -o release_notes.pdf`
 title:  'OpenStudio Release Notes - 3.11.0'
 author:
-- National Renewable Energy Laboratory
+- National Laboratory of the Rockies
 colorlinks: true
 linkcolor: blue
 urlcolor: Mahogany
