@@ -759,6 +759,7 @@ jobs:
           -c tools.cmake.cmaketoolchain:generator=Ninja \
           -s compiler.cppstd=20 \
           -s build_type=${{ env.BUILD_TYPE }} \
+          -s os.version=${{ matrix.macos_dev_target }} \
           -o readline/*:with_library=termcap
 
     - name: Locate Ruby
