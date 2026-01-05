@@ -99,7 +99,15 @@ You can also refer to the [OpenStudio SDK Python Binding Version Compatibility M
         * `designEnteringAirTemperature` and `designEnteringAirWetbulbTemperature` (`boost::optional<double>` to `double`)
         * `resetDesignEnteringWaterTemperature`, `resetDesignEnteringAirTemperature`, and `resetDesignEnteringAirWetbulbTemperature` are removed
 
-* todo - add in Modelica Measures
+* [#5557](https://github.com/NREL/OpenStudio/pull/5557)  - Introduce first-class Modelica workflow and Measure support
+    * add a full Modelica parsing stack (ModelicaFile ownership/AST management, ANTLR grammar artifacts, SWIG interface, and CLI driver) so measures can inspect and edit Modelica source safely
+    * expose ModelicaMeasure/ModelicaParameters, extend OSRunner + WorkflowJSON to pass parameters and surface the last simulation result, and wire everything through OSWorkflow with runModelica/runModelicaMeasures steps
+    * ship a compact Modelica example workflow, measure, Modelica libraries, and README to demonstrate running the CLI end-to-end, while tightening logging, bindings, and CMake integration to make the feature production-ready
+    * Examples
+        *  [The example workflow input file is available on GitHub here and is bundled with the end-user distribution](https://github.com/NREL/OpenStudio/blob/b6529778a4d29210d3933fb398d77ac255c5da49/resources/Examples/compact_osw/compact_modelica.osw)
+        *  [The example workflow includes the new Modelica Measure, located on GitHub here](https://github.com/NREL/OpenStudio/blob/b6529778a4d29210d3933fb398d77ac255c5da49/resources/Examples/compact_osw/measures/SetModelicaZones/measure.rb#L8)
+        *  [We are shipping a README to help users get up to speed and begin exploring this new capability](https://github.com/NREL/OpenStudio/blob/b6529778a4d29210d3933fb398d77ac255c5da49/resources/Examples/compact_osw/MODELICA_README.md) 
+   
 
 ## Minor changes and bug fixes
 
