@@ -770,6 +770,7 @@ jobs:
           -c tools.cmake.cmaketoolchain:generator=Ninja \
           -s compiler.cppstd=20 \
           -s build_type=${{ env.BUILD_TYPE }} \
+          -s os.version=${{ matrix.macos_dev_target }} \
           -o readline/*:with_library=termcap
 
     - name: Locate Ruby
@@ -824,7 +825,7 @@ jobs:
           -DCPACK_BINARY_IFW:BOOL=ON \
           -DBUILD_PYTHON_BINDINGS:BOOL=ON \
           -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF \
-          -DCMAKE_INSTALL_RPATH="@loader_path;@executable_path" \
+          -DCMAKE_INSTALL_RPATH="@loader_path;@executable_path;@loader_path/../lib" \
           -DPYTHON_VERSION:STRING=${{ env.PYTHON_REQUIRED_VERSION }} \
           -DPython_ROOT_DIR:PATH="$(dirname $(dirname $SYSTEM_PYTHON_PATH))" \
           ../${{ env.OPENSTUDIO_SOURCE }}
