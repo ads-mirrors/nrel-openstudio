@@ -123,11 +123,13 @@ jobs:
             mkdir -p $HOME/bin
             ln -sf $SWIG_BIN $HOME/bin/swig
             export PATH=$HOME/bin:$PATH
+            SWIG_EXEC_ARG="-DSWIG_EXECUTABLE=$HOME/bin/swig"
           fi
           
           cmake -G Ninja \
                 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
                 -DCMAKE_BUILD_TYPE:STRING=Release \
+                $SWIG_EXEC_ARG \
                 -DBUILD_TESTING:BOOL=ON \
                 -DCPACK_BINARY_DEB:BOOL=ON \
                 -DCPACK_BINARY_TGZ:BOOL=ON \
