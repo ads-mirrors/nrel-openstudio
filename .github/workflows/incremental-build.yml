@@ -96,6 +96,9 @@ jobs:
           # Force remove all to ensure rebuild with correct ABI
           conan remove "*" -c || true
           
+          # Fix SWIG_DIR env var being set to an invalid path by conan
+          export SWIG_DIR=""
+          
           if [ ! -f "${{ env.DOCKER_ROOT }}/.conan2/profiles/default" ]; then
             conan profile detect
           fi
@@ -112,6 +115,16 @@ jobs:
         working-directory: ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
         run: |
           . ./conanbuild.sh
+          # Create a symlink to the swig executable in a standard path if it exists in conan cache
+          # This helps when the long conan path is causing issues or not being picked up correctly
+          SWIG_BIN=$(find /github/home/.conan2 -name swig -type f -executable | head -n 1)
+          if [ ! -z "$SWIG_BIN" ]; then
+            echo "Found SWIG at $SWIG_BIN"
+            mkdir -p $HOME/bin
+            ln -sf $SWIG_BIN $HOME/bin/swig
+            export PATH=$HOME/bin:$PATH
+          fi
+          
           cmake -G Ninja \
                 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
                 -DCMAKE_BUILD_TYPE:STRING=Release \
