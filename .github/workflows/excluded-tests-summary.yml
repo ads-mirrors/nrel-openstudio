@@ -1,0 +1,664 @@
+name: Excluded Tests Summary
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * *'
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  BUILD_TYPE: Release
+  OPENSTUDIO_BUILD: build
+  OPENSTUDIO_SOURCE: OpenStudio
+  PYTHON_REQUIRED_VERSION: "3.12.2"
+  SDKROOT: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+  CCACHE_SLOPPINESS: pch_defines,time_macros,include_file_mtime,include_file_ctime
+  CCACHE_BASEDIR: ${{ github.workspace }}
+  CCACHE_COMPRESS: "true"
+  CCACHE_COMPRESSLEVEL: "3"
+  CCACHE_MAXSIZE: "10G"
+  CCACHE_DEPEND: "true"
+  CCACHE_NOHASHDIR: "true"
+  SCCACHE_GHA_ENABLED: "false"
+  SCCACHE_DIR: "${{ github.workspace }}\\.sccache"
+  SCCACHE_CACHE_SIZE: "10G"
+
+jobs:
+  setup:
+    name: Extract Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      linux_matrix: ${{ steps.matrix.outputs.linux_matrix }}
+      macos_matrix: ${{ steps.matrix.outputs.macos_matrix }}
+      windows_matrix: ${{ steps.matrix.outputs.windows_matrix }}
+      has_linux: ${{ steps.matrix.outputs.has_linux }}
+      has_macos: ${{ steps.matrix.outputs.has_macos }}
+      has_windows: ${{ steps.matrix.outputs.has_windows }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Extract Matrix from full-build.yml
+        id: matrix
+        shell: python
+        run: |
+          import yaml
+          import json
+          import os
+          import sys
+
+          print("Parsing .github/workflows/full-build.yml...")
+          try:
+              with open('.github/workflows/full-build.yml', 'r') as f:
+                  data = yaml.safe_load(f)
+          except Exception as e:
+              print(f"Error reading full-build.yml: {e}")
+              sys.exit(1)
+
+          def get_filtered_matrix(job_key):
+              try:
+                  job = data.get('jobs', {}).get(job_key, {})
+                  # We target the 'include' list specifically
+                  matrix_data = job.get('strategy', {}).get('matrix', {}).get('include', [])
+                  
+                  filtered = []
+                  for item in matrix_data:
+                      regex = item.get('exclude_regex')
+                      # Filter logic:
+                      # 1. Must be present
+                      # 2. Must not be empty string
+                      # 3. Must not be the explicit empty GHA expression ${{ '""' }}
+                      # 4. Must not be just double quotes ""
+                      if regex and regex != '""' and regex != "${{ '\"\"' }}":
+                          print(f"  Keeping {item.get('pretty')} with regex: {regex}")
+                          filtered.append(item)
+                      else:
+                          print(f"  Skipping {item.get('pretty')} (no exclude regex)")
+                  
+                  return {'include': filtered}
+              except Exception as e:
+                  print(f"Error processing {job_key}: {e}")
+                  return {'include': []}
+
+          print("\nProcessing Linux Matrix:")
+          linux = get_filtered_matrix('linux-build')
+          
+          print("\nProcessing MacOS Matrix:")
+          macos = get_filtered_matrix('macos-build')
+          
+          print("\nProcessing Windows Matrix:")
+          windows = get_filtered_matrix('windows-build')
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+              fh.write(f"linux_matrix={json.dumps(linux)}\n")
+              fh.write(f"macos_matrix={json.dumps(macos)}\n")
+              fh.write(f"windows_matrix={json.dumps(windows)}\n")
+              fh.write(f"has_linux={'true' if linux['include'] else 'false'}\n")
+              fh.write(f"has_macos={'true' if macos['include'] else 'false'}\n")
+              fh.write(f"has_windows={'true' if windows['include'] else 'false'}\n")
+
+  linux-excluded-tests:
+    needs: setup
+    if: needs.setup.outputs.has_linux == 'true'
+    name: Excluded Tests ${{ matrix.pretty }}
+    runs-on: ${{ matrix.os }}
+    container:
+      image: ${{ matrix.container_image }}
+      options: ${{ matrix.container_options }} --volume /mnt:/mnt
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup.outputs.linux_matrix) }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      MAX_BUILD_THREADS: ${{ matrix.max_jobs }}
+      CTEST_PARALLEL_LEVEL: ${{ matrix.max_jobs }}
+
+    steps:
+      - name: Verify space
+        run: |
+          if command -v free >/dev/null 2>&1; then free -h; else echo "free command not available"; fi
+          echo
+          swapon --show || true
+          echo
+          df -h || true
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Restore ccache cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ matrix.os }}-${{ matrix.platform }}-${{ hashFiles('conan.lock') }}
+          restore-keys: |
+            ccache-${{ matrix.os }}-${{ matrix.platform }}-
+
+      - name: Restore Conan cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.conan2
+          key: conan-${{ matrix.os }}-${{ matrix.platform }}-${{ hashFiles('conan.lock') }}
+          restore-keys: |
+            conan-${{ matrix.os }}-${{ matrix.platform }}-
+
+      - name: Prepare workspace
+        run: |
+          set -euo pipefail
+          if command -v git >/dev/null 2>&1; then git config --global --add safe.directory '*'; fi
+          prepare_dir() {
+            local target=$1
+            local dest=$2
+            mkdir -p "$dest"
+            if [ -d "$target" ] && [ ! -L "$target" ]; then cp -a "$target/." "$dest/"; rm -rf "$target"; fi
+            mkdir -p "$(dirname "$target")"
+            ln -sfn "$dest" "$target"
+          }
+          prepare_dir "$GITHUB_WORKSPACE/${{ env.OPENSTUDIO_BUILD }}" "/mnt/build"
+          prepare_dir "$HOME/.ccache" "/mnt/.ccache"
+          prepare_dir "$HOME/.conan2" "/mnt/.conan2"
+          if command -v ccache >/dev/null 2>&1; then ccache -M ${{ env.CCACHE_MAXSIZE }} || true; fi
+
+      - name: Fix CMake Path (CentOS)
+        if: matrix.platform == 'centos-9-x64'
+        run: |
+          if [ -d /usr/local/cmake/bin ]; then echo "/usr/local/cmake/bin" >> $GITHUB_PATH; fi
+
+      - name: Cache External Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.OPENSTUDIO_BUILD }}/EnergyPlus*.tar.gz
+            ${{ env.OPENSTUDIO_BUILD }}/EnergyPlus*.zip
+            ${{ env.OPENSTUDIO_BUILD }}/radiance*.tar.gz
+            ${{ env.OPENSTUDIO_BUILD }}/radiance*.zip
+            ${{ env.OPENSTUDIO_BUILD }}/openstudio*gems*.tar.gz
+          key: external-deps-${{ matrix.os }}-${{ hashFiles('conan.lock') }}
+          restore-keys: |
+            external-deps-${{ matrix.os }}-
+
+      - name: Restore Generated Embedded Files
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.OPENSTUDIO_BUILD }}/src/*/embedded_files
+            ${{ env.OPENSTUDIO_BUILD }}/ruby/engine/embedded_files
+          key: embedded-files-${{ matrix.os }}-${{ hashFiles('resources/**', 'ruby/engine/**', 'src/airflow/**', 'src/energyplus/**', 'src/gbxml/**', 'src/isomodel/**', 'src/model/**', 'src/radiance/**', 'src/sdd/**', 'src/utilities/**') }}
+          restore-keys: |
+            embedded-files-${{ matrix.os }}-
+
+      - name: Configure Conan remotes
+        run: |
+          set -euo pipefail
+          conan remote remove conancenter || true
+          conan remote add conancenter https://center2.conan.io
+          conan remote remove nrel-v2 || true
+          conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2
+          if [ ! -f "$HOME/.conan2/profiles/default" ]; then conan profile detect; fi
+
+      - name: Install CA Certificates
+        if: startsWith(matrix.platform, 'ubuntu')
+        run: apt-get update && apt-get install -y ca-certificates
+
+      - name: Conan install
+        run: |
+          set -euo pipefail
+          conan install . \
+            --output-folder="${{ env.OPENSTUDIO_BUILD }}" \
+            --build=missing \
+            -c tools.cmake.cmaketoolchain:generator=Ninja \
+            -s compiler.cppstd=20 \
+            -s build_type=${{ env.BUILD_TYPE }}
+
+      - name: Locate Ruby
+        run: |
+          ruby_path=$(command -v ruby)
+          echo "SYSTEM_RUBY_PATH=$ruby_path" >> $GITHUB_ENV
+
+      - name: Locate Python
+        run: |
+          python_path=$(command -v python3)
+          echo "SYSTEM_PYTHON_PATH=$python_path" >> $GITHUB_ENV
+
+      - name: Configure with CMake
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          set -euo pipefail
+          . ./conanbuild.sh
+          CCACHE_ARGS=()
+          if command -v ccache >/dev/null 2>&1; then
+            CCACHE_EXE=$(command -v ccache)
+            CCACHE_ARGS=("-DCMAKE_C_COMPILER_LAUNCHER=$CCACHE_EXE" "-DCMAKE_CXX_COMPILER_LAUNCHER=$CCACHE_EXE")
+          fi
+          cmake -G Ninja \
+            "${CCACHE_ARGS[@]}" \
+            -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
+            -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} \
+            -DBUILD_TESTING:BOOL=ON \
+            -DBUILD_PYTHON_BINDINGS:BOOL=ON \
+            -DBUILD_PYTHON_PIP_PACKAGE:BOOL=${{ matrix.pip_package }} \
+            -DPython_EXECUTABLE:FILEPATH="$SYSTEM_PYTHON_PATH" \
+            -DPYTHON_VERSION:STRING=${{ env.PYTHON_REQUIRED_VERSION }} \
+            -DSYSTEM_RUBY_EXECUTABLE="$SYSTEM_RUBY_PATH" \
+            -DCMAKE_INSTALL_RPATH='$ORIGIN;$ORIGIN/../lib' \
+            "$GITHUB_WORKSPACE"
+
+      - name: Build with Ninja
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          set -euo pipefail
+          . ./conanbuild.sh
+          cmake --build . --parallel ${{ matrix.max_jobs }}
+
+      - name: Run Excluded Tests
+        id: ctest
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          set -o pipefail
+          . ./conanbuild.sh
+          
+          exclude_regex="${{ matrix.exclude_regex }}"
+          
+          # Double check just in case, though the matrix setup should filter these
+          if [ -z "$exclude_regex" ] || [ "$exclude_regex" == '""' ]; then
+            echo "No excluded tests defined. Skipping."
+            echo "has_tests=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "has_tests=true" >> $GITHUB_OUTPUT
+          echo "Running excluded tests matching: $exclude_regex"
+          
+          # Run sequentially (-j 1) to avoid resource contentions for these specific problem tests
+          ctest -C ${{ env.BUILD_TYPE }} -R "$exclude_regex" --output-on-failure -j 1 -T test | tee excluded_tests.log
+          
+          exit_code=${PIPESTATUS[0]}
+          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+
+      - name: Upload Test Summary
+        if: always() && steps.ctest.outputs.has_tests == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ExcludedTests-${{ matrix.platform }}-${{ github.sha }}
+          path: |
+            ${{ env.OPENSTUDIO_BUILD }}/excluded_tests.log
+            ${{ env.OPENSTUDIO_BUILD }}/Testing/
+
+  macos-excluded-tests:
+    needs: setup
+    if: needs.setup.outputs.has_macos == 'true'
+    name: Excluded Tests ${{ matrix.pretty }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup.outputs.macos_matrix) }}
+    env:
+      MAX_BUILD_THREADS: ${{ matrix.max_jobs }}
+      CTEST_PARALLEL_LEVEL: ${{ matrix.max_jobs }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+      with:
+        path: ${{ env.OPENSTUDIO_SOURCE }}
+        fetch-depth: 1
+
+    - name: Git safe directory
+      working-directory: ${{ env.OPENSTUDIO_SOURCE }}
+      run: git config --global --add safe.directory '*'
+
+    - name: Setup ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ccache-${{ matrix.os }}-${{ matrix.platform }}-${{ hashFiles('conan.lock') }}
+        max-size: ${{ env.CCACHE_MAXSIZE }}
+
+    - name: Restore Conan cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.conan2
+        key: conan-${{ matrix.os }}-${{ matrix.platform }}-${{ hashFiles('conan.lock') }}
+        restore-keys: |
+          conan-${{ matrix.os }}-${{ matrix.platform }}-
+
+    - name: Remove python ${{ env.PYTHON_REQUIRED_VERSION }} from the toolcache
+      run: |
+        rm -Rf "$RUNNER_TOOL_CACHE/Python/${{ env.PYTHON_REQUIRED_VERSION }}"
+        rm -Rf "$RUNNER_TOOL_CACHE/Python/${{ env.PYTHON_REQUIRED_VERSION }}*/"
+
+    - name: Set up Python ${{ env.PYTHON_REQUIRED_VERSION }}
+      uses: jmarrec/setup-python@v5.4.0
+      with:
+        python-version: ${{ env.PYTHON_REQUIRED_VERSION }}
+      
+    - name: Install Python dependencies
+      working-directory: ${{ env.OPENSTUDIO_SOURCE }}
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel
+        pip install -r python/requirements.txt
+        pip install conan aqtinstall
+
+    - name: Install Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2.2'
+        bundler-cache: true
+
+    - name: Install System dependencies
+      shell: bash
+      run: |
+        echo MACOSX_DEPLOYMENT_TARGET=${{ matrix.macos_dev_target }} >> $GITHUB_ENV
+        brew install ninja
+      
+    - name: Create Build Directory
+      run: cmake -E make_directory ${{ env.OPENSTUDIO_BUILD }}
+
+    - name: Cache External Dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ env.OPENSTUDIO_BUILD }}/EnergyPlus*.tar.gz
+          ${{ env.OPENSTUDIO_BUILD }}/EnergyPlus*.zip
+          ${{ env.OPENSTUDIO_BUILD }}/radiance*.tar.gz
+          ${{ env.OPENSTUDIO_BUILD }}/radiance*.zip
+          ${{ env.OPENSTUDIO_BUILD }}/openstudio*gems*.tar.gz
+        key: external-deps-${{ matrix.os }}-${{ hashFiles('conan.lock') }}
+        restore-keys: |
+          external-deps-${{ matrix.os }}-
+
+    - name: Restore Generated Embedded Files
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ env.OPENSTUDIO_BUILD }}/src/*/embedded_files
+          ${{ env.OPENSTUDIO_BUILD }}/ruby/engine/embedded_files
+        key: embedded-files-${{ matrix.os }}-${{ hashFiles('resources/**', 'ruby/engine/**', 'src/airflow/**', 'src/energyplus/**', 'src/gbxml/**', 'src/isomodel/**', 'src/radiance/**', 'src/sdd/**', 'src/model/**', 'src/utilities/**') }}
+        restore-keys: |
+          embedded-files-${{ matrix.os }}-
+
+    - name: Configure Conan remotes
+      run: |
+        set -euo pipefail
+        conan remote remove nrel-v2 || true
+        conan remote add --index 0 nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2
+        conan remote remove conancenter || true
+        conan remote add conancenter https://center2.conan.io
+        if [ ! -f "$HOME/.conan2/profiles/default" ]; then conan profile detect; fi
+        conan config home
+
+    - name: Conan install
+      working-directory: ${{ env.OPENSTUDIO_SOURCE }}
+      run: |
+        set -euo pipefail
+        CMAKE_POLICY_VERSION_MINIMUM=3.5 conan install . \
+          --output-folder=../${{ env.OPENSTUDIO_BUILD }} \
+          --build=missing \
+          -c tools.cmake.cmaketoolchain:generator=Ninja \
+          -s compiler.cppstd=20 \
+          -s build_type=${{ env.BUILD_TYPE }} \
+          -s os.version=${{ matrix.macos_dev_target }} \
+          -o readline/*:with_library=termcap
+
+    - name: Locate Ruby
+      run: |
+        ruby_path=$(command -v ruby)
+        echo "SYSTEM_RUBY_PATH=$ruby_path" >> $GITHUB_ENV
+
+    - name: Locate Python
+      run: |
+        python_path=$(command -v python3)
+        echo "SYSTEM_PYTHON_PATH=$python_path" >> $GITHUB_ENV
+
+    - name: Configure with CMake
+      working-directory: ${{ env.OPENSTUDIO_BUILD }}
+      run: |
+        set -e
+        chmod +x ./conanbuild.sh
+        . ./conanbuild.sh
+        CCACHE_ARGS=()
+        if command -v ccache >/dev/null 2>&1; then
+          CCACHE_EXE=$(command -v ccache)
+          CCACHE_ARGS=("-DCMAKE_C_COMPILER_LAUNCHER=$CCACHE_EXE" "-DCMAKE_CXX_COMPILER_LAUNCHER=$CCACHE_EXE")
+        fi
+
+        cmake -G Ninja \
+          "${CCACHE_ARGS[@]}" \
+          -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
+          -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${{ matrix.macos_dev_target }} \
+          -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} \
+          -DBUILD_TESTING:BOOL=ON \
+          -DBUILD_PYTHON_BINDINGS:BOOL=ON \
+          -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF \
+          -DCMAKE_INSTALL_RPATH="@loader_path;@executable_path;@loader_path/../lib" \
+          -DPYTHON_VERSION:STRING=${{ env.PYTHON_REQUIRED_VERSION }} \
+          -DPython_ROOT_DIR:PATH="$(dirname $(dirname $SYSTEM_PYTHON_PATH))" \
+          ../${{ env.OPENSTUDIO_SOURCE }}
+
+    - name: Build with Ninja
+      working-directory: ${{ env.OPENSTUDIO_BUILD }}
+      run: |
+        . ./conanbuild.sh
+        cmake --build . --parallel ${MAX_BUILD_THREADS}
+
+    - name: Run Excluded Tests
+      id: ctest
+      working-directory: ${{ env.OPENSTUDIO_BUILD }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        gem install bundler -v 2.4.10 --conservative --no-document
+        
+        exclude_regex="${{ matrix.exclude_regex }}"
+        
+        if [ -z "$exclude_regex" ] || [ "$exclude_regex" == '""' ]; then
+          echo "No excluded tests defined. Skipping."
+          echo "has_tests=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        
+        echo "has_tests=true" >> $GITHUB_OUTPUT
+        echo "Running excluded tests matching: $exclude_regex"
+
+        ctest -C ${{ env.BUILD_TYPE }} -R "$exclude_regex" --output-on-failure -j 1 -T test | tee excluded_tests.log
+        
+        exit_code=${PIPESTATUS[0]}
+        echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+
+    - name: Upload Test Summary
+      if: always() && steps.ctest.outputs.has_tests == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ExcludedTests-${{ matrix.platform }}-${{ github.sha }}
+        path: |
+          ${{ env.OPENSTUDIO_BUILD }}/excluded_tests.log
+          ${{ env.OPENSTUDIO_BUILD }}/Testing/
+
+  windows-excluded-tests:
+    needs: setup
+    if: needs.setup.outputs.has_windows == 'true'
+    name: Excluded Tests ${{ matrix.pretty }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup.outputs.windows_matrix) }}
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      MAX_BUILD_THREADS: ${{ matrix.max_jobs }}
+      CTEST_PARALLEL_LEVEL: ${{ matrix.max_jobs }}
+      RUBYOPT: "-Eutf-8:utf-8"
+      PYTHONUTF8: "1"
+  
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          path: ${{ env.OPENSTUDIO_SOURCE }}
+          fetch-depth: 1
+          
+      - name: Git safe directory
+        working-directory: ${{ env.OPENSTUDIO_SOURCE }}
+        run: git config --global --add safe.directory '*'
+      
+      - name: Restore sccache cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}\.sccache
+          key: sccache-${{ matrix.os }}-${{ matrix.platform }}-${{ hashFiles('conan.lock') }}
+          restore-keys: |
+            sccache-${{ matrix.os }}-${{ matrix.platform }}-
+      
+      - name: Patch tests for Windows
+        working-directory: ${{ env.OPENSTUDIO_SOURCE }}
+        run: |
+          $os_py = "python/module/openstudio.py"
+          if (Test-Path $os_py) {
+            $content = Get-Content $os_py
+            $new_content = @()
+            foreach ($line in $content) {
+                $new_content += $line
+                if ($line -match "os.add_dll_directory\(bin_dir\)") {
+                    $new_content += "        products_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))"
+                    $new_content += "        if os.path.isdir(products_dir) and os.path.isfile(os.path.join(products_dir, 'openstudio_utilities.dll')):"
+                    $new_content += "            os.add_dll_directory(products_dir)"
+                }
+            }
+            $new_content | Set-Content $os_py
+          }
+
+      - name: Prepare workspace
+        run: |
+          git config --global --add safe.directory "*"
+          New-Item -ItemType Directory -Path "${{ env.OPENSTUDIO_BUILD }}" -Force
+
+      - name: Setup sccache
+        uses: Mozilla-Actions/sccache-action@v0.0.5
+
+      - name: Restore Conan cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.conan2
+          key: conan-${{ matrix.os }}-windows-${{ hashFiles('conan.lock') }}
+          restore-keys: |
+            conan-${{ matrix.os }}-windows-
+
+      - name: Set up Python 3.12.2
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12.2'
+          cache: 'pip'
+  
+      - name: Install Python dependencies
+        working-directory: ${{ env.OPENSTUDIO_SOURCE }}
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -r python/requirements.txt
+
+      - name: Install Conan
+        working-directory: ${{ env.OPENSTUDIO_SOURCE }}
+        run: |
+          python -m pip install conan
+
+      - name: Install Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2.2'
+          bundler-cache: true
+        
+      - name: Create Build Directory
+        run: cmake -E make_directory ${{ env.OPENSTUDIO_BUILD }}
+
+      - name: Configure Conan remotes
+        run: |
+          conan remote remove nrel-v2; if ($LASTEXITCODE -ne 0) { $LASTEXITCODE = 0 }
+          conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2
+          conan remote remove conancenter; if ($LASTEXITCODE -ne 0) { $LASTEXITCODE = 0 }
+          conan remote add conancenter https://center2.conan.io
+          if (-not (Test-Path "$env:USERPROFILE/.conan2/profiles/default")) { conan profile detect }
+          conan config home
+
+      - name: Conan install
+        working-directory: ${{ env.OPENSTUDIO_SOURCE }}
+        run: |
+          $env:CMAKE_POLICY_VERSION_MINIMUM="3.5"
+          conan install . `
+            --output-folder="../${{ env.OPENSTUDIO_BUILD }}" `
+            --build=missing `
+            -c tools.cmake.cmaketoolchain:generator=Ninja `
+            -s compiler.cppstd=20 `
+            -s build_type=${{ env.BUILD_TYPE }}
+
+      - name: Locate Ruby
+        run: |
+          $rubyPath = (Get-Command ruby).Source
+          "SYSTEM_RUBY_PATH=$rubyPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Locate Python
+        run: |
+          $pythonPath = (Get-Command python).Source
+          "SYSTEM_PYTHON_PATH=$pythonPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Configure with CMake
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          $sccacheExe = (Get-Command sccache).Source
+          & $env:ComSpec /c "call conanbuild.bat && cmake -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=`"$sccacheExe`" -DCMAKE_CXX_COMPILER_LAUNCHER=`"$sccacheExe`" -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} -DBUILD_TESTING:BOOL=ON -DBUILD_PYTHON_BINDINGS:BOOL=ON -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF -DPython_EXECUTABLE:FILEPATH=`"$env:SYSTEM_PYTHON_PATH`" -DPYTHON_VERSION:STRING=${{ env.PYTHON_REQUIRED_VERSION }} -DSYSTEM_RUBY_EXECUTABLE=`"%SYSTEM_RUBY_PATH%`" `"../${{ env.OPENSTUDIO_SOURCE }}"`"
+
+      - name: Build with Ninja
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        shell: pwsh
+        run: |
+          if (Get-Command sccache -ErrorAction SilentlyContinue) { sccache -s }
+          & $env:ComSpec /c "call conanbuild.bat && cmake --build . --parallel ${{ matrix.max_jobs }}"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (Get-Command sccache -ErrorAction SilentlyContinue) { sccache -s }
+        
+      - name: Run Excluded Tests
+        id: ctest
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        shell: pwsh
+        run: |
+          $env_vars = & $env:ComSpec /c "call conanbuild.bat && set"
+          foreach ($line in $env_vars) {
+            if ($line -match '^(.*?)=(.*)$') {
+              $name = $matches[1]; $value = $matches[2]
+              if ($name -ne "" -and $name -notmatch "^=") { [Environment]::SetEnvironmentVariable($name, $value, "Process") }
+            }
+          }
+          
+          $products_dir = Join-Path (Get-Location) "Products"
+          $env:Path = "$products_dir;" + $env:Path
+          
+          $exclude_regex = "${{ matrix.exclude_regex }}"
+          $env:CTEST_OUTPUT_ON_FAILURE = "1"
+
+          if ([string]::IsNullOrEmpty($exclude_regex) -or $exclude_regex -eq '""') {
+             Write-Host "No excluded tests defined. Skipping."
+             "has_tests=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+             exit 0
+          }
+
+          "has_tests=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Running excluded tests matching: $exclude_regex"
+          
+          ctest -C ${{ env.BUILD_TYPE }} -R "$exclude_regex" --output-on-failure -j 1 -T test | Tee-Object -FilePath "excluded_tests.log"
+          
+          $exit_code = $LASTEXITCODE
+          "exit_code=$exit_code" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Upload Test Summary
+        if: always() && steps.ctest.outputs.has_tests == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ExcludedTests-${{ matrix.platform }}-${{ github.sha }}
+          path: |
+            ${{ env.OPENSTUDIO_BUILD }}/excluded_tests.log
+            ${{ env.OPENSTUDIO_BUILD }}/Testing/
