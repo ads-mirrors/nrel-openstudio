@@ -1,5 +1,6 @@
 set(openstudio_modelica_depends
   antlr4_static
+  ${openstudio_utilities_depends}
 )
 set(openstudio_modelica_depends ${openstudio_modelica_depends} PARENT_SCOPE)
 
@@ -28,7 +29,6 @@ add_library(openstudio_modelica
 target_link_libraries(openstudio_modelica 
   PUBLIC 
   ${openstudio_modelica_depends}
-  openstudio_utilities
 )
 
 target_compile_definitions(openstudio_modelica
@@ -43,18 +43,6 @@ set(openstudio_modelica_swig_src
 
 #macro(MAKE_SWIG_TARGET NAME SIMPLENAME KEY_I_FILE I_FILES PARENT_TARGET PARENT_SWIG_TARGETS)
 MAKE_SWIG_TARGET(OpenStudioModelica modelica "${CMAKE_CURRENT_SOURCE_DIR}/Modelica.i" "${openstudio_modelica_swig_src}" openstudio_modelica OpenStudioUtilities)
-
-if(TARGET ruby_OpenStudioModelica)
-  target_link_libraries(ruby_OpenStudioModelica openstudiolib)
-endif()
-
-if(TARGET python_OpenStudioModelica)
-  target_link_libraries(python_OpenStudioModelica PUBLIC openstudiolib)
-endif()
-
-if(TARGET python_package_OpenStudioModelica)
-  target_link_libraries(python_package_OpenStudioModelica PUBLIC openstudiolib)
-endif()
 
 add_executable(antdemo
   main.cpp
