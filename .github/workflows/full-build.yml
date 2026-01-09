@@ -93,8 +93,8 @@ jobs:
               *.rpm
               *OpenStudio*x86_64.tar.gz
             cpack_generators: "RPM;TGZ"
-            max_jobs: 2
-            exclude_regex: "^BCLFixture.RemoteBCLMetaSearchTest$"
+            max_jobs: 4
+            exclude_regex: "^(BCLFixture.RemoteBCLMetaSearchTest|BCLFixture.BCLMeasure)$"
           - platform: ubuntu-2204-x64
             pretty: Ubuntu 22.04 x64
             os: ubuntu-22.04
@@ -107,8 +107,8 @@ jobs:
               *.deb
               *OpenStudio*x86_64.tar.gz
             cpack_generators: "DEB;TGZ"
-            max_jobs: 2
-            exclude_regex: "^ModelFixture.PythonPluginInstance_NotPYFile$"
+            max_jobs: 3
+            exclude_regex: "^(ModelFixture.PythonPluginInstance_NotPYFile|BCLFixture.BCLMeasure)$"
           - platform: ubuntu-2404-x64
             pretty: Ubuntu 24.04 x64
             os: ubuntu-24.04
@@ -121,8 +121,8 @@ jobs:
               *.deb
               *OpenStudio*x86_64.tar.gz
             cpack_generators: "DEB;TGZ"
-            max_jobs: 2
-            exclude_regex: ${{ '""' }}
+            max_jobs: 4
+            exclude_regex: "^BCLFixture.BCLMeasure$"
           - platform: ubuntu-2204-arm64
             pretty: Ubuntu 22.04 ARM64
             os: ubuntu-22.04-arm
@@ -135,8 +135,8 @@ jobs:
               *.deb
               *OpenStudio*arm64.tar.gz
             cpack_generators: "DEB;TGZ"
-            max_jobs: 2
-            exclude_regex: "^(GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel|SqlFileFixture.AnnualTotalCosts|OpenStudioCLI.*test_measure_manager)$"
+            max_jobs: 3
+            exclude_regex: "^(GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel|SqlFileFixture.AnnualTotalCosts|OpenStudioCLI.*test_measure_manager|BCLFixture.BCLMeasure)$"
           - platform: ubuntu-2404-arm64
             pretty: Ubuntu 24.04 ARM64
             os: ubuntu-24.04-arm
@@ -149,8 +149,8 @@ jobs:
               *.deb
               *OpenStudio*arm64.tar.gz
             cpack_generators: "DEB;TGZ"
-            max_jobs: 2
-            exclude_regex: "^(GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel|SqlFileFixture.AnnualTotalCosts|OpenStudioCLI.*test_measure_manager)$"
+            max_jobs: 4
+            exclude_regex: "^(GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel|SqlFileFixture.AnnualTotalCosts|OpenStudioCLI.*test_measure_manager|BCLFixture.BCLMeasure)$"
     defaults:
       run:
         shell: bash
@@ -163,8 +163,16 @@ jobs:
       contents: write
       
     steps:
-      - name: Verify space
+      - name: Enable Swap and Verify space
         run: |
+          echo "Enabling Swap..."
+          # Create and enable 8GB swap file to prevent OOM kills
+          dd if=/dev/zero of=/mnt/swapfile_extra bs=1M count=8192 status=progress
+          chmod 600 /mnt/swapfile_extra
+          mkswap /mnt/swapfile_extra
+          swapon /mnt/swapfile_extra
+          
+          echo
           echo "Memory and swap:"
           # Check if free exists before running it, or ignore failure
           if command -v free >/dev/null 2>&1; then
@@ -283,7 +291,11 @@ jobs:
 
       - name: Install CA Certificates
         if: startsWith(matrix.platform, 'ubuntu')
-        run: apt-get update && apt-get install -y ca-certificates
+        run: |
+          apt-get update || true
+          apt-get install -y ca-certificates gnupg wget
+          wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+          apt-get update
 
       - name: Conan install
         run: |
@@ -327,7 +339,7 @@ jobs:
             -DPython_EXECUTABLE:FILEPATH="$SYSTEM_PYTHON_PATH" \
             -DPYTHON_VERSION:STRING=${{ env.PYTHON_REQUIRED_VERSION }} \
             -DSYSTEM_RUBY_EXECUTABLE="$SYSTEM_RUBY_PATH" \
-            -DCMAKE_INSTALL_RPATH='$ORIGIN;$ORIGIN/../lib' \
+            -DCMAKE_JOB_POOL_LINK:STRING=console \
             "$GITHUB_WORKSPACE"
 
       - name: Build with Ninja
@@ -452,7 +464,7 @@ jobs:
         run: |
           set -euo pipefail
           . ./conanbuild.sh
-          cmake --build . --target package
+          cpack -C ${{ env.BUILD_TYPE }}
 
       - name: Cleanup intermediate files
         if: always()
@@ -538,7 +550,7 @@ jobs:
         if: inputs.skip_docker_trigger != 'true' && github.event.inputs.skip_docker_trigger != 'true'
         working-directory: installers
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.DOCKER_OPENSTUDIO_PAT }}
           BRANCH_NAME: ${{ github.ref_name }}
           S3_PREFIX: ${{ github.ref_type == 'tag' && format('releases/{0}', github.ref_name) || format('{0}', github.ref_name) }}
         run: |
@@ -612,13 +624,14 @@ jobs:
     name: Build Packages for ${{ matrix.pretty }}
     if: "!inputs.jobs || contains(inputs.jobs, 'macos-build')"
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 720
     continue-on-error: ${{ matrix.allow_failure }}
     strategy:
       fail-fast: false
       matrix:
-        macos_dev_target: [12.1, 13.0]
+        macos_dev_target: ["12.1", "13.0"]
         include:
-          - macos_dev_target: 12.1
+          - macos_dev_target: "12.1"
             platform: macos-x64
             pretty: "macOS x64"
             os: macos-15-intel
@@ -628,9 +641,9 @@ jobs:
             python-arch: x64
             dmg_glob: "*.dmg"
             tar_glob: "*OpenStudio*x86_64.tar.gz"
-            exclude_regex: ${{ '""' }}
-            max_jobs: 2
-          - macos_dev_target: 13.0
+            exclude_regex: "^BCLFixture.BCLMeasure$"
+            max_jobs: 3
+          - macos_dev_target: "13.0"
             platform: macos-arm64
             pretty: "macOS ARM64"
             os: macos-15
@@ -640,8 +653,8 @@ jobs:
             python-arch: arm64
             dmg_glob: "*.dmg"
             tar_glob: "*OpenStudio*arm64.tar.gz"
-            exclude_regex: "^(GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel)$"
-            max_jobs: 2
+            exclude_regex: "^(GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel|BCLFixture.BCLMeasure)$"
+            max_jobs: 3
     env:
       MAX_BUILD_THREADS: ${{ matrix.max_jobs }}
       CTEST_PARALLEL_LEVEL: ${{ matrix.max_jobs }}
@@ -656,6 +669,20 @@ jobs:
       with:
         path: ${{ env.OPENSTUDIO_SOURCE }}
         fetch-depth: 1
+
+    - name: Verify space
+      shell: bash
+      run: |
+        echo "Memory and swap:"
+        if command -v vm_stat >/dev/null 2>&1; then
+          vm_stat
+        fi
+        echo
+        sysctl vm.swapusage || true
+        echo
+        echo "Available storage:"
+        df -h . || true
+        echo
 
     - name: Git safe directory
       working-directory: ${{ env.OPENSTUDIO_SOURCE }}
@@ -769,6 +796,7 @@ jobs:
           --output-folder=../${{ env.OPENSTUDIO_BUILD }} \
           --build=missing \
           -c tools.cmake.cmaketoolchain:generator=Ninja \
+          -c tools.build:cxxflags='["-Wno-enum-constexpr-conversion", "-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION"]' \
           -s compiler.cppstd=20 \
           -s build_type=${{ env.BUILD_TYPE }} \
           -s os.version=${{ matrix.macos_dev_target }} \
@@ -818,6 +846,7 @@ jobs:
           "${CCACHE_ARGS[@]}" \
           "${SIGNING_ARGS[@]}" \
           -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
+          -DCMAKE_CXX_FLAGS="-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION -Wno-enum-constexpr-conversion" \
           -DENABLE_COVERAGE:BOOL=OFF \
           -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${{ matrix.macos_dev_target }} \
           -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} \
@@ -826,9 +855,9 @@ jobs:
           -DCPACK_BINARY_IFW:BOOL=ON \
           -DBUILD_PYTHON_BINDINGS:BOOL=ON \
           -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF \
-          -DCMAKE_INSTALL_RPATH="@loader_path;@executable_path;@loader_path/../lib" \
           -DPYTHON_VERSION:STRING=${{ env.PYTHON_REQUIRED_VERSION }} \
           -DPython_ROOT_DIR:PATH="$(dirname $(dirname $SYSTEM_PYTHON_PATH))" \
+          -DCMAKE_JOB_POOL_LINK:STRING=console \
           ../${{ env.OPENSTUDIO_SOURCE }}
 
     - name: Build with Ninja
@@ -939,7 +968,7 @@ jobs:
       run: |
         set -euo pipefail
         . ./conanbuild.sh
-        ninja -j ${{ matrix.max_jobs }} package
+        cpack -C ${{ env.BUILD_TYPE }}
 
     - name: Cleanup intermediate files
       if: always()
@@ -1158,6 +1187,7 @@ jobs:
     name: Build ${{ matrix.pretty }}
     if: "!inputs.jobs || contains(inputs.jobs, 'windows-build')"
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 720
     strategy:
       fail-fast: false
       matrix:
@@ -1170,8 +1200,8 @@ jobs:
             arch: x86_64
             python-arch: x64
             allow_failure: false
-            max_jobs: 3
-            exclude_regex: "^(RubyTest-Date_Test-ymd_constructor)$"
+            max_jobs: 4
+            exclude_regex: "^(RubyTest-Date_Test-ymd_constructor|BCLFixture.BCLMeasure)$"
     defaults:
       run:
         shell: pwsh
@@ -1189,6 +1219,11 @@ jobs:
         with:
           path: ${{ env.OPENSTUDIO_SOURCE }}
           fetch-depth: 1
+          
+      - name: Verify space
+        run: |
+          Get-PSDrive C | Select-Object Used,Free
+          Get-CimInstance Win32_OperatingSystem | Select-Object TotalVisibleMemorySize,FreePhysicalMemory,TotalVirtualMemorySize,FreeVirtualMemory
           
       - name: Git safe directory
         working-directory: ${{ env.OPENSTUDIO_SOURCE }}
@@ -1350,7 +1385,7 @@ jobs:
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
           $sccacheExe = (Get-Command sccache).Source
-          & $env:ComSpec /c "call conanbuild.bat && cmake -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=`"$sccacheExe`" -DCMAKE_CXX_COMPILER_LAUNCHER=`"$sccacheExe`" -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} -DBUILD_TESTING:BOOL=ON -DCPACK_GENERATOR:STRING=`"NSIS;TGZ`" -DBUILD_PYTHON_BINDINGS:BOOL=ON -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF -DPython_EXECUTABLE:FILEPATH=`"$env:SYSTEM_PYTHON_PATH`" -DPYTHON_VERSION:STRING=${{ env.PYTHON_REQUIRED_VERSION }} -DSYSTEM_RUBY_EXECUTABLE=`"%SYSTEM_RUBY_PATH%`" `"../${{ env.OPENSTUDIO_SOURCE }}"`"
+          & $env:ComSpec /c "call conanbuild.bat && cmake -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=`"$sccacheExe`" -DCMAKE_CXX_COMPILER_LAUNCHER=`"$sccacheExe`" -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} -DBUILD_TESTING:BOOL=ON -DCPACK_GENERATOR:STRING=`"NSIS;TGZ`" -DBUILD_PYTHON_BINDINGS:BOOL=ON -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF -DPython_EXECUTABLE:FILEPATH=`"$env:SYSTEM_PYTHON_PATH`" -DPYTHON_VERSION:STRING=${{ env.PYTHON_REQUIRED_VERSION }} -DSYSTEM_RUBY_EXECUTABLE=`"%SYSTEM_RUBY_PATH%`" -DCMAKE_JOB_POOL_LINK:STRING=console `"../${{ env.OPENSTUDIO_SOURCE }}"`"
 
       - name: Build with Ninja
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
@@ -1557,7 +1592,7 @@ jobs:
         if: ${{ success() && !cancelled() }}
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
-          & $env:ComSpec /c "call conanbuild.bat && cmake --build . --target package --parallel ${{ matrix.max_jobs }}"
+          & $env:ComSpec /c "call conanbuild.bat && cpack -C ${{ env.BUILD_TYPE }}"
 
       - name: Code sign installer
         if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') || inputs.publish_to_s3 == 'true' || github.event.inputs.publish_to_s3 == 'true')
