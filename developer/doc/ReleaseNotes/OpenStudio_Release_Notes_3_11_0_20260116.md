@@ -1,6 +1,6 @@
 # OpenStudio Version 3.11.0
 
-_Release Notes_ -  _TBD_
+_Release Notes_ -  2026-01-16
 
 These release notes describe version 3.11.0 of the OpenStudio SDK developed by the National Laboratory of the Rockies (NLR), Building Technologies and Sciences Center, Building Performance Modeling Group, and associated collaborators. The notes are organized into the following sections:
 
