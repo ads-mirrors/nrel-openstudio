@@ -39,14 +39,14 @@ jobs:
           os: macos-15-intel
           python-version: 3.8
           allow_failure: false
-          MACOSX_DEPLOYMENT_TARGET: 10.15
-          SDKROOT: /Applications/Xcode_15.2.app
+          MACOSX_DEPLOYMENT_TARGET: "12.1"
+          SDKROOT: /Applications/Xcode.app/Contents/Developer
         - name: macOS_arm64
-          os: macos-14
+          os: macos-15
           python-version: 3.8
           allow_failure: false
-          MACOSX_DEPLOYMENT_TARGET: 12.1
-          SDKROOT: /Applications/Xcode_15.2.app
+          MACOSX_DEPLOYMENT_TARGET: "13.0"
+          SDKROOT: /Applications/Xcode.app/Contents/Developer
         - name: Windows_py37
           os: windows-2019
           python-version: 3.7
