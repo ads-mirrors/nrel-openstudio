@@ -5,7 +5,6 @@
 #include "../utilities/core/Filesystem.hpp"
 #include <memory>
 #include <string>
-#include <string_view>
 #include <vector>
 
 namespace openstudio::modelica {
@@ -50,7 +49,7 @@ class MODELICA_API ModelicaFile
   ~ModelicaFile();
 
   /** Parse Modelica source text, replacing the current contents. */
-  void parse(std::string_view text);
+  void parse(const std::string& text);
 
   /** Return the raw Modelica source text represented by this file. */
   std::string getText() const;

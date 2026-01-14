@@ -18,7 +18,7 @@ ModelicaFile& ModelicaFile::operator=(ModelicaFile&& other) noexcept = default;
 
 ModelicaFile::~ModelicaFile() = default;
 
-void ModelicaFile::parse(std::string_view text) {
+void ModelicaFile::parse(const std::string& text) {
   m_impl->parse(text);
 }
 

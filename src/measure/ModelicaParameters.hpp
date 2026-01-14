@@ -23,13 +23,13 @@ namespace measure {
   class MEASURE_API ModelicaParameter
   {
    public:
-    ModelicaParameter(std::string_view model, std::string_view key, std::string_view value);
+    ModelicaParameter(const std::string& model, const std::string& key, const std::string& value);
 
     std::string model() const;
     std::string key() const;
 
     std::string value() const;
-    void setValue(std::string_view value);
+    void setValue(const std::string& value);
 
    private:
     std::shared_ptr<detail::ModelicaParameter_Impl> m_impl;

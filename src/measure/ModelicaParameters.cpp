@@ -13,7 +13,7 @@ namespace measure {
     class ModelicaParameter_Impl
     {
      public:
-      ModelicaParameter_Impl(std::string_view model, std::string_view key, std::string_view value) : m_model(model), m_key(key), m_value(value) {}
+      ModelicaParameter_Impl(const std::string& model, const std::string& key, const std::string& value) : m_model(model), m_key(key), m_value(value) {}
 
       std::string model() const {
         return m_model;
@@ -27,7 +27,7 @@ namespace measure {
         return m_value;
       }
 
-      void setValue(std::string_view value) {
+      void setValue(const std::string& value) {
         m_value = value;
       }
 
@@ -75,15 +75,15 @@ namespace measure {
       }
 
      private:
-      static std::string keyHash(std::string_view model, std::string_view key) {
-        return std::string(model) + std::string(key);
+      static std::string keyHash(const std::string& model, const std::string& key) {
+        return model + key;
       }
 
       std::map<std::pair<std::string, std::string>, ModelicaParameter> m_parameters;
     };
   }  // namespace detail
 
-  ModelicaParameter::ModelicaParameter(std::string_view model, std::string_view key, std::string_view value)
+  ModelicaParameter::ModelicaParameter(const std::string& model, const std::string& key, const std::string& value)
     : m_impl{std::make_unique<detail::ModelicaParameter_Impl>(model, key, value)} {};
 
   std::string ModelicaParameter::model() const {
@@ -98,7 +98,7 @@ namespace measure {
     return m_impl->value();
   }
 
-  void ModelicaParameter::setValue(std::string_view value) {
+  void ModelicaParameter::setValue(const std::string& value) {
     m_impl->setValue(value);
   }
 
