@@ -13,7 +13,8 @@ namespace measure {
     class ModelicaParameter_Impl
     {
      public:
-      ModelicaParameter_Impl(const std::string& model, const std::string& key, const std::string& value) : m_model(model), m_key(key), m_value(value) {}
+      ModelicaParameter_Impl(const std::string& model, const std::string& key, const std::string& value)
+        : m_model(model), m_key(key), m_value(value) {}
 
       std::string model() const {
         return m_model;
