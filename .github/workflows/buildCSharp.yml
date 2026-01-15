@@ -160,7 +160,7 @@ jobs:
 
         cmake --list-presets
         echo "::group::CMake Configure"
-        call ./build/conanbuild.bat
+        call build\conanbuild.bat
         cmake --preset conan-default ^
               -DBUILD_CSHARP_BINDINGS:BOOL=ON  -DBUILD_NUGET_PACKAGE:BOOL=OFF ^
               -DBUILD_TESTING:BOOL=OFF -DBUILD_RUBY_BINDINGS:BOOL=OFF -DBUILD_PYTHON_BINDINGS:BOOL=OFF -DBUILD_CLI:BOOL=OFF
@@ -182,12 +182,12 @@ jobs:
       shell: cmd
       run: |
         echo "::group::Conan Install"
-        conan install . --output-folder=./build --build=missing -c tools.cmake.cmaketoolchain:generator="Visual Studio 17 2022" -s compiler.cppstd=20 -s build_type=${{ env.BUILD_TYPE }} -o with_testing=False -o with_benchmark=False -o with_ruby=False -o with_python=False -o with_csharp=True -s:b arch=x86_64 -s:h arch=x86
+        conan install . --output-folder=./build --build=missing -c tools.cmake.cmaketoolchain:generator="Visual Studio 17 2022" -s compiler.cppstd=20 -s build_type=${{ env.BUILD_TYPE }} -o with_testing=False -o with_benchmark=False -o with_ruby=False -o with_python=False -o with_csharp=True -s:b arch=x86_64 -s:h arch=x86 -c "antlr4-cppruntime/*:tools.build:cxxflags+=/FIchrono"
         echo "::engroup::"
 
         cmake --list-presets
         echo "::group::CMake Configure"
-        call ./build/conanbuild.bat
+        call build\conanbuild.bat
         cmake --preset conan-default ^
               -DBUILD_CSHARP_BINDINGS:BOOL=ON  -DBUILD_NUGET_PACKAGE:BOOL=OFF ^
               -DBUILD_TESTING:BOOL=OFF -DBUILD_RUBY_BINDINGS:BOOL=OFF -DBUILD_PYTHON_BINDINGS:BOOL=OFF -DBUILD_CLI:BOOL=OFF
