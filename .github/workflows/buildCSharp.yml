@@ -194,7 +194,7 @@ jobs:
         echo "::engroup::"
 
         echo "::group::Build"
-        cmake --build --preset conan-default --config Release
+        cmake --build --preset conan-release --config Release
         echo "::engroup::"
 
     - name: build nuget for Windows
