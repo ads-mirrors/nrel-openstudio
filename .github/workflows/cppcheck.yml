@@ -2,8 +2,6 @@ name: cppcheck
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
     branches: [ master, develop ]
 
 jobs:

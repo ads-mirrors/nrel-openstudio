@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -612,6 +612,10 @@ namespace model {
       //@}
       /** @name Other */
       //@{
+
+      AirflowNetworkEquivalentDuct getAirflowNetworkEquivalentDuct(double length, double diameter);
+
+      boost::optional<AirflowNetworkEquivalentDuct> airflowNetworkEquivalentDuct() const;
 
       boost::optional<double> autosizedFluidStorageVolume();
 

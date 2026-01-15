@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -176,6 +176,26 @@ namespace energyplus {
           if (!ok) {
             LOG(Warn, "Unable to set " << people.briefDescription() << "'s Work Efficiency schedule to " << schedule.briefDescription()
                                        << ", likely because of a ScheduleTypeLimits conflict.");
+          }
+        }
+      }
+    }
+
+    s = workspaceObject.getString(openstudio::PeopleFields::ClothingInsulationCalculationMethod);
+    if (s) {
+      people.setClothingInsulationCalculationMethod(*s);
+    }
+
+    target = workspaceObject.getTarget(openstudio::PeopleFields::ClothingInsulationCalculationMethodScheduleName);
+    if (target) {
+      OptionalModelObject modelObject = translateAndMapWorkspaceObject(*target);
+      if (modelObject) {
+        if (OptionalSchedule intermediate = modelObject->optionalCast<Schedule>()) {
+          Schedule schedule(*intermediate);
+          bool ok = people.setClothingInsulationCalculationMethodSchedule(schedule);
+          if (!ok) {
+            LOG(Warn, "Unable to set " << people.briefDescription() << "'s Clothing Insulation Calculation Method schedule to "
+                                       << schedule.briefDescription() << ", likely because of a ScheduleTypeLimits conflict.");
           }
         }
       }

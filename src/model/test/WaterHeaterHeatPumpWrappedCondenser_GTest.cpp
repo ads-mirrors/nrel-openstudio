@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -84,6 +84,25 @@ TEST_F(ModelFixture, WaterHeaterHeatPumpWrappedCondenser_GettersSetters) {
   // Bad Value
   EXPECT_FALSE(hpwh.setInletAirConfiguration("BADENUM"));
   EXPECT_EQ("OutdoorAirOnly", hpwh.inletAirConfiguration());
+
+  // Air Inlet Node Name: Required String
+  EXPECT_EQ("", hpwh.airInletNodeName());
+  EXPECT_TRUE(hpwh.setInletAirConfiguration("ZoneAirOnly"));
+  EXPECT_EQ("", hpwh.airInletNodeName());
+  EXPECT_TRUE(hpwh.setInletAirConfiguration("ZoneAndOutdoorAir"));
+  EXPECT_EQ("", hpwh.airInletNodeName());
+  EXPECT_TRUE(hpwh.setInletAirConfiguration("Schedule"));
+  EXPECT_EQ(hpwh.nameString() + " Inlet", hpwh.airInletNodeName());
+
+  // Air Outlet Node Name: Required String
+  EXPECT_TRUE(hpwh.setInletAirConfiguration("OutdoorAirOnly"));
+  EXPECT_EQ("", hpwh.airOutletNodeName());
+  EXPECT_TRUE(hpwh.setInletAirConfiguration("ZoneAirOnly"));
+  EXPECT_EQ("", hpwh.airOutletNodeName());
+  EXPECT_TRUE(hpwh.setInletAirConfiguration("ZoneAndOutdoorAir"));
+  EXPECT_EQ("", hpwh.airOutletNodeName());
+  EXPECT_TRUE(hpwh.setInletAirConfiguration("Schedule"));
+  EXPECT_EQ(hpwh.nameString() + " Outlet", hpwh.airOutletNodeName());
 
   // Inlet Air Temperature Schedule: Optional Object but set in Ctor
   {

@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -46,6 +46,8 @@ namespace model {
     static std::vector<std::string> validHeatingDesignAirFlowMethodValues();
 
     static std::vector<std::string> validSystemOutdoorAirMethodValues();
+
+    static std::vector<std::string> heatingCoilSizingMethodValues();
 
     std::string typeofLoadtoSizeOn() const;
 
@@ -162,6 +164,10 @@ namespace model {
 
     bool isOccupantDiversityAutosized() const;
 
+    std::string heatingCoilSizingMethod() const;
+
+    double maximumHeatingCapacityToCoolingCapacitySizingRatio() const;
+
     bool setTypeofLoadtoSizeOn(const std::string& typeofLoadtoSizeOn);
 
     void resetTypeofLoadtoSizeOn();
@@ -271,6 +277,10 @@ namespace model {
     bool setOccupantDiversity(double occupantDiversity);
 
     void autosizeOccupantDiversity();
+
+    bool setHeatingCoilSizingMethod(const std::string& heatingCoilSizingMethod);
+
+    bool setMaximumHeatingCapacityToCoolingCapacitySizingRatio(double maximumHeatingCapacityToCoolingCapacitySizingRatio);
 
     AirLoopHVAC airLoopHVAC() const;
 

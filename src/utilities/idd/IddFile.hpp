@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -20,7 +20,7 @@
 namespace openstudio {
 
 // forward declarations
-class IddFactorySingleton;
+class IddFactory;
 namespace detail {
   class IddFile_Impl;
 }  // namespace detail
@@ -118,7 +118,7 @@ class UTILITIES_API IddFile
 
   //@}
  protected:
-  friend class IddFactorySingleton;
+  friend class IddFactory;
 
   /// set version
   void setVersion(const std::string& version);

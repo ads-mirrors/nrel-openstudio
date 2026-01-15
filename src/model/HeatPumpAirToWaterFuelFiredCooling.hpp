@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -118,6 +118,8 @@ namespace model {
 
     double standbyElectricPower() const;
 
+    double minimumUnloadingRatio() const;
+
     //@}
     /** @name Setters */
     //@{
@@ -189,6 +191,8 @@ namespace model {
     void resetAuxiliaryElectricEnergyInputRatioFunctionofPLRCurve();
 
     bool setStandbyElectricPower(double standbyElectricPower);
+
+    bool setMinimumUnloadingRatio(double minimumUnloadingRatio);
 
     //@}
     /** @name Other */

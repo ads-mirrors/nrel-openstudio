@@ -1,11 +1,10 @@
 ########################################################################################################################
-#  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+#  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 #  See also https://openstudio.net/license
 ########################################################################################################################
 
 require 'openstudio'
 require 'logger'
-require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 require 'minitest/autorun'
 require 'csv'

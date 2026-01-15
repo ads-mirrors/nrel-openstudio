@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -14,6 +14,14 @@
 #endif
 
 namespace openstudio {
+
+std::string executableFileExtension() {
+#ifdef _WIN32
+  return ".exe";
+#else
+  return "";
+#endif
+}
 
 std::string modelFileExtension() {
   return {"osm"};

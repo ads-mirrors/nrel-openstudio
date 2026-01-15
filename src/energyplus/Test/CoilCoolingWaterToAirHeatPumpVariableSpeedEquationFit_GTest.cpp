@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -125,6 +125,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilCoolingWaterToAirHeatPumpVariabl
 
   EXPECT_EQ("My CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit",
             idf_coil.getString(Coil_Cooling_WaterToAirHeatPump_VariableSpeedEquationFitFields::Name).get());
+  EXPECT_EQ("Always On Discrete", idf_coil.getString(Coil_Cooling_WaterToAirHeatPump_VariableSpeedEquationFitFields::AvailabilityScheduleName).get());
   EXPECT_EQ("Coil Water Inlet Node",
             idf_coil.getString(Coil_Cooling_WaterToAirHeatPump_VariableSpeedEquationFitFields::WatertoRefrigerantHXWaterInletNodeName).get());
   EXPECT_EQ("Coil Water Outlet Node",

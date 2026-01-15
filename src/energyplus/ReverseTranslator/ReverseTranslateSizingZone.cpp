@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -375,6 +375,18 @@ namespace energyplus {
       s = workspaceObject.getString(Sizing_ZoneFields::TypeofSpaceSumtoUse);
       if (s) {
         sizingZone.setSizingOption(s.get());
+      }
+
+      // HeatingCoilSizingMethod
+      s = workspaceObject.getString(Sizing_ZoneFields::HeatingCoilSizingMethod);
+      if (s) {
+        sizingZone.setHeatingCoilSizingMethod(s.get());
+      }
+
+      // MaximumHeatingCapacityToCoolingLoadSizingRatio
+      value = workspaceObject.getDouble(Sizing_ZoneFields::MaximumHeatingCapacityToCoolingLoadSizingRatio);
+      if (value) {
+        sizingZone.setMaximumHeatingCapacityToCoolingLoadSizingRatio(value.get());
       }
     }
 

@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -30,9 +30,10 @@ void OSWorkflow::runTranslator() {
   // skip if halted
   // TODO: I don't understand this
   if (runner.halted()) {
-    LOG(Info, "Workflow halted, skipping OSM to IDF translation");
+    LOG(Info, "Workflow halted, skipping the OSM to IDF translation");
     // This allows model arguments to still be calculated
     workspace_ = Workspace{};
+    return;
   }
 
   auto runDir = workflowJSON.absoluteRunDir();

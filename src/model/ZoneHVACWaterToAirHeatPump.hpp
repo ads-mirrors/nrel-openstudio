@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -133,6 +133,8 @@ namespace model {
 
     // TODO: field 'Design Specification ZoneHVAC Sizing' isn't implemented since the object isn't wrapped in SDK
 
+    double dXHeatingCoilSizingRatio() const;
+
     //@}
     /** @name Setters */
     //@{
@@ -250,6 +252,8 @@ namespace model {
     bool setSupplyAirFanOperatingModeSchedule(Schedule& schedule);
 
     void resetSupplyAirFanOperatingModeSchedule();
+
+    bool setDXHeatingCoilSizingRatio(double dXHeatingCoilSizingRatio);
 
     //@}
     /** @name Other */

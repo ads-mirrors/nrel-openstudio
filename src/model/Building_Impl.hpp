@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -193,6 +193,12 @@ namespace model {
       double gasEquipmentPowerPerFloorArea() const;
 
       double gasEquipmentPowerPerPerson() const;
+
+      double hotWaterEquipmentPower() const;
+
+      double hotWaterEquipmentPowerPerFloorArea() const;
+
+      double hotWaterEquipmentPowerPerPerson() const;
 
       double infiltrationDesignFlowRate() const;
 

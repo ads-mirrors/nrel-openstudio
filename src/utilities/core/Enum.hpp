@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -9,7 +9,6 @@
 #include <set>
 #include <map>
 #include <vector>
-#include "StaticInitializer.hpp"
 #include <boost/preprocessor.hpp>
 #include <boost/optional.hpp>
 #include <boost/algorithm/string/predicate.hpp>

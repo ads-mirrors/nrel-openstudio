@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -208,6 +208,12 @@ namespace energyplus {
       idfObject.setString(OutputControl_FilesFields::OutputTarcog, "Yes");
     } else {
       idfObject.setString(OutputControl_FilesFields::OutputTarcog, "No");
+    }
+
+    if (modelObject.outputPlantComponentSizing()) {
+      idfObject.setString(OutputControl_FilesFields::OutputPlantComponentSizing, "Yes");
+    } else {
+      idfObject.setString(OutputControl_FilesFields::OutputPlantComponentSizing, "No");
     }
 
     return idfObject;

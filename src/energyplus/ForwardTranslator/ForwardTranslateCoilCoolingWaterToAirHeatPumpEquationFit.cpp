@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -43,6 +43,14 @@ namespace energyplus {
 
     // Object Name
     //std::string baseName = idfObject.name().get();
+
+    // AvailabilityScheduleName
+    {
+      auto schedule = modelObject.availabilitySchedule();
+      if (boost::optional<IdfObject> _schedule = translateAndMapModelObject(schedule)) {
+        idfObject.setString(Coil_Cooling_WaterToAirHeatPump_EquationFitFields::AvailabilityScheduleName, _schedule->name().get());
+      }
+    }
 
     //  Water Inlet Node Name
     if (boost::optional<ModelObject> mo = modelObject.waterInletModelObject()) {

@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -9,8 +9,6 @@
 #include "ModelAPI.hpp"
 #include "ModelObject_Impl.hpp"
 #include "OutputMeter.hpp"
-
-#include "../utilities/core/StaticInitializer.hpp"
 
 namespace openstudio {
 

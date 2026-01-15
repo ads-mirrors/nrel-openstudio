@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -56,6 +56,10 @@ namespace model {
 
       boost::optional<double> maximumDifferenceInMonthlyAverageOutdoorAirTemperatures() const;
 
+      double temperatureMultiplier() const;
+
+      double temperatureOffset() const;
+
       //@}
       /** @name Setters */
       //@{
@@ -74,6 +78,10 @@ namespace model {
         setMaximumDifferenceInMonthlyAverageOutdoorAirTemperatures(boost::optional<double> maximumDifferenceInMonthlyAverageOutdoorAirTemperatures);
 
       void resetMaximumDifferenceInMonthlyAverageOutdoorAirTemperatures();
+
+      bool setTemperatureMultiplier(double temperatureMultiplier);
+
+      bool setTemperatureOffset(double temperatureOffset);
 
       //@}
      protected:

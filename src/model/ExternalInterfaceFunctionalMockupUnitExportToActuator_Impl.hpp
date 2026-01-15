@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -51,7 +51,7 @@ namespace model {
 
       std::string fMUVariableName() const;
 
-      double initialValue() const;
+      boost::optional<double> initialValue() const;
 
       //@}
       /** @name Setters */

@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -118,6 +118,8 @@ namespace model {
 
       boost::optional<Schedule> supplyAirFanOperatingModeSchedule() const;
 
+      double dXHeatingCoilSizingRatio() const;
+
       boost::optional<double> autosizedSupplyAirFlowRateDuringCoolingOperation() const;
 
       boost::optional<double> autosizedSupplyAirFlowRateDuringHeatingOperation() const;
@@ -229,6 +231,8 @@ namespace model {
       bool setSupplyAirFanOperatingModeSchedule(Schedule& schedule);
 
       void resetSupplyAirFanOperatingModeSchedule();
+
+      bool setDXHeatingCoilSizingRatio(double dXHeatingCoilSizingRatio);
 
       //@}
       /** @name Other */

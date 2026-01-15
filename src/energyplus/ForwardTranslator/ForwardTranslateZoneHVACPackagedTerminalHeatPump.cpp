@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -422,6 +422,12 @@ namespace energyplus {
     Schedule fanOpSchedule = modelObject.supplyAirFanOperatingModeSchedule();
     if (boost::optional<IdfObject> _schedule = translateAndMapModelObject(fanOpSchedule)) {
       idfObject.setString(ZoneHVAC_PackagedTerminalHeatPumpFields::SupplyAirFanOperatingModeScheduleName, _schedule->name().get());
+    }
+
+    // DXHeatingCoilSizingRatio
+
+    if ((value = modelObject.dXHeatingCoilSizingRatio())) {
+      idfObject.setDouble(ZoneHVAC_PackagedTerminalHeatPumpFields::DXHeatingCoilSizingRatio, value.get());
     }
 
     return idfObject;

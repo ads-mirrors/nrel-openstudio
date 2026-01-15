@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -105,6 +105,8 @@ namespace model {
 
       bool outputTarcog() const;
 
+      bool outputPlantComponentSizing() const;
+
       //@}
       /** @name Setters */
       //@{
@@ -170,6 +172,8 @@ namespace model {
       bool setOutputExtShd(bool outputExtShd);
 
       bool setOutputTarcog(bool outputTarcog);
+
+      bool setOutputPlantComponentSizing(bool outputPlantComponentSizing);
 
       //@}
       /** @name Other */

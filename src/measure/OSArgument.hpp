@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -368,6 +368,8 @@ OPENSTUDIO_ENUM( OSDomainType,
   *  Preserves existing minimum value or sets it to infinity if it does not exist. */
     bool setMaxValue(double maxValue);
     bool setMaxValue(int maxValue);
+
+    void setRequired(bool required);
 
     //@}
     /** @name Serialization */

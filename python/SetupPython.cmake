@@ -85,7 +85,6 @@ else()
   # endif()
 endif()
 
-include_directories(SYSTEM ${Python_INCLUDE_DIRS})
 set(ALL_PYTHON_BINDING_TARGETS "") # global list of python bindings
 set(ALL_PYTHON_BINDING_DEPENDS "") # global list of library dependencies of the generated wrapper cxx files
 set(ALL_PYTHON_WRAPPER_FILES "") # global list of generated wrapper cxx files

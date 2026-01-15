@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -26,8 +26,6 @@ namespace model {
    public:
     /** @name Constructors and Destructors */
     //@{
-
-    explicit SiteGroundTemperatureBuildingSurface(Model& model);
 
     virtual ~SiteGroundTemperatureBuildingSurface() override = default;
     // Default the copy and move operators because the virtual dtor is explicit
@@ -178,6 +176,8 @@ namespace model {
     friend class detail::SiteGroundTemperatureBuildingSurface_Impl;
 
     explicit SiteGroundTemperatureBuildingSurface(std::shared_ptr<detail::SiteGroundTemperatureBuildingSurface_Impl> impl);
+
+    explicit SiteGroundTemperatureBuildingSurface(Model& model);
 
     /// @endcond
    private:

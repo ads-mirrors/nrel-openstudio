@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -46,6 +46,10 @@ namespace measure {
 
   alfalfa::AlfalfaJSON OSRunner::alfalfa() const {
     return m_alfalfa;
+  }
+
+  ModelicaParameters OSRunner::modelicaParameters() const {
+    return m_modelicaParameters;
   }
 
   std::string OSRunner::unitsPreference() const {
@@ -103,6 +107,10 @@ namespace measure {
     return m_lastEnergyPlusSqlFile;
   }
 
+  boost::optional<openstudio::path> OSRunner::lastModelicaResultPath() const {
+    return m_lastModelicaResultPath;
+  }
+
   boost::optional<openstudio::EpwFile> OSRunner::lastEpwFile() const {
     if (m_lastEpwFile) {
       return m_lastEpwFile;
@@ -149,6 +157,7 @@ namespace measure {
     m_lastEnergyPlusWorkspacePath.reset();
     m_lastEnergyPlusSqlFile.reset();
     m_lastEnergyPlusSqlFilePath.reset();
+    m_lastModelicaResultPath.reset();
     m_lastEpwFile.reset();
     m_lastEpwFilePath.reset();
 
@@ -409,6 +418,10 @@ namespace measure {
     bool result = true;
     std::vector<WorkflowStepValue> stepValues;
     for (const OSArgument& script_argument : script_arguments) {
+      if (script_argument.type().value() == OSArgumentType::Separator) {
+        // skip separators
+        continue;
+      }
       auto it = user_arguments.find(script_argument.name());
       if (it == user_arguments.end()) {
         // script_argument is not in user_arguments
@@ -940,6 +953,18 @@ namespace measure {
   void OSRunner::resetLastEnergyPlusSqlFilePath() {
     m_lastEnergyPlusSqlFilePath.reset();
     m_lastEnergyPlusSqlFile.reset();
+  }
+
+  void OSRunner::setLastModelicaResultPath(const openstudio::path& lastModelicaResultPath) {
+    if (openstudio::filesystem::exists(lastModelicaResultPath)) {
+      m_lastModelicaResultPath = openstudio::filesystem::canonical(lastModelicaResultPath);
+    } else {
+      m_lastModelicaResultPath = lastModelicaResultPath;
+    }
+  }
+
+  void OSRunner::resetLastModelicaResultPath() {
+    m_lastModelicaResultPath.reset();
   }
 
   void OSRunner::setLastEpwFilePath(const openstudio::path& lastEpwFilePath) {

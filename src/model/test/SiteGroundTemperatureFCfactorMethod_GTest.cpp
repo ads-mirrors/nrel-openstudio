@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -24,7 +24,7 @@ TEST_F(ModelFixture, SiteGroundTemperatureFCfactorMethod_SiteGroundTemperatureFC
       Model m;
 
       // create a SiteGroundTemperatureFCfactorMethod object
-      SiteGroundTemperatureFCfactorMethod groundTemp(m);
+      SiteGroundTemperatureFCfactorMethod groundTemp = m.getUniqueModelObject<SiteGroundTemperatureFCfactorMethod>();
       exit(0);
     },
     ::testing::ExitedWithCode(0), "");
@@ -33,7 +33,7 @@ TEST_F(ModelFixture, SiteGroundTemperatureFCfactorMethod_SiteGroundTemperatureFC
   Model m;
 
   // create a SiteGroundTemperatureFCfactorMethod object
-  SiteGroundTemperatureFCfactorMethod groundTemp(m);
+  SiteGroundTemperatureFCfactorMethod groundTemp = m.getUniqueModelObject<SiteGroundTemperatureFCfactorMethod>();
 
   // Check to make sure all the fields are defaulted as expected
   EXPECT_TRUE(groundTemp.isJanuaryGroundTemperatureDefaulted());
@@ -56,7 +56,7 @@ TEST_F(ModelFixture, SiteGroundTemperatureFCfactorMethod_Clone) {
   Model m;
 
   // Create the object
-  SiteGroundTemperatureFCfactorMethod groundTemp(m);
+  SiteGroundTemperatureFCfactorMethod groundTemp = m.getUniqueModelObject<SiteGroundTemperatureFCfactorMethod>();
 
   // Change some of the fields
   groundTemp.setJanuaryGroundTemperature(25.0);
@@ -81,7 +81,7 @@ TEST_F(ModelFixture, SiteGroundTemperatureFCfactorMethod_SetGetFields) {
   Model m;
 
   // Create the object
-  SiteGroundTemperatureFCfactorMethod groundTemp(m);
+  SiteGroundTemperatureFCfactorMethod groundTemp = m.getUniqueModelObject<SiteGroundTemperatureFCfactorMethod>();
 
   // Set the fields
   groundTemp.setJanuaryGroundTemperature(20.0);

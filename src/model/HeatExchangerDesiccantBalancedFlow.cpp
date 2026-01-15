@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -269,7 +269,7 @@ namespace model {
     bool ok = setHeatExchangerPerformance(heatExchangerPerformance);
     OS_ASSERT(ok);
 
-    setEconomizerLockout(false);
+    setEconomizerLockout(true);
   }
 
   HeatExchangerDesiccantBalancedFlow::HeatExchangerDesiccantBalancedFlow(
@@ -287,7 +287,7 @@ namespace model {
                                      << heatExchangerPerformance.briefDescription() << ".");
     }
 
-    setEconomizerLockout(false);
+    setEconomizerLockout(true);
   }
 
   IddObjectType HeatExchangerDesiccantBalancedFlow::iddObjectType() {

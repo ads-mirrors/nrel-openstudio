@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -163,6 +163,10 @@ namespace energyplus {
     // Standby Electric Power: Optional Double
     const double standbyElectricPower = modelObject.standbyElectricPower();
     idfObject.setDouble(HeatPump_AirToWater_FuelFired_CoolingFields::StandbyElectricPower, standbyElectricPower);
+
+    // Minimum Unloading Ratio: Optional Double
+    const double minimumUnloadingRatio = modelObject.minimumUnloadingRatio();
+    idfObject.setDouble(HeatPump_AirToWater_FuelFired_CoolingFields::MinimumUnloadingRatio, minimumUnloadingRatio);
 
     return idfObject;
   }  // End of translate function

@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -68,9 +68,11 @@ TEST_F(ModelFixture, ExternalInterfaceFunctionalMockupUnitExportToActuator) {
   fanActuator.setActuatedComponentUnique(fan2);
   EXPECT_EQ(fan2, fanActuator.actuatedComponentUnique());
 
-  EXPECT_EQ(10, fanActuator.initialValue());
+  ASSERT_TRUE(fanActuator.initialValue());
+  EXPECT_EQ(10, fanActuator.initialValue().get());
   fanActuator.setInitialValue(1);
-  EXPECT_EQ(1.0, fanActuator.initialValue());
+  ASSERT_TRUE(fanActuator.initialValue());
+  EXPECT_EQ(1.0, fanActuator.initialValue().get());
 
   //add electric equipment actuator
   ElectricEquipmentDefinition definition(model);

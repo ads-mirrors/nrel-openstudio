@@ -18,7 +18,7 @@ if(CCACHE_PROGRAM)
 endif()
 
 # Project macro can only take digits in the version, it splits these out to specific variables
-project(OpenStudio VERSION 3.10.0)
+project(OpenStudio VERSION 3.11.0)
 
 include(CMake/compiler_flags.cmake)
 
@@ -123,6 +123,7 @@ if(GIT_FOUND)
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
   if(${RESULT} EQUAL 0 AND NOT "${GIT_VERSION}" EQUAL "${PROJECT_VERSION_BUILD}")
     set(PROJECT_VERSION_BUILD ${GIT_VERSION} CACHE STRING "Build number" FORCE) # git sha
+    message(STATUS "GIT_SHA: ${GIT_VERSION}")
   endif()
 
   # Git branch name
@@ -195,15 +196,15 @@ endif()
 
 # EnergyPlus Idd version
 set(ENERGYPLUS_VERSION_MAJOR 25)
-set(ENERGYPLUS_VERSION_MINOR 1)
+set(ENERGYPLUS_VERSION_MINOR 2)
 set(ENERGYPLUS_VERSION_PATCH 0)
 set(ENERGYPLUS_VERSION "${ENERGYPLUS_VERSION_MAJOR}.${ENERGYPLUS_VERSION_MINOR}.${ENERGYPLUS_VERSION_PATCH}")
 # Build SHA is not required to have a value, but if it does OpenStudio will require this build.
-set(ENERGYPLUS_BUILD_SHA "1c11a3d85f")
+set(ENERGYPLUS_BUILD_SHA "cf7368216c")
 
 # ENERGYPLUS_RELEASE_NAME is used to locate the E+ download
 # from the github releases
-set(ENERGYPLUS_RELEASE_NAME "v25.1.0-WithDSOASpaceListFixes")
+set(ENERGYPLUS_RELEASE_NAME "v25.2.0")
 
 set(ENERGYPLUS_REPO "NREL")
 
@@ -293,6 +294,10 @@ option(BUILD_NUGET_PACKAGE "Build NuGet Package" OFF)
 # Requires: SWIG Python
 option(BUILD_PYTHON_BINDINGS "Build Python bindings" ON)
 mark_as_advanced(BUILD_PYTHON_BINDINGS)
+option(DISCOVER_TESTS_AFTER_BUILD "Defer pytest discovery to post-build second configure" OFF)
+mark_as_advanced(DISCOVER_TESTS_AFTER_BUILD)
+option(APPEND_TESTS_ONLY "Internal: append tests only during deferred discovery second pass" OFF)
+mark_as_advanced(APPEND_TESTS_ONLY)
 
 # Build ctest testing
 # Requires: EnergyPlus
@@ -454,6 +459,7 @@ find_package(TinyGLTF)
 find_package(CLI11)
 find_package(minizip)
 find_package(OpenSSL)
+find_package(antlr4-runtime)
 find_package(ZLIB)
 if(BUILD_TESTING)
   find_package(GTest)
@@ -648,30 +654,30 @@ endif()
 if(UNIX)
   if(APPLE)
     if (ARCH MATCHES "arm64")
-      set(ENERGYPLUS_EXPECTED_HASH f2fce0c8883d057dae498d1a0a717a80)
+      set(ENERGYPLUS_EXPECTED_HASH 4a6bece818e89eb88b50249c823b97d9)
       set(ENERGYPLUS_PLATFORM "Darwin-macOS13-arm64")
     else()
-      set(ENERGYPLUS_EXPECTED_HASH f3bd66b9555d86e7330f6bb86f18eb89)
+      set(ENERGYPLUS_EXPECTED_HASH 6b10baada08857a9284c2583e01e735a)
       set(ENERGYPLUS_PLATFORM "Darwin-macOS12.1-x86_64")
     endif()
   elseif(LSB_RELEASE_ID_SHORT MATCHES "CentOS")
-    set(ENERGYPLUS_EXPECTED_HASH 6fb9360c50ca797d16f74e167dd8b7ce)
+    set(ENERGYPLUS_EXPECTED_HASH 578be7722a67294cdc901ee35650d083)
     set(ENERGYPLUS_PLATFORM "Linux-CentOS7.9.2009-x86_64")
   elseif(LSB_RELEASE_ID_SHORT MATCHES "AlmaLinux")
-    set(ENERGYPLUS_EXPECTED_HASH 67f00826449aad725a5a5b56fe0ec76a)
+    set(ENERGYPLUS_EXPECTED_HASH 48894cf599022b4333c6e42a73d9d845)
     set(ENERGYPLUS_PLATFORM "Linux-AlmaLinux9.6-x86_64")
   else()
     if(LSB_RELEASE_VERSION_SHORT MATCHES "24.04")
       if (ARCH MATCHES "arm64")
-        set(ENERGYPLUS_EXPECTED_HASH dbe28aebdbfc28ee8538cabb2dd15305)
+        set(ENERGYPLUS_EXPECTED_HASH 304fddba0082d833263a0128ee96a0ff)
       else()
-        set(ENERGYPLUS_EXPECTED_HASH af8ee54182777923fa4154b122c39447)
+        set(ENERGYPLUS_EXPECTED_HASH 3c03a2eaac845ac2e9d8b5601e7abbde)
       endif()
     elseif(LSB_RELEASE_VERSION_SHORT MATCHES "22.04")
       if (ARCH MATCHES "arm64")
-        set(ENERGYPLUS_EXPECTED_HASH 2ddd6ddb854cc3957943a9dd396c2dce)
+        set(ENERGYPLUS_EXPECTED_HASH a17981b177b0fc25540cb0ac1bad4617)
       else()
-        set(ENERGYPLUS_EXPECTED_HASH 7700f3f7865e36e442b7d171c2e2f96a)
+        set(ENERGYPLUS_EXPECTED_HASH 195ad0c2455d09224e04b375e442a395)
       endif()
     else() # e.g., 18.04, 20.04
       message(FATAL_ERROR "EnergyPlus no longer provides packages for Ubuntu < 22.04")
@@ -708,11 +714,11 @@ elseif(WIN32)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8) # 64 bit
     set(ENERGYPLUS_PATH "EnergyPlus-${ENERGYPLUS_VERSION}-${ENERGYPLUS_BUILD_SHA}-Windows-x86_64")
     set(ENERGYPLUS_ARCH 64)
-    set(ENERGYPLUS_EXPECTED_HASH 630e0b8de20dea68185224072c079d90)
+    set(ENERGYPLUS_EXPECTED_HASH 22a1d7e594fe8fb0f8e4d2cc0604f05d)
   else()
     set(ENERGYPLUS_PATH "EnergyPlus-${ENERGYPLUS_VERSION}-${ENERGYPLUS_BUILD_SHA}-Windows-i386")
     set(ENERGYPLUS_ARCH 32)
-    set(ENERGYPLUS_EXPECTED_HASH e26ed12ee4df8dafa3d34a3340a9b780)
+    set(ENERGYPLUS_EXPECTED_HASH 37be5b38954af66460402b5569f57812)
   endif()
   if(EXISTS "${PROJECT_BINARY_DIR}/${ENERGYPLUS_PATH}.zip")
     file(MD5 "${PROJECT_BINARY_DIR}/${ENERGYPLUS_PATH}.zip" ENERGYPLUS_HASH)
@@ -855,7 +861,7 @@ if(BUILD_CLI)
   set(OPENSTUDIO_GEMS_BASEURL "http://openstudio-resources.s3.amazonaws.com/dependencies")
 
   # TODO: temp
-  set(OPENSTUDIO_GEMS_BASEURL "https://github.com/NREL/openstudio-gems/releases/download/v3.10.0-2")
+  set(OPENSTUDIO_GEMS_BASEURL "https://github.com/NREL/openstudio-gems/releases/download/v3.11.0")
 
   # To use the package produced by a PR to https://github.com/NREL/openstudio-gems
   set(USE_OPENSTUDIO_GEMS_PR FALSE)
@@ -867,19 +873,19 @@ if(BUILD_CLI)
   if(UNIX)
      if(APPLE)
        if (ARCH MATCHES arm64)
-         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20250618-darwin_arm64-3.2.2.tar.gz")
-         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "d70de801baa266d5cb7f624c3590f895")
+         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20260106-darwin_arm64-3.2.2.tar.gz")
+         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "c0183e900f2ce0828d0c5d550224f823")
        else()
-         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20250618-darwin-3.2.2.tar.gz")
-         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "cad8324c268781fb3454c25aa49bdb92")
+         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20260106-darwin-3.2.2.tar.gz")
+         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "9f00eb1a2b3ff224ade4953cd355225d")
        endif()
      else()
        if (ARCH MATCHES "arm64")
-         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20250618-linux_arm64-3.2.2.tar.gz")
-         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "20d05d01880be1e3d133a52a6d2905b2")
+         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20260106-linux_arm64-3.2.2.tar.gz")
+         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "abbc644c67afc476bdee5a14c2d43900")
        else()
-         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20250618-linux-3.2.2.tar.gz")
-         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "c904d3bef3b000875a88058677bd6e9f")
+         set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20260106-linux-3.2.2.tar.gz")
+         set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "983d9545f151193487b8446676c06df2")
        endif()
        if (USE_OPENSTUDIO_GEMS_PR)
          set(OPENSTUDIO_GEMS_BASEURL "${OPENSTUDIO_GEMS_BASEURL}/openstudio-gems-linux/${OPENSTUDIO_GEMS_PR_NUMBER}")
@@ -887,8 +893,8 @@ if(BUILD_CLI)
      endif()
   elseif(WIN32)
     # OpenStudio gems are only supported on 64 bit windows
-    set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20250618-windows-3.2.2.tar.gz")
-    set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "d1f1b46b30f43c8bfe086ade5134d8f9")
+    set(OPENSTUDIO_GEMS_ZIP_FILENAME "openstudio3-gems-20260106-windows-3.2.2.tar.gz")
+    set(OPENSTUDIO_GEMS_ZIP_EXPECTED_MD5 "35b4af50f7507e0d59cb05a4b6c65540")
     if (USE_OPENSTUDIO_GEMS_PR)
       set(OPENSTUDIO_GEMS_BASEURL "${OPENSTUDIO_GEMS_BASEURL}/openstudio-gems-windows/${OPENSTUDIO_GEMS_PR_NUMBER}")
     endif()
@@ -1030,7 +1036,7 @@ include_directories("${PROJECT_BINARY_DIR}/src/")
 if(MSVC)
   # treat warnings as errors
   add_definitions(/WX)
-elseif()
+else()
   add_definitions(-Werror)
 endif()
 
@@ -1045,6 +1051,7 @@ set(project_directories
   generateiddfactory
   utilities
   model
+  modelica
   energyplus
   epjson
   radiance

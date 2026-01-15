@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -185,6 +185,9 @@ namespace model {
       ModelObject clone(Model model) const override;
       bool addToThermalZone(ThermalZone& thermalZone) override;
       std::vector<IdfObject> remove() override;
+
+      std::string airInletNodeName() const;
+      std::string airOutletNodeName() const;
 
       //@}
      protected:

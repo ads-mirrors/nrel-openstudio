@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -202,6 +202,10 @@ namespace energyplus {
     boost::optional<model::ModelObject> translateGroundHeatExchangerVertical(const WorkspaceObject& workspaceObject);
 
     boost::optional<model::ModelObject> translateHeatBalanceAlgorithm(const WorkspaceObject& workspaceObject);
+
+    boost::optional<model::ModelObject> translateHeatPumpAirToWater(const WorkspaceObject& workspaceObject);
+    boost::optional<model::ModelObject> translateHeatPumpAirToWaterCooling(const WorkspaceObject& workspaceObject);
+    boost::optional<model::ModelObject> translateHeatPumpAirToWaterHeating(const WorkspaceObject& workspaceObject);
 
     boost::optional<model::ModelObject> translateHotWaterEquipment(const WorkspaceObject& workspaceObject);
 

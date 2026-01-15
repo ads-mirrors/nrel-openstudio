@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -410,6 +410,26 @@ namespace model {
       bool setGasEquipmentPowerPerPerson(double gasEquipmentPowerPerPerson);
 
       bool setGasEquipmentPowerPerPerson(double gasEquipmentPowerPerPerson, const boost::optional<GasEquipment>& templateGasEquipment);
+
+      double hotWaterEquipmentPower() const;
+
+      bool setHotWaterEquipmentPower(double hotWaterEquipmentPower);
+
+      bool setHotWaterEquipmentPower(double hotWaterEquipmentPower, const boost::optional<HotWaterEquipment>& templateHotWaterEquipment);
+
+      double hotWaterEquipmentPowerPerFloorArea() const;
+
+      bool setHotWaterEquipmentPowerPerFloorArea(double hotWaterEquipmentPowerPerFloorArea);
+
+      bool setHotWaterEquipmentPowerPerFloorArea(double hotWaterEquipmentPowerPerFloorArea,
+                                                 const boost::optional<HotWaterEquipment>& templateHotWaterEquipment);
+
+      double hotWaterEquipmentPowerPerPerson() const;
+
+      bool setHotWaterEquipmentPowerPerPerson(double hotWaterEquipmentPowerPerPerson);
+
+      bool setHotWaterEquipmentPowerPerPerson(double hotWaterEquipmentPowerPerPerson,
+                                              const boost::optional<HotWaterEquipment>& templateHotWaterEquipment);
 
       double infiltrationDesignFlowRate() const;
 

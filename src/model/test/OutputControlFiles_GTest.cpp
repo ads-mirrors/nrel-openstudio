@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -201,4 +201,10 @@ TEST_F(ModelFixture, OutputControlFiles_GettersSetters) {
   EXPECT_FALSE(outputControlFiles.outputTarcog());
   EXPECT_TRUE(outputControlFiles.setOutputTarcog(true));
   EXPECT_TRUE(outputControlFiles.outputTarcog());
+
+  EXPECT_TRUE(outputControlFiles.outputPlantComponentSizing());
+  EXPECT_TRUE(outputControlFiles.setOutputPlantComponentSizing(false));
+  EXPECT_FALSE(outputControlFiles.outputPlantComponentSizing());
+  EXPECT_TRUE(outputControlFiles.setOutputPlantComponentSizing(true));
+  EXPECT_TRUE(outputControlFiles.outputPlantComponentSizing());
 }

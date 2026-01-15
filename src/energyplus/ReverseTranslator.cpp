@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -591,6 +591,10 @@ namespace energyplus {
       }
       case openstudio::IddObjectType::HeatBalanceAlgorithm: {
         modelObject = translateHeatBalanceAlgorithm(workspaceObject);
+        break;
+      }
+      case openstudio::IddObjectType::HeatPump_AirToWater: {
+        modelObject = translateHeatPumpAirToWater(workspaceObject);
         break;
       }
       case openstudio::IddObjectType::HotWaterEquipment: {

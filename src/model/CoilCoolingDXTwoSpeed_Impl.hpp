@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -12,7 +12,6 @@ namespace openstudio {
 namespace model {
 
   class Curve;
-  class Information;
   class Schedule;
 
   namespace detail {
@@ -241,6 +240,10 @@ namespace model {
       //@}
       /** @name Other */
       //@{
+
+      AirflowNetworkEquivalentDuct getAirflowNetworkEquivalentDuct(double length, double diameter);
+
+      boost::optional<AirflowNetworkEquivalentDuct> airflowNetworkEquivalentDuct() const;
 
       // Autosize methods
 

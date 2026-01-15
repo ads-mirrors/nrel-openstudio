@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -7,7 +7,6 @@
 #define UTILITIES_IDF_IDFREGEX_HPP
 
 #include "../UtilitiesAPI.hpp"
-#include "../core/StaticInitializer.hpp"
 #include <string>
 #include <boost/regex.hpp>
 

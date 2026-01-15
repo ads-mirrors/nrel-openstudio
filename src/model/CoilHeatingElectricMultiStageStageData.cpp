@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -122,8 +122,7 @@ namespace model {
       auto [index, parentCoil] = indexAndNameOpt.get();
       const std::string sqlField = "Design Size Stage " + std::to_string(index) + " Nominal Capacity";
 
-      // EPLUS-SQL-INCONSISTENCY
-      return parentCoil.getImpl<CoilHeatingElectricMultiStage_Impl>()->getAutosizedValue(sqlField, "W", "Coil:Heating:ElectricMultiStage");
+      return parentCoil.getImpl<CoilHeatingElectricMultiStage_Impl>()->getAutosizedValue(sqlField, "W", "Coil:Heating:Electric:MultiStage");
     }
 
     void CoilHeatingElectricMultiStageStageData_Impl::autosize() {

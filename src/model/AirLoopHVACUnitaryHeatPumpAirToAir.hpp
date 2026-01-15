@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -102,6 +102,8 @@ namespace model {
 
     bool isDehumidificationControlTypeDefaulted() const;
 
+    double dXHeatingCoilSizingRatio() const;
+
     //@}
     /** @name Setters */
     //@{
@@ -153,6 +155,8 @@ namespace model {
     bool setDehumidificationControlType(const std::string& dehumidificationControlType);
 
     void resetDehumidificationControlType();
+
+    bool setDXHeatingCoilSizingRatio(double dXHeatingCoilSizingRatio);
 
     //@}
     /** @name Other */

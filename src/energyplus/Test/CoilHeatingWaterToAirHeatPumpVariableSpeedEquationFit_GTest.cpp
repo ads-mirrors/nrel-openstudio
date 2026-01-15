@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -116,6 +116,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilHeatingWaterToAirHeatPumpVariabl
 
   EXPECT_EQ("My CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit",
             idf_coil.getString(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitFields::Name).get());
+  EXPECT_EQ("Always On Discrete", idf_coil.getString(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitFields::AvailabilityScheduleName).get());
   EXPECT_EQ("Coil Water Inlet Node",
             idf_coil.getString(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitFields::WatertoRefrigerantHXWaterInletNodeName).get());
   EXPECT_EQ("Coil Water Outlet Node",
@@ -148,7 +149,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilHeatingWaterToAirHeatPumpVariabl
     EXPECT_EQ(speed.referenceUnitGrossRatedHeatingCOP(),
               eg.getDouble(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitExtensibleFields::SpeedReferenceUnitGrossRatedHeatingCOP).get());
     EXPECT_EQ(speed.referenceUnitRatedAirFlow(),
-              eg.getDouble(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitExtensibleFields::SpeedReferenceUnitRatedAirFlow).get());
+              eg.getDouble(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitExtensibleFields::SpeedReferenceUnitRatedAirFlowRate).get());
     EXPECT_EQ(speed.referenceUnitRatedWaterFlowRate(),
               eg.getDouble(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitExtensibleFields::SpeedReferenceUnitRatedWaterFlowRate).get());
 

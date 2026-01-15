@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -270,4 +270,13 @@ TEST_F(MeasureFixture, OSArgument_valueAsJSON) {
     EXPECT_TRUE(val.isString());
     EXPECT_EQ("handle1", val.asString());
   }
+}
+
+TEST_F(MeasureFixture, OSArgument_setRequired) {
+  OSArgument boolArgument = OSArgument::makeBoolArgument("bool");
+  boolArgument.setRequired(true);
+  EXPECT_EQ(true, boolArgument.required());
+
+  boolArgument.setRequired(false);
+  EXPECT_EQ(false, boolArgument.required());
 }

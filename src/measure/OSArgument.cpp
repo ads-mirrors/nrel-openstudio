@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -816,6 +816,10 @@ namespace measure {
     onChange();
 
     return true;
+  }
+
+  void OSArgument::setRequired(bool required) {
+    m_required = required;
   }
 
   bool OSArgument::setStringInternal(OSArgumentVariant& argVar, const std::string& value) {

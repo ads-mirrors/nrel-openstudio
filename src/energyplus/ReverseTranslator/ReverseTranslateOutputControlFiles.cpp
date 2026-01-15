@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -268,6 +268,15 @@ namespace energyplus {
         modelObject.setOutputTarcog(true);
       } else {
         modelObject.setOutputTarcog(false);
+      }
+    }
+
+    if (boost::optional<std::string> _outputPlantComponentSizing =
+          workspaceObject.getString(OutputControl_FilesFields::OutputPlantComponentSizing, true)) {
+      if (istringEqual("Yes", _outputPlantComponentSizing.get())) {
+        modelObject.setOutputPlantComponentSizing(true);
+      } else {
+        modelObject.setOutputPlantComponentSizing(false);
       }
     }
 

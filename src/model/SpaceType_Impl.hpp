@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -342,6 +342,26 @@ namespace model {
       double getGasEquipmentPowerPerFloorArea(double floorArea, double numPeople) const;
 
       double getGasEquipmentPowerPerPerson(double floorArea, double numPeople) const;
+
+      boost::optional<double> hotWaterEquipmentPowerPerFloorArea() const;
+
+      bool setHotWaterEquipmentPowerPerFloorArea(double hotWaterEquipmentPowerPerFloorArea);
+
+      bool setHotWaterEquipmentPowerPerFloorArea(double hotWaterEquipmentPowerPerFloorArea,
+                                                 const boost::optional<HotWaterEquipment>& templateHotWaterEquipment);
+
+      boost::optional<double> hotWaterEquipmentPowerPerPerson() const;
+
+      bool setHotWaterEquipmentPowerPerPerson(double hotWaterEquipmentPowerPerPerson);
+
+      bool setHotWaterEquipmentPowerPerPerson(double hotWaterEquipmentPowerPerPerson,
+                                              const boost::optional<HotWaterEquipment>& templateHotWaterEquipment);
+
+      double getHotWaterEquipmentDesignLevel(double floorArea, double numPeople) const;
+
+      double getHotWaterEquipmentPowerPerFloorArea(double floorArea, double numPeople) const;
+
+      double getHotWaterEquipmentPowerPerPerson(double floorArea, double numPeople) const;
 
       double floorArea() const;
 

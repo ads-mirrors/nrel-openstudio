@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -75,7 +75,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_HeatExchangerDesiccantBalancedFlow) 
   if (woPerformance) {
     EXPECT_EQ(woPerformance->iddObject().type(), IddObjectType::HeatExchanger_Desiccant_BalancedFlow_PerformanceDataType1);
   }
-  EXPECT_EQ("No", idfHX.getString(HeatExchanger_Desiccant_BalancedFlowFields::EconomizerLockout, false).get());
+  EXPECT_EQ("Yes", idfHX.getString(HeatExchanger_Desiccant_BalancedFlowFields::EconomizerLockout, false).get());
 }
 
 TEST_F(EnergyPlusFixture, ForwardTranslator_CoilSystemCoolingDXHeatExchangerAssisted_HeatExchangerDesiccantBalancedFlow) {

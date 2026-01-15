@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -238,6 +238,7 @@ namespace osversion {
     std::string update_3_7_0_to_3_8_0(const IdfFile& idf_3_7_0, const IddFileAndFactoryWrapper& idd_3_8_0);
     std::string update_3_8_0_to_3_9_0(const IdfFile& idf_3_8_0, const IddFileAndFactoryWrapper& idd_3_9_0);
     std::string update_3_9_0_to_3_10_0(const IdfFile& idf_3_9_0, const IddFileAndFactoryWrapper& idd_3_10_0);
+    std::string update_3_10_0_to_3_11_0(const IdfFile& idf_3_10_0, const IddFileAndFactoryWrapper& idd_3_11_0);
 
     IdfObject updateUrlField_0_7_1_to_0_7_2(const IdfObject& object, unsigned index);
 

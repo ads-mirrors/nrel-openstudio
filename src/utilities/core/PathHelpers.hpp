@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -11,6 +11,11 @@
 #include "Path.hpp"
 
 namespace openstudio {
+/** System dependent extension for an executable file. 
+ *  This is .exe on Windows platforms and otherwise an empty string. 
+ *  For this function, the "." will be included.
+ *  */
+UTILITIES_API std::string executableFileExtension();
 
 /** Single location for storing the default extension for Model serialization files. (That is,
  *  the file extension to be used for Idf files following the IddFileType::OpenStudio Idd, or a

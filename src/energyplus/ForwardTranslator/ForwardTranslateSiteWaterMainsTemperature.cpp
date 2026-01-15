@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -43,6 +43,12 @@ namespace energyplus {
     if (d) {
       idfObject.setDouble(Site_WaterMainsTemperatureFields::MaximumDifferenceInMonthlyAverageOutdoorAirTemperatures, *d);
     }
+
+    const double temperatureMultiplier = modelObject.temperatureMultiplier();
+    idfObject.setDouble(Site_WaterMainsTemperatureFields::TemperatureMultiplier, temperatureMultiplier);
+
+    const double temperatureOffset = modelObject.temperatureOffset();
+    idfObject.setDouble(Site_WaterMainsTemperatureFields::TemperatureOffset, temperatureOffset);
 
     return idfObject;
   }

@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -55,7 +55,7 @@ TEST_F(IddFixture, EpIddFile) {
     EXPECT_EQ("", logMessage.logMessage());
   }
 
-  EXPECT_EQ("25.1.0", loadedIddFile->version());
+  EXPECT_EQ("25.2.0", loadedIddFile->version());
   EXPECT_EQ(epIddFile.objects().size(), loadedIddFile->objects().size());
   if (epIddFile.objects().size() != loadedIddFile->objects().size()) {
     // get sets of IddObjectType

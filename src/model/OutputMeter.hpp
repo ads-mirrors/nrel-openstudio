@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -69,6 +69,8 @@ namespace model {
     static std::string getName(const boost::optional<std::string>& specificEndUseType, const boost::optional<EndUseType>& endUseType,
                                const boost::optional<FuelType>& fuelType, const boost::optional<InstallLocationType>& installLocationType,
                                const boost::optional<std::string>& specificInstallLocation);
+
+    static std::vector<std::string> reportingFrequencyValues();
 
     //@}
     /** @name Getters */

@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -103,6 +103,10 @@ namespace model {
       if (auto c_ = crankcaseHeaterCapacityFunctionofTemperatureCurve()) {
         result.emplace_back(std::move(*c_));
       }
+      std::vector<AirflowNetworkEquivalentDuct> myAFNItems =
+        getObject<ModelObject>().getModelObjectSources<AirflowNetworkEquivalentDuct>(AirflowNetworkEquivalentDuct::iddObjectType());
+      result.insert(result.end(), myAFNItems.begin(), myAFNItems.end());
+
       return result;
     }
     // Get all output variable names that could be associated with this object.

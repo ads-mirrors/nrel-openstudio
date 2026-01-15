@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -156,7 +156,9 @@ namespace model {
       auto result = modelObjectCreator.getNew(this, object, keepHandle);
 
       if (!result) {
-        LOG(Warn, "Creating GenericModelObject for IddObjectType '" << object.iddObject().type().valueName() << "'.");
+        if (object.iddObject().type().value() != IddObjectType::CommentOnly) {
+          LOG(Warn, "Creating GenericModelObject for IddObjectType '" << object.iddObject().type().valueName() << "'.");
+        }
         result = std::shared_ptr<GenericModelObject_Impl>(new GenericModelObject_Impl(object, this, keepHandle));
       }
 
@@ -171,7 +173,9 @@ namespace model {
       auto result = modelObjectCreator.getCopy(this, originalObjectImplPtr, keepHandle);
 
       if (!result) {
-        LOG(Warn, "Creating GenericModelObject for IddObjectType '" << originalObjectImplPtr->iddObject().type().valueName() << "'.");
+        if (originalObjectImplPtr->iddObject().type().value() != IddObjectType::CommentOnly) {
+          LOG(Warn, "Creating GenericModelObject for IddObjectType '" << originalObjectImplPtr->iddObject().type().valueName() << "'.");
+        }
         if (dynamic_pointer_cast<GenericModelObject_Impl>(originalObjectImplPtr)) {
           result = std::shared_ptr<GenericModelObject_Impl>(
             new GenericModelObject_Impl(*dynamic_pointer_cast<GenericModelObject_Impl>(originalObjectImplPtr), this, keepHandle));
@@ -4188,6 +4192,11 @@ namespace model {
     REGISTER_CONSTRUCTOR(HeatExchangerFluidToFluid);
     REGISTER_CONSTRUCTOR(HeatPumpAirToWaterFuelFiredHeating);
     REGISTER_CONSTRUCTOR(HeatPumpAirToWaterFuelFiredCooling);
+    REGISTER_CONSTRUCTOR(HeatPumpAirToWater);
+    REGISTER_CONSTRUCTOR(HeatPumpAirToWaterCooling);
+    REGISTER_CONSTRUCTOR(HeatPumpAirToWaterCoolingSpeedData);
+    REGISTER_CONSTRUCTOR(HeatPumpAirToWaterHeating);
+    REGISTER_CONSTRUCTOR(HeatPumpAirToWaterHeatingSpeedData);
     REGISTER_CONSTRUCTOR(HeatPumpWaterToWaterEquationFitCooling);
     REGISTER_CONSTRUCTOR(HeatPumpWaterToWaterEquationFitHeating);
     REGISTER_CONSTRUCTOR(HeatPumpPlantLoopEIRCooling);
@@ -4767,6 +4776,11 @@ namespace model {
     REGISTER_COPYCONSTRUCTORS(HeatExchangerFluidToFluid);
     REGISTER_COPYCONSTRUCTORS(HeatPumpAirToWaterFuelFiredHeating);
     REGISTER_COPYCONSTRUCTORS(HeatPumpAirToWaterFuelFiredCooling);
+    REGISTER_COPYCONSTRUCTORS(HeatPumpAirToWater);
+    REGISTER_COPYCONSTRUCTORS(HeatPumpAirToWaterCooling);
+    REGISTER_COPYCONSTRUCTORS(HeatPumpAirToWaterCoolingSpeedData);
+    REGISTER_COPYCONSTRUCTORS(HeatPumpAirToWaterHeating);
+    REGISTER_COPYCONSTRUCTORS(HeatPumpAirToWaterHeatingSpeedData);
     REGISTER_COPYCONSTRUCTORS(HeatPumpWaterToWaterEquationFitCooling);
     REGISTER_COPYCONSTRUCTORS(HeatPumpWaterToWaterEquationFitHeating);
     REGISTER_COPYCONSTRUCTORS(HeatPumpPlantLoopEIRCooling);

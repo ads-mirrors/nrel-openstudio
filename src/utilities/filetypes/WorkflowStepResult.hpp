@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -304,6 +304,13 @@ class UTILITIES_API WorkflowStepResult
 
   void setStdErr(const std::string& stdErr);
   void resetStdErr();
+
+  //@}
+  /** @name Other */
+  //@{
+
+  // Print the result to stdout
+  void showOutput() const;
 
   //@}
 

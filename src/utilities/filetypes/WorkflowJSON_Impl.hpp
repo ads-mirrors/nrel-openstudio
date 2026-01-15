@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -123,6 +123,20 @@ namespace detail {
 
     bool setSeedFile(const openstudio::path& seedFile);
 
+    boost::optional<openstudio::path> seedModelicaFile() const;
+
+    boost::optional<std::string> seedModelicaModel() const;
+
+    bool setSeedModelicaFile(const openstudio::path& modelicaSeedFile);
+
+    void resetSeedModelicaFile();
+
+    std::vector<openstudio::path> modelicaPackages() const;
+
+    bool setModelicaPackages(const std::vector<openstudio::path>& packages);
+
+    void resetModelicaPackages();
+
     boost::optional<openstudio::path> weatherFile() const;
 
     bool setWeatherFile(const openstudio::path& weatherFile);
@@ -181,7 +195,9 @@ namespace detail {
     openstudio::path m_oswDir;
     openstudio::path m_oswFilename;
     Json::Value m_value;
+    // cppcheck-suppress unusedStructMember
     std::vector<WorkflowStep> m_steps;
+    // cppcheck-suppress unusedStructMember
     std::vector<int> m_measureTypes;
     boost::optional<RunOptions> m_runOptions;
   };

@@ -1,5 +1,5 @@
 ########################################################################################################################
-#  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+#  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 #  See also https://openstudio.net/license
 ########################################################################################################################
 
@@ -284,4 +284,12 @@ class SubProjectClassGenerator
     return result
   end
 
+end
+
+class FakeIddObjectType
+  attr_accessor :valueName, :valueDescription
+  def initialize(iddObjectTypeName)
+    @valueName = iddObjectTypeName.gsub(':', '_')
+    @valueDescription = iddObjectTypeName
+  end
 end

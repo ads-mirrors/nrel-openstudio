@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -346,7 +346,7 @@ void IddFileFactoryData::parseFile(const path& outPath, const std::string& outFi
   }
 
   // register objects with CallbackMap
-  cxxFile->tempFile << "void IddFactorySingleton::register" << fileName() << "ObjectsInCallbackMap() {" << '\n';
+  cxxFile->tempFile << "void IddFactory::register" << fileName() << "ObjectsInCallbackMap() {" << '\n';
   for (const StringPair& objectName : objectNames()) {
     cxxFile->tempFile << "  m_callbackMap.insert(IddObjectCallbackMap::value_type(IddObjectType::" << objectName.first << ",create"
                       << objectName.first << "IddObject));" << '\n';

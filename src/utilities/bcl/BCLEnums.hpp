@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -28,6 +28,7 @@ OPENSTUDIO_ENUM( MeasureType,
  *  \endcode */
 OPENSTUDIO_ENUM( MeasureType,
   ((ModelMeasure)(Model Measure))
+  ((ModelicaMeasure)(Modelica Measure))
   ((EnergyPlusMeasure)(EnergyPlus Measure))
   ((UtilityMeasure)(Utility Measure))
   ((ReportingMeasure)(Reporting Measure))

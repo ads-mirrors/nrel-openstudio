@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -2340,7 +2340,7 @@ namespace model {
   }
 
   double Surface::skylightToProjectedFloorRatio() const {
-    return getImpl<detail::Surface_Impl>()->skylightToRoofRatio();
+    return getImpl<detail::Surface_Impl>()->skylightToProjectedFloorRatio();
   }
 
   boost::optional<SubSurface> Surface::setWindowToWallRatio(double wwr) {

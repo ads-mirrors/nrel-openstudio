@@ -3,8 +3,6 @@ name: Clang Format
 on:
   push:
     branches: [ master, develop, clang-format ]
-  pull_request:
-    branches: [ master, develop ]
 
 jobs:
   build:

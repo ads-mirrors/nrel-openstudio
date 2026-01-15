@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -402,6 +402,10 @@ namespace model {
   IddObjectType OutputMeter::iddObjectType() {
     IddObjectType result(IddObjectType::OS_Output_Meter);
     return result;
+  }
+
+  std::vector<std::string> OutputMeter::reportingFrequencyValues() {
+    return getIddKeyNames(IddFactory::instance().getObject(iddObjectType()).get(), OS_Output_MeterFields::ReportingFrequency);
   }
 
   boost::regex OutputMeter::meterRegex() {

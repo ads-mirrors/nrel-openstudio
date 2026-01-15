@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
-*  OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+*  OpenStudio(R), Copyright (c) Alliance for Energy Innovation, LLC.
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
@@ -29,6 +29,14 @@ namespace energyplus {
 
     // Name
     IdfObject idfObject = createRegisterAndNameIdfObject(openstudio::IddObjectType::Coil_Heating_DX_VariableSpeed, modelObject);
+
+    // AvailabilityScheduleName
+    {
+      auto schedule = modelObject.availabilitySchedule();
+      if (boost::optional<IdfObject> _schedule = translateAndMapModelObject(schedule)) {
+        idfObject.setString(Coil_Heating_DX_VariableSpeedFields::AvailabilityScheduleName, _schedule->name().get());
+      }
+    }
 
     // IndoorAirInletNodeName
     if (auto node = modelObject.inletModelObject()) {
