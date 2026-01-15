@@ -167,7 +167,7 @@ jobs:
         echo "::engroup::"
 
         echo "::group::Build"
-        cmake --build --preset conan-release
+        cmake --build --preset conan-release --config Release
         echo "::engroup::"
 
     - name: Install Dotnet x86
@@ -185,6 +185,7 @@ jobs:
         conan install . --output-folder=./build --build=missing -c tools.cmake.cmaketoolchain:generator="Visual Studio 17 2022" -s compiler.cppstd=20 -s build_type=${{ env.BUILD_TYPE }} -o with_testing=False -o with_benchmark=False -o with_ruby=False -o with_python=False -o with_csharp=True -s:b arch=x86_64 -s:h arch=x86
         echo "::engroup::"
 
+        cmake --list-presets
         echo "::group::CMake Configure"
         call ./build/conanbuild.bat
         cmake --preset conan-default ^
@@ -193,7 +194,7 @@ jobs:
         echo "::engroup::"
 
         echo "::group::Build"
-        cmake --build --preset conan-release
+        cmake --build --preset conan-default --config Release
         echo "::engroup::"
 
     - name: build nuget for Windows
