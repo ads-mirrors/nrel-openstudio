@@ -6,8 +6,6 @@ on:
     # Sequence of patterns matched against refs/tags
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
-  pull_request:
-    branches: [ master ]
   workflow_dispatch:
 
 env:
@@ -317,7 +315,7 @@ jobs:
         echo -e "::endgroup::"
 
         begin_group "Build"
-        if [ "${{ matrix.name }}" == "Ubuntu_arm64" ]; then
+        if [ "${{ matrix.name }}" == "Ubuntu" ] || [ "${{ matrix.name }}" == "Ubuntu_arm64" ]; then
           echo "Ubuntu_arm64 is apparently running out of memory/CPU during the build as of 2025-06-18, so work around it"
           N=$(nproc)
           cmake --build --preset conan-release --target openstudiolib -j $N
