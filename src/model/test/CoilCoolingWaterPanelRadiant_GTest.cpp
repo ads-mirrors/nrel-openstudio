@@ -116,7 +116,7 @@ TEST_F(ModelFixture, CoilCoolingWaterPanelRadiant_SetGetFields) {
 
 TEST_F(ModelFixture, CoilCoolingWaterPanelRadiant_CoolingControlTemperatureSchedule) {
   // Address #5595: "CoilCoolingWaterPanelRadiant.setCoolingControlTemperatureSchedule" but keep getting 'incompatible ScheduleTypeLimits' error
-  
+
   Model m;
   CoilCoolingWaterPanelRadiant coil(m);
 
