@@ -126,7 +126,7 @@ TEST_F(ModelFixture, CoilCoolingWaterPanelRadiant_CoolingControlTemperatureSched
   EXPECT_TRUE(temperatureLimits.setNumericType("Continuous"));
   EXPECT_TRUE(temperatureLimits.setUnitType("Temperature"));
 
-  ScheduleRuleset temperatureSchedule(model);
+  ScheduleRuleset temperatureSchedule(m);
   EXPECT_TRUE(temperatureSchedule.setScheduleTypeLimits(temperatureLimits));
 
   EXPECT_TRUE(coil.setCoolingControlTemperatureSchedule(temperatureSchedule));
