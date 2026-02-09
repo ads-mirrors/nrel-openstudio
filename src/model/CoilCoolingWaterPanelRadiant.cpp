@@ -60,7 +60,7 @@ namespace model {
       UnsignedVector::const_iterator b(fieldIndices.begin());
       UnsignedVector::const_iterator e(fieldIndices.end());
       if (std::find(b, e, OS_Coil_Cooling_Water_Panel_RadiantFields::CoolingControlTemperatureScheduleName) != e) {
-        result.push_back(ScheduleTypeKey("CoilCoolingWaterPanelRadiant", "Cooling Control Temperature Schedule"));
+        result.emplace_back("CoilCoolingWaterPanelRadiant", "Cooling Control Temperature Schedule");
       }
       return result;
     }
