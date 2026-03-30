@@ -81,6 +81,7 @@ class PackageInfo:
         self.need_update = None
 
         self.force_version = None
+        self.true_latest_version = None
 
     def __repr__(self):
         d = {}
@@ -156,6 +157,16 @@ class PackageInfo:
                 # print(f"FOUND {last_v_str} in {remote}")
                 self.last_known_version = last_v_str
                 self.last_known_v_remote = remote
+
+            if self.force_version:
+                orig = self.force_version
+                self.force_version = None
+                all_versions = self._lookup_all_v(remote=remote)
+                self.force_version = orig
+                if all_versions:
+                    true_last = all_versions[-1]
+                    if self.true_latest_version is None or version.parse(true_last) > version.parse(self.true_latest_version):
+                        self.true_latest_version = true_last
         if not found:
             raise ValueError(f"Could not find {query} in any of the remotes: {remotes}")
         return self.last_known_version
@@ -199,9 +210,15 @@ class PackageInfo:
 
         elif cur_v == last_v:
             if self.rev is None:
-                print(
-                    f"\n:white_check_mark: [green]Package {self} is using " "the latest version and has no revision[/]"
-                )
+                if self.true_latest_version and version.parse(self.true_latest_version) > cur_v:
+                    print(
+                        f"\n:lock: [yellow]Package {self} is pinned "
+                        f"(latest available: {self.true_latest_version})[/]"
+                    )
+                else:
+                    print(
+                        f"\n:white_check_mark: [green]Package {self} is using " "the latest version and has no revision[/]"
+                    )
                 # No-op!
                 return False
             elif self.rev == self.last_known_rev:
