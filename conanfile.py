@@ -51,9 +51,9 @@ class OpenStudioBuildRecipe(ConanFile):
         self.requires("websocketpp/0.8.2")  # 3fd704c4c5388d9c08b11af86f79f616
         self.requires("geographiclib/2.6")
         self.requires("swig/4.4.0")
-        self.requires("tinygltf/2.9.0")
+        self.requires("tinygltf/2.9.7")
         self.requires("cli11/2.6.0")
-        self.requires("antlr4-cppruntime/4.13.1") # a173ea06e501a0f833003e679d5f3fb4 
+        self.requires("antlr4-cppruntime/4.13.2")
 
         self.requires(
             "minizip/1.3.1"
@@ -66,7 +66,7 @@ class OpenStudioBuildRecipe(ConanFile):
         if self.options.with_testing:
             self.requires("gtest/1.17.0")
         if self.options.with_benchmark:
-            self.requires("benchmark/1.9.4")
+            self.requires("benchmark/1.9.5")
 
     # Let people provide their own CMake for now
     # def build_requirements(self):
