@@ -306,6 +306,7 @@ class ConanFileUpdater:
         lines = content.splitlines()
 
         packages = []
+        seen_packages = set()
         for line in lines:
             line = line.strip()
             if line.startswith("#"):
@@ -315,6 +316,9 @@ class ConanFileUpdater:
                 continue
             if m := RE_CONAN.search(line):
                 d = m.groupdict()
+                if d["package"] in seen_packages:
+                    continue
+                seen_packages.add(d["package"])
                 p = PackageInfo(**d)
                 # Dynamically add an attribute to track whether
                 # we want to check all remotes or not
