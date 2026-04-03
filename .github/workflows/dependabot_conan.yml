@@ -9,6 +9,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write      # Commit to branch
+      pull-requests: write # Create pull request
+
     steps:
     - uses: actions/checkout@v6
 
