@@ -6,6 +6,8 @@
 #include "MeasureUpdateCommand.hpp"
 #include "MeasureManager.hpp"
 
+#include <CLI/ExtraValidators.hpp>
+
 #include "../utilities/core/Filesystem.hpp"
 #include "../utilities/bcl/BCLMeasure.hpp"
 #include "../scriptengine/ScriptEngine.hpp"
