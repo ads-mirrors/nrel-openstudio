@@ -1379,7 +1379,9 @@ jobs:
             --build=missing `
             -c tools.cmake.cmaketoolchain:generator=Ninja `
             -s compiler.cppstd=20 `
-            -s build_type=${{ env.BUILD_TYPE }}
+            -s build_type=${{ env.BUILD_TYPE }} `
+            --lockfile-partial --lockfile-out=conan.lock
+          git diff conan.lock
 
       - name: Locate Ruby
         run: |
