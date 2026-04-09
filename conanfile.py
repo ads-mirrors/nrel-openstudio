@@ -102,7 +102,11 @@ class OpenStudioBuildRecipe(ConanFile):
 
         # Ensure cmake finds the conan executable
         exe_ext = ".exe" if self.settings.os == "Windows" else ""
-        tc.cache_variables["SWIG_EXECUTABLE"] = str(Path(self.dependencies['swig'].cpp_info.bindir) / f"swig{exe_ext}")
+        swig_exe = str(Path(self.dependencies['swig'].cpp_info.bindir) / f"swig{exe_ext}")
+        # CMakePresets.json
+        tc.cache_variables["SWIG_EXECUTABLE"] = swig_exe
+        # conan_toolchain.cmake
+        tc.variables["SWIG_EXECUTABLE"] = swig_exe
 
         if self.options.with_python:
             v = sys.version_info
