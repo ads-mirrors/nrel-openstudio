@@ -102,7 +102,7 @@ class OpenStudioBuildRecipe(ConanFile):
 
         # Ensure cmake finds the conan executable
         exe_ext = ".exe" if self.settings.os == "Windows" else ""
-        swig_exe = str(Path(self.dependencies['swig'].cpp_info.bindir) / f"swig{exe_ext}")
+        swig_exe = (Path(self.dependencies['swig'].cpp_info.bindir) / f"swig{exe_ext}").as_posix()
         # CMakePresets.json
         tc.cache_variables["SWIG_EXECUTABLE"] = swig_exe
         # conan_toolchain.cmake
@@ -116,7 +116,7 @@ class OpenStudioBuildRecipe(ConanFile):
                     f"Setting PYTHON_VERSION and Python_ROOT_DIR from your current python: {python_version}, '{sys.base_prefix}'"
                 )
                 tc.cache_variables["PYTHON_VERSION"] = python_version
-                tc.cache_variables["Python_ROOT_DIR"] = str(Path(sys.base_prefix))
+                tc.cache_variables["Python_ROOT_DIR"] = Path(sys.base_prefix).as_posix()
             else:
                 self.output.warning(
                     "Your current python is not in the 3.12.x range, which is what we target.\n"
