@@ -240,21 +240,12 @@ jobs:
             ln -sfn "$dest" "$target"
           }
 
-          prepare_dir "$GITHUB_WORKSPACE/${{ env.OPENSTUDIO_BUILD }}" "/mnt/build"
           prepare_dir "$HOME/.ccache" "/mnt/.ccache"
           prepare_dir "$HOME/.conan2" "/mnt/.conan2"
           if command -v ccache >/dev/null 2>&1; then
             ccache -M ${{ env.CCACHE_MAXSIZE }} || true
             echo "Configured ccache:"; ccache -s | sed -n '1,10p'
           fi
-
-      - name: Resolve build path
-        id: build_path
-        run: |
-          # actions/upload-artifact@v4 does not follow symlinks at the start of a path.
-          # We resolve the build directory to its real location to ensure globbing works.
-          REAL_PATH=$(readlink -f "${{ env.OPENSTUDIO_BUILD }}")
-          echo "path=$REAL_PATH" >> $GITHUB_OUTPUT
 
       - name: Fix CMake Path (CentOS)
         if: matrix.platform == 'centos-9-x64'
@@ -415,9 +406,9 @@ jobs:
         with:
           name: build-diag-${{ matrix.platform }}-${{ github.sha }}
           path: |
-            ${{ steps.build_path.outputs.path }}/build.log
-            ${{ steps.build_path.outputs.path }}/.ninja_log
-            ${{ steps.build_path.outputs.path }}/CTestTestfile.cmake
+            ${{ env.OPENSTUDIO_BUILD }}/build.log
+            ${{ env.OPENSTUDIO_BUILD }}/.ninja_log
+            ${{ env.OPENSTUDIO_BUILD }}/CTestTestfile.cmake
           if-no-files-found: warn
 
       - name: Copy Testing tree with suffix
@@ -489,7 +480,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: OS-Installers-${{ matrix.platform }}-DEB-${{ github.sha }}
-          path: ${{ steps.build_path.outputs.path }}/*.deb
+          path: ${{ env.OPENSTUDIO_BUILD }}/*.deb
           if-no-files-found: ignore
 
       - name: Upload RPM installer
@@ -497,14 +488,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: OS-Installers-${{ matrix.platform }}-RPM-${{ github.sha }}
-          path: ${{ steps.build_path.outputs.path }}/*.rpm
+          path: ${{ env.OPENSTUDIO_BUILD }}/*.rpm
           if-no-files-found: ignore
 
       - name: Upload TGZ installer
         uses: actions/upload-artifact@v4
         with:
           name: OS-Installers-${{ matrix.platform }}-TGZ-${{ github.sha }}
-          path: ${{ steps.build_path.outputs.path }}/OpenStudio-*.tar.gz
+          path: ${{ env.OPENSTUDIO_BUILD }}/OpenStudio-*.tar.gz
           if-no-files-found: ignore
 
       - name: Upload WHEEL installer
@@ -512,7 +503,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: OS-Installers-${{ matrix.platform }}-WHEEL-${{ github.sha }}
-          path: ${{ steps.build_path.outputs.path }}/*.whl
+          path: ${{ env.OPENSTUDIO_BUILD }}/*.whl
           if-no-files-found: ignore
 
   linux-publish:
