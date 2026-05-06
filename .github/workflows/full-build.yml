@@ -103,7 +103,7 @@ jobs:
               *OpenStudio*x86_64.tar.gz
             cpack_generators: "RPM;TGZ"
             max_jobs: 4
-            exclude_regex: "^(BCLFixture.RemoteBCLMetaSearchTest|BCLFixture.BCLMeasure)$"
+            exclude_regex: "BCLFixture.RemoteBCLMetaSearchTest|BCLFixture.BCLMeasure"
           - platform: ubuntu-2204-x64
             pretty: Ubuntu 22.04 x64
             os: ubuntu-22.04
@@ -117,7 +117,7 @@ jobs:
               *OpenStudio*x86_64.tar.gz
             cpack_generators: "DEB;TGZ"
             max_jobs: 3
-            exclude_regex: "^(ModelFixture.PythonPluginInstance_NotPYFile|BCLFixture.BCLMeasure)$"
+            exclude_regex: "ModelFixture.PythonPluginInstance_NotPYFile|BCLFixture.BCLMeasure"
           - platform: ubuntu-2404-x64
             pretty: Ubuntu 24.04 x64
             os: ubuntu-24.04
@@ -145,7 +145,7 @@ jobs:
               *OpenStudio*arm64.tar.gz
             cpack_generators: "DEB;TGZ"
             max_jobs: 3
-            exclude_regex: "^(GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel|SqlFileFixture.AnnualTotalCosts|OpenStudioCLI.*test_measure_manager|BCLFixture.BCLMeasure)$"
+            exclude_regex: "GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel|SqlFileFixture.AnnualTotalCosts|OpenStudioCLI.*test_measure_manager|BCLFixture.BCLMeasure"
           - platform: ubuntu-2404-arm64
             pretty: Ubuntu 24.04 ARM64
             os: ubuntu-24.04-arm
@@ -159,13 +159,12 @@ jobs:
               *OpenStudio*arm64.tar.gz
             cpack_generators: "DEB;TGZ"
             max_jobs: 4
-            exclude_regex: "^(GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel|SqlFileFixture.AnnualTotalCosts|OpenStudioCLI.*test_measure_manager|BCLFixture.BCLMeasure)$"
+            exclude_regex: "GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel|SqlFileFixture.AnnualTotalCosts|OpenStudioCLI.*test_measure_manager|BCLFixture.BCLMeasure"
     defaults:
       run:
         shell: bash
     env:
       MAX_BUILD_THREADS: ${{ matrix.max_jobs }}
-      CTEST_PARALLEL_LEVEL: ${{ matrix.max_jobs }}
 
     permissions:
       # Needed permission to upload the release asset
@@ -358,36 +357,58 @@ jobs:
         continue-on-error: true
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
+          overall_exit_code=0
+
+          begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+          export CTEST_OUTPUT_ON_FAILURE=1
+          exclude_pattern="${{ matrix.exclude_regex }}"
+
           . ./conanbuild.sh
 
           # Conflicting tests that must run sequentially
-          resource_locked_tests="ModelFixture.ScheduleFile|ModelFixture.ScheduleFileAltCtor|ModelFixture.PythonPluginInstance|ModelFixture.PythonPluginInstance_NotPYFile|ModelFixture.PythonPluginInstance_ClassNameValidation|ModelFixture.ChillerElectricASHRAE205_GettersSetters|ModelFixture.ChillerElectricASHRAE205_Loops|ModelFixture.ChillerElectricASHRAE205_NotCBORFile|ModelFixture.ChillerElectricASHRAE205_Clone"
+          resource_locked_tests=(
+            ModelFixture.ScheduleFile
+            ModelFixture.ScheduleFileAltCtor
+            ModelFixture.PythonPluginInstance
+            ModelFixture.PythonPluginInstance_NotPYFile
+            ModelFixture.PythonPluginInstance_ClassNameValidation
+            ModelFixture.ChillerElectricASHRAE205_GettersSetters
+            ModelFixture.ChillerElectricASHRAE205_Loops
+            ModelFixture.ChillerElectricASHRAE205_NotCBORFile
+            ModelFixture.ChillerElectricASHRAE205_Clone
+          )
+          resource_locked_pattern=$(IFS='|'; echo "${resource_locked_tests[*]}")
 
-          overall_exit_code=0
-          exclude_regex="${{ matrix.exclude_regex }}"
-
-          echo "Running sequential tests..."
-          export CTEST_OUTPUT_ON_FAILURE=1
-
-          if [ "$exclude_regex" == '""' ] || [ -z "$exclude_regex" ]; then
-            ctest -C ${{ env.BUILD_TYPE }} -R "^($resource_locked_tests)$" -j 1 -T test || overall_exit_code=1
+          ctest_command=(ctest -C ${{ env.BUILD_TYPE }} -T test --no-compress-output)
+          seq_exclude_args=()
+          if [ -n "$exclude_pattern" ]; then
+            seq_exclude_args=(-E "^($exclude_pattern)$")
+            final_exclude="$exclude_pattern|$resource_locked_pattern"
           else
-            ctest -C ${{ env.BUILD_TYPE }} -R "^($resource_locked_tests)$" -E "$exclude_regex" -j 1 -T test || overall_exit_code=1
+            final_exclude="$resource_locked_pattern"
           fi
 
-          echo "Running all other tests in parallel..."
-          if [ "$exclude_regex" == '""' ] || [ -z "$exclude_regex" ]; then
-            final_exclude="^($resource_locked_tests)$"
-          else
-            final_exclude="($exclude_regex|$resource_locked_tests)"
-          fi
+          begin_group "Running sequential tests..."
+          echo "Running: ${ctest_command[@]} ${seq_exclude_args[@]} -R '^($resource_locked_pattern)$' -j 1"
+          "${ctest_command[@]}" "${seq_exclude_args[@]}" -R "^($resource_locked_pattern)$" -j 1 || overall_exit_code=$?
+          echo "::endgroup::"
 
-          ctest -C ${{ env.BUILD_TYPE }} -E "$final_exclude" -j ${{ matrix.max_jobs }} -T test || overall_exit_code=$?
+
+          ctest_command+=(-E "^($final_exclude)$")
+
+          begin_group "Running all other tests in parallel..."
+          echo "Running: ${ctest_command[@]} -j ${{ matrix.max_jobs }}"
+          "${ctest_command[@]}" -j ${{ matrix.max_jobs }} || overall_exit_code=$?
+          echo "::endgroup::"
 
           if [ $overall_exit_code -ne 0 ]; then
-            echo "Rerunning failing tests..."
-            ctest -C ${{ env.BUILD_TYPE }} -E "$final_exclude" --rerun-failed -T test --no-compress-output && overall_exit_code=0 || overall_exit_code=$?
+            begin_group "Rerunning failing tests..."
+            echo "Running: ${ctest_command[@]} --rerun-failed --output-on-failure"
+            "${ctest_command[@]}" --rerun-failed --output-on-failure && overall_exit_code=0 || overall_exit_code=$?
+            echo "::endgroup::"
           fi
+
           echo "exit_code=${overall_exit_code}" >> $GITHUB_OUTPUT
 
       - name: Wait for network stability
@@ -641,11 +662,10 @@ jobs:
             python-arch: arm64
             dmg_glob: "*.dmg"
             tar_glob: "*OpenStudio*arm64.tar.gz"
-            exclude_regex: "^(GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel|BCLFixture.BCLMeasure)$"
+            exclude_regex: "GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel|BCLFixture.BCLMeasure"
             max_jobs: 3
     env:
       MAX_BUILD_THREADS: ${{ matrix.max_jobs }}
-      CTEST_PARALLEL_LEVEL: ${{ matrix.max_jobs }}
 
     permissions:
       # Needed permission to upload the release asset
@@ -887,34 +907,53 @@ jobs:
       run: |
         gem install bundler -v 2.4.10 --conservative --no-document
 
-        # Conflicting tests that must run sequentially
-        resource_locked_tests="ModelFixture.ScheduleFile|ModelFixture.ScheduleFileAltCtor|ModelFixture.PythonPluginInstance|ModelFixture.PythonPluginInstance_NotPYFile|ModelFixture.PythonPluginInstance_ClassNameValidation|ModelFixture.ChillerElectricASHRAE205_GettersSetters|ModelFixture.ChillerElectricASHRAE205_Loops|ModelFixture.ChillerElectricASHRAE205_NotCBORFile|ModelFixture.ChillerElectricASHRAE205_Clone"
-
         overall_exit_code=0
-        exclude_regex="${{ matrix.exclude_regex }}"
 
-        echo "Running sequential tests..."
-        if [ "$exclude_regex" == '""' ] || [ -z "$exclude_regex" ]; then
-          ctest -C ${{ env.BUILD_TYPE }} -R "^($resource_locked_tests)$" -j 1 -T test || overall_exit_code=1
-        else
-          ctest -C ${{ env.BUILD_TYPE }} -R "^($resource_locked_tests)$" -E "$exclude_regex" -j 1 -T test || overall_exit_code=1
-        fi
+        begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
 
-        echo "Running all other tests in parallel..."
         export CTEST_OUTPUT_ON_FAILURE=1
-        export CTEST_PARALLEL_LEVEL=${{ matrix.max_jobs }}
+        exclude_pattern="${{ matrix.exclude_regex }}"
 
-        if [ -n "$exclude_regex" ] && [ "$exclude_regex" != '""' ]; then
-          final_exclude="($exclude_regex|$resource_locked_tests)"
+        # Conflicting tests that must run sequentially
+        resource_locked_tests=(
+          ModelFixture.ScheduleFile
+          ModelFixture.ScheduleFileAltCtor
+          ModelFixture.PythonPluginInstance
+          ModelFixture.PythonPluginInstance_NotPYFile
+          ModelFixture.PythonPluginInstance_ClassNameValidation
+          ModelFixture.ChillerElectricASHRAE205_GettersSetters
+          ModelFixture.ChillerElectricASHRAE205_Loops
+          ModelFixture.ChillerElectricASHRAE205_NotCBORFile
+          ModelFixture.ChillerElectricASHRAE205_Clone
+        )
+        resource_locked_pattern=$(IFS='|'; echo "${resource_locked_tests[*]}")
+
+        ctest_command=(ctest -C ${{ env.BUILD_TYPE }} -T test --no-compress-output)
+        seq_exclude_args=()
+        if [ -n "$exclude_pattern" ]; then
+          seq_exclude_args=(-E "^($exclude_pattern)$")
+          final_exclude="$exclude_pattern|$resource_locked_pattern"
         else
-          final_exclude="^($resource_locked_tests)$"
+          final_exclude="$resource_locked_pattern"
         fi
 
-        ctest -C ${{ env.BUILD_TYPE }} -E "$final_exclude" -T test || overall_exit_code=$?
+        begin_group "Running sequential tests..."
+        echo "Running: ${ctest_command[@]} ${seq_exclude_args[@]} -R '^($resource_locked_pattern)$' -j 1"
+        "${ctest_command[@]}" "${seq_exclude_args[@]}" -R "^($resource_locked_pattern)$" -j 1 || overall_exit_code=$?
+        echo "::endgroup::"
+
+        ctest_command+=(-E "^($final_exclude)$")
+
+        begin_group "Running all other tests in parallel..."
+        echo "Running: ${ctest_command[@]} -j ${{ matrix.max_jobs }}"
+        "${ctest_command[@]}" -j ${{ matrix.max_jobs }} || overall_exit_code=$?
+        echo "::endgroup::"
 
         if [ $overall_exit_code -ne 0 ]; then
-          echo "Rerunning failing tests..."
-          ctest -C ${{ env.BUILD_TYPE }} -E "$final_exclude" --rerun-failed -T test --no-compress-output --output-on-failure && overall_exit_code=0 || overall_exit_code=$?
+          begin_group "Rerunning failing tests..."
+          echo "Running: ${ctest_command[@]} --rerun-failed --output-on-failure"
+          "${ctest_command[@]}" --rerun-failed --output-on-failure && overall_exit_code=0 || overall_exit_code=$?
+          echo "::endgroup::"
         fi
 
         echo "exit_code=${overall_exit_code}" >> $GITHUB_OUTPUT
@@ -1180,13 +1219,12 @@ jobs:
             python-arch: x64
             allow_failure: false
             max_jobs: 4
-            exclude_regex: "^(RubyTest-Date_Test-ymd_constructor|BCLFixture.BCLMeasure)$"
+            exclude_regex: "RubyTest-Date_Test-ymd_constructor|BCLFixture.BCLMeasure"
     defaults:
       run:
         shell: pwsh
     env:
       MAX_BUILD_THREADS: ${{ matrix.max_jobs }}
-      CTEST_PARALLEL_LEVEL: ${{ matrix.max_jobs }}
       RUBYOPT: "-Eutf-8:utf-8"
       PYTHONUTF8: "1"
     permissions:
@@ -1420,35 +1458,56 @@ jobs:
           $env:Path = "$products_dir;" + $env:Path
 
           # Conflicting tests that must run sequentially
-          $resource_locked_tests = "ModelFixture.ScheduleFile|ModelFixture.ScheduleFileAltCtor|ModelFixture.PythonPluginInstance|ModelFixture.PythonPluginInstance_NotPYFile|ModelFixture.PythonPluginInstance_ClassNameValidation|ModelFixture.ChillerElectricASHRAE205_GettersSetters|ModelFixture.ChillerElectricASHRAE205_Loops|ModelFixture.ChillerElectricASHRAE205_NotCBORFile|ModelFixture.ChillerElectricASHRAE205_Clone"
+          $resource_locked_tests = @(
+            "ModelFixture.ScheduleFile",
+            "ModelFixture.ScheduleFileAltCtor",
+            "ModelFixture.PythonPluginInstance",
+            "ModelFixture.PythonPluginInstance_NotPYFile",
+            "ModelFixture.PythonPluginInstance_ClassNameValidation",
+            "ModelFixture.ChillerElectricASHRAE205_GettersSetters",
+            "ModelFixture.ChillerElectricASHRAE205_Loops",
+            "ModelFixture.ChillerElectricASHRAE205_NotCBORFile",
+            "ModelFixture.ChillerElectricASHRAE205_Clone"
+          )
+          $resource_locked_pattern = $resource_locked_tests -join "|"
 
           $overall_exit_code = 0
-          $exclude_regex = "${{ matrix.exclude_regex }}"
+          $exclude_pattern = "${{ matrix.exclude_regex }}"
 
           $env:CTEST_OUTPUT_ON_FAILURE = "1"
 
-          Write-Host "Running sequential tests..."
-          if ([string]::IsNullOrEmpty($exclude_regex) -or $exclude_regex -eq '""') {
-            ctest -C ${{ env.BUILD_TYPE }} -R "^($resource_locked_tests)$" -j 1 -T test
-          } else {
-            ctest -C ${{ env.BUILD_TYPE }} -R "^($resource_locked_tests)$" -E "$exclude_regex" -j 1 -T test
-          }
-          if ($LASTEXITCODE -ne 0) { $overall_exit_code = 1 }
+          function begin_group($msg) { Write-Host "::group::$([char]27)[93m$msg$([char]27)[0m" }
 
-          Write-Host "Running all other tests in parallel..."
-          if ([string]::IsNullOrEmpty($exclude_regex) -or $exclude_regex -eq '""') {
-             $final_exclude = "^($resource_locked_tests)$"
+          $ctest_command = @("ctest", "-C", "${{ env.BUILD_TYPE }}", "-T", "test", "--no-compress-output")
+
+          $seq_exclude_args = @()
+          if (-not [string]::IsNullOrEmpty($exclude_pattern)) {
+            $seq_exclude_args = @("-E", "^($exclude_pattern)$")
+            $final_exclude = "$exclude_pattern|$resource_locked_pattern"
           } else {
-             $final_exclude = "($exclude_regex|$resource_locked_tests)"
+            $final_exclude = $resource_locked_pattern
           }
 
-          ctest -C ${{ env.BUILD_TYPE }} -E "$final_exclude" -j ${{ matrix.max_jobs }} -T test
-          if ($LASTEXITCODE -ne 0) { $overall_exit_code = 1 }
+          begin_group "Running sequential tests..."
+          Write-Host "Running: $($ctest_command -join ' ') $($seq_exclude_args -join ' ') -R '^($resource_locked_pattern)$' -j 1"
+          & $ctest_command[0] $ctest_command[1..($ctest_command.Length-1)] @seq_exclude_args -R "^($resource_locked_pattern)$" -j 1
+          if ($LASTEXITCODE -ne 0) { $overall_exit_code = $LASTEXITCODE }
+          Write-Host "::endgroup::"
+
+          $ctest_command += @("-E", "^($final_exclude)$")
+
+          begin_group "Running all other tests in parallel..."
+          Write-Host "Running: $($ctest_command -join ' ') -j ${{ matrix.max_jobs }}"
+          & $ctest_command[0] $ctest_command[1..($ctest_command.Length-1)] -j ${{ matrix.max_jobs }}
+          if ($LASTEXITCODE -ne 0) { $overall_exit_code = $LASTEXITCODE }
+          Write-Host "::endgroup::"
 
           if ($overall_exit_code -ne 0) {
-            Write-Host "Rerunning failing tests..."
-            ctest -C ${{ env.BUILD_TYPE }} -E "$final_exclude" --rerun-failed -T test
-            if ($LASTEXITCODE -eq 0) { $overall_exit_code = 0 } else { $overall_exit_code = 1 }
+            begin_group "Rerunning failing tests..."
+            Write-Host "Running: $($ctest_command -join ' ') --rerun-failed --output-on-failure"
+            & $ctest_command[0] $ctest_command[1..($ctest_command.Length-1)] --rerun-failed --output-on-failure
+            if ($LASTEXITCODE -eq 0) { $overall_exit_code = 0 } else { $overall_exit_code = $LASTEXITCODE }
+            Write-Host "::endgroup::"
           }
           "exit_code=$overall_exit_code" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
