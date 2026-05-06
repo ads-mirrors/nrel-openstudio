@@ -219,7 +219,6 @@ jobs:
 
       - name: Prepare workspace
         run: |
-          set -euo pipefail
 
           # Git safe directory
           if command -v git >/dev/null 2>&1; then
@@ -280,7 +279,6 @@ jobs:
 
       - name: Configure Conan remotes
         run: |
-          set -euo pipefail
           conan remote remove conancenter || true
           conan remote add conancenter https://center2.conan.io
           conan remote remove nrel-v2 || true
@@ -299,7 +297,6 @@ jobs:
 
       - name: Conan install
         run: |
-          set -euo pipefail
           conan install . \
             --output-folder="${{ env.OPENSTUDIO_BUILD }}" \
             --build=missing \
@@ -319,7 +316,6 @@ jobs:
 
       - name: Configure with CMake
         run: |
-          set -euo pipefail
           # Use absolute path for ccache to avoid resolution issues in containers with symlinked build dirs
           CCACHE_ARGS=()
           if command -v ccache >/dev/null 2>&1; then
@@ -341,7 +337,6 @@ jobs:
       - name: Build with Ninja
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
-          set -euo pipefail
           . ./conanbuild.sh
           export NINJA_STATUS="[%f/%t | %es elapsed | %o objs/sec]"
           # Start resource monitor (records RSS samples for later summary)
@@ -363,7 +358,6 @@ jobs:
         continue-on-error: true
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
-          set -euo pipefail
           . ./conanbuild.sh
 
           # Conflicting tests that must run sequentially
@@ -415,7 +409,6 @@ jobs:
         if: always()
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
-          set -euo pipefail
           if [ -d "Testing" ]; then
             cp -r Testing "Testing-${{ matrix.test_suffix }}"
           fi
@@ -424,7 +417,6 @@ jobs:
         if: always()
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
-          set -euo pipefail
 
           # Generate a simple markdown summary from CTest results
           mkdir -p "$(dirname '${{ env.TEST_DASHBOARD_RELATIVE }}')"
@@ -458,7 +450,6 @@ jobs:
         if: ${{ success() && !cancelled() }}
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
-          set -euo pipefail
           . ./conanbuild.sh
           cpack -C ${{ env.BUILD_TYPE }}
 
@@ -531,7 +522,6 @@ jobs:
         env:
           S3_PREFIX: ${{ github.ref_type == 'tag' && format('releases/{0}', github.ref_name) || format('{0}', github.ref_name) }}
         run: |
-          set -euo pipefail
           echo "Uploading artifacts to s3://${AWS_S3_BUCKET}/${S3_PREFIX}"
           for file in *; do
             [ -e "$file" ] || continue
@@ -550,7 +540,6 @@ jobs:
           BRANCH_NAME: ${{ github.ref_name }}
           S3_PREFIX: ${{ github.ref_type == 'tag' && format('releases/{0}', github.ref_name) || format('{0}', github.ref_name) }}
         run: |
-          set -euo pipefail
 
           # Find the 22.04 deb file locally
           DEB_FILE=$(find . -name "*22.04*.deb" | head -n 1)
@@ -730,7 +719,6 @@ jobs:
 
     - name: Set up Qt IFW
       run: |
-        set -euo pipefail
         cd $RUNNER_TEMP
         mkdir QtIFW && cd QtIFW
         aria2c https://github.com/jmarrec/QtIFW-fixup/releases/download/v5.0.0-dev-with-fixup/QtIFW-5.0.0-${{ matrix.arch }}.zip
@@ -777,7 +765,6 @@ jobs:
 
     - name: Configure Conan remotes
       run: |
-        set -euo pipefail
         conan remote remove nrel-v2 || true
         conan remote add --index 0 nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2
         conan remote remove conancenter || true
@@ -790,7 +777,6 @@ jobs:
     - name: Conan install
       working-directory: ${{ env.OPENSTUDIO_SOURCE }}
       run: |
-        set -euo pipefail
         CMAKE_POLICY_VERSION_MINIMUM=3.5 conan install . \
           --output-folder=../${{ env.OPENSTUDIO_BUILD }} \
           --build=missing \
@@ -899,7 +885,6 @@ jobs:
       shell: bash
       continue-on-error: true
       run: |
-        set -euo pipefail
         gem install bundler -v 2.4.10 --conservative --no-document
 
         # Conflicting tests that must run sequentially
@@ -940,7 +925,6 @@ jobs:
         APPLE_CERT_DATA: ${{ secrets.APPLE_CERT_DATA }}
         APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
       run: |
-        set -euo pipefail
         if [ -n "$APPLE_CERT_DATA" ] && [ -n "$APPLE_CERT_PASSWORD" ]; then
           # Create temporary keychain
           KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain"
@@ -964,7 +948,6 @@ jobs:
       env:
         COPYFILE_DISABLE: 1
       run: |
-        set -euo pipefail
         . ./conanbuild.sh
         cpack -C ${{ env.BUILD_TYPE }}
 
@@ -982,7 +965,6 @@ jobs:
         # Check if we have a real ID; if not, we must patch the installer
         APPLE_DEV_ID: ${{ secrets.APPLE_DEV_ID }}
       run: |
-        set -euo pipefail
 
         # Only run this fix if we DO NOT have a valid Developer ID.
         if [ -n "$APPLE_DEV_ID" ]; then
@@ -1007,7 +989,6 @@ jobs:
         APPLE_ID_USERNAME: ${{ secrets.APPLE_ID_USERNAME }}
         APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
       run: |
-        set -euo pipefail
 
         # Check if signing credentials are configured
         if [ -z "$APPLE_CERT_DATA" ] || [ -z "$APPLE_DEV_ID" ]; then
@@ -1072,7 +1053,6 @@ jobs:
       if: always()
       working-directory: ${{ env.OPENSTUDIO_BUILD }}
       run: |
-        set -euo pipefail
         if [ -d "Testing" ]; then
           cp -r Testing "Testing-${{ matrix.test_suffix }}"
         fi
@@ -1081,7 +1061,6 @@ jobs:
       if: always()
       working-directory: ${{ env.OPENSTUDIO_BUILD }}
       run: |
-        set -euo pipefail
 
         # Generate a simple markdown summary from CTest results
         mkdir -p "$(dirname '${{ env.TEST_DASHBOARD_RELATIVE }}')"
@@ -1170,7 +1149,6 @@ jobs:
           S3_PREFIX: ${{ github.ref_type == 'tag' && format('releases/{0}/signed', github.ref_name) || format('{0}/signed', github.ref_name) }}
           AWS_S3_BUCKET: openstudio-ci-builds
         run: |
-          set -euo pipefail
           echo "Uploading artifacts to s3://${AWS_S3_BUCKET}/${S3_PREFIX}"
           for file in *; do
             [ -e "$file" ] || continue
@@ -1723,7 +1701,6 @@ jobs:
           S3_PREFIX: ${{ github.ref_type == 'tag' && format('releases/{0}/signed', github.ref_name) || format('{0}/signed', github.ref_name) }}
           AWS_S3_BUCKET: openstudio-ci-builds
         run: |
-          set -euo pipefail
           echo "Uploading artifacts to s3://${AWS_S3_BUCKET}/${S3_PREFIX}"
 
           # Find installers in artifact subdirectories
