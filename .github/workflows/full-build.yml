@@ -617,9 +617,9 @@ jobs:
           echo "Docker Image Tag: $DOCKER_IMAGE_TAG"
 
           # Trigger Workflow
-          echo "Triggering manual_update_develop workflow in NREL/docker-openstudio..."
+          echo "Triggering manual_update_develop workflow in NatLabRockies/docker-openstudio..."
           gh workflow run 'manual_update_develop' \
-            --repo NREL/docker-openstudio \
+            --repo NatLabRockies/docker-openstudio \
             --ref develop \
             -f docker_image_tag="$DOCKER_IMAGE_TAG" \
             -f os_installer_link="$BINARY_URL" \
