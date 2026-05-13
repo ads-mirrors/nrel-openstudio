@@ -409,6 +409,9 @@ if(WIN32)
   endif()
 endif()
 
+option(USE_PCH "Enable Precompiled Headers" ON)
+mark_as_advanced(USE_PCH)
+
 option(USE_LTO "Use Link-Time-Optimization" OFF)
 
 if (USE_LTO)
@@ -1105,6 +1108,34 @@ if(BUILD_PYTHON_BINDINGS)
 endif()
 
 ###############################################################################
+
+###############################################################################
+# Precompiled headers
+# Based on ftime-trace analysis: ModelObject.hpp/IdfObject.hpp/WorkspaceObject.hpp/Logger.hpp
+# are included thousands of times and dominate frontend parse time.
+if(USE_PCH)
+  set(_pch_model_headers
+    "src/utilities/core/Logger.hpp"
+    "src/utilities/idf/IdfObject.hpp"
+    "src/utilities/idf/WorkspaceObject.hpp"
+    "src/model/ModelObject.hpp"
+    "src/model/Model.hpp"
+  )
+
+  target_precompile_headers(openstudio_utilities PRIVATE
+    "src/utilities/core/Logger.hpp"
+  )
+  target_precompile_headers(openstudio_model PRIVATE ${_pch_model_headers})
+  target_precompile_headers(openstudio_energyplus REUSE_FROM openstudio_model)
+  target_precompile_headers(openstudio_measure REUSE_FROM openstudio_model)
+  target_precompile_headers(openstudio_osversion REUSE_FROM openstudio_model)
+
+  if(BUILD_TESTING)
+    foreach(_test ${ALL_TESTING_TARGETS})
+      target_precompile_headers(${_test} REUSE_FROM openstudio_model)
+    endforeach()
+  endif()
+endif()
 
 ###############################################################################
 # Targets that combine all bindings targets
