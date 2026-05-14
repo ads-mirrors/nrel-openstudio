@@ -1120,6 +1120,7 @@ if(ENABLE_PCH)
     "src/utilities/idf/WorkspaceObject.hpp"
     "src/model/ModelObject.hpp"
     "src/model/Model.hpp"
+    "src/utilities/sql/SqlFile.hpp"  # stable, expensive via ModelFixture/EnergyPlusFixture (500+ TUs)
   )
 
   target_precompile_headers(openstudio_utilities PRIVATE
@@ -1127,8 +1128,26 @@ if(ENABLE_PCH)
   )
   target_precompile_headers(openstudio_model PRIVATE ${_pch_model_headers})
   target_precompile_headers(openstudio_energyplus REUSE_FROM openstudio_model)
-  target_precompile_headers(openstudio_measure REUSE_FROM openstudio_model)
-  target_precompile_headers(openstudio_osversion REUSE_FROM openstudio_model)
+  target_precompile_headers(openstudio_measure    REUSE_FROM openstudio_model)
+  target_precompile_headers(openstudio_osversion  REUSE_FROM openstudio_model)
+  foreach(_lib
+    openstudio_epmodel
+    openstudio_modelica
+    openstudio_alfalfa
+    openstudio_workflow
+    openstudio_scriptengine
+    openstudio_airflow
+    openstudio_epjson
+    openstudio_gbxml
+    openstudio_gltf
+    openstudio_isomodel
+    openstudio_radiance
+    openstudio_sdd
+  )
+    if(TARGET ${_lib})
+      target_precompile_headers(${_lib} REUSE_FROM openstudio_model)
+    endif()
+  endforeach()
 
   if(BUILD_TESTING)
     foreach(_test ${ALL_TESTING_TARGETS})
