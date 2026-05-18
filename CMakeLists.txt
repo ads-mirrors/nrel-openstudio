@@ -1126,16 +1126,19 @@ if(ENABLE_PCH)
   target_precompile_headers(openstudio_utilities PRIVATE
     "src/utilities/core/Logger.hpp"
   )
-  target_precompile_headers(openstudio_model PRIVATE ${_pch_model_headers})
-  target_precompile_headers(openstudio_energyplus REUSE_FROM openstudio_model)
-  target_precompile_headers(openstudio_measure    REUSE_FROM openstudio_model)
-  target_precompile_headers(openstudio_osversion  REUSE_FROM openstudio_model)
-  foreach(_lib
+  # Each shared lib must build its own PCH with its own <target>_EXPORTS flag.
+  # REUSE_FROM would share the PCH compiled with openstudio_model_EXPORTS, which GCC
+  # and MSVC reject for any target that doesn't define that symbol (-Werror=invalid-pch).
+  set(_pch_reuse_targets
+    openstudio_model
+    openstudio_energyplus
+    openstudio_measure
+    openstudio_osversion
     openstudio_epmodel
     openstudio_modelica
     openstudio_alfalfa
     openstudio_workflow
-    openstudio_scriptengine
+    # openstudio_scriptengine  # INTERFACE library — no compilation step, PCH not applicable
     openstudio_airflow
     openstudio_epjson
     openstudio_gbxml
@@ -1144,15 +1147,43 @@ if(ENABLE_PCH)
     openstudio_radiance
     openstudio_sdd
   )
+  foreach(_lib IN LISTS _pch_reuse_targets)
     if(TARGET ${_lib})
-      target_precompile_headers(${_lib} REUSE_FROM openstudio_model)
+      target_precompile_headers(${_lib} PRIVATE ${_pch_model_headers})
     endif()
   endforeach()
 
   if(BUILD_TESTING)
+    # openstudio_utilities_tests links openstudio_utilities directly, picking up
+    # extra compile definitions (GEOGRAPHICLIB_SHARED_LIB, HAVE_BZIP2,
+    # LIBXSLT_STATIC, HAVE_UNISTD_H …) that all other test targets lack — they
+    # reach the same code only through openstudiolib's PRIVATE link, which hides
+    # those transitive definitions.  GCC rejects the PCH for any TU whose macro
+    # environment differs from the one in effect when the PCH was compiled, so
+    # using openstudio_utilities_tests as the REUSE_FROM anchor causes every other
+    # target to fail with -Werror=invalid-pch.
+    #
+    # Fix: give openstudio_utilities_tests its own independent PCH, and pick the
+    # first remaining test (which links openstudiolib and therefore shares the
+    # same compile definitions as all the others) as the shared anchor.
+    target_precompile_headers(openstudio_utilities_tests PRIVATE ${_pch_model_headers})
+
+    set(_pch_anchor "")
     foreach(_test ${ALL_TESTING_TARGETS})
-      target_precompile_headers(${_test} REUSE_FROM openstudio_model)
+      if(NOT _test STREQUAL "openstudio_utilities_tests")
+        set(_pch_anchor "${_test}")
+        break()
+      endif()
     endforeach()
+
+    if(_pch_anchor)
+      target_precompile_headers(${_pch_anchor} PRIVATE ${_pch_model_headers})
+      foreach(_test ${ALL_TESTING_TARGETS})
+        if(NOT _test STREQUAL "openstudio_utilities_tests" AND NOT _test STREQUAL "${_pch_anchor}")
+          target_precompile_headers(${_test} REUSE_FROM ${_pch_anchor})
+        endif()
+      endforeach()
+    endif()
   endif()
 endif()
 
