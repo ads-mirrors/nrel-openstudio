@@ -409,8 +409,8 @@ if(WIN32)
   endif()
 endif()
 
-option(USE_PCH "Enable Precompiled Headers" ON)
-mark_as_advanced(USE_PCH)
+option(ENABLE_PCH "Enable Precompiled Headers" ON)
+mark_as_advanced(ENABLE_PCH)
 
 option(USE_LTO "Use Link-Time-Optimization" OFF)
 
@@ -1113,7 +1113,7 @@ endif()
 # Precompiled headers
 # Based on ftime-trace analysis: ModelObject.hpp/IdfObject.hpp/WorkspaceObject.hpp/Logger.hpp
 # are included thousands of times and dominate frontend parse time.
-if(USE_PCH)
+if(ENABLE_PCH)
   set(_pch_model_headers
     "src/utilities/core/Logger.hpp"
     "src/utilities/idf/IdfObject.hpp"
