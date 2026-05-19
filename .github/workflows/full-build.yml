@@ -1399,10 +1399,6 @@ jobs:
             }
           }
 
-          # Add build Products directory to Path so Python can find _openstudioairflow.pyd and its dependencies
-          $products_dir = Join-Path (Get-Location) "Products"
-          $env:Path = "$products_dir;" + $env:Path
-
           # Conflicting tests that must run sequentially
           $resource_locked_tests = @(
             "ModelFixture.ScheduleFile",
