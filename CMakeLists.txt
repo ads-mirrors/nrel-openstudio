@@ -1114,6 +1114,7 @@ endif()
 # Based on ftime-trace analysis: ModelObject.hpp/IdfObject.hpp/WorkspaceObject.hpp/Logger.hpp
 # are included thousands of times and dominate frontend parse time.
 if(ENABLE_PCH)
+  message(STATUS "Enabling precompiled headers")
   set(_pch_model_headers
     "src/utilities/core/Logger.hpp"
     "src/utilities/idf/IdfObject.hpp"
