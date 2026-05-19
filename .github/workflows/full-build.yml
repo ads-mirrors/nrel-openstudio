@@ -1257,32 +1257,6 @@ jobs:
           restore-keys: |
             sccache-${{ matrix.os }}-${{ matrix.platform }}-
 
-      - name: Patch tests for Windows
-        working-directory: ${{ env.OPENSTUDIO_SOURCE }}
-        run: |
-          # Patch openstudio.py for build tree DLL loading
-          $os_py = "python/module/openstudio.py"
-          if (Test-Path $os_py) {
-            $content = Get-Content $os_py
-            $new_content = @()
-            foreach ($line in $content) {
-                $new_content += $line
-                if ($line -match "os.add_dll_directory\(bin_dir\)") {
-                    $new_content += "        products_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))"
-                    $new_content += "        if os.path.isdir(products_dir) and os.path.isfile(os.path.join(products_dir, 'openstudio_utilities.dll')):"
-                    $new_content += "            os.add_dll_directory(products_dir)"
-                    $new_content += "        # Add PATH to DLL search, needed for Conan dependencies on Python 3.8+"
-                    $new_content += "        for p in os.environ['PATH'].split(';'):"
-                    $new_content += "            if p and os.path.isdir(p):"
-                    $new_content += "                try:"
-                    $new_content += "                    os.add_dll_directory(p)"
-                    $new_content += "                except:"
-                    $new_content += "                    pass"
-                }
-            }
-            $new_content | Set-Content $os_py
-          }
-
       - name: Prepare workspace
         run: |
           git config --global --add safe.directory "*"
