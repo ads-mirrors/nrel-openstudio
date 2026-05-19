@@ -146,7 +146,7 @@ jobs:
               *OpenStudio*arm64.tar.gz
             cpack_generators: "DEB;TGZ"
             max_jobs: 3
-            exclude_regex: "GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel|SqlFileFixture.AnnualTotalCosts|OpenStudioCLI.*test_measure_manager"
+            exclude_regex: "SqlFileFixture.AnnualTotalCosts|OpenStudioCLI.*test_measure_manager"
           - platform: ubuntu-2404-arm64
             pretty: Ubuntu 24.04 ARM64
             os: ubuntu-24.04-arm
@@ -160,7 +160,7 @@ jobs:
               *OpenStudio*arm64.tar.gz
             cpack_generators: "DEB;TGZ"
             max_jobs: 4
-            exclude_regex: "GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel|SqlFileFixture.AnnualTotalCosts|OpenStudioCLI.*test_measure_manager"
+            exclude_regex: "SqlFileFixture.AnnualTotalCosts|OpenStudioCLI.*test_measure_manager"
     defaults:
       run:
         shell: bash
@@ -664,7 +664,7 @@ jobs:
             python-arch: arm64
             dmg_glob: "*.dmg"
             tar_glob: "*OpenStudio*arm64.tar.gz"
-            exclude_regex: "GeometryFixture.Plane_RayIntersection|ISOModelFixture.SimModel"
+            exclude_regex: ""
             max_jobs: 3
     env:
       MAX_BUILD_THREADS: ${{ matrix.max_jobs }}
