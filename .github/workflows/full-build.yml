@@ -1,3 +1,5 @@
+name: Full Build
+
 on:
   push:
     branches:
