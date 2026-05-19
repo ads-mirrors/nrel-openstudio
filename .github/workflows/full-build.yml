@@ -1222,7 +1222,7 @@ jobs:
             python-arch: x64
             allow_failure: false
             max_jobs: 4
-            exclude_regex: "RubyTest-Date_Test-ymd_constructor"
+            exclude_regex: ""
     defaults:
       run:
         shell: pwsh
