@@ -49,6 +49,10 @@ jobs:
         - "/srv/data/jenkins/docker-volumes/conan-data/.conan2:/github/home/.conan2" # Conan cache
         - "/srv/data/jenkins/docker-volumes/ubuntu-2204:/github/home/Ubuntu"
 
+    defaults:
+      run:
+        shell: bash
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
