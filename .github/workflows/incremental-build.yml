@@ -5,7 +5,7 @@ on:
     branches: [ incremental_build_debug ]
 
   pull_request:
-    branches: [ develop ]
+    branches: [ develop, os-4.0-dev ]
 
   workflow_dispatch:
     inputs:

@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - master
+      - os-4.0-dev
     tags:
       - "v*"
   schedule:
@@ -15,6 +16,8 @@ on:
     branches:
       - develop
       - master
+      - os-4.0-dev
+
     types: [ opened, reopened, synchronize ]
   workflow_dispatch:
     inputs:
