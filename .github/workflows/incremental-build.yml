@@ -1,9 +1,13 @@
 name: Build and Test (Ubuntu 22.04)
 
 on:
+  push:
+    branches: [ incremental_build_debug ]
+
   pull_request:
-    branches:
-      - develop
+    branches: [ develop ]
+
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -11,7 +15,7 @@ concurrency:
 
 jobs:
   build:
-    if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'Pull Request - Ready for CI')
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'Pull Request - Ready for CI')
     runs-on: linux-openstudio-2
 
     permissions:
@@ -84,7 +88,11 @@ jobs:
           git config user.name "ci-commercialbuildings" && \
           git fetch origin && \
           git fetch origin +refs/pull/*/head:refs/remotes/origin/pr/* && \
-          git checkout origin/pr/${{ github.event.pull_request.number || github.ref }}
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git checkout origin/pr/${{ github.event.pull_request.number }}
+          else
+            git checkout ${{ github.ref_name }}
+          fi
 
       - name: Install dependencies
         run: |
