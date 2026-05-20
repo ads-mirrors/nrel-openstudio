@@ -72,7 +72,7 @@ jobs:
           # Force remove all to ensure rebuild with correct ABI
           conan remove "*" -c || true
 
-          CONAN_PROFILE_DEFAULT="${{ env.DOCKER_ROOT }}/.conan2/profiles/default"
+          CONAN_PROFILE_DEFAULT="~/.conan2/profiles/default"
           if [ -f "$CONAN_PROFILE_DEFAULT " ]; then
             echo "Aggressive clean: removing conan profile to ensure correct detection and rebuild"
             conan profile show
@@ -126,7 +126,7 @@ jobs:
           conan remote add nrel-v2 --index 0 --force https://conan.openstudio.net/artifactory/api/conan/conan-v2
           conan remote update nrel-v2 --insecure
 
-          CONAN_PROFILE_DEFAULT="${{ env.DOCKER_ROOT }}/.conan2/profiles/default"
+          CONAN_PROFILE_DEFAULT="~/.conan2/profiles/default"
           if [ ! -f "$CONAN_PROFILE_DEFAULT " ]; then
             conan profile detect
           fi
@@ -190,7 +190,7 @@ jobs:
 
               # Final attempt with verbose output for failing tests
               echo "Final attempt with verbose output..."
-              ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-junit Testing/run3/results.xml -E "${{ env.EXCLUDED_TESTS }}" 2>&1 | tee /tmp/run3.log
+              ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed -VV --no-compress-output --output-junit Testing/run3/results.xml -E "${{ env.EXCLUDED_TESTS }}" 2>&1 | tee /tmp/run3.log
               RESULT3=$?
             else
               RESULT3=0
