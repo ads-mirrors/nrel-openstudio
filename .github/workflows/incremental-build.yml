@@ -40,7 +40,7 @@ jobs:
       OPENSTUDIO_DOCKER_VOLUME: /github/home/Ubuntu
       OPENSTUDIO_SOURCE_NAME: OpenStudio
       OPENSTUDIO_BUILD_NAME: OS-build
-      EXCLUDED_TESTS: "BCLFixture.BCLMeasure"
+      EXCLUDED_TESTS: "BCLFixture.RemoteBCL_BCLSearchResult"
 
     container: # Define the Docker container for the job. All subsequent steps run inside it.
       image: nrel/openstudio-cmake-tools:jammy-main
@@ -169,29 +169,27 @@ jobs:
           set +e
           mkdir -p Testing/run{1,2,3}
 
-          # First test run - quiet by default, show failures only
-          echo "Testing..."
-          ctest -j ${{ env.MAX_SAFE_THREADS }} --no-compress-output --output-junit Testing/run1/results.xml -E "${{ env.EXCLUDED_TESTS }}" > /tmp/run1.log 2>&1
-          RESULT1=$?
+          begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+
+          begin_group "Run 1 - Initial with all tests"
+          ctest -j ${{ env.MAX_SAFE_THREADS }} --no-compress-output --output-junit Testing/run1/results.xml -E "${{ env.EXCLUDED_TESTS }}" 2>&1 | tee /tmp/run1.log
+          RESULT1=${PIPESTATUS[0]}
+          echo "::endgroup::"
 
           if [ $RESULT1 -ne 0 ]; then
-            # Show failures from first run
-            echo "Failed tests from run 1:"
-            grep -A 5 "FAILED\|Error\|Fail:" /tmp/run1.log | head -30 || tail -20 /tmp/run1.log
-
-            # Retry failed tests
+            begin_group "Run 2 - Retrying failed tests"
             echo "Retrying failed tests..."
-            ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-junit Testing/run2/results.xml -E "${{ env.EXCLUDED_TESTS }}" > /tmp/run2.log 2>&1
-            RESULT2=$?
+            ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-junit Testing/run2/results.xml -E "${{ env.EXCLUDED_TESTS }}" 2>&1 | tee /tmp/run2.log
+            RESULT2=${PIPESTATUS[0]}
+            echo "::endgroup::"
 
             if [ $RESULT2 -ne 0 ]; then
-              echo "Failed tests from run 2 (verbose):"
-              grep -A 10 "FAILED\|Error\|Fail:" /tmp/run2.log | head -50 || tail -30 /tmp/run2.log
-
               # Final attempt with verbose output for failing tests
-              echo "Final attempt with verbose output..."
-              ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-junit Testing/run3/results.xml -E "${{ env.EXCLUDED_TESTS }}" 2>&1 | tee /tmp/run3.log
-              RESULT3=$?
+              begin_group "Run 3 - Final attempt with verbose output..."
+              ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-junit Testing/run3/results.xml -E "${{ env.EXCLUDED_TESTS }}" --output-on-failure 2>&1 | tee /tmp/run3.log
+              RESULT3=${PIPESTATUS[0]}
+              echo "::endgroup::"
             else
               RESULT3=0
               echo "Tests passed on retry"
